@@ -1,0 +1,1 @@
+[ ] All instances of the ‘Resource Optimism’ code smell have been refactored by adding an assertion to check for file existence.

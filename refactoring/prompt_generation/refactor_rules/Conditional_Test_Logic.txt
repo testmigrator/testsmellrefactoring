@@ -1,0 +1,51 @@
+RefactorRule:
+  SmellType: Conditional Test Logic
+  Description: Remove control statements (if, switch, conditional expression, etc.) within the test method.
+  Steps:
+    - Step:
+        Description: "Extract condition into a separate method"
+        Action: ExtractMethod
+        Parameters:
+          TargetType: Method
+          SourcePattern: |
+            if ({condition}) {
+                {stmt}
+            }
+          ExtractedMethod: |
+            boolean isConditionMet() {
+              return {condition};
+            }
+    - Step:
+        Description: "Annotate test method with @EnabledIf"
+        Action: AddAnnotation
+        Parameters:
+          TargetType: Method
+          Annotation: @EnabledIf("isConditionMet")
+    - Step:
+        Description: "Remove original conditional logic from test method"
+        Action: RemoveConditional
+        Parameters:
+          SourcePattern: |
+              if ({condition}) {
+                 {stmt}
+              }
+          ReplacementPattern: |
+              {stmt}
+  Example:
+    Before: |
+      @Test
+      public void T() {
+        if (C) {
+           stmt
+        }
+      }
+    After: |
+      boolean isC(){
+        return C;
+      }
+
+      @Test
+      @EnableIf("isC")
+      public void T() {
+        stmt
+      }

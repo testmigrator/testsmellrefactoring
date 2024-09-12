@@ -1,0 +1,4 @@
+Test Smell Type：Mystery Guest
+
+Feature:
+A test method containing object instances of files and databases classes.

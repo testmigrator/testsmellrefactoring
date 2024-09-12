@@ -1,0 +1,4 @@
+Test Smell Type：Conditional Test Logic
+
+Feature:
+A test method that contains one or more control statements (i.e if, switch, conditional expression, for, foreach and while statement).

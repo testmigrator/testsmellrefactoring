@@ -1,0 +1,35 @@
+RefactorRule:
+  SmellType: Resource Optimism
+  Description: "Add an assertion to ensure that the required file or directory exists before performing operations on it."
+  Steps:
+    - Step:
+        Description: "Add assertion to check for the existence of the file or directory."
+        Action: AddAssertion
+        Parameters:
+          TargetPattern: |
+            File {fileVariable} = ...;
+          Assertion: |
+            if (!{fileVariable}.exists() || ({fileVariable}.isDirectory() != {isDirectory})) {
+                fail("File or directory does not exist or is not of the expected type");
+            }
+  Example:
+    Before: |
+      @Test
+      public void T() {
+        File outputFile = ...;
+        stmt
+        assert
+      }
+    After: |
+      @Test
+      public void T() {
+        File outputFile = ...;
+        if (!outputFile.exists() || outputFile.isDirectory()) {
+            fail("Output file does not exist or is not a file");
+        }
+        stmt
+        assert
+      }
+  Variables:
+    fileVariable: "outputFile"
+    isDirectory: "false"

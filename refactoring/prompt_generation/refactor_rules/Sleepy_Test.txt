@@ -1,0 +1,55 @@
+RefactorRule:
+  SmellType: Sleepy Test
+  Description: "Use of Thread.sleep() in test methods can possibly lead to unexpected results as the processing time of tasks on different devices/machines can vary. Use mock objects instead. This code marks a method as smelly if the method body calls Thread.sleep()."
+  Steps:
+    - Step:
+        Description: "Identify test methods using Thread.sleep()."
+        Action: IdentifySleepCall
+        Parameters:
+          TargetType: Method
+          SourcePattern: |
+            Thread.sleep({duration})
+    - Step:
+        Description: "Replace Thread.sleep() with a mock object."
+        Action: ReplaceWithMock
+        Parameters:
+          TargetType: Method
+          SourcePattern: |
+            Thread.sleep({duration})
+          ReplacementPattern: |
+            Mockito.when(mockedObject.method()).thenAnswer(invocation -> {
+              // simulate delay
+              TimeUnit.MILLISECONDS.sleep({duration});
+              return invocation.callRealMethod();
+            });
+          Imports:
+            - "org.mockito.Mockito"
+            - "java.util.concurrent.TimeUnit"
+  Example:
+    Before: |
+      @Test
+      public void T() {
+        stmt
+        Thread.sleep(1000);
+        stmt'
+      }
+    After: |
+      @Mock
+      private SomeClass mockedObject;
+
+      @Test
+      public void T() {
+        Mockito.when(mockedObject.method()).thenAnswer(invocation -> {
+          // simulate delay
+          TimeUnit.MILLISECONDS.sleep(1000);
+          return invocation.callRealMethod();
+        });
+        stmt
+        mockedObject.method();
+        stmt'
+      }
+  Variables:
+    duration: "1000"
+    stmt: "some initial statements"
+    stmt': "some following statements"
+    mockedObject: "someObject"

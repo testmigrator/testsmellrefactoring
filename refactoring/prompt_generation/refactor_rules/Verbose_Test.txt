@@ -1,0 +1,64 @@
+RefactorRule:
+  SmellType: Verbose Test
+  Description: "If a test method contains statements that exceed a certain threshold (default 123 characters), split the test method into multiple, smaller, more focused methods."
+  Steps:
+    - Step:
+        Description: "Identify verbose test methods."
+        Action: IdentifyVerboseMethod
+        Parameters:
+          Threshold: 123
+    - Step:
+        Description: "Split verbose test method into smaller methods."
+        Action: SplitMethod
+        Parameters:
+          SourcePattern: |
+            @Test
+            public void {methodName}() {
+              {longStatements}
+            }
+          SplitPattern: |
+            @Test
+            public void {methodName}_Part1() {
+              {part1Statements}
+            }
+
+            @Test
+            public void {methodName}_Part2() {
+              {part2Statements}
+            }
+    - Step:
+        Description: "Ensure each new method remains focused and does not exceed the threshold."
+        Action: EnsureFocus
+        Parameters:
+          Threshold: 123
+  Example:
+    Before: |
+      @Test
+      public void T() {
+        // Long statements exceeding 123 characters
+        stmt_1
+        stmt_2
+        stmt_3
+        ...
+        stmt_n
+      }
+    After: |
+      @Test
+      public void T_Part1() {
+        // First part of the long statements
+        stmt_1
+        stmt_2
+      }
+
+      @Test
+      public void T_Part2() {
+        // Second part of the long statements
+        stmt_3
+        ...
+        stmt_n
+      }
+  Variables:
+    methodName: "T"
+    longStatements: "stmt_1\nstmt_2\nstmt_3\n...\nstmt_n"
+    part1Statements: "stmt_1\nstmt_2"
+    part2Statements: "stmt_3\n...\nstmt_n"

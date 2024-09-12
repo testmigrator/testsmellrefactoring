@@ -1,0 +1,41 @@
+RefactorRule:
+  SmellType: Magic Number Test
+  Description: "Extract magic numbers and assign meaningful names to improve readability and maintainability."
+  Steps:
+    - Step:
+        Action: IdentifyMagicNumbers
+        Description: "Identify magic numbers in assertions"
+        Parameters:
+          TargetType: Method
+          SourcePattern: |
+            assertEquals({magicNumber}, {variable})
+    - Step:
+        Action: ExtractVariable
+        Description: "Extract magic number to a variable with meaningful name"
+        Parameters:
+          TargetType: Method
+          SourcePattern: |
+            assertEquals({magicNumber}, {variable})
+          ReplacementPattern: |
+            int {meaningfulName} = {magicNumber};
+            assertEquals({meaningfulName}, {variable})
+  Example:
+    Before: |
+      @Test
+      public void T() {
+          stmt
+          assertEquals(1, a)
+          stmt'
+      }
+    After: |
+      @Test
+      public void T() {
+          int x = 1; // x: meaningful variable name
+          stmt
+          assertEquals(x, a)
+          stmt'
+      }
+  Variables:
+    magicNumber: "1"
+    variable: "a"
+    meaningfulName: "x"

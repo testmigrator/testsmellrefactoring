@@ -1,0 +1,4 @@
+Test Smell Type：Eager Test
+
+Feature:
+A test method contains multiple calls to multiple production methods.

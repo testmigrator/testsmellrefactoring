@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="a455f8fa-a2aa-4c81-848a-a80badfabd50" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/datasets/datasets.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/detection/TestFileDetector.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/detection/TestFileMapping.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/detection/v3/TestSmellDetector.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/refactoring/buildindex/code_repo_v5.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/refactoring/loading/loading.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/refactoring/loading/process.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/refactoring/prompt_generation/checkpoints/Assertion_Roulette.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/refactoring/prompt_generation/checkpoints/Conditional_Test_Logic.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/refactoring/prompt_generation/checkpoints/Duplicate_Assert.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/refactoring/prompt_generation/checkpoints/Eager_Test.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/refactoring/prompt_generation/checkpoints/Exception_Catching_Throwing.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/refactoring/prompt_generation/checkpoints/Magic_Number_Test.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/refactoring/prompt_generation/checkpoints/Mystery_Guest.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/refactoring/prompt_generation/checkpoints/Redundant_Assertion.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/refactoring/prompt_generation/checkpoints/Redundant_Print.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/refactoring/prompt_generation/checkpoints/Resource_Optimism.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/refactoring/prompt_generation/checkpoints/Sensitive_Equality.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/refactoring/prompt_generation/refactor_rules/Assertion_Roulette.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/refactoring/prompt_generation/refactor_rules/Conditional_Test_Logic.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/refactoring/prompt_generation/refactor_rules/Duplicate_Assert.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/refactoring/prompt_generation/refactor_rules/Eager_Test.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/refactoring/prompt_generation/refactor_rules/Exception_Catching_Throwing.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/refactoring/prompt_generation/refactor_rules/Magic_Number_Test.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/refactoring/prompt_generation/refactor_rules/Mystery_Guest.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/refactoring/prompt_generation/refactor_rules/Print_Statement.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/refactoring/prompt_generation/refactor_rules/Redundant_Assertion.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/refactoring/prompt_generation/refactor_rules/Resource_Optimism.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/refactoring/prompt_generation/refactor_rules/Sensitive_Equality.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/refactoring/prompt_generation/refactor_rules/Sleepy_Test.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/refactoring/prompt_generation/refactor_rules/Verbose_Test.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/refactoring/prompt_generation/smelltype/Assertion_Roulette.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/refactoring/prompt_generation/smelltype/Conditional_Test_Logic.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/refactoring/prompt_generation/smelltype/Duplicate_Assert.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/refactoring/prompt_generation/smelltype/Eager_Test.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/refactoring/prompt_generation/smelltype/Exception_Catching_Throwing.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/refactoring/prompt_generation/smelltype/Magic_Number_Test.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/refactoring/prompt_generation/smelltype/Mystery_Guest.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/refactoring/prompt_generation/smelltype/Print_Statement.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/refactoring/prompt_generation/smelltype/Redundant_Assertion.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/refactoring/prompt_generation/smelltype/Resource_Optimism.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/refactoring/prompt_generation/smelltype/Sensitive_Equality.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/refactoring/refactoring_test.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/Main.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/antlr/Java8-back.g4" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/antlr/Java8.g4" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/antlr/Java8.interp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/antlr/Java8.tokens" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/antlr/Java8BaseListener.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/antlr/Java8BaseVisitor.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/antlr/Java8Lexer.interp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/antlr/Java8Lexer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/antlr/Java8Lexer.tokens" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/antlr/Java8Listener.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/antlr/Java8Parser.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/antlr/Java8Visitor.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/entity/TaskParam.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/entity/TestCodeContext.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/entity/TestContext.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/entity/TestLLMContext.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/entity/TestRefactorRule.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/entity/TestSmellDetectionOutput.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/entity/TestSmellType.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/service/TaskParamReader.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/service/TestContextCollection.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/service/detection/TestSmellDetection.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/service/preprocess/FocalMethodExtractor.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/service/preprocess/MethodInvocationExtractor.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/service/preprocess/MethodSignatureVisitor.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/service/preprocess/TestCodeVisitor.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/service/preprocess/TestContextService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/service/preprocess/TestFileSplitService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/service/preprocess/TestMethodService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/service/preprocess/TestSmellDetectionService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/service/preprocess/TestSplitVisitor.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/service/preprocess/TreeParseService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/service/refactor/TestSmellRefactorRuleSetting.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/util/ExecuteJar.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/util/FileUtil.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/util/GetFoldFileNames.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/util/JsonUtil.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/resources/task.properties" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectId" id="2luc0DDK3k3wdHS8LvN2UUcjMWl" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+    <option name="showMembers" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "last_opened_file_path": "/Users/gaoyi/IdeaProjects/TestSmellRefactoring/refactoring/prompt_generation",
+    "nodejs_package_manager_path": "npm",
+    "project.structure.last.edited": "Modules",
+    "project.structure.proportion": "0.0",
+    "project.structure.side.proportion": "0.0"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/refactoring/prompt_generation" />
+      <recent name="$PROJECT_DIR$/refactoring" />
+      <recent name="$PROJECT_DIR$" />
+      <recent name="$PROJECT_DIR$/src/main" />
+      <recent name="$PROJECT_DIR$/src/main/resources" />
+    </key>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="a455f8fa-a2aa-4c81-848a-a80badfabd50" name="Changes" comment="" />
+      <created>1726033179498</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1726033179498</updated>
+      <workItem from="1726033183231" duration="6765000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+</project>

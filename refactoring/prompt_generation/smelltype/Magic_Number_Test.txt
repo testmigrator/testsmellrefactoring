@@ -1,0 +1,4 @@
+Test Smell Type：Magic Number Test
+
+Feature:
+An assertion method that contains a numeric literal as an argument.

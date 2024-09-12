@@ -1,0 +1,62 @@
+RefactorRule:
+  SmellType: Exception_Catching_Throwing
+  Description: "Refactor test to use JUnit 5 Exception Handling feature."
+  Steps:
+    - Step1:
+        Description: "Identify try-catch blocks handling exceptions"
+        Action: IdentifyTryCatch
+        Parameters:
+          TargetType: Method
+          SourcePattern: |
+            try {
+              {tryBlock}
+              fail();
+            } catch ({exception}) {
+              {catchBlock}
+            }
+    - Step2:
+        Description: "Replace try-catch block with assertThrows"
+        Action: ReplaceWithAssertThrows
+        Parameters:
+          TargetType: Method
+          SourcePattern: |
+            try {
+              {tryBlock}
+              fail();
+            } catch ({exception}) {
+              {catchBlock}
+            }
+          ReplacementPattern: |
+            assertThrows({exception}.class, () -> {
+              {tryBlock}
+            });
+            {catchBlock}
+            If test don't contains assertThrow or try/catch statement, then use 'Assertions.assertDoesNotThrow(() -> {});',
+  Example:
+    Before: |
+      @Test
+      public void T() {
+        stmt
+        try {
+            stmt'
+            fail();
+        } catch (E) {
+            evs
+        }
+        stmt''
+      }
+    After: |
+      @Test
+      public void T() {
+        stmt
+        assertThrows(E.class, () -> {
+            stmt'
+        });
+        evs
+        stmt''
+      }
+  Variables:
+    exception: "E"
+    tryBlock: "stmt'"
+    catchBlock: "evs"
+    tryBlockStatement: "stmt'i"

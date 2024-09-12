@@ -1,0 +1,4 @@
+Test Smell Type：Exception_Catching_Throwing
+
+Feature:
+A test method that contains either a throw statement or a catch clause.

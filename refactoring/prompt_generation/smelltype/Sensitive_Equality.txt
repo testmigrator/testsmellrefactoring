@@ -1,0 +1,4 @@
+Test Smell Type：Sensitive Equality
+
+Feature:
+A test method invokes the toString() method of an object.

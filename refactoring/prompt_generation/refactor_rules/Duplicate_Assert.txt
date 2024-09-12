@@ -1,0 +1,72 @@
+RefactorRule:
+  SmellType: Duplicate Assert
+  Description: "Uses JUnit 5 Parameterized Tests to eliminate duplicate assert statements by declaring parameterizable values in an annotation and executing the test method multiple times."
+  Steps:
+    - Step:
+        Description: "Convert test method to a parameterized test method"
+        Action: ConvertToParameterizedTest
+        Parameters:
+          TargetType: Method
+    - Step:
+        Description: "Declare parameterizable values in @CsvSource annotation"
+        Action: AddAnnotation
+        Parameters:
+          TargetType: Method
+          Annotation: |
+            @CsvSource({
+              "{paramValues}"
+            })
+    - Step:
+        Description: "Refactor test method to use parameterized values"
+        Action: RefactorMethod
+        Parameters:
+          SourcePattern: |
+            public void T() {
+              {stmts}
+            }
+          ReplacementPattern: |
+            public void T({params}) {
+              {refactoredStmts}
+            }
+  Example:
+    Before: |
+      @Test
+      public void T() {
+        stmt_1(P1);
+        ...
+        stmt_n(W1);
+        ...
+        stmt_1(Pm);
+        ...
+        stmt_n(Wm);
+      }
+    After: |
+      @ParameterizedTest
+      @CsvSource({
+        "P1, ..., W1",
+        ...
+        "Pm, ..., Wm"
+      })
+      public void T(P, ..., W) {
+        stmt_1(P);
+        ...
+        stmt_n(W);
+      }
+  Variables:
+    paramValues: |
+      "P1, ..., W1",
+      ...
+      "Pm, ..., Wm"
+    stmts: |
+      stmt_1(P1);
+      ...
+      stmt_n(W1);
+      ...
+      stmt_1(Pm);
+      ...
+      stmt_n(Wm);
+    params: "P, ..., W"
+    refactoredStmts: |
+      stmt_1(P);
+      ...
+      stmt_n(W);

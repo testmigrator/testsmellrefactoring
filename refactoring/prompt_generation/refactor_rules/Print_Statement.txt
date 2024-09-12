@@ -1,0 +1,26 @@
+RefactorRule:
+  SmellType: Print Statement
+  Description: "Remove redundant System.out.println statements that are used for debugging or logging purposes but do not contribute to test validation."
+  Steps:
+    - Step:
+        Description: "Identify and remove System.out.println statements that are not necessary for test validation."
+        Action: RemovePrintStatement
+        Parameters:
+          TargetPattern: |
+            System.out.println("{message}");
+  Example:
+    Before: |
+      @Test
+      public void T(){
+        stmt
+        System.out.println("Debugging message");
+        stmt'
+      }
+    After: |
+      @Test
+      public void T(){
+        stmt
+        stmt'
+      }
+  Variables:
+    printStatement: "System.out.println(\"Debugging message\")"

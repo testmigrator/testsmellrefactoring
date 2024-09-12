@@ -1,0 +1,4 @@
+Test Smell Type：Duplicate Assert
+
+Feature:
+A test method that contains more than one assertion statement with the same parameters.

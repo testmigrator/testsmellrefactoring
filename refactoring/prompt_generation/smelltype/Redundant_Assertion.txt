@@ -1,0 +1,4 @@
+Test Smell Type：Redundant Assertion
+
+Feature:
+A test method that contains an assertion statement in which the expected and actual parameters are the same.

@@ -1,0 +1,4 @@
+Test Smell Type：Assertion Roulette
+
+Feature:
+A test method contains more than one assertion statement without an explanation/message (parameter in the assertion method).

@@ -1,0 +1,1 @@
+[ ] All instances of the ‘Mystery Guest’ code smell have been refactored using the JUnit 5 Temporary Directory feature, annotating a temporary directory and considering its use in the external file instantiation steps.

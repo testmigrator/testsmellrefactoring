@@ -1,0 +1,30 @@
+RefactorRule:
+  SmellType: Assertion Roulette
+  Description: Add descriptive messages to assert statements to improve readability and maintainability.
+  Steps:
+    - Step:
+        Description: "Add descriptive message to each assert statement(except assertThat, assertThrows)."
+        Action: AddMessageToAssert
+        Parameters:
+          MessagePattern: "{assertionMessage}"
+  Example:
+    Before: |
+      @Test
+      public void T() {
+        stmt
+        assert_1
+        ...
+        assert_n
+        stmt'
+      }
+    After: |
+      @Test
+      public void T() {
+        stmt
+        assert_1(..., "Descriptive message for assert statement")
+        ...
+        assert_n(..., "Descriptive message for assert statement")
+        stmt'
+      }
+    Variables:
+      assertionMessage: "Descriptive message for assert statement"

@@ -1,0 +1,34 @@
+RefactorRule:
+  SmellType: Mystery Guest
+  Description: "Use JUnit 5 Temporary Directory feature to handle temporary files in a more controlled manner."
+  Steps:
+    - Step:
+        Description: "Annotate test method with @TempDir to inject a temporary directory"
+        Action: AddAnnotation
+        Parameters:
+          TargetType: Method
+          Annotation: @TempDir File {tempDirVariable}
+    - Step:
+        Description: "Replace direct creation of temporary files with creation using the injected temporary directory"
+        Action: ReplaceMethodCall
+        Parameters:
+          TargetMethod: "File.createTempFile"
+          ReplacementPattern: "{tempDirVariable}.createTempFile"
+          Import: "org.junit.jupiter.api.io.TempDir"
+  Example:
+    Before: |
+      @Test
+      public void T() {
+          stmt
+          File.createTempFile(params)
+          stmt'
+      }
+    After: |
+      @Test
+      public void T(@TempDir File D) {
+          stmt
+          D.createTempFile(params)
+          stmt'
+      }
+  Variables:
+    tempDirVariable: "D"

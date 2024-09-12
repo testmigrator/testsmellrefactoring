@@ -1,0 +1,60 @@
+RefactorRule:
+  SmellType: Eager Test
+  Description: "Split the test method to ensure each test focuses on verifying a single API."
+  Steps:
+    - Step:
+        Description: "Identify assert statements for each API"
+        Action: IdentifyAssertions
+        Parameters:
+          TargetType: Method
+          SourcePattern: |
+            assertEquals(.{api}(), is("{value}"))
+    - Step:
+        Description: "Create new test methods for each assert statement"
+        Action: CreateTestMethod
+        Parameters:
+          TargetType: Method
+          SourcePattern: |
+            @Test
+            public void {originalMethod}() {
+              stmt
+              assertEquals(.{api}(), is("{value}"))
+            }
+          ReplacementPattern: |
+            @Test
+            public void {newMethod}_{api}() {
+              stmt
+              assertEquals(.{api}(), is("{value}"))
+            }
+  Example:
+    Before: |
+      @Test
+      public void T() {
+        stmt
+        assertEquals(.api1(), is("1.5"));
+        assertEquals(.api2(), is("2.5"));
+        assertEquals(.api3(), is("3.5"));
+      }
+    After: |
+      @Test
+      public void T_api1() {
+        stmt
+        assertEquals(.api1(), is("1.5"));
+      }
+
+      @Test
+      public void T_api2() {
+        stmt
+        assertEquals(.api2(), is("2.5"));
+      }
+
+      @Test
+      public void T_api3() {
+        stmt
+        assertEquals(.api3(), is("3.5"));
+      }
+  Variables:
+    originalMethod: "T"
+    newMethod: "T"
+    api: "api1, api2, api3"
+    value: "1.5, 2.5, 3.5"

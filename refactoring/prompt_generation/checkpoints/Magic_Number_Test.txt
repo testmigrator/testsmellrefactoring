@@ -1,0 +1,1 @@
+[ ] All magic numbers in the test code have been extracted and assigned meaningful variable names.

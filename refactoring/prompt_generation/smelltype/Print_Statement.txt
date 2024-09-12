@@ -1,0 +1,4 @@
+Test Smell Type：Print Statement
+
+Feature:
+A test method that invokes either the print or println or printf or write method of the System class.

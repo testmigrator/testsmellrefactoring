@@ -1,0 +1,1 @@
+[ ] All redundant assertion statements have been removed.

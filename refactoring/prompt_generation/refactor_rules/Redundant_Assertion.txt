@@ -1,0 +1,27 @@
+RefactorRule:
+  SmellType: Redundant Assertion
+  Description: "Remove redundant assert statements that do not contribute to the test validation."
+  Steps:
+    - Step:
+        Description: "Identify and remove redundant assert statements that always evaluate to true or are unnecessary."
+        Action: RemoveRedundantAssertion
+        Parameters:
+          RedundantPattern: |
+            assertEquals(true, true);
+            # Any other redundant assert statements that are identified
+  Example:
+    Before: |
+      @Test
+      public void T(){
+        stmt
+        assertEquals(true, true);
+        stmt'
+      }
+    After: |
+      @Test
+      public void T(){
+        stmt
+        stmt'
+      }
+  Variables:
+    redundantAssertion: "assertEquals(true, true)"
