@@ -64,3 +64,7 @@ You can find a prompt in the `motivation_example_prompt.txt` file, and use an LL
 Execute the `refactoring_test.py`.
 
 This process will automatically refactor the test code with 'smell'. Note, please change the paths used in the code to the actual paths in your computer environment.
+
+
+
+You can find a prompt in the motivation_example_prompt.txt file, and use an LLM to quickly see the effect of a test refactoring.
