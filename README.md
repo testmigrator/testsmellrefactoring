@@ -62,4 +62,4 @@ This process will automatically refactor the test code with 'smell'. Note, pleas
 
 
 
-You can find a prompt in the motivation_example_prompt.txt file, and use an LLM to quickly see the effect of a test refactoring.
+You can find a prompt in the `motivation_example_prompt.txt` file, and use an LLM to quickly see the effect of a test refactoring.
