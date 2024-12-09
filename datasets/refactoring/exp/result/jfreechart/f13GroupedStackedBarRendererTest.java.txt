@@ -1,0 +1,330 @@
+File#1
+
+
+Input#1
+ @Test
+    public void testEquals() {
+        GroupedStackedBarRenderer r1 = new GroupedStackedBarRenderer();
+        GroupedStackedBarRenderer r2 = new GroupedStackedBarRenderer();
+        assertEquals(r1, r2);
+        assertEquals(r2, r1);
+
+        // map
+        KeyToGroupMap<String, String> m1 = new KeyToGroupMap<>("G1");
+        m1.mapKeyToGroup("S1", "G2");
+        r1.setSeriesToGroupMap(m1);
+        assertNotEquals(r1, r2);
+        KeyToGroupMap<String, String> m2 = new KeyToGroupMap<>("G1");
+        m2.mapKeyToGroup("S1", "G2");
+        r2.setSeriesToGroupMap(m2);
+        assertEquals(r1, r2);
+        TestUtils.checkIndependence(r1, r2);
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test', 'Duplicate_Assert']
+
+Refactor#1
+GroupedStackedBarRenderer r1;
+GroupedStackedBarRenderer r2;
+private void setupTestEquals() {
+    r1 = new GroupedStackedBarRenderer();
+    r2 = new GroupedStackedBarRenderer();
+}
+
+@Test
+public void testEquals_DefaultState() {
+    setupTestEquals();
+    assertEquals(r1, r2, "Default state equality check failed");
+    assertEquals(r2, r1, "Default state equality check failed (reversed)");
+}
+
+@Test
+public void testEquals_SeriesToGroupMapDifferent() {
+    setupTestEquals();
+    KeyToGroupMap<String, String> m1 = new KeyToGroupMap<>("G1");
+    m1.mapKeyToGroup("S1", "G2");
+    r1.setSeriesToGroupMap(m1);
+    assertNotEquals(r1, r2, "Equality check failed when SeriesToGroupMap is different");
+}
+
+@Test
+public void testEquals_SeriesToGroupMapSame() {
+    setupTestEquals();
+    KeyToGroupMap<String, String> m1 = new KeyToGroupMap<>("G1");
+    m1.mapKeyToGroup("S1", "G2");
+    r1.setSeriesToGroupMap(m1);
+    KeyToGroupMap<String, String> m2 = new KeyToGroupMap<>("G1");
+    m2.mapKeyToGroup("S1", "G2");
+    r2.setSeriesToGroupMap(m2);
+    assertEquals(r1, r2, "Equality check failed when SeriesToGroupMap is the same");
+    TestUtils.checkIndependence(r1, r2, "Check independence failed");
+}
+
+
+Input#2
+ @Test
+    public void testCloning() throws CloneNotSupportedException {
+        GroupedStackedBarRenderer r1 = new GroupedStackedBarRenderer();
+        KeyToGroupMap map = new KeyToGroupMap();
+        map.mapKeyToGroup("A", "X");
+        map.mapKeyToGroup("B", "Y");
+        r1.setSeriesToGroupMap(map);
+        GroupedStackedBarRenderer r2 = (GroupedStackedBarRenderer) r1.clone();
+        assertNotSame(r1, r2);
+        assertSame(r1.getClass(), r2.getClass());
+        assertEquals(r1, r2);
+        TestUtils.checkIndependence(r1, r2);
+    }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing', 'Eager_Test']
+
+Refactor#2
+
+private GroupedStackedBarRenderer setupTestCloning() throws CloneNotSupportedException {
+    GroupedStackedBarRenderer r1 = new GroupedStackedBarRenderer();
+    KeyToGroupMap map = new KeyToGroupMap();
+    map.mapKeyToGroup("A", "X");
+    map.mapKeyToGroup("B", "Y");
+    r1.setSeriesToGroupMap(map);
+    return r1;
+}
+
+@Test
+public void testCloning_InstanceEquality() {
+    GroupedStackedBarRenderer r1 = setupTestCloning();
+    GroupedStackedBarRenderer r2 = (GroupedStackedBarRenderer) r1.clone();
+    assertNotSame(r1, r2, "r1 and r2 should be different instances");
+}
+
+@Test
+public void testCloning_ClassEquality() {
+    GroupedStackedBarRenderer r1 = setupTestCloning();
+    GroupedStackedBarRenderer r2 = (GroupedStackedBarRenderer) r1.clone();
+    assertSame(r1.getClass(), r2.getClass(), "r1 and r2 should be of the same class");
+}
+
+@Test
+public void testCloning_ObjectEquality() {
+    GroupedStackedBarRenderer r1 = setupTestCloning();
+    GroupedStackedBarRenderer r2 = (GroupedStackedBarRenderer) r1.clone();
+    assertEquals(r1, r2, "r1 and r2 should be equal in content");
+}
+
+@Test
+public void testCloning_Independence() {
+    GroupedStackedBarRenderer r1 = setupTestCloning();
+    GroupedStackedBarRenderer r2 = (GroupedStackedBarRenderer) r1.clone();
+    assertDoesNotThrow(() -> TestUtils.checkIndependence(r1, r2), "r1 and r2 should be independent");
+}
+
+
+Input#3
+ @Test
+    public void testDrawWithNullInfo() {
+        try {
+            DefaultCategoryDataset<String, String> dataset = new DefaultCategoryDataset<>();
+            dataset.addValue(1.0, "S1", "C1");
+            dataset.addValue(2.0, "S1", "C2");
+            dataset.addValue(3.0, "S2", "C1");
+            dataset.addValue(4.0, "S2", "C2");
+            GroupedStackedBarRenderer renderer
+                    = new GroupedStackedBarRenderer();
+            CategoryPlot<String, String> plot = new CategoryPlot<>(dataset,
+                    new CategoryAxis("Category"), new NumberAxis("Value"),
+                    renderer);
+            JFreeChart chart = new JFreeChart(plot);
+            /* BufferedImage image = */ chart.createBufferedImage(300, 200,
+                    null);
+        }
+        catch (NullPointerException e) {
+            fail("No exception should be thrown.");
+        }
+    }
+Smell List: ['Exception_Catching_Throwing']
+Refactor#3
+
+@Test
+public void testDrawWithNullInfo() {
+    assertDoesNotThrow(() -> {
+        DefaultCategoryDataset<String, String> dataset = new DefaultCategoryDataset<>();
+        dataset.addValue(1.0, "S1", "C1");
+        dataset.addValue(2.0, "S1", "C2");
+        dataset.addValue(3.0, "S2", "C1");
+        dataset.addValue(4.0, "S2", "C2");
+        GroupedStackedBarRenderer renderer = new GroupedStackedBarRenderer();
+        CategoryPlot<String, String> plot = new CategoryPlot<>(dataset,
+                new CategoryAxis("Category"), new NumberAxis("Value"),
+                renderer);
+        JFreeChart chart = new JFreeChart(plot);
+        /* BufferedImage image = */ chart.createBufferedImage(300, 200, null);
+    }, "No exception should be thrown.");
+}
+
+
+Input#4
+
+Refactor#4
+
+
+Input#5
+
+Refactor#5
+
+
+Input#6
+
+Refactor#6
+
+
+Input#7
+
+Refactor#7
+
+
+Input#8
+
+Refactor#8
+
+
+Input#9
+
+Refactor#9
+
+
+Input#10
+
+Refactor#10
+
+
+Input#11
+
+Refactor#11
+
+
+Input#12
+
+Refactor#12
+
+
+Input#13
+
+Refactor#13
+
+
+Input#14
+
+Refactor#14
+
+
+Input#15
+
+Refactor#15
+
+
+Input#16
+
+Refactor#16
+
+
+Input#17
+
+Refactor#17
+
+
+Input#18
+
+Refactor#18
+
+
+
+Input#19
+
+Refactor#19
+
+
+
+Input#20
+
+Refactor#20
+
+
+
+Input#21
+
+Refactor#21
+
+
+Input#22
+
+Refactor#22
+
+
+Input#23
+
+Refactor#23
+
+
+Input#24
+
+Refactor#24
+
+
+Input#25
+
+Refactor#25
+
+
+Input#26
+
+Refactor#26
+
+
+Input#27
+
+Refactor#27
+
+
+
+Input#28
+
+Refactor#28
+
+
+
+Input#29
+
+Refactor#29
+
+
+
+Input#30
+
+Refactor#30
+
+
+Input#31
+
+Refactor#31
+
+
+
+Input#32
+
+Refactor#32
+
+
+
+Input#33
+
+Refactor#33
+
+
+
+Input#34
+
+Refactor#34
+
+
+
+Input#35
+
+Refactor#35
+

@@ -1,0 +1,361 @@
+File#1
+
+
+Input#1
+@Test
+    public void testMaxEvaluations() throws Exception {
+        try{
+        CircleVectorial circle = new CircleVectorial();
+        circle.addPoint( 30.0,  68.0);
+        circle.addPoint( 50.0,  -6.0);
+        circle.addPoint(110.0, -20.0);
+        circle.addPoint( 35.0,  15.0);
+        circle.addPoint( 45.0,  97.0);
+
+        LeastSquaresProblem lsp = builder(circle)
+                .checkerPair(new SimpleVectorValueChecker(1e-30, 1e-30))
+                .maxIterations(Integer.MAX_VALUE)
+                .start(new double[]{98.680, 47.345})
+                .build();
+
+        optimizer.optimize(lsp);
+
+            fail(optimizer);
+        }catch (TooManyEvaluationsException e){
+            //expected
+        }
+    }
+Smell List: ['Exception_Catching_Throwing']
+
+Refactor#1
+
+@Test
+public void testMaxEvaluations() {
+    assertThrows(TooManyEvaluationsException.class, () -> {
+        CircleVectorial circle = new CircleVectorial();
+        circle.addPoint(30.0, 68.0);
+        circle.addPoint(50.0, -6.0);
+        circle.addPoint(110.0, -20.0);
+        circle.addPoint(35.0, 15.0);
+        circle.addPoint(45.0, 97.0);
+
+        LeastSquaresProblem lsp = builder(circle)
+                .checkerPair(new SimpleVectorValueChecker(1e-30, 1e-30))
+                .maxIterations(Integer.MAX_VALUE)
+                .start(new double[]{98.680, 47.345})
+                .build();
+
+        optimizer.optimize(lsp);
+    });
+}
+
+
+
+Input#2
+    @Test
+    public void testCircleFittingBadInit() {
+        /*
+         * This test converged to the wrong solution with this optimizer.
+         * It seems that the state becomes so large that the convergence
+         * checker's relative tolerance test passes.
+         */
+        try {
+            super.testCircleFittingBadInit();
+            fail(optimizer);
+        } catch (AssertionError e) {
+            //expected
+        }
+    }
+Smell List: ['Exception_Catching_Throwing']
+
+Refactor#2
+@Test
+public void testCircleFittingBadInit() {
+    /*
+     * This test converged to the wrong solution with this optimizer.
+     * It seems that the state becomes so large that the convergence
+     * checker's relative tolerance test passes.
+     */
+    AssertionError exception = assertThrows(AssertionError.class, () -> {
+        super.testCircleFittingBadInit();
+    });
+}
+
+
+
+Input#3
+@Test
+    public void testHahn1()
+        throws IOException {
+        /*
+         * TODO This test leads to a singular problem with the Gauss-Newton
+         * optimizer. This should be inquired.
+         */
+        try{
+            super.testHahn1();
+            fail(optimizer);
+        } catch (ConvergenceException e){
+            //expected for LU
+        } catch (TooManyEvaluationsException e){
+            //expected for QR
+        }
+    }
+Smell List: ['Exception_Catching_Throwing']
+
+Refactor#3
+@Test
+public void testHahn1() {
+    /*
+     * TODO This test leads to a singular problem with the Gauss-Newton
+     * optimizer. This should be inquired.
+     */
+    ConvergenceException convergenceException = assertThrows(ConvergenceException.class, () -> {
+        super.testHahn1();
+    });
+
+    TooManyEvaluationsException tooManyEvaluationsException = assertThrows(TooManyEvaluationsException.class, () -> {
+        super.testHahn1();
+    });
+}
+
+Input#4
+   @Override
+    public void testGetIterations() {
+        /* this diverges with SVD */
+        try {
+            super.testGetIterations();
+            fail(optimizer);
+        } catch (TooManyEvaluationsException e) {
+            //expected
+        }
+    }
+Smell List: ['Exception_Catching_Throwing']
+
+Refactor#4
+@Test
+public void testGetIterations() {
+    /* this diverges with SVD */
+    TooManyEvaluationsException exception = assertThrows(TooManyEvaluationsException.class, () -> {
+        super.testGetIterations();
+    });
+}
+
+
+Input#5
+@Test
+    @Override
+    public void testNonInvertible() throws Exception {
+        /*  SVD can compute a solution to singular problems.
+         *  In this case the target vector, b, is not in the
+         *  span of the jacobian matrix, A. The closes point
+         *  to b on the plane spanned by A is computed.
+         */
+        LinearProblem problem = new LinearProblem(new double[][]{
+                {1, 2, -3},
+                {2, 1, 3},
+                {-3, 0, -9}
+        }, new double[]{1, 1, 1});
+
+        Optimum optimum = optimizer.optimize(problem.getBuilder().build());
+
+        Plane span = Planes.fromPoints(Vector3D.ZERO, Vector3D.of(1, 2, -3), Vector3D.of(2, 1, 0),
+                                       Precision.doubleEquivalenceOfEpsilon(TOL));
+        double expected = JdkMath.abs(span.offset(Vector3D.of(1, 1, 1)));
+        double actual = optimum.getResiduals().getNorm();
+
+        //verify
+        Assert.assertEquals(expected, actual, TOL);
+    }
+Smell List: ['Exception_Catching_Throwing']
+
+Refactor#5
+
+@Test
+public void testNonInvertible() {
+    /*  SVD can compute a solution to singular problems.
+     *  In this case the target vector, b, is not in the
+     *  span of the jacobian matrix, A. The closest point
+     *  to b on the plane spanned by A is computed.
+     */
+    LinearProblem problem = new LinearProblem(new double[][]{
+            {1, 2, -3},
+            {2, 1, 3},
+            {-3, 0, -9}
+    }, new double[]{1, 1, 1});
+
+    assertDoesNotThrow(() -> {
+        Optimum optimum = optimizer.optimize(problem.getBuilder().build());
+
+        Plane span = Planes.fromPoints(Vector3D.ZERO, Vector3D.of(1, 2, -3), Vector3D.of(2, 1, 0),
+                                       Precision.doubleEquivalenceOfEpsilon(TOL));
+        double expected = JdkMath.abs(span.offset(Vector3D.of(1, 1, 1)));
+        double actual = optimum.getResiduals().getNorm();
+
+        //verify
+        Assert.assertEquals(expected, actual, TOL);
+    }, "Unexpected exception occurred during the test");
+}
+
+
+
+
+
+Input#6
+
+Refactor#6
+
+
+Input#7
+
+Refactor#7
+
+
+Input#8
+
+Refactor#8
+
+
+Input#9
+
+Refactor#9
+
+
+Input#10
+
+Refactor#10
+
+
+Input#11
+
+Refactor#11
+
+
+Input#12
+
+Refactor#12
+
+
+Input#13
+
+Refactor#13
+
+
+Input#14
+
+Refactor#14
+
+
+Input#15
+
+Refactor#15
+
+
+Input#16
+
+Refactor#16
+
+
+Input#17
+
+Refactor#17
+
+
+Input#18
+
+Refactor#18
+
+
+
+Input#19
+
+Refactor#19
+
+
+
+Input#20
+
+Refactor#20
+
+
+
+Input#21
+
+Refactor#21
+
+
+Input#22
+
+Refactor#22
+
+
+Input#23
+
+Refactor#23
+
+
+Input#24
+
+Refactor#24
+
+
+Input#25
+
+Refactor#25
+
+
+Input#26
+
+Refactor#26
+
+
+Input#27
+
+Refactor#27
+
+
+
+Input#28
+
+Refactor#28
+
+
+
+Input#29
+
+Refactor#29
+
+
+
+Input#30
+
+Refactor#30
+
+
+Input#31
+
+Refactor#31
+
+
+
+Input#32
+
+Refactor#32
+
+
+
+Input#33
+
+Refactor#33
+
+
+
+Input#34
+
+Refactor#34
+
+
+
+Input#35
+
+Refactor#35
+

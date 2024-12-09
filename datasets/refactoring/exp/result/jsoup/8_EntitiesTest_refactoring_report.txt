@@ -1,0 +1,529 @@
+File#1
+
+
+Input#1
+@Test public void escape() {
+        String text = "Hello &<> Å å π 新 there ¾ © »";
+        String escapedAscii = Entities.escape(text, new OutputSettings().charset("ascii").escapeMode(base));
+        String escapedAsciiFull = Entities.escape(text, new OutputSettings().charset("ascii").escapeMode(extended));
+        String escapedAsciiXhtml = Entities.escape(text, new OutputSettings().charset("ascii").escapeMode(xhtml));
+        String escapedUtfFull = Entities.escape(text, new OutputSettings().charset("UTF-8").escapeMode(extended));
+        String escapedUtfMin = Entities.escape(text, new OutputSettings().charset("UTF-8").escapeMode(xhtml));
+
+        assertEquals("Hello &amp;&lt;&gt; &Aring; &aring; &#x3c0; &#x65b0; there &frac34; &copy; &raquo;", escapedAscii);
+        assertEquals("Hello &amp;&lt;&gt; &angst; &aring; &pi; &#x65b0; there &frac34; &copy; &raquo;", escapedAsciiFull);
+        assertEquals("Hello &amp;&lt;&gt; &#xc5; &#xe5; &#x3c0; &#x65b0; there &#xbe; &#xa9; &#xbb;", escapedAsciiXhtml);
+        assertEquals("Hello &amp;&lt;&gt; Å å π 新 there ¾ © »", escapedUtfFull);
+        assertEquals("Hello &amp;&lt;&gt; Å å π 新 there ¾ © »", escapedUtfMin);
+        // odd that it's defined as aring in base but angst in full
+
+        // round trip
+        assertEquals(text, Entities.unescape(escapedAscii));
+        assertEquals(text, Entities.unescape(escapedAsciiFull));
+        assertEquals(text, Entities.unescape(escapedAsciiXhtml));
+        assertEquals(text, Entities.unescape(escapedUtfFull));
+        assertEquals(text, Entities.unescape(escapedUtfMin));
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+Refactor#1
+private String text = "Hello &<> Å å π 新 there ¾ © »";
+
+private String setupEntities(String charset, EscapeMode escapeMode) {
+    return Entities.escape(text, new OutputSettings().charset(charset).escapeMode(escapeMode));
+}
+
+@Test
+public void testEscape_AsciiBase() {
+    String escapedAscii = setupEntities("ascii", EscapeMode.base);
+    assertEquals("Hello &amp;&lt;&gt; &Aring; &aring; &#x3c0; &#x65b0; there &frac34; &copy; &raquo;", escapedAscii, "ASCII Base Escaping");
+}
+
+@Test
+public void testEscape_AsciiFull() {
+    String escapedAsciiFull = setupEntities("ascii", EscapeMode.extended);
+    assertEquals("Hello &amp;&lt;&gt; &angst; &aring; &pi; &#x65b0; there &frac34; &copy; &raquo;", escapedAsciiFull, "ASCII Full Escaping");
+}
+
+@Test
+public void testEscape_AsciiXhtml() {
+    String escapedAsciiXhtml = setupEntities("ascii", EscapeMode.xhtml);
+    assertEquals("Hello &amp;&lt;&gt; &#xc5; &#xe5; &#x3c0; &#x65b0; there &#xbe; &#xa9; &#xbb;", escapedAsciiXhtml, "ASCII XHTML Escaping");
+}
+
+@Test
+public void testEscape_Utf8Full() {
+    String escapedUtfFull = setupEntities("UTF-8", EscapeMode.extended);
+    assertEquals("Hello &amp;&lt;&gt; Å å π 新 there ¾ © »", escapedUtfFull, "UTF-8 Full Escaping");
+}
+
+@Test
+public void testEscape_Utf8Min() {
+    String escapedUtfMin = setupEntities("UTF-8", EscapeMode.xhtml);
+    assertEquals("Hello &amp;&lt;&gt; Å å π 新 there ¾ © »", escapedUtfMin, "UTF-8 Min Escaping");
+}
+
+@Test
+public void testUnescape_AsciiBase() {
+    String escapedAscii = setupEntities("ascii", EscapeMode.base);
+    assertEquals(text, Entities.unescape(escapedAscii), "Unescaping ASCII Base Escaped Text");
+}
+
+@Test
+public void testUnescape_AsciiFull() {
+    String escapedAsciiFull = setupEntities("ascii", EscapeMode.extended);
+    assertEquals(text, Entities.unescape(escapedAsciiFull), "Unescaping ASCII Full Escaped Text");
+}
+
+@Test
+public void testUnescape_AsciiXhtml() {
+    String escapedAsciiXhtml = setupEntities("ascii", EscapeMode.xhtml);
+    assertEquals(text, Entities.unescape(escapedAsciiXhtml), "Unescaping ASCII XHTML Escaped Text");
+}
+
+@Test
+public void testUnescape_Utf8Full() {
+    String escapedUtfFull = setupEntities("UTF-8", EscapeMode.extended);
+    assertEquals(text, Entities.unescape(escapedUtfFull), "Unescaping UTF-8 Full Escaped Text");
+}
+
+@Test
+public void testUnescape_Utf8Min() {
+    String escapedUtfMin = setupEntities("UTF-8", EscapeMode.xhtml);
+    assertEquals(text, Entities.unescape(escapedUtfMin), "Unescaping UTF-8 Min Escaped Text");
+}
+
+
+Input#2
+ @Test public void escapedSupplementary() {
+        String text = "\uD835\uDD59";
+        String escapedAscii = Entities.escape(text, new OutputSettings().charset("ascii").escapeMode(base));
+        assertEquals("&#x1d559;", escapedAscii);
+        String escapedAsciiFull = Entities.escape(text, new OutputSettings().charset("ascii").escapeMode(extended));
+        assertEquals("&hopf;", escapedAsciiFull);
+        String escapedUtf= Entities.escape(text, new OutputSettings().charset("UTF-8").escapeMode(extended));
+        assertEquals(text, escapedUtf);
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+Refactor#2
+
+private String getTextForEscapedSupplementary() {
+    return "\uD835\uDD59";
+}
+
+@Test
+public void testEscapedSupplementary_EscapeAsciiBase() {
+    String text = getTextForEscapedSupplementary();
+    String escapedAscii = Entities.escape(text, new OutputSettings().charset("ascii").escapeMode(base));
+    assertEquals("&#x1d559;", escapedAscii, "ASCII base escape should match expected value");
+}
+
+@Test
+public void testEscapedSupplementary_EscapeAsciiExtended() {
+    String text = getTextForEscapedSupplementary();
+    String escapedAsciiFull = Entities.escape(text, new OutputSettings().charset("ascii").escapeMode(extended));
+    assertEquals("&hopf;", escapedAsciiFull, "ASCII extended escape should match expected value");
+}
+
+@Test
+public void testEscapedSupplementary_EscapeUtf8Extended() {
+    String text = getTextForEscapedSupplementary();
+    String escapedUtf = Entities.escape(text, new OutputSettings().charset("UTF-8").escapeMode(extended));
+    assertEquals(text, escapedUtf, "UTF-8 extended escape should match original text");
+}
+
+
+Input#3
+ @Test public void unescapeMultiChars() {
+        String text = "&NestedGreaterGreater; &nGg; &nGt; &nGtv; &Gt; &gg;"; // gg is not combo, but 8811 could conflict with NestedGreaterGreater or others
+        String un = "≫ ⋙̸ ≫⃒ ≫̸ ≫ ≫";
+        assertEquals(un, Entities.unescape(text));
+        String escaped = Entities.escape(un, new OutputSettings().charset("ascii").escapeMode(extended));
+        assertEquals("&Gt; &Gg;&#x338; &Gt;&#x20d2; &Gt;&#x338; &Gt; &Gt;", escaped);
+        assertEquals(un, Entities.unescape(escaped));
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+Refactor#3
+
+private String setupUnescapeMultiChars() {
+    String text = "&NestedGreaterGreater; &nGg; &nGt; &nGtv; &Gt; &gg;";
+    return text;
+}
+
+@Test
+public void testUnescapeMultiChars_Unescape() {
+    String text = setupUnescapeMultiChars();
+    String un = "≫ ⋙̸ ≫⃒ ≫̸ ≫ ≫";
+    assertEquals(un, Entities.unescape(text), "Unescaped text should match expected output");
+}
+
+@Test
+public void testUnescapeMultiChars_Escape() {
+    String un = "≫ ⋙̸ ≫⃒ ≫̸ ≫ ≫";
+    String escaped = Entities.escape(un, new OutputSettings().charset("ascii").escapeMode(extended));
+    assertEquals("&Gt; &Gg;&#x338; &Gt;&#x20d2; &Gt;&#x338; &Gt; &Gt;", escaped, "Escaped text should match expected output");
+}
+
+@Test
+public void testUnescapeMultiChars_RoundTrip() {
+    String un = "≫ ⋙̸ ≫⃒ ≫̸ ≫ ≫";
+    String escaped = Entities.escape(un, new OutputSettings().charset("ascii").escapeMode(extended));
+    assertEquals(un, Entities.unescape(escaped), "Round-trip unescaping should result in the original text");
+}
+
+Input#4
+ @Test public void xhtml() {
+        String text = "&amp; &gt; &lt; &quot;";
+        assertEquals(38, xhtml.codepointForName("amp"));
+        assertEquals(62, xhtml.codepointForName("gt"));
+        assertEquals(60, xhtml.codepointForName("lt"));
+        assertEquals(34, xhtml.codepointForName("quot"));
+
+        assertEquals("amp", xhtml.nameForCodepoint(38));
+        assertEquals("gt", xhtml.nameForCodepoint(62));
+        assertEquals("lt", xhtml.nameForCodepoint(60));
+        assertEquals("quot", xhtml.nameForCodepoint(34));
+    }
+Smell List: ['Assertion_Roulette', 'Magic_Number_Test']
+Refactor#4
+@Test
+public void xhtml() {
+    // Define meaningful names for magic numbers
+    int ampCodepoint = 38;
+    int gtCodepoint = 62;
+    int ltCodepoint = 60;
+    int quotCodepoint = 34;
+
+    // Test codepointForName method
+    assertEquals(ampCodepoint, xhtml.codepointForName("amp"), "Checking codepoint for 'amp'");
+    assertEquals(gtCodepoint, xhtml.codepointForName("gt"), "Checking codepoint for 'gt'");
+    assertEquals(ltCodepoint, xhtml.codepointForName("lt"), "Checking codepoint for 'lt'");
+    assertEquals(quotCodepoint, xhtml.codepointForName("quot"), "Checking codepoint for 'quot'");
+
+    // Test nameForCodepoint method
+    assertEquals("amp", xhtml.nameForCodepoint(ampCodepoint), "Checking name for codepoint 38");
+    assertEquals("gt", xhtml.nameForCodepoint(gtCodepoint), "Checking name for codepoint 62");
+    assertEquals("lt", xhtml.nameForCodepoint(ltCodepoint), "Checking name for codepoint 60");
+    assertEquals("quot", xhtml.nameForCodepoint(quotCodepoint), "Checking name for codepoint 34");
+}
+
+Input#5
+ @Test public void getByName() {
+        assertEquals("≫⃒", Entities.getByName("nGt"));
+        assertEquals("fj", Entities.getByName("fjlig"));
+        assertEquals("≫", Entities.getByName("gg"));
+        assertEquals("©", Entities.getByName("copy"));
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+Refactor#5
+@Test
+public void testGetByName_nGt() {
+    assertEquals("≫⃒", Entities.getByName("nGt"), "Check if 'nGt' returns '≫⃒'");
+}
+
+@Test
+public void testGetByName_fjlig() {
+    assertEquals("fj", Entities.getByName("fjlig"), "Check if 'fjlig' returns 'fj'");
+}
+
+@Test
+public void testGetByName_gg() {
+    assertEquals("≫", Entities.getByName("gg"), "Check if 'gg' returns '≫'");
+}
+
+@Test
+public void testGetByName_copy() {
+    assertEquals("©", Entities.getByName("copy"), "Check if 'copy' returns '©'");
+}
+
+Input#6
+ @Test public void escapeSupplementaryCharacter() {
+        String text = new String(Character.toChars(135361));
+        String escapedAscii = Entities.escape(text, new OutputSettings().charset("ascii").escapeMode(base));
+        assertEquals("&#x210c1;", escapedAscii);
+        String escapedUtf = Entities.escape(text, new OutputSettings().charset("UTF-8").escapeMode(base));
+        assertEquals(text, escapedUtf);
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+Refactor#6
+private String setupEscapeSupplementaryCharacter() {
+    String text = new String(Character.toChars(135361));
+    return text;
+}
+
+@Test
+public void testEscapeSupplementaryCharacter_Ascii() {
+    String text = setupEscapeSupplementaryCharacter();
+    String escapedAscii = Entities.escape(text, new OutputSettings().charset("ascii").escapeMode(base));
+    assertEquals("&#x210c1;", escapedAscii, "Check if supplementary character is correctly escaped in ASCII");
+}
+
+@Test
+public void testEscapeSupplementaryCharacter_Utf8() {
+    String text = setupEscapeSupplementaryCharacter();
+    String escapedUtf = Entities.escape(text, new OutputSettings().charset("UTF-8").escapeMode(base));
+    assertEquals(text, escapedUtf, "Check if supplementary character is not escaped in UTF-8");
+}
+
+Input#7
+ @Test public void unescape() {
+        String text = "Hello &AElig; &amp;&LT&gt; &reg &angst; &angst &#960; &#960 &#x65B0; there &! &frac34; &copy; &COPY;";
+        assertEquals("Hello Æ &<> ® Å &angst π π 新 there &! ¾ © ©", Entities.unescape(text));
+
+        assertEquals("&0987654321; &unknown", Entities.unescape("&0987654321; &unknown"));
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+Refactor#7
+private String setupUnescapeTest() {
+    return "Hello &AElig; &amp;&LT&gt; &reg &angst; &angst &#960; &#960 &#x65B0; there &! &frac34; &copy; &COPY;";
+}
+
+@Test
+public void testUnescape_StandardEntities() {
+    String text = setupUnescapeTest();
+    assertEquals("Hello Æ &<> ® Å &angst π π 新 there &! ¾ © ©", Entities.unescape(text), "Standard entities should be correctly unescaped");
+}
+
+@Test
+public void testUnescape_UnknownEntities() {
+    String text = "&0987654321; &unknown";
+    assertEquals("&0987654321; &unknown", Entities.unescape(text), "Unknown entities should remain unchanged");
+}
+
+
+Input#8
+ @Test public void strictUnescape() { // for attributes, enforce strict unescaping (must look like &#xxx; , not just &#xxx)
+        String text = "Hello &amp= &amp;";
+        assertEquals("Hello &amp= &", Entities.unescape(text, true));
+        assertEquals("Hello &= &", Entities.unescape(text));
+        assertEquals("Hello &= &", Entities.unescape(text, false));
+    }
+Smell List: ['Assertion_Roulette']
+Refactor#8
+@Test
+public void strictUnescape() {
+    // for attributes, enforce strict unescaping (must look like &#xxx; , not just &#xxx)
+    String text = "Hello &amp= &amp;";
+    assertEquals("Hello &amp= &", Entities.unescape(text, true), "Strict unescaping should handle incomplete entities correctly");
+    assertEquals("Hello &= &", Entities.unescape(text), "Default unescaping should handle incomplete entities correctly");
+    assertEquals("Hello &= &", Entities.unescape(text, false), "Non-strict unescaping should handle incomplete entities correctly");
+}
+
+
+
+Input#9
+ @Test public void caseSensitive() {
+        String unescaped = "Ü ü & &";
+        assertEquals("&Uuml; &uuml; &amp; &amp;",
+                Entities.escape(unescaped, new OutputSettings().charset("ascii").escapeMode(extended)));
+
+        String escaped = "&Uuml; &uuml; &amp; &AMP";
+        assertEquals("Ü ü & &", Entities.unescape(escaped));
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+Refactor#9
+String unescaped;
+String escaped;
+
+private void setupCaseSensitive() {
+    unescaped = "Ü ü & &";
+    escaped = "&Uuml; &uuml; &amp; &AMP";
+}
+
+@Test
+public void testCaseSensitive_Escape() {
+    setupCaseSensitive();
+    assertEquals(escaped, Entities.escape(unescaped, new OutputSettings().charset("ascii").escapeMode(extended)), "Escaping special characters should produce the correct HTML entities");
+}
+
+@Test
+public void testCaseSensitive_Unescape() {
+    setupCaseSensitive();
+    assertEquals(unescaped, Entities.unescape(escaped), "Unescaping HTML entities should produce the correct characters");
+}
+
+Input#10
+ @Test public void letterDigitEntities() {
+        String html = "<p>&sup1;&sup2;&sup3;&frac14;&frac12;&frac34;</p>";
+        Document doc = Jsoup.parse(html);
+        doc.outputSettings().charset("ascii");
+        Element p = doc.select("p").first();
+        assertEquals("&sup1;&sup2;&sup3;&frac14;&frac12;&frac34;", p.html());
+        assertEquals("¹²³¼½¾", p.text());
+        doc.outputSettings().charset("UTF-8");
+        assertEquals("¹²³¼½¾", p.html());
+    }
+Smell List: ['Assertion_Roulette']
+Refactor#10
+@Test
+public void letterDigitEntities() {
+    String html = "<p>&sup1;&sup2;&sup3;&frac14;&frac12;&frac34;</p>";
+    Document doc = Jsoup.parse(html);
+    doc.outputSettings().charset("ascii");
+    Element p = doc.select("p").first();
+    assertEquals("&sup1;&sup2;&sup3;&frac14;&frac12;&frac34;", p.html(), "HTML content should match the ASCII representation of the entities");
+    assertEquals("¹²³¼½¾", p.text(), "Text content should match the Unicode representation of the entities");
+    doc.outputSettings().charset("UTF-8");
+    assertEquals("¹²³¼½¾", p.html(), "HTML content should match the UTF-8 representation of the entities");
+}
+
+Input#11
+ @Test public void escapesGtInXmlAttributesButNotInHtml() {
+        // https://github.com/jhy/jsoup/issues/528 - < is OK in HTML attribute values, but not in XML
+
+
+        String docHtml = "<a title='<p>One</p>'>One</a>";
+        Document doc = Jsoup.parse(docHtml);
+        Element element = doc.select("a").first();
+
+        doc.outputSettings().escapeMode(base);
+        assertEquals("<a title=\"<p>One</p>\">One</a>", element.outerHtml());
+
+        doc.outputSettings().escapeMode(xhtml);
+        assertEquals("<a title=\"&lt;p>One&lt;/p>\">One</a>", element.outerHtml());
+    }
+Smell List: ['Assertion_Roulette']
+Refactor#11
+@Test
+public void escapesGtInXmlAttributesButNotInHtml() {
+    // https://github.com/jhy/jsoup/issues/528 - < is OK in HTML attribute values, but not in XML
+
+    String docHtml = "<a title='<p>One</p>'>One</a>";
+    Document doc = Jsoup.parse(docHtml);
+    Element element = doc.select("a").first();
+
+    doc.outputSettings().escapeMode(Entities.EscapeMode.base);
+    assertEquals("<a title=\"<p>One</p>\">One</a>", element.outerHtml(), "HTML attribute value should not escape '<'");
+
+    doc.outputSettings().escapeMode(Entities.EscapeMode.xhtml);
+    assertEquals("<a title=\"&lt;p>One&lt;/p>\">One</a>", element.outerHtml(), "XML attribute value should escape '<'");
+}
+
+Input#12
+
+Refactor#12
+
+
+Input#13
+
+Refactor#13
+
+
+Input#14
+
+Refactor#14
+
+
+Input#15
+
+Refactor#15
+
+
+Input#16
+
+Refactor#16
+
+
+Input#17
+
+Refactor#17
+
+
+Input#18
+
+Refactor#18
+
+
+
+Input#19
+
+Refactor#19
+
+
+
+Input#20
+
+Refactor#20
+
+
+
+Input#21
+
+Refactor#21
+
+
+Input#22
+
+Refactor#22
+
+
+Input#23
+
+Refactor#23
+
+
+Input#24
+
+Refactor#24
+
+
+Input#25
+
+Refactor#25
+
+
+Input#26
+
+Refactor#26
+
+
+Input#27
+
+Refactor#27
+
+
+
+Input#28
+
+Refactor#28
+
+
+
+Input#29
+
+Refactor#29
+
+
+
+Input#30
+
+Refactor#30
+
+
+Input#31
+
+Refactor#31
+
+
+
+Input#32
+
+Refactor#32
+
+
+
+Input#33
+
+Refactor#33
+
+
+
+Input#34
+
+Refactor#34
+
+
+
+Input#35
+
+Refactor#35
+

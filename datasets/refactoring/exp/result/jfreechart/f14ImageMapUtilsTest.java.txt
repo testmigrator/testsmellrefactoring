@@ -1,0 +1,285 @@
+File#1
+
+
+Input#1
+ @Test
+    public void testHTMLEscape() {
+        assertEquals("", ImageMapUtils.htmlEscape(""));
+        assertEquals("abc", ImageMapUtils.htmlEscape("abc"));
+        assertEquals("&amp;", ImageMapUtils.htmlEscape("&"));
+        assertEquals("&quot;", ImageMapUtils.htmlEscape("\""));
+        assertEquals("&lt;", ImageMapUtils.htmlEscape("<"));
+        assertEquals("&gt;", ImageMapUtils.htmlEscape(">"));
+        assertEquals("&#39;", ImageMapUtils.htmlEscape("\'"));
+        assertEquals("&#092;abc", ImageMapUtils.htmlEscape("\\abc"));
+        assertEquals("abc\n", ImageMapUtils.htmlEscape("abc\n"));
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+Refactor#1
+
+@Test
+public void testHTMLEscape_EmptyString() {
+    setupTestHTMLEscape();
+    assertEquals("", ImageMapUtils.htmlEscape(""), "HTML escape of empty string should return an empty string");
+}
+
+@Test
+public void testHTMLEscape_PlainText() {
+    setupTestHTMLEscape();
+    assertEquals("abc", ImageMapUtils.htmlEscape("abc"), "HTML escape of plain text 'abc' should return 'abc'");
+}
+
+@Test
+public void testHTMLEscape_Ampersand() {
+    setupTestHTMLEscape();
+    assertEquals("&amp;", ImageMapUtils.htmlEscape("&"), "HTML escape of '&' should return '&amp;'");
+}
+
+@Test
+public void testHTMLEscape_Quote() {
+    setupTestHTMLEscape();
+    assertEquals("&quot;", ImageMapUtils.htmlEscape("\""), "HTML escape of '\"' should return '&quot;'");
+}
+
+@Test
+public void testHTMLEscape_LessThan() {
+    setupTestHTMLEscape();
+    assertEquals("&lt;", ImageMapUtils.htmlEscape("<"), "HTML escape of '<' should return '&lt;'");
+}
+
+@Test
+public void testHTMLEscape_GreaterThan() {
+    setupTestHTMLEscape();
+    assertEquals("&gt;", ImageMapUtils.htmlEscape(">"), "HTML escape of '>' should return '&gt;'");
+}
+
+@Test
+public void testHTMLEscape_SingleQuote() {
+    setupTestHTMLEscape();
+    assertEquals("&#39;", ImageMapUtils.htmlEscape("\'"), "HTML escape of ''' should return '&#39;'");
+}
+
+@Test
+public void testHTMLEscape_Backslash() {
+    setupTestHTMLEscape();
+    assertEquals("&#092;abc", ImageMapUtils.htmlEscape("\\abc"), "HTML escape of '\\abc' should return '&#092;abc'");
+}
+
+@Test
+public void testHTMLEscape_Newline() {
+    setupTestHTMLEscape();
+    assertEquals("abc\n", ImageMapUtils.htmlEscape("abc\n"), "HTML escape of 'abc\\n' should return 'abc\\n'");
+}
+
+
+Input#2
+ @Test
+    public void testJavascriptEscape() {
+        assertEquals("", ImageMapUtils.javascriptEscape(""));
+        assertEquals("abc", ImageMapUtils.javascriptEscape("abc"));
+        assertEquals("\\\'", ImageMapUtils.javascriptEscape("\'"));
+        assertEquals("\\\"", ImageMapUtils.javascriptEscape("\""));
+        assertEquals("\\\\", ImageMapUtils.javascriptEscape("\\"));
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+Refactor#2
+@Test
+public void testJavascriptEscape_EmptyString() {
+    assertEquals("", ImageMapUtils.javascriptEscape(""), "Expected empty string to remain empty after escaping.");
+}
+
+@Test
+public void testJavascriptEscape_RegularString() {
+    assertEquals("abc", ImageMapUtils.javascriptEscape("abc"), "Expected 'abc' to remain the same after escaping.");
+}
+
+@Test
+public void testJavascriptEscape_SingleQuote() {
+    assertEquals("\\\'", ImageMapUtils.javascriptEscape("\'"), "Expected single quote to be escaped as '\\\''.");
+}
+
+@Test
+public void testJavascriptEscape_DoubleQuote() {
+    assertEquals("\\\"", ImageMapUtils.javascriptEscape("\""), "Expected double quote to be escaped as '\\\"'.");
+}
+
+@Test
+public void testJavascriptEscape_Backslash() {
+    assertEquals("\\\\", ImageMapUtils.javascriptEscape("\\"), "Expected backslash to be escaped as '\\\\'.");
+}
+
+
+Input#3
+
+Refactor#3
+
+
+Input#4
+
+Refactor#4
+
+
+Input#5
+
+Refactor#5
+
+
+Input#6
+
+Refactor#6
+
+
+Input#7
+
+Refactor#7
+
+
+Input#8
+
+Refactor#8
+
+
+Input#9
+
+Refactor#9
+
+
+Input#10
+
+Refactor#10
+
+
+Input#11
+
+Refactor#11
+
+
+Input#12
+
+Refactor#12
+
+
+Input#13
+
+Refactor#13
+
+
+Input#14
+
+Refactor#14
+
+
+Input#15
+
+Refactor#15
+
+
+Input#16
+
+Refactor#16
+
+
+Input#17
+
+Refactor#17
+
+
+Input#18
+
+Refactor#18
+
+
+
+Input#19
+
+Refactor#19
+
+
+
+Input#20
+
+Refactor#20
+
+
+
+Input#21
+
+Refactor#21
+
+
+Input#22
+
+Refactor#22
+
+
+Input#23
+
+Refactor#23
+
+
+Input#24
+
+Refactor#24
+
+
+Input#25
+
+Refactor#25
+
+
+Input#26
+
+Refactor#26
+
+
+Input#27
+
+Refactor#27
+
+
+
+Input#28
+
+Refactor#28
+
+
+
+Input#29
+
+Refactor#29
+
+
+
+Input#30
+
+Refactor#30
+
+
+Input#31
+
+Refactor#31
+
+
+
+Input#32
+
+Refactor#32
+
+
+
+Input#33
+
+Refactor#33
+
+
+
+Input#34
+
+Refactor#34
+
+
+
+Input#35
+
+Refactor#35
+

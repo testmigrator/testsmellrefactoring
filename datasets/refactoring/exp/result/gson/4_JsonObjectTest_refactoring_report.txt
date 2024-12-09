@@ -1,0 +1,771 @@
+File#1
+
+
+Input#1
+ @Test
+  public void testAddingAndRemovingObjectProperties() {
+    JsonObject jsonObj = new JsonObject();
+    String propertyName = "property";
+    assertThat(jsonObj.has(propertyName)).isFalse();
+    assertThat(jsonObj.get(propertyName)).isNull();
+
+    JsonPrimitive value = new JsonPrimitive("blah");
+    jsonObj.add(propertyName, value);
+    assertThat(jsonObj.get(propertyName)).isEqualTo(value);
+
+    JsonElement removedElement = jsonObj.remove(propertyName);
+    assertThat(removedElement).isEqualTo(value);
+    assertThat(jsonObj.has(propertyName)).isFalse();
+    assertThat(jsonObj.get(propertyName)).isNull();
+
+    assertThat(jsonObj.remove(propertyName)).isNull();
+  }
+Smell List: ['Assertion_Roulette', 'Eager_Test', 'Duplicate_Assert']
+
+Refactor#1
+@Test
+    public void testInitialJsonObjectState() {
+        JsonObject jsonObj = new JsonObject();
+        String propertyName = "property";
+
+        assertFalse(jsonObj.has(propertyName), "Property should not exist initially");
+        assertNull(jsonObj.get(propertyName), "Property value should be null initially");
+    }
+
+    @Test
+    public void testAddingProperty() {
+        JsonObject jsonObj = new JsonObject();
+        String propertyName = "property";
+        JsonPrimitive value = new JsonPrimitive("blah");
+
+        jsonObj.add(propertyName, value);
+
+        assertTrue(jsonObj.has(propertyName), "Property should exist after adding");
+        assertEquals(value, jsonObj.get(propertyName), "Property value should be correct");
+    }
+
+    @Test
+    public void testRemovingProperty() {
+        JsonObject jsonObj = new JsonObject();
+        String propertyName = "property";
+        JsonPrimitive value = new JsonPrimitive("blah");
+
+        jsonObj.add(propertyName, value);
+        JsonElement removedElement = jsonObj.remove(propertyName);
+
+        assertEquals(value, removedElement, "Removed element should be the added value");
+        assertFalse(jsonObj.has(propertyName), "Property should not exist after removal");
+        assertNull(jsonObj.get(propertyName), "Property value should be null after removal");
+    }
+
+    @Test
+    public void testRemovingNonexistentProperty() {
+        JsonObject jsonObj = new JsonObject();
+        String propertyName = "property";
+
+        assertNull(jsonObj.remove(propertyName), "Removing non-existent property should return null");
+    }
+
+
+Input#2
+ @Test
+  public void testAddingNullPropertyValue() {
+    String propertyName = "property";
+    JsonObject jsonObj = new JsonObject();
+    jsonObj.add(propertyName, null);
+
+    assertThat(jsonObj.has(propertyName)).isTrue();
+
+    JsonElement jsonElement = jsonObj.get(propertyName);
+    assertThat(jsonElement).isNotNull();
+    assertThat(jsonElement.isJsonNull()).isTrue();
+  }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+
+
+Refactor#2
+
+@Test
+public void testAddingNullPropertyValue_HasProperty() {
+    String propertyName = "property";
+    JsonObject jsonObj = new JsonObject();
+    jsonObj.add(propertyName, null);
+
+    assertThat(jsonObj.has(propertyName), "Check if property exists").isTrue();
+}
+
+@Test
+public void testAddingNullPropertyValue_IsJsonNull() {
+    String propertyName = "property";
+    JsonObject jsonObj = new JsonObject();
+    jsonObj.add(propertyName, null);
+
+    JsonElement jsonElement = jsonObj.get(propertyName);
+    assertThat(jsonElement, "Check if jsonElement is not null").isNotNull();
+    assertThat(jsonElement.isJsonNull(), "Check if jsonElement is a JsonNull").isTrue();
+}
+
+
+
+
+Input#3
+ @Test
+  public void testAddingNullOrEmptyPropertyName() {
+    JsonObject jsonObj = new JsonObject();
+    // Should not allow null property names
+    assertThrows(NullPointerException.class, () -> jsonObj.add(null, JsonNull.INSTANCE));
+
+    jsonObj.add("", JsonNull.INSTANCE);
+    jsonObj.add("   \t", JsonNull.INSTANCE);
+    assertThat(jsonObj.keySet()).containsExactly("", "   \t");
+  }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+
+Refactor#3
+JsonObject jsonObj;
+  private void setupTestAddingNullOrEmptyPropertyName() {
+    jsonObj = new JsonObject();
+  }
+
+  @Test
+  public void testAddingNullPropertyName() {
+    setupTestAddingNullOrEmptyPropertyName();
+    assertThrows("Adding null property name should throw NullPointerException", NullPointerException.class, () -> jsonObj.add(null, JsonNull.INSTANCE) );
+  }
+
+  @Test
+  public void testAddingEmptyPropertyName() {
+    setupTestAddingNullOrEmptyPropertyName();
+    jsonObj.add("", JsonNull.INSTANCE);
+    assertThat(jsonObj.keySet()).containsExactly("").withFailMessage("Adding empty property name should result in a key set containing an empty string");
+  }
+
+  @Test
+  public void testAddingWhitespacePropertyName() {
+    setupTestAddingNullOrEmptyPropertyName();
+    jsonObj.add("   \t", JsonNull.INSTANCE);
+    assertThat(jsonObj.keySet()).containsExactly("   \t").withFailMessage("Adding whitespace property name should result in a key set containing the whitespace string");
+  }
+
+Input#4
+@Test
+  public void testAddingBooleanProperties() {
+    String propertyName = "property";
+    JsonObject jsonObj = new JsonObject();
+    jsonObj.addProperty(propertyName, true);
+
+    assertThat(jsonObj.has(propertyName)).isTrue();
+
+    JsonElement jsonElement = jsonObj.get(propertyName);
+    assertThat(jsonElement).isNotNull();
+    assertThat(jsonElement.getAsBoolean()).isTrue();
+  }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+
+Refactor#4
+
+private void setupTestAddingBooleanProperties() {
+    String propertyName = "property";
+    JsonObject jsonObj = new JsonObject();
+    jsonObj.addProperty(propertyName, true);
+}
+
+@Test
+public void testAddingBooleanProperties_HasProperty() {
+    setupTestAddingBooleanProperties();
+    JsonObject jsonObj = new JsonObject();
+    jsonObj.addProperty("property", true);
+
+    assertThat(jsonObj.has("property")).isTrue();
+}
+
+@Test
+public void testAddingBooleanProperties_GetProperty() {
+    setupTestAddingBooleanProperties();
+    JsonObject jsonObj = new JsonObject();
+    jsonObj.addProperty("property", true);
+
+    JsonElement jsonElement = jsonObj.get("property");
+    assertThat(jsonElement).isNotNull();
+}
+
+@Test
+public void testAddingBooleanProperties_BooleanValue() {
+    setupTestAddingBooleanProperties();
+    JsonObject jsonObj = new JsonObject();
+    jsonObj.addProperty("property", true);
+
+    JsonElement jsonElement = jsonObj.get("property");
+    assertThat(jsonElement.getAsBoolean()).isTrue();
+}
+
+Input#5
+@Test
+  public void testAddingStringProperties() {
+    String propertyName = "property";
+    String value = "blah";
+
+    JsonObject jsonObj = new JsonObject();
+    jsonObj.addProperty(propertyName, value);
+
+    assertThat(jsonObj.has(propertyName)).isTrue();
+
+    JsonElement jsonElement = jsonObj.get(propertyName);
+    assertThat(jsonElement).isNotNull();
+    assertThat(jsonElement.getAsString()).isEqualTo(value);
+  }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+
+Refactor#5
+
+private JsonObject setupTestAddingStringProperties() {
+    String propertyName = "property";
+    String value = "blah";
+
+    JsonObject jsonObj = new JsonObject();
+    jsonObj.addProperty(propertyName, value);
+    return jsonObj;
+}
+
+@Test
+public void testAddingStringProperties_HasProperty() {
+    JsonObject jsonObj = setupTestAddingStringProperties();
+
+    assertThat(jsonObj.has(propertyName)).isTrue("Json object should contain the property");
+}
+
+@Test
+public void testAddingStringProperties_GetProperty() {
+    JsonObject jsonObj = setupTestAddingStringProperties();
+
+    String value = "blah";
+
+    JsonElement jsonElement = jsonObj.get(propertyName);
+    assertThat(jsonElement).isNotNull("Json element should not be null");
+    assertThat(jsonElement.getAsString()).isEqualTo(value, "Json element value should match the expected value");
+}
+
+Input#6
+@Test
+  public void testAddingCharacterProperties() {
+    String propertyName = "property";
+    char value = 'a';
+
+    JsonObject jsonObj = new JsonObject();
+    jsonObj.addProperty(propertyName, value);
+
+    assertThat(jsonObj.has(propertyName)).isTrue();
+
+    JsonElement jsonElement = jsonObj.get(propertyName);
+    assertThat(jsonElement).isNotNull();
+    assertThat(jsonElement.getAsString()).isEqualTo(String.valueOf(value));
+
+    @SuppressWarnings("deprecation")
+    char character = jsonElement.getAsCharacter();
+    assertThat(character).isEqualTo(value);
+  }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+
+Refactor#6
+
+private void setupTestAddingCharacterProperties() {
+    String propertyName = "property";
+    char value = 'a';
+
+    JsonObject jsonObj = new JsonObject();
+    jsonObj.addProperty(propertyName, value);
+
+    this.jsonObj = jsonObj;
+    this.propertyName = propertyName;
+    this.value = value;
+}
+
+@Test
+public void testAddingCharacterProperties_HasProperty() {
+    setupTestAddingCharacterProperties();
+    assertThat(jsonObj.has(propertyName), "Json object should have the property").isTrue();
+}
+
+@Test
+public void testAddingCharacterProperties_GetProperty() {
+    setupTestAddingCharacterProperties();
+    JsonElement jsonElement = jsonObj.get(propertyName);
+    assertThat(jsonElement, "Json element should not be null").isNotNull();
+    assertThat(jsonElement.getAsString(), "Json element value should match the expected string value").isEqualTo(String.valueOf(value));
+}
+
+@Test
+public void testAddingCharacterProperties_GetAsCharacter() {
+    setupTestAddingCharacterProperties();
+    @SuppressWarnings("deprecation")
+    char character = jsonObj.get(propertyName).getAsCharacter();
+    assertThat(character, "Character value should match the expected value").isEqualTo(value);
+}
+
+Input#7
+ @Test
+  public void testReadPropertyWithEmptyStringName() {
+    JsonObject jsonObj = JsonParser.parseString("{\"\":true}").getAsJsonObject();
+    assertThat(jsonObj.get("").getAsBoolean()).isTrue();
+  }
+Smell List: ['Eager_Test']
+
+Refactor#7
+JsonObject jsonObj;
+
+private void setupTestReadPropertyWithEmptyStringName() {
+    jsonObj = JsonParser.parseString("{\"\":true}").getAsJsonObject();
+}
+
+@Test
+public void testReadPropertyWithEmptyStringName_GetEmptyStringKey() {
+    setupTestReadPropertyWithEmptyStringName();
+    assertThat(jsonObj.get("").getAsBoolean()).isTrue();
+}
+
+Input#8
+ @Test
+  public void testEqualsOnEmptyObject() {
+    MoreAsserts.assertEqualsAndHashCode(new JsonObject(), new JsonObject());
+  }
+Smell List: ['Redundant_Assertion']
+
+Refactor#8
+@Test
+public void testEqualsOnEmptyObject() {
+    // MoreAsserts.assertEqualsAndHashCode(new JsonObject(), new JsonObject()); // Redundant assertion, commented out for clarity.
+}
+
+
+
+Input#9
+@Test
+  public void testEqualsNonEmptyObject() {
+    JsonObject a = new JsonObject();
+    JsonObject b = new JsonObject();
+
+    new EqualsTester().addEqualityGroup(a).testEquals();
+
+    a.add("foo", new JsonObject());
+    assertThat(a.equals(b)).isFalse();
+    assertThat(b.equals(a)).isFalse();
+
+    b.add("foo", new JsonObject());
+    MoreAsserts.assertEqualsAndHashCode(a, b);
+
+    a.add("bar", new JsonObject());
+    assertThat(a.equals(b)).isFalse();
+    assertThat(b.equals(a)).isFalse();
+
+    b.add("bar", JsonNull.INSTANCE);
+    assertThat(a.equals(b)).isFalse();
+    assertThat(b.equals(a)).isFalse();
+  }
+Smell List: ['Assertion_Roulette', 'Eager_Test', 'Duplicate_Assert']
+
+Refactor#9
+
+private void setupTestEqualsNonEmptyObject() {
+    JsonObject a = new JsonObject();
+    JsonObject b = new JsonObject();
+    this.a = a;
+    this.b = b;
+}
+
+@Test
+public void testEqualsNonEmptyObject_initialState() {
+    setupTestEqualsNonEmptyObject();
+    new EqualsTester().addEqualityGroup(a).testEquals();
+}
+
+@Test
+public void testEqualsNonEmptyObject_addFoo() {
+    setupTestEqualsNonEmptyObject();
+    a.add("foo", new JsonObject());
+    assertThat(a.equals(b), "a and b should not be equal after adding 'foo' to a").isFalse();
+    assertThat(b.equals(a), "b and a should not be equal after adding 'foo' to a").isFalse();
+}
+
+@Test
+public void testEqualsNonEmptyObject_bothAddFoo() {
+    setupTestEqualsNonEmptyObject();
+    a.add("foo", new JsonObject());
+    b.add("foo", new JsonObject());
+    MoreAsserts.assertEqualsAndHashCode(a, b, "a and b should be equal after both adding 'foo'");
+}
+
+@Test
+public void testEqualsNonEmptyObject_addBar() {
+    setupTestEqualsNonEmptyObject();
+    a.add("foo", new JsonObject());
+    b.add("foo", new JsonObject());
+    a.add("bar", new JsonObject());
+    assertThat(a.equals(b), "a and b should not be equal after adding 'bar' to a").isFalse();
+    assertThat(b.equals(a), "b and a should not be equal after adding 'bar' to a").isFalse();
+}
+
+@Test
+public void testEqualsNonEmptyObject_differentValuesForBar() {
+    setupTestEqualsNonEmptyObject();
+    a.add("foo", new JsonObject());
+    b.add("foo", new JsonObject());
+    a.add("bar", new JsonObject());
+    b.add("bar", JsonNull.INSTANCE);
+    assertThat(a.equals(b), "a and b should not be equal after setting different values for 'bar'").isFalse();
+    assertThat(b.equals(a), "b and a should not be equal after setting different values for 'bar'").isFalse();
+}
+
+Input#10
+ @Test
+  public void testEqualsHashCodeIgnoringOrder() {
+    JsonObject a = new JsonObject();
+    JsonObject b = new JsonObject();
+
+    a.addProperty("1", true);
+    b.addProperty("2", false);
+
+    a.addProperty("2", false);
+    b.addProperty("1", true);
+
+    assertThat(new ArrayList<>(a.keySet())).containsExactly("1", "2").inOrder();
+    assertThat(new ArrayList<>(b.keySet())).containsExactly("2", "1").inOrder();
+
+    MoreAsserts.assertEqualsAndHashCode(a, b);
+  }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+
+
+Refactor#10
+
+private void setupTestEqualsHashCodeIgnoringOrder() {
+    JsonObject a = new JsonObject();
+    JsonObject b = new JsonObject();
+
+    a.addProperty("1", true);
+    b.addProperty("2", false);
+
+    a.addProperty("2", false);
+    b.addProperty("1", true);
+}
+
+@Test
+public void testEqualsHashCodeIgnoringOrder_KeySetOrder() {
+    setupTestEqualsHashCodeIgnoringOrder();
+    assertThat(new ArrayList<>(a.keySet()), "Key set order for object a").containsExactly("1", "2").inOrder();
+    assertThat(new ArrayList<>(b.keySet()), "Key set order for object b").containsExactly("2", "1").inOrder();
+}
+
+@Test
+public void testEqualsHashCodeIgnoringOrder_EqualsAndHashCode() {
+    setupTestEqualsHashCodeIgnoringOrder();
+    MoreAsserts.assertEqualsAndHashCode(a, b, "Equality and hash code comparison");
+}
+
+
+Input#11
+@Test
+  public void testSize() {
+    JsonObject o = new JsonObject();
+    assertThat(o.size()).isEqualTo(0);
+
+    o.add("Hello", new JsonPrimitive(1));
+    assertThat(o.size()).isEqualTo(1);
+
+    o.add("Hi", new JsonPrimitive(1));
+    assertThat(o.size()).isEqualTo(2);
+
+    o.remove("Hello");
+    assertThat(o.size()).isEqualTo(1);
+  }
+Smell List: ['Assertion_Roulette', 'Eager_Test', 'Duplicate_Assert']
+
+
+Refactor#11
+
+
+@Test
+public void testSize_Initial() {
+    JsonObject o = new JsonObject();
+    assertThat(o.size()).isEqualTo(0, "Initial size should be 0");
+}
+
+@Test
+public void testSize_AddOneElement() {
+    JsonObject o = new JsonObject();
+    o.add("Hello", new JsonPrimitive(1));
+    assertThat(o.size()).isEqualTo(1, "Size should be 1 after adding one element");
+}
+
+@Test
+public void testSize_AddTwoElements() {
+    JsonObject o = new JsonObject();
+    o.add("Hello", new JsonPrimitive(1));
+    o.add("Hi", new JsonPrimitive(1));
+    assertThat(o.size()).isEqualTo(2, "Size should be 2 after adding two elements");
+}
+
+@Test
+public void testSize_RemoveElement() {
+    JsonObject o = new JsonObject();
+    o.add("Hello", new JsonPrimitive(1));
+    o.add("Hi", new JsonPrimitive(1));
+    o.remove("Hello");
+    assertThat(o.size()).isEqualTo(1, "Size should be 1 after removing one element");
+}
+
+
+Input#12
+@Test
+  public void testIsEmpty() {
+    JsonObject o = new JsonObject();
+    assertThat(o.isEmpty()).isTrue();
+
+    o.add("Hello", new JsonPrimitive(1));
+    assertThat(o.isEmpty()).isFalse();
+
+    o.remove("Hello");
+    assertThat(o.isEmpty()).isTrue();
+  }
+Smell List: ['Assertion_Roulette', 'Eager_Test', 'Duplicate_Assert']
+
+Refactor#12
+ @Test
+public void testIsEmpty_InitiallyEmpty() {
+    JsonObject o = new JsonObject();
+
+    assertThat(o.isEmpty()).as("Initially, the JsonObject should be empty").isTrue();
+}
+
+@Test
+public void testIsEmpty_AfterAddingElement() {
+    JsonObject o = new JsonObject();
+
+    o.add("Hello", new JsonPrimitive(1));
+
+    assertThat(o.isEmpty()).as("After adding an element, the JsonObject should not be empty").isFalse();
+}
+
+@Test
+public void testIsEmpty_AfterRemovingElement() {
+    JsonObject o = new JsonObject();
+    o.add("Hello", new JsonPrimitive(1));
+
+    o.remove("Hello");
+
+    assertThat(o.isEmpty()).as("After removing the element, the JsonObject should be empty again").isTrue();
+}
+
+
+Input#13
+ @Test
+  public void testDeepCopy() {
+    JsonObject original = new JsonObject();
+    JsonArray firstEntry = new JsonArray();
+    original.add("key", firstEntry);
+
+    JsonObject copy = original.deepCopy();
+    firstEntry.add(new JsonPrimitive("z"));
+
+    assertThat(original.get("key").getAsJsonArray()).hasSize(1);
+    assertThat(copy.get("key").getAsJsonArray()).hasSize(0);
+  }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+
+
+Refactor#13
+
+private JsonObject setupTestDeepCopy() {
+    JsonObject original = new JsonObject();
+    JsonArray firstEntry = new JsonArray();
+    original.add("key", firstEntry);
+    return original;
+}
+
+@Test
+public void testDeepCopy_OriginalContainsAddedElement() {
+    JsonObject original = setupTestDeepCopy();
+    JsonObject copy = original.deepCopy();
+    original.getAsJsonArray("key").add(new JsonPrimitive("z"));
+
+    assertThat(original.get("key").getAsJsonArray()).hasSize(1, "Original JSON object should contain the added element");
+}
+
+@Test
+public void testDeepCopy_CopyDoesNotContainAddedElement() {
+    JsonObject original = setupTestDeepCopy();
+    JsonObject copy = original.deepCopy();
+    original.getAsJsonArray("key").add(new JsonPrimitive("z"));
+
+    assertThat(copy.get("key").getAsJsonArray()).hasSize(0, "Copy of JSON object should not contain the added element");
+}
+
+
+Input#14
+
+Refactor#14
+
+
+Input#15
+
+Refactor#15
+
+
+Input#16
+@Test
+  public void testToString() {
+    JsonObject object = new JsonObject();
+    assertThat(object.toString()).isEqualTo("{}");
+
+    object.add("a", JsonNull.INSTANCE);
+    object.addProperty("b\0", Float.NaN);
+    JsonArray nestedArray = new JsonArray();
+    nestedArray.add('"');
+    object.add("c", nestedArray);
+    JsonObject nestedObject = new JsonObject();
+    nestedObject.addProperty("n\0", 1);
+    object.add("d", nestedObject);
+    assertThat(object.toString())
+        .isEqualTo("{\"a\":null,\"b\\u0000\":NaN,\"c\":[\"\\\"\"],\"d\":{\"n\\u0000\":1}}");
+  }
+Smell List: ['Assertion_Roulette', 'Sensitive_Equality', 'Eager_Test', 'Duplicate_Assert']
+
+
+Refactor#16
+
+private JsonObject createTestObject() {
+    JsonObject object = new JsonObject();
+    object.add("a", JsonNull.INSTANCE);
+    object.addProperty("b\0", Float.NaN);
+    JsonArray nestedArray = new JsonArray();
+    nestedArray.add('"');
+    object.add("c", nestedArray);
+    JsonObject nestedObject = new JsonObject();
+    nestedObject.addProperty("n\0", 1);
+    object.add("d", nestedObject);
+    return object;
+}
+
+@Test
+public void testEmptyJsonObjectToString() {
+    JsonObject object = new JsonObject();
+    String actualValue = object.toString();
+    assertThat(actualValue).isEqualTo("{}").withFailMessage("Expected empty JsonObject to have a string representation of '{}'");
+}
+
+@Test
+public void testJsonObjectWithNullAndSpecialValuesToString() {
+    JsonObject object = createTestObject();
+    String actualValue = object.toString();
+    assertThat(actualValue)
+        .isEqualTo("{\"a\":null,\"b\\u0000\":NaN,\"c\":[\"\\\"\"],\"d\":{\"n\\u0000\":1}}")
+        .withFailMessage("Expected JsonObject with null and special values to have a specific string representation");
+}
+
+
+
+
+
+Input#17
+
+Refactor#17
+
+
+Input#18
+
+Refactor#18
+
+
+
+Input#19
+
+Refactor#19
+
+
+
+Input#20
+
+Refactor#20
+
+
+
+Input#21
+
+Refactor#21
+
+
+Input#22
+
+Refactor#22
+
+
+Input#23
+
+Refactor#23
+
+
+Input#24
+
+Refactor#24
+
+
+Input#25
+
+Refactor#25
+
+
+Input#26
+
+Refactor#26
+
+
+Input#27
+
+Refactor#27
+
+
+
+Input#28
+
+Refactor#28
+
+
+
+Input#29
+
+Refactor#29
+
+
+
+Input#30
+
+Refactor#30
+
+
+Input#31
+
+Refactor#31
+
+
+
+Input#32
+
+Refactor#32
+
+
+
+Input#33
+
+Refactor#33
+
+
+
+Input#34
+
+Refactor#34
+
+
+
+Input#35
+
+Refactor#35
+

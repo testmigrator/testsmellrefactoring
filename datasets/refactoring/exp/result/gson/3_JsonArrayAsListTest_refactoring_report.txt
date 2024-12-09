@@ -1,0 +1,446 @@
+File#1
+
+
+Input#1
+ @Test
+  public void testGet() {
+    JsonArray a = new JsonArray();
+    a.add(1);
+
+    List<JsonElement> list = a.asList();
+    assertThat(list.get(0)).isEqualTo(new JsonPrimitive(1));
+
+    assertThrows(IndexOutOfBoundsException.class, () -> list.get(-1));
+    assertThrows(IndexOutOfBoundsException.class, () -> list.get(2));
+
+    a.add((JsonElement) null);
+    assertThat(list.get(1)).isEqualTo(JsonNull.INSTANCE);
+  }
+Smell List: ['Assertion_Roulette', 'Magic_Number_Test']
+
+Refactor#1
+@Test
+  public void testGet() {
+    JsonArray a = new JsonArray();
+    int firstElementValue = 1;
+    a.add(firstElementValue);
+
+    List<JsonElement> list = a.asList();
+    assertThat(list.get(0)).isEqualTo(new JsonPrimitive(firstElementValue)).withFailMessage("The first element should match the added value");
+
+    assertThrows("Getting element at negative index should throw IndexOutOfBoundsException", IndexOutOfBoundsException.class, () -> list.get(-1));
+    assertThrows("Getting element beyond the list size should throw IndexOutOfBoundsException", IndexOutOfBoundsException.class, () -> list.get(2));
+
+    a.add((JsonElement) null);
+    assertThat(list.get(1)).isEqualTo(JsonNull.INSTANCE).withFailMessage("The second element should be JsonNull after adding null");
+  }
+
+Input#2
+
+Refactor#2
+
+
+Input#3
+@Test
+  public void testSet() {
+    JsonArray a = new JsonArray();
+    a.add(1);
+
+    List<JsonElement> list = a.asList();
+    JsonElement old = list.set(0, new JsonPrimitive(2));
+    assertThat(old).isEqualTo(new JsonPrimitive(1));
+    assertThat(list.get(0)).isEqualTo(new JsonPrimitive(2));
+    assertThat(a.get(0)).isEqualTo(new JsonPrimitive(2));
+
+    assertThrows(IndexOutOfBoundsException.class, () -> list.set(-1, new JsonPrimitive(1)));
+    assertThrows(IndexOutOfBoundsException.class, () -> list.set(2, new JsonPrimitive(1)));
+
+    NullPointerException e = assertThrows(NullPointerException.class, () -> list.set(0, null));
+    assertThat(e).hasMessageThat().isEqualTo("Element must be non-null");
+  }
+Smell List: ['Assertion_Roulette', 'Magic_Number_Test']
+
+Refactor#3
+
+  @Test
+  public void testSet() {
+    JsonArray a = new JsonArray();
+    a.add(1);
+
+    List<JsonElement> list = a.asList();
+    JsonElement old = list.set(0, new JsonPrimitive(2));
+    assertThat(old).isEqualTo(new JsonPrimitive(1)).withFailMessage("The old element should be 1");
+    assertThat(list.get(0)).isEqualTo(new JsonPrimitive(2)).withFailMessage("The new element at index 0 should be 2");
+    assertThat(a.get(0)).isEqualTo(new JsonPrimitive(2)).withFailMessage("The new element in JsonArray at index 0 should be 2");
+
+    int invalidIndexNegative = -1;
+    int invalidIndexOutOfRange = 2;
+    assertThrows("Setting element at negative index should throw IndexOutOfBoundsException", IndexOutOfBoundsException.class, () -> list.set(invalidIndexNegative, new JsonPrimitive(1)));
+    assertThrows("Setting element at out-of-range index should throw IndexOutOfBoundsException", IndexOutOfBoundsException.class, () -> list.set(invalidIndexOutOfRange, new JsonPrimitive(1)));
+
+    NullPointerException e = assertThrows("Setting null element should throw NullPointerException", NullPointerException.class, () -> list.set(0, null));
+    assertThat(e).hasMessageThat().isEqualTo("Element must be non-null").withFailMessage("Exception message should indicate that element must be non-null");
+  }
+
+Input#4
+
+Refactor#4
+
+
+Input#5
+
+Refactor#5
+
+
+Input#6
+ @Test
+  public void testRemoveIndex() {
+    JsonArray a = new JsonArray();
+    a.add(1);
+
+    List<JsonElement> list = a.asList();
+    assertThat(list.remove(0)).isEqualTo(new JsonPrimitive(1));
+    assertThat(list).hasSize(0);
+    assertThat(a).hasSize(0);
+
+    assertThrows(IndexOutOfBoundsException.class, () -> list.remove(0));
+  }
+Smell List: ['Assertion_Roulette', 'Magic_Number_Test']
+
+Refactor#6
+@Test
+public void testRemoveIndex() {
+    JsonArray a = new JsonArray();
+    a.add(1);
+
+    List<JsonElement> list = a.asList();
+    int expectedValue = 1;
+    JsonPrimitive expectedJsonPrimitive = new JsonPrimitive(expectedValue);
+    assertThat(list.remove(0)).isEqualTo(expectedJsonPrimitive, "The removed element should be equal to the expected value");
+    assertThat(list).hasSize(0, "The list should be empty after removing the element");
+    assertThat(a).hasSize(0, "The JsonArray should be empty after removing the element");
+
+    assertThrows(IndexOutOfBoundsException.class, () -> list.remove(0), "Removing from an empty list should throw IndexOutOfBoundsException");
+}
+
+
+Input#7
+ @Test
+  public void testRemoveElement() {
+    JsonArray a = new JsonArray();
+    a.add(1);
+
+    List<JsonElement> list = a.asList();
+    assertThat(list.remove(new JsonPrimitive(1))).isTrue();
+    assertThat(list).hasSize(0);
+    assertThat(a).hasSize(0);
+
+    assertThat(list.remove(new JsonPrimitive(1))).isFalse();
+    assertThat(list.remove(null)).isFalse();
+  }
+Smell List: ['Assertion_Roulette', 'Duplicate_Assert']
+
+Refactor#7
+
+  @Test
+  public void testRemoveElement() {
+    JsonArray a = new JsonArray();
+    a.add(1);
+
+    List<JsonElement> list = a.asList();
+    assertTrue(list.remove(new JsonPrimitive(1)), "Element should be removed");
+    assertTrue(list.isEmpty(), "List should be empty after removal");
+    assertTrue(a.isEmpty(), "JsonArray should be empty after removal");
+
+    assertFalse(list.remove(new JsonPrimitive(1)), "Element should not be found");
+    assertFalse(list.remove(null), "Null element should not be found");
+  }
+
+Input#8
+@Test
+  public void testClear() {
+    JsonArray a = new JsonArray();
+    a.add(1);
+
+    List<JsonElement> list = a.asList();
+    list.clear();
+    assertThat(list).hasSize(0);
+    assertThat(a).hasSize(0);
+  }
+Smell List: ['Assertion_Roulette']
+
+Refactor#8
+
+@Test
+public void testClear() {
+    JsonArray a = new JsonArray();
+    a.add(1);
+
+    List<JsonElement> list = a.asList();
+    list.clear();
+    assertThat(list).hasSize(0).withFailMessage("List should be empty after clear");
+    assertThat(a).hasSize(0).withFailMessage("JsonArray should be empty after clearing its list representation");
+}
+
+
+Input#9
+ @Test
+  public void testContains() {
+    JsonArray a = new JsonArray();
+    a.add(1);
+
+    List<JsonElement> list = a.asList();
+    assertThat(list).contains(new JsonPrimitive(1));
+    assertThat(list).doesNotContain(new JsonPrimitive(2));
+    assertThat(list).doesNotContain(null);
+
+    @SuppressWarnings({"unlikely-arg-type", "CollectionIncompatibleType"})
+    boolean containsInt = list.contains(1); // should only contain JsonPrimitive(1)
+    assertThat(containsInt).isFalse();
+  }
+Smell List: ['Assertion_Roulette', 'Duplicate_Assert']
+
+Refactor#9
+@Test
+  public void testContains() {
+    JsonArray a = new JsonArray();
+    a.add(1);
+
+    List<JsonElement> list = a.asList();
+    assertTrue(list.contains(new JsonPrimitive(1)), "List should contain the specified element");
+    assertFalse(list.contains(new JsonPrimitive(2)), "List should not contain the specified element");
+    assertFalse(list.contains(null), "List should not contain null");
+
+    boolean containsInt = list.contains(1); // should only contain JsonPrimitive(1)
+    assertFalse(containsInt, "List should not contain an integer value");
+}
+
+Input#10
+@Test
+  public void testIndexOf() {
+    JsonArray a = new JsonArray();
+    // Add the same value twice to test indexOf vs. lastIndexOf
+    a.add(1);
+    a.add(1);
+
+    List<JsonElement> list = a.asList();
+    assertThat(list.indexOf(new JsonPrimitive(1))).isEqualTo(0);
+    assertThat(list.indexOf(new JsonPrimitive(2))).isEqualTo(-1);
+    assertThat(list.indexOf(null)).isEqualTo(-1);
+
+    @SuppressWarnings({"unlikely-arg-type", "CollectionIncompatibleType"})
+    int indexOfInt = list.indexOf(1); // should only contain JsonPrimitive(1)
+    assertThat(indexOfInt).isEqualTo(-1);
+
+    assertThat(list.lastIndexOf(new JsonPrimitive(1))).isEqualTo(1);
+    assertThat(list.lastIndexOf(new JsonPrimitive(2))).isEqualTo(-1);
+    assertThat(list.lastIndexOf(null)).isEqualTo(-1);
+  }
+Smell List: ['Assertion_Roulette']
+
+Refactor#10
+
+@Test
+public void testIndexOf() {
+    JsonArray a = new JsonArray();
+    // Add the same value twice to test indexOf vs. lastIndexOf
+    a.add(1);
+    a.add(1);
+
+    List<JsonElement> list = a.asList();
+    assertThat(list.indexOf(new JsonPrimitive(1))).isEqualTo(0).withFailMessage("Expected index of first occurrence of 1 to be 0");
+    assertThat(list.indexOf(new JsonPrimitive(2))).isEqualTo(-1).withFailMessage("Expected index of 2 to be -1 as it does not exist in the list");
+    assertThat(list.indexOf(null)).isEqualTo(-1).withFailMessage("Expected index of null to be -1 as null does not exist in the list");
+
+    @SuppressWarnings({"unlikely-arg-type", "CollectionIncompatibleType"})
+    int indexOfInt = list.indexOf(1); // should only contain JsonPrimitive(1)
+    assertThat(indexOfInt).isEqualTo(-1).withFailMessage("Expected index of integer 1 to be -1 as the list contains JsonPrimitive(1) instead");
+
+    assertThat(list.lastIndexOf(new JsonPrimitive(1))).isEqualTo(1).withFailMessage("Expected last index of 1 to be 1");
+    assertThat(list.lastIndexOf(new JsonPrimitive(2))).isEqualTo(-1).withFailMessage("Expected last index of 2 to be -1 as it does not exist in the list");
+    assertThat(list.lastIndexOf(null)).isEqualTo(-1).withFailMessage("Expected last index of null to be -1 as null does not exist in the list");
+}
+
+
+Input#11
+
+Refactor#11
+
+
+Input#12
+@Test
+  public void testEqualsHashCode() {
+    JsonArray a = new JsonArray();
+    a.add(1);
+
+    List<JsonElement> list = a.asList();
+    MoreAsserts.assertEqualsAndHashCode(list, Collections.singletonList(new JsonPrimitive(1)));
+    assertThat(list.equals(Collections.emptyList())).isFalse();
+    assertThat(list.equals(Collections.singletonList(new JsonPrimitive(2)))).isFalse();
+  }
+Smell List: ['Assertion_Roulette']
+
+Refactor#12
+@Test
+public void testEqualsHashCode() {
+    JsonArray a = new JsonArray();
+    a.add(1);
+
+    List<JsonElement> list = a.asList();
+    MoreAsserts.assertEqualsAndHashCode(list, Collections.singletonList(new JsonPrimitive(1)), "List should be equal and have the same hash code as a singleton list with JsonPrimitive(1)");
+    assertThat(list.equals(Collections.emptyList()), "List should not be equal to an empty list").isFalse();
+    assertThat(list.equals(Collections.singletonList(new JsonPrimitive(2))), "List should not be equal to a singleton list with JsonPrimitive(2)").isFalse();
+}
+
+Input#13
+@Test
+  public void testViewUpdates() {
+    JsonArray a = new JsonArray();
+    List<JsonElement> list = a.asList();
+
+    a.add(1);
+    assertThat(list).hasSize(1);
+    assertThat(list.get(0)).isEqualTo(new JsonPrimitive(1));
+
+    list.add(new JsonPrimitive(2));
+    assertThat(a).hasSize(2);
+    assertThat(a.get(1)).isEqualTo(new JsonPrimitive(2));
+  }
+Smell List: ['Assertion_Roulette', 'Magic_Number_Test']
+
+Refactor#13
+@Test
+public void testViewUpdates() {
+    JsonArray jsonArray = new JsonArray();
+    List<JsonElement> list = jsonArray.asList();
+
+    int initialElement = 1;
+    jsonArray.add(initialElement);
+    assertThat(list).hasSize(1, "List should have one element after adding the first element");
+    assertThat(list.get(0)).isEqualTo(new JsonPrimitive(initialElement), "First element in the list should match the added element");
+
+    int secondElement = 2;
+    list.add(new JsonPrimitive(secondElement));
+    assertThat(jsonArray).hasSize(2, "JsonArray should have two elements after adding the second element");
+    assertThat(jsonArray.get(1)).isEqualTo(new JsonPrimitive(secondElement), "Second element in the JsonArray should match the added element");
+}
+
+Input#14
+
+Refactor#14
+
+
+Input#15
+
+Refactor#15
+
+
+Input#16
+
+Refactor#16
+
+
+Input#17
+
+Refactor#17
+
+
+Input#18
+
+Refactor#18
+
+
+
+Input#19
+
+Refactor#19
+
+
+
+Input#20
+
+Refactor#20
+
+
+
+Input#21
+
+Refactor#21
+
+
+Input#22
+
+Refactor#22
+
+
+Input#23
+
+Refactor#23
+
+
+Input#24
+
+Refactor#24
+
+
+Input#25
+
+Refactor#25
+
+
+Input#26
+
+Refactor#26
+
+
+Input#27
+
+Refactor#27
+
+
+
+Input#28
+
+Refactor#28
+
+
+
+Input#29
+
+Refactor#29
+
+
+
+Input#30
+
+Refactor#30
+
+
+Input#31
+
+Refactor#31
+
+
+
+Input#32
+
+Refactor#32
+
+
+
+Input#33
+
+Refactor#33
+
+
+
+Input#34
+
+Refactor#34
+
+
+
+Input#35
+
+Refactor#35
+

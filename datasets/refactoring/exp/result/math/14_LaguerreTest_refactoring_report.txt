@@ -1,0 +1,226 @@
+File#1
+
+
+Input#1
+@Test
+    public void testGamma() {
+        final double tol = 1e-13;
+
+        for (int i = 2; i < 10; i += 1) {
+            final double t = i;
+
+            final UnivariateFunction f = new UnivariateFunction() {
+                @Override
+                public double value(double x) {
+                    return JdkMath.pow(x, t - 1);
+                }
+            };
+
+            final GaussIntegrator integrator = factory.laguerre(7);
+            final double s = integrator.integrate(f);
+            Assert.assertEquals(1d, Gamma.value(t) / s, tol);
+        }
+    }
+
+Smell List: ['Conditional_Test_Logic', 'Magic_Number_Test']
+Refactor#1
+
+    private static final double TOLERANCE = 1e-13;
+    private static final int INTEGRATION_ORDER = 7;
+
+    @Test
+    public void testGamma() {
+        for (int i = 2; i < 10; i++) {
+            double expectedResult = 1.0;
+            double actualResult = computeGammaValue(i);
+            assertEquals(expectedResult, actualResult, TOLERANCE);
+        }
+    }
+
+    private double computeGammaValue(int i) {
+        double t = i;
+        UnivariateFunction f = x -> JdkMath.pow(x, t - 1);
+        GaussIntegrator integrator = factory.laguerre(INTEGRATION_ORDER);
+        return Gamma.value(t) / integrator.integrate(f);
+    }
+
+
+Input#2
+
+Refactor#2
+
+
+Input#3
+
+Refactor#3
+
+
+Input#4
+
+Refactor#4
+
+
+Input#5
+
+Refactor#5
+
+
+Input#6
+
+Refactor#6
+
+
+Input#7
+
+Refactor#7
+
+
+Input#8
+
+Refactor#8
+
+
+Input#9
+
+Refactor#9
+
+
+Input#10
+
+Refactor#10
+
+
+Input#11
+
+Refactor#11
+
+
+Input#12
+
+Refactor#12
+
+
+Input#13
+
+Refactor#13
+
+
+Input#14
+
+Refactor#14
+
+
+Input#15
+
+Refactor#15
+
+
+Input#16
+
+Refactor#16
+
+
+Input#17
+
+Refactor#17
+
+
+Input#18
+
+Refactor#18
+
+
+
+Input#19
+
+Refactor#19
+
+
+
+Input#20
+
+Refactor#20
+
+
+
+Input#21
+
+Refactor#21
+
+
+Input#22
+
+Refactor#22
+
+
+Input#23
+
+Refactor#23
+
+
+Input#24
+
+Refactor#24
+
+
+Input#25
+
+Refactor#25
+
+
+Input#26
+
+Refactor#26
+
+
+Input#27
+
+Refactor#27
+
+
+
+Input#28
+
+Refactor#28
+
+
+
+Input#29
+
+Refactor#29
+
+
+
+Input#30
+
+Refactor#30
+
+
+Input#31
+
+Refactor#31
+
+
+
+Input#32
+
+Refactor#32
+
+
+
+Input#33
+
+Refactor#33
+
+
+
+Input#34
+
+Refactor#34
+
+
+
+Input#35
+
+Refactor#35
+

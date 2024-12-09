@@ -1,0 +1,38 @@
+Test smell num : 196
+After: 28
+
+Refactoring Test num : 144
+CPR:95
+EPR:88
+
+!!!!=>127 tests
+
+
+
+f1: 13 tests
+f2: 0 tests
+f3: 1 tests
+f4: 4 tests
+f5: 8 tests
+f6: 30 tests
+f7: 11 tests
+f8: 4 tests
+f9: 4 tests
+f10: 3 tests
+f11: 5 tests
+f12: 5 tests
+f13: 5 tests
+f14: 1 tests
+f15: 4 tests
+f16: 1 tests
+f17: 1 tests
+f18: 5 tests
+f19: 5 tests
+total:110
+
+
+
+
+
+
+

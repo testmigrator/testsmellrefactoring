@@ -1,0 +1,1012 @@
+File#1
+
+
+Input#1
+ @Test public void testGetTextNodes() {
+        Document doc = Jsoup.parse("<p>One <span>Two</span> Three <br> Four</p>");
+        List<TextNode> textNodes = doc.select("p").first().textNodes();
+
+        assertEquals(3, textNodes.size());
+        assertEquals("One ", textNodes.get(0).text());
+        assertEquals(" Three ", textNodes.get(1).text());
+        assertEquals(" Four", textNodes.get(2).text());
+
+        assertEquals(0, doc.select("br").first().textNodes().size());
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test', 'Magic_Number_Test']
+Refactor#1
+private Document setupTestGetTextNodes() {
+    return Jsoup.parse("<p>One <span>Two</span> Three <br> Four</p>");
+}
+
+@Test
+public void testGetTextNodes_TextNodesCount() {
+    Document doc = setupTestGetTextNodes();
+    List<TextNode> textNodes = doc.select("p").first().textNodes();
+    int expectedTextNodesCount = 3;
+    assertEquals(expectedTextNodesCount, textNodes.size(), "The number of text nodes should be 3");
+}
+
+@Test
+public void testGetTextNodes_TextNodeContent() {
+    Document doc = setupTestGetTextNodes();
+    List<TextNode> textNodes = doc.select("p").first().textNodes();
+    assertEquals("One ", textNodes.get(0).text(), "The first text node should contain 'One '");
+    assertEquals(" Three ", textNodes.get(1).text(), "The second text node should contain ' Three '");
+    assertEquals(" Four", textNodes.get(2).text(), "The third text node should contain ' Four'");
+}
+
+@Test
+public void testGetTextNodes_BrElementTextNodes() {
+    Document doc = setupTestGetTextNodes();
+    Element brElement = doc.select("br").first();
+    int expectedTextNodesCount = 0;
+    assertEquals(expectedTextNodesCount, brElement.textNodes().size(), "The <br> element should have no text nodes");
+}
+
+Input#2
+ @Test public void testManipulateTextNodes() {
+        Document doc = Jsoup.parse("<p>One <span>Two</span> Three <br> Four</p>");
+        Element p = doc.select("p").first();
+        List<TextNode> textNodes = p.textNodes();
+
+        textNodes.get(1).text(" three-more ");
+        textNodes.get(2).splitText(3).text("-ur");
+
+        assertEquals("One Two three-more Fo-ur", p.text());
+        assertEquals("One three-more Fo-ur", p.ownText());
+        assertEquals(4, p.textNodes().size()); // grew because of split
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test', 'Magic_Number_Test']
+Refactor#2
+private Document setupTestManipulateTextNodes() {
+    Document doc = Jsoup.parse("<p>One <span>Two</span> Three <br> Four</p>");
+    Element p = doc.select("p").first();
+    List<TextNode> textNodes = p.textNodes();
+
+    textNodes.get(1).text(" three-more ");
+    textNodes.get(2).splitText(3).text("-ur");
+
+    return doc;
+}
+
+@Test
+public void testManipulateTextNodes_FinalText() {
+    Document doc = setupTestManipulateTextNodes();
+    Element p = doc.select("p").first();
+    String expectedFinalText = "One Two three-more Fo-ur";
+    assertEquals(expectedFinalText, p.text(), "The final text of the paragraph should match the expected value.");
+}
+
+@Test
+public void testManipulateTextNodes_OwnText() {
+    Document doc = setupTestManipulateTextNodes();
+    Element p = doc.select("p").first();
+    String expectedOwnText = "One three-more Fo-ur";
+    assertEquals(expectedOwnText, p.ownText(), "The own text of the paragraph should match the expected value.");
+}
+
+@Test
+public void testManipulateTextNodes_TextNodesCount() {
+    Document doc = setupTestManipulateTextNodes();
+    Element p = doc.select("p").first();
+    int expectedTextNodesCount = 4;
+    assertEquals(expectedTextNodesCount, p.textNodes().size(), "The number of text nodes should match the expected count after manipulation.");
+}
+
+Input#3
+@Test public void testGetDataNodes() {
+        Document doc = Jsoup.parse("<script>One Two</script> <style>Three Four</style> <p>Fix Six</p>");
+        Element script = doc.select("script").first();
+        Element style = doc.select("style").first();
+        Element p = doc.select("p").first();
+
+        List<DataNode> scriptData = script.dataNodes();
+        assertEquals(1, scriptData.size());
+        assertEquals("One Two", scriptData.get(0).getWholeData());
+
+        List<DataNode> styleData = style.dataNodes();
+        assertEquals(1, styleData.size());
+        assertEquals("Three Four", styleData.get(0).getWholeData());
+
+        List<DataNode> pData = p.dataNodes();
+        assertEquals(0, pData.size());
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test', 'Magic_Number_Test']
+Refactor#3
+
+private Document setupTestGetDataNodes() {
+    return Jsoup.parse("<script>One Two</script> <style>Three Four</style> <p>Fix Six</p>");
+}
+
+@Test
+public void testGetDataNodes_ScriptElement() {
+    Document doc = setupTestGetDataNodes();
+    Element script = doc.select("script").first();
+    List<DataNode> scriptData = script.dataNodes();
+
+    int expectedScriptDataSize = 1;
+    assertEquals(expectedScriptDataSize, scriptData.size(), "Script element should contain exactly one data node");
+
+    String expectedScriptData = "One Two";
+    assertEquals(expectedScriptData, scriptData.get(0).getWholeData(), "Script data node content should match 'One Two'");
+}
+
+@Test
+public void testGetDataNodes_StyleElement() {
+    Document doc = setupTestGetDataNodes();
+    Element style = doc.select("style").first();
+    List<DataNode> styleData = style.dataNodes();
+
+    int expectedStyleDataSize = 1;
+    assertEquals(expectedStyleDataSize, styleData.size(), "Style element should contain exactly one data node");
+
+    String expectedStyleData = "Three Four";
+    assertEquals(expectedStyleData, styleData.get(0).getWholeData(), "Style data node content should match 'Three Four'");
+}
+
+@Test
+public void testGetDataNodes_ParagraphElement() {
+    Document doc = setupTestGetDataNodes();
+    Element p = doc.select("p").first();
+    List<DataNode> pData = p.dataNodes();
+
+    int expectedPDataSize = 0;
+    assertEquals(expectedPDataSize, pData.size(), "Paragraph element should contain no data nodes");
+}
+
+
+Input#4
+@Test public void elementIsNotASiblingOfItself() {
+        Document doc = Jsoup.parse("<div><p>One<p>Two<p>Three</div>");
+        Element p2 = doc.select("p").get(1);
+
+        assertEquals("Two", p2.text());
+        Elements els = p2.siblingElements();
+        assertEquals(2, els.size());
+        assertEquals("<p>One</p>", els.get(0).outerHtml());
+        assertEquals("<p>Three</p>", els.get(1).outerHtml());
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test', 'Magic_Number_Test']
+Refactor#4
+Document doc;
+Element p2;
+
+private void setupElementIsNotASiblingOfItself() {
+    doc = Jsoup.parse("<div><p>One<p>Two<p>Three</div>");
+    p2 = doc.select("p").get(1);
+}
+
+@Test
+public void testElementIsNotASiblingOfItself_Text() {
+    setupElementIsNotASiblingOfItself();
+    assertEquals("Two", p2.text(), "The text of the second paragraph should be 'Two'");
+}
+
+@Test
+public void testElementIsNotASiblingOfItself_SiblingCount() {
+    setupElementIsNotASiblingOfItself();
+    int expectedSiblingCount = 2;
+    assertEquals(expectedSiblingCount, p2.siblingElements().size(), "The second paragraph should have 2 sibling elements");
+}
+
+@Test
+public void testElementIsNotASiblingOfItself_SiblingElements() {
+    setupElementIsNotASiblingOfItself();
+    Elements els = p2.siblingElements();
+    assertEquals("<p>One</p>", els.get(0).outerHtml(), "The first sibling element should be '<p>One</p>'");
+    assertEquals("<p>Three</p>", els.get(1).outerHtml(), "The second sibling element should be '<p>Three</p>'");
+}
+
+
+Input#5
+ @Test public void testChildThrowsIndexOutOfBoundsOnMissing() {
+        Document doc = Jsoup.parse("<div><p>One</p><p>Two</p></div>");
+        Element div = doc.select("div").first();
+
+        assertEquals(2, div.children().size());
+        assertEquals("One", div.child(0).text());
+
+        try {
+            div.child(3);
+            fail("Should throw index out of bounds");
+        } catch (IndexOutOfBoundsException e) {}
+    }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing', 'Eager_Test', 'Magic_Number_Test']
+
+Refactor#5
+
+private static final String HTML_CONTENT = "<div><p>One</p><p>Two</p></div>";
+private static final int EXPECTED_CHILDREN_SIZE = 2;
+private static final String EXPECTED_FIRST_CHILD_TEXT = "One";
+private static final int INVALID_INDEX = 3;
+
+private Element setupTestChildThrowsIndexOutOfBoundsOnMissing() {
+    Document doc = Jsoup.parse(HTML_CONTENT);
+    return doc.select("div").first();
+}
+
+@Test
+public void testChildThrowsIndexOutOfBoundsOnMissing_Setup() {
+    Element div = setupTestChildThrowsIndexOutOfBoundsOnMissing();
+    assertEquals(EXPECTED_CHILDREN_SIZE, div.children().size(), "The number of children elements should be 2");
+    assertEquals(EXPECTED_FIRST_CHILD_TEXT, div.child(0).text(), "The text of the first child element should be 'One'");
+}
+
+@Test
+public void testChildThrowsIndexOutOfBoundsOnMissing_Exception() {
+    Element div = setupTestChildThrowsIndexOutOfBoundsOnMissing();
+    IndexOutOfBoundsException exception = assertThrows(IndexOutOfBoundsException.class, () -> {
+        div.child(INVALID_INDEX);
+    }, "Accessing child at index 3 should throw IndexOutOfBoundsException");
+}
+
+Input#6
+@Test
+    public void moveByAppend() {
+        // test for https://github.com/jhy/jsoup/issues/239
+        // can empty an element and append its children to another element
+        Document doc = Jsoup.parse("<div id=1>Text <p>One</p> Text <p>Two</p></div><div id=2></div>");
+        Element div1 = doc.select("div").get(0);
+        Element div2 = doc.select("div").get(1);
+
+        assertEquals(4, div1.childNodeSize());
+        List<Node> children = div1.childNodes();
+        assertEquals(4, children.size());
+
+        div2.insertChildren(0, children);
+
+        assertEquals(0, children.size()); // children is backed by div1.childNodes, moved, so should be 0 now
+        assertEquals(0, div1.childNodeSize());
+        assertEquals(4, div2.childNodeSize());
+        assertEquals("<div id=\"1\"></div>\n<div id=\"2\">\n Text \n <p>One</p> Text \n <p>Two</p>\n</div>",
+            doc.body().html());
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test', 'Magic_Number_Test']
+Refactor#6
+
+private Document setupMoveByAppendTest() {
+    Document doc = Jsoup.parse("<div id=1>Text <p>One</p> Text <p>Two</p></div><div id=2></div>");
+    return doc;
+}
+
+@Test
+public void testMoveByAppend_ChildNodeCountBeforeMove() {
+    Document doc = setupMoveByAppendTest();
+    Element div1 = doc.select("div").get(0);
+    int expectedChildNodeCount = 4;
+    assertEquals(expectedChildNodeCount, div1.childNodeSize(), "Initial child node count of div1 should be 4");
+    List<Node> children = div1.childNodes();
+    assertEquals(expectedChildNodeCount, children.size(), "Initial child node count of div1 should be 4");
+}
+
+@Test
+public void testMoveByAppend_ChildNodeCountAfterMove() {
+    Document doc = setupMoveByAppendTest();
+    Element div1 = doc.select("div").get(0);
+    Element div2 = doc.select("div").get(1);
+    List<Node> children = div1.childNodes();
+    div2.insertChildren(0, children);
+
+    int expectedChildNodeCountDiv1 = 0;
+    assertEquals(expectedChildNodeCountDiv1, children.size(), "Children list should be empty after moving nodes to div2");
+    assertEquals(expectedChildNodeCountDiv1, div1.childNodeSize(), "Child node count of div1 should be 0 after moving nodes");
+
+    int expectedChildNodeCountDiv2 = 4;
+    assertEquals(expectedChildNodeCountDiv2, div2.childNodeSize(), "Child node count of div2 should be 4 after moving nodes");
+}
+
+@Test
+public void testMoveByAppend_DocumentStructureAfterMove() {
+    Document doc = setupMoveByAppendTest();
+    Element div1 = doc.select("div").get(0);
+    Element div2 = doc.select("div").get(1);
+    List<Node> children = div1.childNodes();
+    div2.insertChildren(0, children);
+
+    String expectedHtml = "<div id=\"1\"></div>\n<div id=\"2\">\n Text \n <p>One</p> Text \n <p>Two</p>\n</div>";
+    assertEquals(expectedHtml, doc.body().html(), "Document structure should match expected HTML after moving nodes");
+}
+
+Input#7
+@Test
+    public void insertChildrenArgumentValidation() {
+        Document doc = Jsoup.parse("<div id=1>Text <p>One</p> Text <p>Two</p></div><div id=2></div>");
+        Element div1 = doc.select("div").get(0);
+        Element div2 = doc.select("div").get(1);
+        List<Node> children = div1.childNodes();
+
+        try {
+            div2.insertChildren(6, children);
+            fail();
+        } catch (IllegalArgumentException e) {}
+
+        try {
+            div2.insertChildren(-5, children);
+            fail();
+        } catch (IllegalArgumentException e) {
+        }
+
+        try {
+            div2.insertChildren(0, (Collection<? extends Node>) null);
+            fail();
+        } catch (IllegalArgumentException e) {
+        }
+    }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing', 'Eager_Test', 'Duplicate_Assert']
+Refactor#7
+private Document setupDocument() {
+        return Jsoup.parse("<div id=1>Text <p>One</p> Text <p>Two</p></div><div id=2></div>");
+    }
+
+    private Element getDiv1(Document doc) {
+        return doc.select("div").get(0);
+    }
+
+    private Element getDiv2(Document doc) {
+        return doc.select("div").get(1);
+    }
+
+    @Test
+    public void testInsertChildrenWithInvalidIndex() {
+        Document doc = setupDocument();
+        Element div2 = getDiv2(doc);
+        List<Node> children = getDiv1(doc).childNodes();
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            div2.insertChildren(6, children);
+        }, "Expected IllegalArgumentException when inserting children at index 6");
+
+        IllegalArgumentException exception2 = assertThrows(IllegalArgumentException.class, () -> {
+            div2.insertChildren(-5, children);
+        }, "Expected IllegalArgumentException when inserting children at index -5");
+    }
+
+    @Test
+    public void testInsertChildrenWithNullCollection() {
+        Document doc = setupDocument();
+        Element div2 = getDiv2(doc);
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            div2.insertChildren(0, (Collection<? extends Node>) null);
+        }, "Expected IllegalArgumentException when inserting null collection");
+    }
+
+Input#8
+@Test
+    public void insertChildrenAtPosition() {
+        Document doc = Jsoup.parse("<div id=1>Text1 <p>One</p> Text2 <p>Two</p></div><div id=2>Text3 <p>Three</p></div>");
+        Element div1 = doc.select("div").get(0);
+        Elements p1s = div1.select("p");
+        Element div2 = doc.select("div").get(1);
+
+        assertEquals(2, div2.childNodeSize());
+        div2.insertChildren(-1, p1s);
+        assertEquals(2, div1.childNodeSize()); // moved two out
+        assertEquals(4, div2.childNodeSize());
+        assertEquals(3, p1s.get(1).siblingIndex()); // should be last
+
+        List<Node> els = new ArrayList<>();
+        Element el1 = new Element(Tag.valueOf("span"), "").text("Span1");
+        Element el2 = new Element(Tag.valueOf("span"), "").text("Span2");
+        TextNode tn1 = new TextNode("Text4");
+        els.add(el1);
+        els.add(el2);
+        els.add(tn1);
+
+        assertNull(el1.parent());
+        div2.insertChildren(-2, els);
+        assertEquals(div2, el1.parent());
+        assertEquals(7, div2.childNodeSize());
+        assertEquals(3, el1.siblingIndex());
+        assertEquals(4, el2.siblingIndex());
+        assertEquals(5, tn1.siblingIndex());
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test', 'Magic_Number_Test']
+Refactor#8
+private Document setupDocument() {
+    return Jsoup.parse("<div id=1>Text1 <p>One</p> Text2 <p>Two</p></div><div id=2>Text3 <p>Three</p></div>");
+}
+
+private Element getDiv1(Document doc) {
+    return doc.select("div").get(0);
+}
+
+private Element getDiv2(Document doc) {
+    return doc.select("div").get(1);
+}
+
+private List<Node> createNodes() {
+    List<Node> els = new ArrayList<>();
+    Element el1 = new Element(Tag.valueOf("span"), "").text("Span1");
+    Element el2 = new Element(Tag.valueOf("span"), "").text("Span2");
+    TextNode tn1 = new TextNode("Text4");
+    els.add(el1);
+    els.add(el2);
+    els.add(tn1);
+    return els;
+}
+
+@Test
+public void testInsertChildrenAtPosition_InitialChildNodeSize() {
+    Document doc = setupDocument();
+    Element div2 = getDiv2(doc);
+
+    int expectedChildNodeSize = 2;
+    assertEquals(expectedChildNodeSize, div2.childNodeSize(), "Initial child node size of div2 should be 2");
+}
+
+@Test
+public void testInsertChildrenAtPosition_InsertPElements() {
+    Document doc = setupDocument();
+    Element div1 = getDiv1(doc);
+    Element div2 = getDiv2(doc);
+    Elements p1s = div1.select("p");
+
+    int expectedDiv1ChildNodeSizeAfterMove = 2;
+    int expectedDiv2ChildNodeSizeAfterInsert = 4;
+    int expectedSiblingIndexForLastP = 3;
+
+    div2.insertChildren(-1, p1s);
+    assertEquals(expectedDiv1ChildNodeSizeAfterMove, div1.childNodeSize(), "Child node size of div1 after moving elements should be 2");
+    assertEquals(expectedDiv2ChildNodeSizeAfterInsert, div2.childNodeSize(), "Child node size of div2 after inserting elements should be 4");
+    assertEquals(expectedSiblingIndexForLastP, p1s.get(1).siblingIndex(), "The second p element should be the last sibling in div2");
+}
+
+@Test
+public void testInsertChildrenAtPosition_InsertCustomNodes() {
+    Document doc = setupDocument();
+    Element div2 = getDiv2(doc);
+    List<Node> nodes = createNodes();
+
+    assertNull(nodes.get(0).parent(), "Parent of the first span should be null before insertion");
+    div2.insertChildren(-2, nodes);
+    assertEquals(div2, nodes.get(0).parent(), "Parent of the first span should be div2 after insertion");
+    int expectedChildNodeSizeAfterInsert = 7;
+    assertEquals(expectedChildNodeSizeAfterInsert, div2.childNodeSize(), "Child node size of div2 after inserting custom nodes should be 7");
+    int expectedSiblingIndexForFirstSpan = 3;
+    int expectedSiblingIndexForSecondSpan = 4;
+    int expectedSiblingIndexForText4 = 5;
+    assertEquals(expectedSiblingIndexForFirstSpan, nodes.get(0).siblingIndex(), "The first span should have a sibling index of 3");
+    assertEquals(expectedSiblingIndexForSecondSpan, nodes.get(1).siblingIndex(), "The second span should have a sibling index of 4");
+    assertEquals(expectedSiblingIndexForText4, nodes.get(2).siblingIndex(), "The text node should have a sibling index of 5");
+}
+
+
+Input#9
+@Test
+    public void insertChildrenAsCopy() {
+        Document doc = Jsoup.parse("<div id=1>Text <p>One</p> Text <p>Two</p></div><div id=2></div>");
+        Element div1 = doc.select("div").get(0);
+        Element div2 = doc.select("div").get(1);
+        Elements ps = doc.select("p").clone();
+        ps.first().text("One cloned");
+        div2.insertChildren(-1, ps);
+
+        assertEquals(4, div1.childNodeSize()); // not moved -- cloned
+        assertEquals(2, div2.childNodeSize());
+        assertEquals("<div id=\"1\">Text <p>One</p> Text <p>Two</p></div><div id=\"2\"><p>One cloned</p><p>Two</p></div>",
+            TextUtil.stripNewlines(doc.body().html()));
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test', 'Magic_Number_Test']
+
+Refactor#9
+
+private void setupInsertChildrenAsCopy() {
+    Document doc = Jsoup.parse("<div id=1>Text <p>One</p> Text <p>Two</p></div><div id=2></div>");
+    Element div1 = doc.select("div").get(0);
+    Element div2 = doc.select("div").get(1);
+    Elements ps = doc.select("p").clone();
+    ps.first().text("One cloned");
+    div2.insertChildren(-1, ps);
+}
+
+@Test
+public void testInsertChildrenAsCopy_Div1ChildNodeSize() {
+    setupInsertChildrenAsCopy();
+    int expectedDiv1ChildNodeSize = 4;
+    assertEquals(expectedDiv1ChildNodeSize, div1.childNodeSize(), "Div1 should still have 4 child nodes after cloning");
+}
+
+@Test
+public void testInsertChildrenAsCopy_Div2ChildNodeSize() {
+    setupInsertChildrenAsCopy();
+    int expectedDiv2ChildNodeSize = 2;
+    assertEquals(expectedDiv2ChildNodeSize, div2.childNodeSize(), "Div2 should have 2 child nodes after inserting cloned elements");
+}
+
+@Test
+public void testInsertChildrenAsCopy_DocumentStructure() {
+    setupInsertChildrenAsCopy();
+    String expectedDocumentStructure = "<div id=\"1\">Text <p>One</p> Text <p>Two</p></div><div id=\"2\"><p>One cloned</p><p>Two</p></div>";
+    assertEquals(expectedDocumentStructure, TextUtil.stripNewlines(doc.body().html()), "The document structure should match the expected output after insertion");
+}
+
+
+Input#10
+@Test
+    public void testCssPath() {
+        Document doc = Jsoup.parse("<div id=\"id1\">A</div><div>B</div><div class=\"c1 c2\">C</div>");
+        Element divA = doc.select("div").get(0);
+        Element divB = doc.select("div").get(1);
+        Element divC = doc.select("div").get(2);
+        assertEquals(divA.cssSelector(), "#id1");
+        assertEquals(divB.cssSelector(), "html > body > div:nth-child(2)");
+        assertEquals(divC.cssSelector(), "html > body > div.c1.c2");
+
+        assertTrue(divA == doc.select(divA.cssSelector()).first());
+        assertTrue(divB == doc.select(divB.cssSelector()).first());
+        assertTrue(divC == doc.select(divC.cssSelector()).first());
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+Refactor#10
+
+private Document setupTestCssPath() {
+    return Jsoup.parse("<div id=\"id1\">A</div><div>B</div><div class=\"c1 c2\">C</div>");
+}
+
+@Test
+public void testCssPath_Id1() {
+    Document doc = setupTestCssPath();
+    Element divA = doc.select("div").get(0);
+    assertEquals("#id1", divA.cssSelector(), "CSS selector for divA should be #id1");
+    assertTrue(divA == doc.select(divA.cssSelector()).first(), "Selecting CSS selector for divA should return the same element");
+}
+
+@Test
+public void testCssPath_SecondDiv() {
+    Document doc = setupTestCssPath();
+    Element divB = doc.select("div").get(1);
+    assertEquals("html > body > div:nth-child(2)", divB.cssSelector(), "CSS selector for divB should be html > body > div:nth-child(2)");
+    assertTrue(divB == doc.select(divB.cssSelector()).first(), "Selecting CSS selector for divB should return the same element");
+}
+
+@Test
+public void testCssPath_Classes() {
+    Document doc = setupTestCssPath();
+    Element divC = doc.select("div").get(2);
+    assertEquals("html > body > div.c1.c2", divC.cssSelector(), "CSS selector for divC should be html > body > div.c1.c2");
+    assertTrue(divC == doc.select(divC.cssSelector()).first(), "Selecting CSS selector for divC should return the same element");
+}
+
+
+Input#11
+
+Refactor#11
+
+
+Input#12
+ @Test
+    public void testHashAndEqualsAndValue() {
+        // .equals and hashcode are identity. value is content.
+
+        String doc1 = "<div id=1><p class=one>One</p><p class=one>One</p><p class=one>Two</p><p class=two>One</p></div>" +
+                "<div id=2><p class=one>One</p><p class=one>One</p><p class=one>Two</p><p class=two>One</p></div>";
+
+        Document doc = Jsoup.parse(doc1);
+        Elements els = doc.select("p");
+
+        /*
+        for (Element el : els) {
+            System.out.println(el.hashCode() + " - " + el.outerHtml());
+        }
+
+        0 1534787905 - <p class="one">One</p>
+        1 1534787905 - <p class="one">One</p>
+        2 1539683239 - <p class="one">Two</p>
+        3 1535455211 - <p class="two">One</p>
+        4 1534787905 - <p class="one">One</p>
+        5 1534787905 - <p class="one">One</p>
+        6 1539683239 - <p class="one">Two</p>
+        7 1535455211 - <p class="two">One</p>
+        */
+        assertEquals(8, els.size());
+        Element e0 = els.get(0);
+        Element e1 = els.get(1);
+        Element e2 = els.get(2);
+        Element e3 = els.get(3);
+        Element e4 = els.get(4);
+        Element e5 = els.get(5);
+        Element e6 = els.get(6);
+        Element e7 = els.get(7);
+
+        assertEquals(e0, e0);
+        assertTrue(e0.hasSameValue(e1));
+        assertTrue(e0.hasSameValue(e4));
+        assertTrue(e0.hasSameValue(e5));
+        assertFalse(e0.equals(e2));
+        assertFalse(e0.hasSameValue(e2));
+        assertFalse(e0.hasSameValue(e3));
+        assertFalse(e0.hasSameValue(e6));
+        assertFalse(e0.hasSameValue(e7));
+
+        assertEquals(e0.hashCode(), e0.hashCode());
+        assertFalse(e0.hashCode() == (e2.hashCode()));
+        assertFalse(e0.hashCode() == (e3).hashCode());
+        assertFalse(e0.hashCode() == (e6).hashCode());
+        assertFalse(e0.hashCode() == (e7).hashCode());
+    }
+Smell List: ['Assertion_Roulette', 'Redundant_Assertion', 'Magic_Number_Test']
+Refactor#12
+@Test
+public void testHashAndEqualsAndValue() {
+    // .equals and hashcode are identity. value is content.
+
+    String doc1 = "<div id=1><p class=one>One</p><p class=one>One</p><p class=one>Two</p><p class=two>One</p></div>" +
+            "<div id=2><p class=one>One</p><p class=one>One</p><p class=one>Two</p><p class=two>One</p></div>";
+
+    Document doc = Jsoup.parse(doc1);
+    Elements els = doc.select("p");
+
+    int expectedElementsSize = 8;
+    assertEquals(expectedElementsSize, els.size(), "The number of selected elements should be 8");
+
+    Element e0 = els.get(0);
+    Element e1 = els.get(1);
+    Element e2 = els.get(2);
+    Element e3 = els.get(3);
+    Element e4 = els.get(4);
+    Element e5 = els.get(5);
+    Element e6 = els.get(6);
+    Element e7 = els.get(7);
+
+    // Redundant assertion, commented out for clarity.
+    // assertEquals(e0, e0, "Element should be equal to itself");
+
+    assertTrue(e0.hasSameValue(e1), "Element 0 should have the same value as Element 1");
+    assertTrue(e0.hasSameValue(e4), "Element 0 should have the same value as Element 4");
+    assertTrue(e0.hasSameValue(e5), "Element 0 should have the same value as Element 5");
+    assertFalse(e0.equals(e2), "Element 0 should not be equal to Element 2");
+    assertFalse(e0.hasSameValue(e2), "Element 0 should not have the same value as Element 2");
+    assertFalse(e0.hasSameValue(e3), "Element 0 should not have the same value as Element 3");
+    assertFalse(e0.hasSameValue(e6), "Element 0 should not have the same value as Element 6");
+    assertFalse(e0.hasSameValue(e7), "Element 0 should not have the same value as Element 7");
+
+    // Redundant assertion, commented out for clarity.
+    // assertEquals(e0.hashCode(), e0.hashCode(), "Element 0's hash code should be equal to itself");
+
+    assertFalse(e0.hashCode() == e2.hashCode(), "Element 0's hash code should not be equal to Element 2's hash code");
+    assertFalse(e0.hashCode() == e3.hashCode(), "Element 0's hash code should not be equal to Element 3's hash code");
+    assertFalse(e0.hashCode() == e6.hashCode(), "Element 0's hash code should not be equal to Element 6's hash code");
+    assertFalse(e0.hashCode() == e7.hashCode(), "Element 0's hash code should not be equal to Element 7's hash code");
+}
+
+
+Input#13
+@Test public void testRelativeUrls() {
+        String html = "<body><a href='./one.html'>One</a> <a href='two.html'>two</a> <a href='../three.html'>Three</a> <a href='//example2.com/four/'>Four</a> <a href='https://example2.com/five/'>Five</a>";
+        Document doc = Jsoup.parse(html, "http://example.com/bar/");
+        Elements els = doc.select("a");
+
+        assertEquals("http://example.com/bar/one.html", els.get(0).absUrl("href"));
+        assertEquals("http://example.com/bar/two.html", els.get(1).absUrl("href"));
+        assertEquals("http://example.com/three.html", els.get(2).absUrl("href"));
+        assertEquals("http://example2.com/four/", els.get(3).absUrl("href"));
+        assertEquals("https://example2.com/five/", els.get(4).absUrl("href"));
+    }
+Smell List: ['Assertion_Roulette']
+Refactor#13
+
+@Test
+public void testRelativeUrls() {
+    String html = "<body><a href='./one.html'>One</a> <a href='two.html'>two</a> <a href='../three.html'>Three</a> <a href='//example2.com/four/'>Four</a> <a href='https://example2.com/five/'>Five</a>";
+    Document doc = Jsoup.parse(html, "http://example.com/bar/");
+    Elements els = doc.select("a");
+
+    assertEquals("http://example.com/bar/one.html", els.get(0).absUrl("href"), "The absolute URL for 'One' should be correct");
+    assertEquals("http://example.com/bar/two.html", els.get(1).absUrl("href"), "The absolute URL for 'Two' should be correct");
+    assertEquals("http://example.com/three.html", els.get(2).absUrl("href"), "The absolute URL for 'Three' should be correct");
+    assertEquals("http://example2.com/four/", els.get(3).absUrl("href"), "The absolute URL for 'Four' should be correct");
+    assertEquals("https://example2.com/five/", els.get(4).absUrl("href"), "The absolute URL for 'Five' should be correct");
+}
+
+Input#14
+
+Refactor#14
+
+
+Input#15
+
+Refactor#15
+
+
+Input#16
+ @Test
+    public void testChainedRemoveAttributes() {
+        String html = "<a one two three four>Text</a>";
+        Document doc = Jsoup.parse(html);
+        Element a = doc.select("a").first();
+        a
+            .removeAttr("zero")
+            .removeAttr("one")
+            .removeAttr("two")
+            .removeAttr("three")
+            .removeAttr("four")
+            .removeAttr("five");
+        assertEquals("<a>Text</a>", a.outerHtml());
+    }
+Smell List: ['Eager_Test']
+Refactor#16
+
+private void setupTestChainedRemoveAttributes() {
+    String html = "<a one two three four>Text</a>";
+    Document doc = Jsoup.parse(html);
+    a = doc.select("a").first();
+}
+
+@Test
+public void testChainedRemoveAttributes_RemoveZero() {
+    setupTestChainedRemoveAttributes();
+    a.removeAttr("zero");
+    assertEquals("<a one two three four>Text</a>", a.outerHtml());
+}
+
+@Test
+public void testChainedRemoveAttributes_RemoveOne() {
+    setupTestChainedRemoveAttributes();
+    a.removeAttr("one");
+    assertEquals("<a two three four>Text</a>", a.outerHtml());
+}
+
+@Test
+public void testChainedRemoveAttributes_RemoveTwo() {
+    setupTestChainedRemoveAttributes();
+    a.removeAttr("two");
+    assertEquals("<a one three four>Text</a>", a.outerHtml());
+}
+
+@Test
+public void testChainedRemoveAttributes_RemoveThree() {
+    setupTestChainedRemoveAttributes();
+    a.removeAttr("three");
+    assertEquals("<a one two four>Text</a>", a.outerHtml());
+}
+
+@Test
+public void testChainedRemoveAttributes_RemoveFour() {
+    setupTestChainedRemoveAttributes();
+    a.removeAttr("four");
+    assertEquals("<a one two three>Text</a>", a.outerHtml());
+}
+
+@Test
+public void testChainedRemoveAttributes_RemoveFive() {
+    setupTestChainedRemoveAttributes();
+    a.removeAttr("five");
+    assertEquals("<a one two three four>Text</a>", a.outerHtml());
+}
+
+
+Input#17
+
+Refactor#17
+
+
+Input#18
+@Test
+    public void testIs() {
+        String html = "<div><p>One <a class=big>Two</a> Three</p><p>Another</p>";
+        Document doc = Jsoup.parse(html);
+        Element p = doc.select("p").first();
+
+        assertTrue(p.is("p"));
+        assertFalse(p.is("div"));
+        assertTrue(p.is("p:has(a)"));
+        assertFalse(p.is("a")); // does not descend
+        assertTrue(p.is("p:first-child"));
+        assertFalse(p.is("p:last-child"));
+        assertTrue(p.is("*"));
+        assertTrue(p.is("div p"));
+
+        Element q = doc.select("p").last();
+        assertTrue(q.is("p"));
+        assertTrue(q.is("p ~ p"));
+        assertTrue(q.is("p + p"));
+        assertTrue(q.is("p:last-child"));
+        assertFalse(q.is("p a"));
+        assertFalse(q.is("a"));
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+Refactor#18
+private Document setupDocument() {
+    String html = "<div><p>One <a class=big>Two</a> Three</p><p>Another</p>";
+    return Jsoup.parse(html);
+}
+
+@Test
+public void testIs_PFirstElement() {
+    Document doc = setupDocument();
+    Element p = doc.select("p").first();
+
+    assertTrue(p.is("p"), "Element should match the selector 'p'");
+    assertFalse(p.is("div"), "Element should not match the selector 'div'");
+    assertTrue(p.is("p:has(a)"), "Element should match the selector 'p:has(a)'");
+    assertFalse(p.is("a"), "Element should not match the selector 'a' as it does not descend");
+    assertTrue(p.is("p:first-child"), "Element should match the selector 'p:first-child'");
+    assertFalse(p.is("p:last-child"), "Element should not match the selector 'p:last-child'");
+    assertTrue(p.is("*"), "Element should match the selector '*'");
+    assertTrue(p.is("div p"), "Element should match the selector 'div p'");
+}
+
+@Test
+public void testIs_PLastElement() {
+    Document doc = setupDocument();
+    Element q = doc.select("p").last();
+
+    assertTrue(q.is("p"), "Element should match the selector 'p'");
+    assertTrue(q.is("p ~ p"), "Element should match the selector 'p ~ p'");
+    assertTrue(q.is("p + p"), "Element should match the selector 'p + p'");
+    assertTrue(q.is("p:last-child"), "Element should match the selector 'p:last-child'");
+    assertFalse(q.is("p a"), "Element should not match the selector 'p a'");
+    assertFalse(q.is("a"), "Element should not match the selector 'a'");
+}
+
+
+
+Input#19
+
+Refactor#19
+
+
+
+Input#20
+
+Refactor#20
+
+
+
+Input#21
+
+Refactor#21
+
+
+Input#22
+
+Refactor#22
+
+
+Input#23
+
+Refactor#23
+
+
+Input#24
+
+Refactor#24
+
+
+Input#25
+
+Refactor#25
+
+
+Input#26
+
+Refactor#26
+
+
+Input#27
+
+Refactor#27
+
+
+
+Input#28
+
+Refactor#28
+
+
+
+Input#29
+
+Refactor#29
+
+
+
+Input#30
+
+Refactor#30
+
+
+Input#31
+
+Refactor#31
+
+
+
+Input#32
+
+Refactor#32
+
+
+
+Input#33
+
+Refactor#33
+
+
+
+Input#34
+
+Refactor#34
+
+
+
+Input#35
+
+Refactor#35
+
+
+
+Input#36
+
+Refactor#36
+
+
+
+Input#37
+
+Refactor#37
+
+
+
+Input#38
+
+Refactor#38
+
+
+
+Input#39
+
+Refactor#39
+
+
+Input#40
+
+Refactor#40
+
+Input#41
+
+Refactor#41
+
+Input#42
+
+Refactor#42
+
+Input#43
+
+Refactor#43
+
+Input#44
+
+Refactor#44
+
+Input#45
+
+Refactor#45
+
+Input#46
+
+Refactor#46
+
+
+Input#47
+
+Refactor#47
+
+
+Input#48
+
+Refactor#48
+
+
+Input#49
+
+Refactor#49
+
+
+
+Input#50
+
+Refactor#50
+

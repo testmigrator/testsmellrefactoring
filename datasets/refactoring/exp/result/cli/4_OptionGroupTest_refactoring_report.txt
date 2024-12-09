@@ -1,0 +1,353 @@
+File#1
+
+
+Input#1
+ @Test
+    public void testNoOptionsExtraArgs() throws Exception {
+        final String[] args = {"arg1", "arg2"};
+
+        final CommandLine cl = parser.parse(options, args);
+
+        assertFalse(cl.hasOption("r"), "Confirm -r is NOT set");
+        assertFalse(cl.hasOption("f"), "Confirm -f is NOT set");
+        assertFalse(cl.hasOption("d"), "Confirm -d is NOT set");
+        assertFalse(cl.hasOption("s"), "Confirm -s is NOT set");
+        assertFalse(cl.hasOption("c"), "Confirm -c is NOT set");
+        assertEquals(2, cl.getArgList().size(), "Confirm TWO extra args");
+    }
+Smell List: ['Exception_Catching_Throwing', 'Magic_Number_Test']
+
+Refactor#1
+@Test
+public void testNoOptionsExtraArgs() {
+    final String[] args = {"arg1", "arg2"};
+
+    assertDoesNotThrow(() -> {
+        final CommandLine cl = parser.parse(options, args);
+
+        assertFalse(cl.hasOption("r"), "Confirm -r is NOT set");
+        assertFalse(cl.hasOption("f"), "Confirm -f is NOT set");
+        assertFalse(cl.hasOption("d"), "Confirm -d is NOT set");
+        assertFalse(cl.hasOption("s"), "Confirm -s is NOT set");
+        assertFalse(cl.hasOption("c"), "Confirm -c is NOT set");
+
+        int expectedArgCount = 2;
+        assertEquals(expectedArgCount, cl.getArgList().size(), "Confirm TWO extra args");
+    }, "Unexpected exception occurred during the test");
+}
+
+
+Input#2
+ @Test
+    public void testSingleLongOption() throws Exception {
+        final String[] args = {"--file"};
+
+        final CommandLine cl = parser.parse(options, args);
+
+        assertFalse(cl.hasOption("r"), "Confirm -r is NOT set");
+        assertTrue(cl.hasOption("f"), "Confirm -f is set");
+        assertFalse(cl.hasOption("d"), "Confirm -d is NOT set");
+        assertFalse(cl.hasOption("s"), "Confirm -s is NOT set");
+        assertFalse(cl.hasOption("c"), "Confirm -c is NOT set");
+        assertTrue(cl.getArgList().isEmpty(), "Confirm no extra args");
+    }
+Smell List: ['Exception_Catching_Throwing']
+
+Refactor#2
+ @Test
+    public void testSingleLongOption() {
+        final String[] args = {"--file"};
+
+        assertDoesNotThrow(() -> {
+            final CommandLine cl = parser.parse(options, args);
+
+            assertFalse(cl.hasOption("r"), "Confirm -r is NOT set");
+            assertTrue(cl.hasOption("f"), "Confirm -f is set");
+            assertFalse(cl.hasOption("d"), "Confirm -d is NOT set");
+            assertFalse(cl.hasOption("s"), "Confirm -s is NOT set");
+            assertFalse(cl.hasOption("c"), "Confirm -c is NOT set");
+            assertTrue(cl.getArgList().isEmpty(), "Confirm no extra args");
+        }, "Unexpected exception occurred during the test");
+    }
+
+Input#3
+@Test
+    public void testSingleOption() throws Exception {
+        final String[] args = {"-r"};
+
+        final CommandLine cl = parser.parse(options, args);
+
+        assertTrue(cl.hasOption("r"), "Confirm -r is set");
+        assertFalse(cl.hasOption("f"), "Confirm -f is NOT set");
+        assertFalse(cl.hasOption("d"), "Confirm -d is NOT set");
+        assertFalse(cl.hasOption("s"), "Confirm -s is NOT set");
+        assertFalse(cl.hasOption("c"), "Confirm -c is NOT set");
+        assertTrue(cl.getArgList().isEmpty(), "Confirm no extra args");
+    }
+Smell List: ['Exception_Catching_Throwing']
+
+Refactor#3
+@Test
+    public void testSingleOption() {
+        assertDoesNotThrow(() -> {
+            final String[] args = {"-r"};
+            final CommandLine cl = parser.parse(options, args);
+
+            assertTrue(cl.hasOption("r"), "Confirm -r is set");
+            assertFalse(cl.hasOption("f"), "Confirm -f is NOT set");
+            assertFalse(cl.hasOption("d"), "Confirm -d is NOT set");
+            assertFalse(cl.hasOption("s"), "Confirm -s is NOT set");
+            assertFalse(cl.hasOption("c"), "Confirm -c is NOT set");
+            assertTrue(cl.getArgList().isEmpty(), "Confirm no extra args");
+        }, "Unexpected exception occurred during the test");
+    }
+
+Input#4
+@Test
+    public void testSingleOptionFromGroup() throws Exception {
+        final String[] args = {"-f"};
+
+        final CommandLine cl = parser.parse(options, args);
+
+        assertFalse(cl.hasOption("r"), "Confirm -r is NOT set");
+        assertTrue(cl.hasOption("f"), "Confirm -f is set");
+        assertFalse(cl.hasOption("d"), "Confirm -d is NOT set");
+        assertFalse(cl.hasOption("s"), "Confirm -s is NOT set");
+        assertFalse(cl.hasOption("c"), "Confirm -c is NOT set");
+        assertTrue(cl.getArgList().isEmpty(), "Confirm no extra args");
+    }
+Smell List: ['Exception_Catching_Throwing']
+
+Refactor#4
+@Test
+public void testSingleOptionFromGroup() {
+    assertDoesNotThrow(() -> {
+        final String[] args = {"-f"};
+        final CommandLine cl = parser.parse(options, args);
+
+        assertFalse(cl.hasOption("r"), "Confirm -r is NOT set");
+        assertTrue(cl.hasOption("f"), "Confirm -f is set");
+        assertFalse(cl.hasOption("d"), "Confirm -d is NOT set");
+        assertFalse(cl.hasOption("s"), "Confirm -s is NOT set");
+        assertFalse(cl.hasOption("c"), "Confirm -c is NOT set");
+        assertTrue(cl.getArgList().isEmpty(), "Confirm no extra args");
+    }, "Unexpected exception occurred during the test");
+}
+
+Input#5
+@Test
+    public void testTwoLongOptionsFromGroup() throws Exception {
+        final String[] args = {"--file", "--directory"};
+
+        try {
+            parser.parse(options, args);
+            fail("two arguments from group not allowed");
+        } catch (final AlreadySelectedException e) {
+            assertNotNull(e.getOptionGroup(), "null option group");
+            assertTrue(e.getOptionGroup().isSelected());
+            assertEquals("f", e.getOptionGroup().getSelected(), "selected option");
+            assertEquals("d", e.getOption().getOpt(), "option");
+        }
+    }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing', 'Eager_Test']
+
+Refactor#5
+@Test
+public void testTwoLongOptionsFromGroup_ExceptionThrown() {
+    final String[] args = {"--file", "--directory"};
+
+    AlreadySelectedException exception = assertThrows(AlreadySelectedException.class, () -> {
+        parser.parse(options, args);
+    });
+
+    assertNotNull(exception.getOptionGroup(), "Option group should not be null");
+    assertTrue(exception.getOptionGroup().isSelected(), "Option group should be selected");
+    assertEquals("f", exception.getOptionGroup().getSelected(), "Selected option should be 'f'");
+    assertEquals("d", exception.getOption().getOpt(), "Option should be 'd'");
+}
+
+Input#6
+@Test
+    public void testTwoOptionsFromDifferentGroup() throws Exception {
+        final String[] args = {"-f", "-s"};
+
+        final CommandLine cl = parser.parse(options, args);
+        assertFalse(cl.hasOption("r"), "Confirm -r is NOT set");
+        assertTrue(cl.hasOption("f"), "Confirm -f is set");
+        assertFalse(cl.hasOption("d"), "Confirm -d is NOT set");
+        assertTrue(cl.hasOption("s"), "Confirm -s is set");
+        assertFalse(cl.hasOption("c"), "Confirm -c is NOT set");
+        assertTrue(cl.getArgList().isEmpty(), "Confirm NO extra args");
+    }
+Smell List: ['Exception_Catching_Throwing']
+
+Refactor#6
+@Test
+    public void testTwoOptionsFromDifferentGroup() {
+        assertDoesNotThrow(() -> {
+            final String[] args = {"-f", "-s"};
+            final CommandLine cl = parser.parse(options, args);
+            assertFalse(cl.hasOption("r"), "Confirm -r is NOT set");
+            assertTrue(cl.hasOption("f"), "Confirm -f is set");
+            assertFalse(cl.hasOption("d"), "Confirm -d is NOT set");
+            assertTrue(cl.hasOption("s"), "Confirm -s is set");
+            assertFalse(cl.hasOption("c"), "Confirm -c is NOT set");
+            assertTrue(cl.getArgList().isEmpty(), "Confirm NO extra args");
+        }, "Unexpected exception occurred during the test");
+    }
+
+Input#7
+@Test
+    public void testTwoOptionsFromGroup() throws Exception {
+        final String[] args = {"-f", "-d"};
+
+        try {
+            parser.parse(options, args);
+            fail("two arguments from group not allowed");
+        } catch (final AlreadySelectedException e) {
+            assertNotNull(e.getOptionGroup(), "null option group");
+            assertTrue(e.getOptionGroup().isSelected());
+            assertEquals("f", e.getOptionGroup().getSelected(), "selected option");
+            assertEquals("d", e.getOption().getOpt(), "option");
+        }
+    }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing', 'Eager_Test']
+
+Refactor#7
+@Test
+public void testTwoOptionsFromGroup() {
+    final String[] args = {"-f", "-d"};
+
+    AlreadySelectedException exception = assertThrows(AlreadySelectedException.class, () -> {
+        parser.parse(options, args);
+    }, "Expected AlreadySelectedException to be thrown");
+
+    assertNotNull(exception.getOptionGroup(), "Option group should not be null");
+    assertTrue(exception.getOptionGroup().isSelected(), "Option group should be selected");
+    assertEquals("f", exception.getOptionGroup().getSelected(), "Incorrect selected option");
+    assertEquals("d", exception.getOption().getOpt(), "Incorrect option");
+}
+
+
+Input#8
+ @Test
+    public void testTwoOptionsFromGroupWithProperties() throws Exception {
+        final String[] args = {"-f"};
+
+        final Properties properties = new Properties();
+        properties.put("d", "true");
+
+        final CommandLine cl = parser.parse(options, args, properties);
+        assertTrue(cl.hasOption("f"));
+        assertFalse(cl.hasOption("d"));
+    }
+
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing']
+Refactor#8
+
+@Test
+public void testTwoOptionsFromGroupWithProperties() {
+    final String[] args = {"-f"};
+
+    final Properties properties = new Properties();
+    properties.put("d", "true");
+
+    assertDoesNotThrow(() -> {
+        final CommandLine cl = new DefaultParser().parse(options, args, properties);
+        assertTrue(cl.hasOption("f"), "Expected option 'f' to be present");
+        assertFalse(cl.hasOption("d"), "Expected option 'd' to not be present");
+    }, "Unexpected exception occurred during the test");
+}
+
+
+Input#9
+ @Test
+    public void testTwoValidLongOptions() throws Exception {
+        final String[] args = {"--revision", "--file"};
+
+        final CommandLine cl = parser.parse(options, args);
+
+        assertTrue(cl.hasOption("r"), "Confirm -r is set");
+        assertTrue(cl.hasOption("f"), "Confirm -f is set");
+        assertFalse(cl.hasOption("d"), "Confirm -d is NOT set");
+        assertFalse(cl.hasOption("s"), "Confirm -s is NOT set");
+        assertFalse(cl.hasOption("c"), "Confirm -c is NOT set");
+        assertTrue(cl.getArgList().isEmpty(), "Confirm no extra args");
+    }
+Smell List: ['Exception_Catching_Throwing']
+
+Refactor#9
+@Test
+public void testTwoValidLongOptions() {
+    final String[] args = {"--revision", "--file"};
+
+    assertDoesNotThrow(() -> {
+        final CommandLine cl = parser.parse(options, args);
+
+        assertTrue(cl.hasOption("r"), "Confirm -r is set");
+        assertTrue(cl.hasOption("f"), "Confirm -f is set");
+        assertFalse(cl.hasOption("d"), "Confirm -d is NOT set");
+        assertFalse(cl.hasOption("s"), "Confirm -s is NOT set");
+        assertFalse(cl.hasOption("c"), "Confirm -c is NOT set");
+        assertTrue(cl.getArgList().isEmpty(), "Confirm no extra args");
+    }, "Unexpected exception occurred during the test");
+}
+
+
+Input#10
+ @Test
+    public void testTwoValidOptions() throws Exception {
+        final String[] args = {"-r", "-f"};
+
+        final CommandLine cl = parser.parse(options, args);
+
+        assertTrue(cl.hasOption("r"), "Confirm -r is set");
+        assertTrue(cl.hasOption("f"), "Confirm -f is set");
+        assertFalse(cl.hasOption("d"), "Confirm -d is NOT set");
+        assertFalse(cl.hasOption("s"), "Confirm -s is NOT set");
+        assertFalse(cl.hasOption("c"), "Confirm -c is NOT set");
+        assertTrue(cl.getArgList().isEmpty(), "Confirm no extra args");
+    }
+Smell List: ['Exception_Catching_Throwing']
+
+Refactor#10
+@Test
+    public void testTwoValidOptions() {
+        assertDoesNotThrow(() -> {
+            final String[] args = {"-r", "-f"};
+            final CommandLine cl = parser.parse(options, args);
+
+            assertTrue(cl.hasOption("r"), "Confirm -r is set");
+            assertTrue(cl.hasOption("f"), "Confirm -f is set");
+            assertFalse(cl.hasOption("d"), "Confirm -d is NOT set");
+            assertFalse(cl.hasOption("s"), "Confirm -s is NOT set");
+            assertFalse(cl.hasOption("c"), "Confirm -c is NOT set");
+            assertTrue(cl.getArgList().isEmpty(), "Confirm no extra args");
+        }, "Unexpected exception occurred during the test");
+    }
+
+Input#11
+ @Test
+    public void testValidLongOnlyOptions() throws Exception {
+        final CommandLine cl1 = parser.parse(options, new String[] {"--export"});
+        assertTrue(cl1.hasOption("export"), "Confirm --export is set");
+
+        final CommandLine cl2 = parser.parse(options, new String[] {"--import"});
+        assertTrue(cl2.hasOption("import"), "Confirm --import is set");
+    }
+Smell List: ['Exception_Catching_Throwing']
+
+Refactor#11
+
+@Test
+public void testValidLongOnlyOptions() {
+    assertDoesNotThrow(() -> {
+        final CommandLine cl1 = parser.parse(options, new String[] {"--export"});
+        assertTrue(cl1.hasOption("export"), "Confirm --export is set");
+    }, "Unexpected exception occurred during the test");
+
+    assertDoesNotThrow(() -> {
+        final CommandLine cl2 = parser.parse(options, new String[] {"--import"});
+        assertTrue(cl2.hasOption("import"), "Confirm --import is set");
+    }, "Unexpected exception occurred during the test");
+}

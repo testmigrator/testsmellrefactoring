@@ -1,0 +1,359 @@
+File#1
+
+
+Input#1
+ @Test
+    public void testCOMPRESS_117() throws Exception {
+        try (ArchiveInputStream<?> tar = createArchiveInputStream("COMPRESS-117.tar")) {
+            assertNotNull(tar);
+            assertTrue(tar instanceof TarArchiveInputStream);
+        }
+    }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing']
+Refactor#1
+@Test
+public void testCOMPRESS_117() {
+    assertDoesNotThrow(() -> {
+        try (ArchiveInputStream<?> tar = createArchiveInputStream("COMPRESS-117.tar")) {
+            assertNotNull(tar, "The ArchiveInputStream should not be null");
+            assertTrue(tar instanceof TarArchiveInputStream, "The ArchiveInputStream should be an instance of TarArchiveInputStream");
+        }
+    }, "Unexpected exception occurred during the test");
+}
+
+Input#2
+@Test
+    public void testCOMPRESS_335() throws Exception {
+        try (ArchiveInputStream<?> tar = createArchiveInputStream("COMPRESS-335.tar")) {
+            assertNotNull(tar);
+            assertTrue(tar instanceof TarArchiveInputStream);
+        }
+    }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing']
+
+Refactor#2
+@Test
+public void testCOMPRESS_335() {
+    assertDoesNotThrow(() -> {
+        try (ArchiveInputStream<?> tar = createArchiveInputStream("COMPRESS-335.tar")) {
+            assertNotNull(tar, "The ArchiveInputStream should not be null");
+            assertTrue(tar instanceof TarArchiveInputStream, "The ArchiveInputStream should be an instance of TarArchiveInputStream");
+        }
+    }, "Unexpected exception occurred during the test");
+}
+
+
+Input#3
+@Test
+    public void testDetection() throws Exception {
+
+        try (ArchiveInputStream<?> ar = createArchiveInputStream("bla.ar")) {
+            assertNotNull(ar);
+            assertTrue(ar instanceof ArArchiveInputStream);
+        }
+
+        try (ArchiveInputStream<?> tar = createArchiveInputStream("bla.tar")) {
+            assertNotNull(tar);
+            assertTrue(tar instanceof TarArchiveInputStream);
+        }
+
+        try (ArchiveInputStream<?> zip = createArchiveInputStream("bla.zip")) {
+            assertNotNull(zip);
+            assertTrue(zip instanceof ZipArchiveInputStream);
+        }
+
+        try (ArchiveInputStream<?> jar = createArchiveInputStream("bla.jar")) {
+            assertNotNull(jar);
+            assertTrue(jar instanceof ZipArchiveInputStream);
+        }
+
+        try (ArchiveInputStream<?> cpio = createArchiveInputStream("bla.cpio")) {
+            assertNotNull(cpio);
+            assertTrue(cpio instanceof CpioArchiveInputStream);
+        }
+
+        try (ArchiveInputStream<?> arj = createArchiveInputStream("bla.arj")) {
+            assertNotNull(arj);
+            assertTrue(arj instanceof ArjArchiveInputStream);
+        }
+
+// Not yet implemented
+//        final ArchiveInputStream<?> tgz = getStreamFor("bla.tgz");
+//        assertNotNull(tgz);
+//        assertTrue(tgz instanceof TarArchiveInputStream);
+
+    }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing']
+
+Refactor#3
+
+@Test
+public void testDetection() {
+
+    assertDoesNotThrow(() -> {
+        try (ArchiveInputStream<?> ar = createArchiveInputStream("bla.ar")) {
+            assertNotNull(ar, "AR archive input stream should not be null");
+            assertTrue(ar instanceof ArArchiveInputStream, "AR archive input stream should be an instance of ArArchiveInputStream");
+        }
+    }, "Unexpected exception occurred during AR archive detection");
+
+    assertDoesNotThrow(() -> {
+        try (ArchiveInputStream<?> tar = createArchiveInputStream("bla.tar")) {
+            assertNotNull(tar, "TAR archive input stream should not be null");
+            assertTrue(tar instanceof TarArchiveInputStream, "TAR archive input stream should be an instance of TarArchiveInputStream");
+        }
+    }, "Unexpected exception occurred during TAR archive detection");
+
+    assertDoesNotThrow(() -> {
+        try (ArchiveInputStream<?> zip = createArchiveInputStream("bla.zip")) {
+            assertNotNull(zip, "ZIP archive input stream should not be null");
+            assertTrue(zip instanceof ZipArchiveInputStream, "ZIP archive input stream should be an instance of ZipArchiveInputStream");
+        }
+    }, "Unexpected exception occurred during ZIP archive detection");
+
+    assertDoesNotThrow(() -> {
+        try (ArchiveInputStream<?> jar = createArchiveInputStream("bla.jar")) {
+            assertNotNull(jar, "JAR archive input stream should not be null");
+            assertTrue(jar instanceof ZipArchiveInputStream, "JAR archive input stream should be an instance of ZipArchiveInputStream");
+        }
+    }, "Unexpected exception occurred during JAR archive detection");
+
+    assertDoesNotThrow(() -> {
+        try (ArchiveInputStream<?> cpio = createArchiveInputStream("bla.cpio")) {
+            assertNotNull(cpio, "CPIO archive input stream should not be null");
+            assertTrue(cpio instanceof CpioArchiveInputStream, "CPIO archive input stream should be an instance of CpioArchiveInputStream");
+        }
+    }, "Unexpected exception occurred during CPIO archive detection");
+
+    assertDoesNotThrow(() -> {
+        try (ArchiveInputStream<?> arj = createArchiveInputStream("bla.arj")) {
+            assertNotNull(arj, "ARJ archive input stream should not be null");
+            assertTrue(arj instanceof ArjArchiveInputStream, "ARJ archive input stream should be an instance of ArjArchiveInputStream");
+        }
+    }, "Unexpected exception occurred during ARJ archive detection");
+
+    // Not yet implemented
+    // assertDoesNotThrow(() -> {
+    //     final ArchiveInputStream<?> tgz = getStreamFor("bla.tgz");
+    //     assertNotNull(tgz, "TGZ archive input stream should not be null");
+    //     assertTrue(tgz instanceof TarArchiveInputStream, "TGZ archive input stream should be an instance of TarArchiveInputStream");
+    // }, "Unexpected exception occurred during TGZ archive detection");
+
+}
+
+
+Input#4
+ @Test
+    public void testDetectOldTarFormatArchive() throws Exception {
+        try (ArchiveInputStream<?> tar = createArchiveInputStream("COMPRESS-612/test-times-star-folder.tar")) {
+            assertNotNull(tar);
+            assertTrue(tar instanceof TarArchiveInputStream);
+        }
+    }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing']
+
+Refactor#4
+@Test
+public void testDetectOldTarFormatArchive() {
+    assertDoesNotThrow(() -> {
+        try (ArchiveInputStream<?> tar = createArchiveInputStream("COMPRESS-612/test-times-star-folder.tar")) {
+            assertNotNull(tar, "The ArchiveInputStream should not be null");
+            assertTrue(tar instanceof TarArchiveInputStream, "The ArchiveInputStream should be an instance of TarArchiveInputStream");
+        }
+    }, "Unexpected exception occurred during the test");
+}
+
+
+Input#5
+ @Test
+    public void testEmptyTarArchive() throws Exception {
+        // Can't detect empty tar archive from its contents.
+        final Path path = createEmptyArchive("tar"); // will be deleted by tearDown()
+        assertThrows(ArchiveException.class, () -> checkDetectedType("tar", path));
+    }
+Smell List: ['Exception_Catching_Throwing']
+Refactor#5
+@Test
+public void testEmptyTarArchive() {
+    // Can't detect empty tar archive from its contents.
+    assertDoesNotThrow(() -> {
+        final Path path = createEmptyArchive("tar"); // will be deleted by tearDown()
+        assertThrows(ArchiveException.class, () -> checkDetectedType("tar", path));
+    });
+}
+
+Input#6
+@Test
+    public void testIgnoreZeroByteEntryInTarDetect() {
+        assertThrows(ArchiveException.class, () -> {
+            try (InputStream in = createBufferedInputStream("org/apache/commons/compress/COMPRESS-644/ARW05UP.ICO")) {
+                assertNull(ArchiveStreamFactory.detect(in));
+            }
+        });
+    }
+Smell List: ['Assertion_Roulette']
+Refactor#6
+@Test
+public void testIgnoreZeroByteEntryInTarDetect() {
+    assertThrows(ArchiveException.class, () -> {
+        try (InputStream in = createBufferedInputStream("org/apache/commons/compress/COMPRESS-644/ARW05UP.ICO")) {
+            assertNull(ArchiveStreamFactory.detect(in), "Expected null as the archive type could not be detected");
+        }
+    }, "Expected ArchiveException when trying to detect the type of a zero-byte entry in the tar file");
+}
+
+
+Input#7
+
+Refactor#7
+
+
+Input#8
+
+Refactor#8
+
+
+Input#9
+
+Refactor#9
+
+
+Input#10
+
+Refactor#10
+
+
+Input#11
+
+Refactor#11
+
+
+Input#12
+
+Refactor#12
+
+
+Input#13
+
+Refactor#13
+
+
+Input#14
+
+Refactor#14
+
+
+Input#15
+
+Refactor#15
+
+
+Input#16
+
+Refactor#16
+
+
+Input#17
+
+Refactor#17
+
+
+Input#18
+
+Refactor#18
+
+
+
+Input#19
+
+Refactor#19
+
+
+
+Input#20
+
+Refactor#20
+
+
+
+Input#21
+
+Refactor#21
+
+
+Input#22
+
+Refactor#22
+
+
+Input#23
+
+Refactor#23
+
+
+Input#24
+
+Refactor#24
+
+
+Input#25
+
+Refactor#25
+
+
+Input#26
+
+Refactor#26
+
+
+Input#27
+
+Refactor#27
+
+
+
+Input#28
+
+Refactor#28
+
+
+
+Input#29
+
+Refactor#29
+
+
+
+Input#30
+
+Refactor#30
+
+
+Input#31
+
+Refactor#31
+
+
+
+Input#32
+
+Refactor#32
+
+
+
+Input#33
+
+Refactor#33
+
+
+
+Input#34
+
+Refactor#34
+
+
+
+Input#35
+
+Refactor#35
+

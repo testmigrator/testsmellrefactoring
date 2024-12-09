@@ -1,0 +1,286 @@
+File#1
+
+
+Input#1
+@Test
+    public void testMoreEstimatedParametersSimple() {
+        /*
+         * Exception is expected with this optimizer
+         */
+        try {
+            super.testMoreEstimatedParametersSimple();
+            fail(optimizer);
+        } catch (ConvergenceException e) {
+            //expected
+        }
+    }
+Smell List: ['Exception_Catching_Throwing']
+Refactor#1
+@Test
+public void testMoreEstimatedParametersSimple() {
+    ConvergenceException exception = assertThrows(ConvergenceException.class, () -> {
+        super.testMoreEstimatedParametersSimple();
+    });
+}
+
+
+Input#2
+@Test
+    public void testMoreEstimatedParametersUnsorted() {
+        /*
+         * Exception is expected with this optimizer
+         */
+        try{
+            super.testMoreEstimatedParametersUnsorted();
+            fail(optimizer);
+        }catch (ConvergenceException e){
+            //expected
+        }
+    }
+Smell List: ['Exception_Catching_Throwing']
+
+Refactor#2
+@Test
+public void testMoreEstimatedParametersUnsorted() {
+    ConvergenceException exception = assertThrows(ConvergenceException.class, () -> {
+        super.testMoreEstimatedParametersUnsorted();
+    });
+}
+
+
+Input#3
+@Test
+    public void testMaxEvaluations() throws Exception {
+        try{
+        CircleVectorial circle = new CircleVectorial();
+        circle.addPoint( 30.0,  68.0);
+        circle.addPoint( 50.0,  -6.0);
+        circle.addPoint(110.0, -20.0);
+        circle.addPoint( 35.0,  15.0);
+        circle.addPoint( 45.0,  97.0);
+
+        LeastSquaresProblem lsp = builder(circle)
+                .checkerPair(new SimpleVectorValueChecker(1e-30, 1e-30))
+                .maxIterations(Integer.MAX_VALUE)
+                .start(new double[]{98.680, 47.345})
+                .build();
+
+        optimizer.optimize(lsp);
+
+            fail(optimizer);
+        }catch (TooManyEvaluationsException e){
+            //expected
+        }
+    }
+Smell List: ['Exception_Catching_Throwing']
+
+Refactor#3
+
+@Test
+public void testMaxEvaluations() {
+    TooManyEvaluationsException exception = assertThrows(TooManyEvaluationsException.class, () -> {
+        CircleVectorial circle = new CircleVectorial();
+        circle.addPoint(30.0, 68.0);
+        circle.addPoint(50.0, -6.0);
+        circle.addPoint(110.0, -20.0);
+        circle.addPoint(35.0, 15.0);
+        circle.addPoint(45.0, 97.0);
+
+        LeastSquaresProblem lsp = builder(circle)
+                .checkerPair(new SimpleVectorValueChecker(1e-30, 1e-30))
+                .maxIterations(Integer.MAX_VALUE)
+                .start(new double[]{98.680, 47.345})
+                .build();
+
+        optimizer.optimize(lsp);
+    });
+}
+
+Input#4
+@Test
+    public void testCircleFittingBadInit() {
+        /*
+         * This test does not converge with this optimizer.
+         */
+        try{
+            super.testCircleFittingBadInit();
+            fail(optimizer);
+        }catch (ConvergenceException e){
+            //expected
+        }
+    }
+Smell List: ['Exception_Catching_Throwing']
+
+Refactor#4
+@Test
+public void testCircleFittingBadInit() {
+    ConvergenceException exception = assertThrows(ConvergenceException.class, () -> {
+        super.testCircleFittingBadInit();
+    });
+}
+
+
+Input#5
+
+Refactor#5
+
+
+Input#6
+
+Refactor#6
+
+
+Input#7
+
+Refactor#7
+
+
+Input#8
+
+Refactor#8
+
+
+Input#9
+
+Refactor#9
+
+
+Input#10
+
+Refactor#10
+
+
+Input#11
+
+Refactor#11
+
+
+Input#12
+
+Refactor#12
+
+
+Input#13
+
+Refactor#13
+
+
+Input#14
+
+Refactor#14
+
+
+Input#15
+
+Refactor#15
+
+
+Input#16
+
+Refactor#16
+
+
+Input#17
+
+Refactor#17
+
+
+Input#18
+
+Refactor#18
+
+
+
+Input#19
+
+Refactor#19
+
+
+
+Input#20
+
+Refactor#20
+
+
+
+Input#21
+
+Refactor#21
+
+
+Input#22
+
+Refactor#22
+
+
+Input#23
+
+Refactor#23
+
+
+Input#24
+
+Refactor#24
+
+
+Input#25
+
+Refactor#25
+
+
+Input#26
+
+Refactor#26
+
+
+Input#27
+
+Refactor#27
+
+
+
+Input#28
+
+Refactor#28
+
+
+
+Input#29
+
+Refactor#29
+
+
+
+Input#30
+
+Refactor#30
+
+
+Input#31
+
+Refactor#31
+
+
+
+Input#32
+
+Refactor#32
+
+
+
+Input#33
+
+Refactor#33
+
+
+
+Input#34
+
+Refactor#34
+
+
+
+Input#35
+
+Refactor#35
+

@@ -1,0 +1,85 @@
+File#1
+Input#1
+@Test
+public void testOption() throws Exception {
+    final String[] args = {"-p"};
+
+    final CommandLine cl = parser.parse(options, args);
+    assertTrue(cl.hasOption("p"), "Confirm -p is set");
+    assertFalse(cl.hasOption("attr"), "Confirm -attr is not set");
+    assertEquals(0, cl.getArgs().length, "Confirm all arguments recognized");
+}
+Smell List: ['Exception_Catching_Throwing', 'Magic_Number_Test']
+
+Refactor#1
+@Test
+public void testOption() {
+    final String[] args = {"-p"};
+
+    assertDoesNotThrow(() -> {
+        final CommandLine cl = parser.parse(options, args);
+        assertTrue(cl.hasOption("p"), "Confirm -p is set");
+        assertFalse(cl.hasOption("attr"), "Confirm -attr is not set");
+
+        int expectedArgumentCount = 0;
+        assertEquals(expectedArgumentCount, cl.getArgs().length, "Confirm all arguments recognized");
+    }, "Unexpected exception occurred during the test");
+}
+
+Input#2
+@Test
+public void testOptionAndOptionWithArgument() throws Exception {
+    final String[] args = {"-p", "-attr", "p"};
+
+    final CommandLine cl = parser.parse(options, args);
+    assertTrue(cl.hasOption("p"), "Confirm -p is set");
+    assertTrue(cl.hasOption("attr"), "Confirm -attr is set");
+    assertEquals("p", cl.getOptionValue("attr"), "Confirm arg of -attr");
+    assertEquals(0, cl.getArgs().length, "Confirm all arguments recognized");
+}
+Smell List: ['Exception_Catching_Throwing', 'Magic_Number_Test']
+
+Refactor#2
+@Test
+public void testOptionAndOptionWithArgument() {
+    final String[] args = {"-p", "-attr", "p"};
+
+    assertDoesNotThrow(() -> {
+        final CommandLine cl = parser.parse(options, args);
+        assertTrue(cl.hasOption("p"), "Confirm -p is set");
+        assertTrue(cl.hasOption("attr"), "Confirm -attr is set");
+        assertEquals("p", cl.getOptionValue("attr"), "Confirm arg of -attr");
+
+        int expectedNumberOfArgs = 0;
+        assertEquals(expectedNumberOfArgs, cl.getArgs().length, "Confirm all arguments recognized");
+    }, "Unexpected exception occurred during the test");
+}
+
+
+Input#3
+@Test
+public void testOptionWithArgument() throws Exception {
+    final String[] args = {"-attr", "p"};
+
+    final CommandLine cl = parser.parse(options, args);
+    assertFalse(cl.hasOption("p"), "Confirm -p is set");
+    assertTrue(cl.hasOption("attr"), "Confirm -attr is set");
+    assertEquals("p", cl.getOptionValue("attr"), "Confirm arg of -attr");
+    assertEquals(0, cl.getArgs().length, "Confirm all arguments recognized");
+}
+Smell List: ['Exception_Catching_Throwing', 'Magic_Number_Test']
+
+Refactor#3
+@Test
+public void testOptionWithArgument() {
+    final String[] args = {"-attr", "p"};
+
+    assertDoesNotThrow(() -> {
+        final CommandLine cl = parser.parse(options, args);
+        assertFalse(cl.hasOption("p"), "Confirm -p is set");
+        assertTrue(cl.hasOption("attr"), "Confirm -attr is set");
+        assertEquals("p", cl.getOptionValue("attr"), "Confirm arg of -attr");
+        int expectedNumberOfArgs = 0;
+        assertEquals(expectedNumberOfArgs, cl.getArgs().length, "Confirm all arguments recognized");
+    }, "Unexpected exception occurred during the test");
+}

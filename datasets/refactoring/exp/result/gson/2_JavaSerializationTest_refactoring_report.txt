@@ -1,0 +1,249 @@
+File#1
+
+
+Input#1
+ @Test
+  public void testMapIsSerializable() throws Exception {
+    Type type = new TypeToken<Map<String, Integer>>() {}.getType();
+    Map<String, Integer> map = gson.fromJson("{\"b\":1,\"c\":2,\"a\":3}", type);
+    Map<String, Integer> serialized = serializedCopy(map);
+    assertThat(serialized).isEqualTo(map);
+    // Also check that the iteration order is retained.
+    assertThat(serialized.keySet()).containsExactly("b", "c", "a").inOrder();
+  }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing']
+
+Refactor#1
+@Test
+public void testMapIsSerializable() {
+    assertDoesNotThrow(()->{
+      Type type = new TypeToken<Map<String, Integer>>() {}.getType();
+      Map<String, Integer> map = gson.fromJson("{\"b\":1,\"c\":2,\"a\":3}", type);
+      Map<String, Integer> serialized = serializedCopy(map);
+
+      assertThat(serialized).isEqualTo(map)
+              .withFailMessage("The serialized map should be equal to the original map");
+      // Also check that the iteration order is retained.
+      assertThat(serialized.keySet()).containsExactly("b", "c", "a").inOrder().withFailMessage("The iteration order of the serialized map should match the original map");
+    });
+}
+
+
+Input#2
+ @Test
+  public void testListIsSerializable() throws Exception {
+    Type type = new TypeToken<List<String>>() {}.getType();
+    List<String> list = gson.fromJson("[\"a\",\"b\",\"c\"]", type);
+    List<String> serialized = serializedCopy(list);
+    assertThat(serialized).isEqualTo(list);
+  }
+Smell List: ['Exception_Catching_Throwing']
+
+
+Refactor#2
+@Test
+public void testListIsSerializable() {
+  assertDoesNotThrow(() -> {
+    Type type = new TypeToken<List<String>>() {}.getType();
+    List<String> list = gson.fromJson("[\"a\",\"b\",\"c\"]", type);
+    List<String> serialized = serializedCopy(list);
+    assertThat(serialized).isEqualTo(list);
+  }, "Unexpected exception occurred during the test");
+}
+
+
+Input#3
+ @Test
+  public void testNumberIsSerializable() throws Exception {
+    Type type = new TypeToken<List<Number>>() {}.getType();
+    List<Number> list = gson.fromJson("[1,3.14,6.673e-11]", type);
+    List<Number> serialized = serializedCopy(list);
+    assertThat(serialized.get(0).doubleValue()).isEqualTo(1.0);
+    assertThat(serialized.get(1).doubleValue()).isEqualTo(3.14);
+    assertThat(serialized.get(2).doubleValue()).isEqualTo(6.673e-11);
+  }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing']
+
+Refactor#3
+@Test
+public void testNumberIsSerializable() {
+    assertDoesNotThrow(() -> {
+        Type type = new TypeToken<List<Number>>() {}.getType();
+        List<Number> list = gson.fromJson("[1,3.14,6.673e-11]", type);
+        List<Number> serialized = serializedCopy(list);
+        assertThat(serialized.get(0).doubleValue()).isEqualTo(1.0, "First element should be 1.0");
+        assertThat(serialized.get(1).doubleValue()).isEqualTo(3.14, "Second element should be 3.14");
+        assertThat(serialized.get(2).doubleValue()).isEqualTo(6.673e-11, "Third element should be 6.673e-11");
+    }, "Unexpected exception occurred during the test");
+}
+
+
+Input#4
+
+Refactor#4
+
+
+Input#5
+
+Refactor#5
+
+
+Input#6
+
+Refactor#6
+
+
+Input#7
+
+Refactor#7
+
+
+Input#8
+
+Refactor#8
+
+
+Input#9
+
+Refactor#9
+
+
+Input#10
+
+Refactor#10
+
+
+Input#11
+
+Refactor#11
+
+
+Input#12
+
+Refactor#12
+
+
+Input#13
+
+Refactor#13
+
+
+Input#14
+
+Refactor#14
+
+
+Input#15
+
+Refactor#15
+
+
+Input#16
+
+Refactor#16
+
+
+Input#17
+
+Refactor#17
+
+
+Input#18
+
+Refactor#18
+
+
+
+Input#19
+
+Refactor#19
+
+
+
+Input#20
+
+Refactor#20
+
+
+
+Input#21
+
+Refactor#21
+
+
+Input#22
+
+Refactor#22
+
+
+Input#23
+
+Refactor#23
+
+
+Input#24
+
+Refactor#24
+
+
+Input#25
+
+Refactor#25
+
+
+Input#26
+
+Refactor#26
+
+
+Input#27
+
+Refactor#27
+
+
+
+Input#28
+
+Refactor#28
+
+
+
+Input#29
+
+Refactor#29
+
+
+
+Input#30
+
+Refactor#30
+
+
+Input#31
+
+Refactor#31
+
+
+
+Input#32
+
+Refactor#32
+
+
+
+Input#33
+
+Refactor#33
+
+
+
+Input#34
+
+Refactor#34
+
+
+
+Input#35
+
+Refactor#35
+

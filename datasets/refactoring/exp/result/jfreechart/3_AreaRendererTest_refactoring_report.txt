@@ -1,0 +1,357 @@
+f1.txtFile#1
+
+
+Input#1
+Test Code:
+ @Test
+    public void testEquals() {
+        AreaRenderer r1 = new AreaRenderer();
+        AreaRenderer r2 = new AreaRenderer();
+        assertEquals(r1, r2);
+
+        r1.setEndType(AreaRendererEndType.LEVEL);
+        assertNotEquals(r1, r2);
+        r2.setEndType(AreaRendererEndType.LEVEL);
+        assertEquals(r1, r2);
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test', 'Duplicate_Assert']
+
+
+Refactor#1
+private AreaRenderer r1;
+private AreaRenderer r2;
+
+@BeforeEach
+public void setUp() {
+    r1 = new AreaRenderer();
+    r2 = new AreaRenderer();
+}
+
+@Test
+public void testEquals_DefaultState() {
+    assertEquals(r1, r2, "Default state should be equal");
+}
+
+@Test
+public void testEquals_AfterSettingEndType() {
+    r1.setEndType(AreaRendererEndType.LEVEL);
+    assertNotEquals(r1, r2, "Objects should not be equal after setting different end types");
+
+    r2.setEndType(AreaRendererEndType.LEVEL);
+    assertEquals(r1, r2, "Objects should be equal after setting the same end type");
+}
+
+Input#2
+ @Test
+    public void testHashcode() {
+        AreaRenderer r1 = new AreaRenderer();
+        AreaRenderer r2 = new AreaRenderer();
+        assertEquals(r1, r2);
+        int h1 = r1.hashCode();
+        int h2 = r2.hashCode();
+        assertEquals(h1, h2);
+    }
+Smell List: ['Assertion_Roulette']
+
+
+Refactor#2
+@Test
+public void testHashcode() {
+    AreaRenderer r1 = new AreaRenderer();
+    AreaRenderer r2 = new AreaRenderer();
+    assertEquals("AreaRenderers should be equal", r1, r2);
+    int h1 = r1.hashCode();
+    int h2 = r2.hashCode();
+    assertEquals("Hash codes of equal AreaRenderers should be equal", h1, h2);
+}
+
+
+Input#3
+ @Test
+    public void testCloning() throws CloneNotSupportedException {
+        AreaRenderer r1 = new AreaRenderer();
+        AreaRenderer r2 = CloneUtils.clone(r1);
+        assertNotSame(r1, r2);
+        assertSame(r1.getClass(), r2.getClass());
+        assertEquals(r1, r2);
+        TestUtils.checkIndependence(r1, r2);
+    }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing']
+
+
+Refactor#3
+@Test
+public void testCloning() {
+    assertDoesNotThrow(() -> {
+        AreaRenderer r1 = new AreaRenderer();
+        AreaRenderer r2 = CloneUtils.clone(r1);
+        assertNotSame(r1, r2, "The cloned object should not be the same instance as the original");
+        assertSame(r1.getClass(), r2.getClass(), "The cloned object should be of the same class as the original");
+        assertEquals(r1, r2, "The cloned object should be equal to the original");
+        TestUtils.checkIndependence(r1, r2, "The cloned object should be independent of the original");
+    }, "Unexpected exception occurred during the test");
+}
+
+Input#4
+ @Test
+    public void testSerialization() {
+        AreaRenderer r1 = new AreaRenderer();
+        r1.setSeriesFillPaint(1, new GradientPaint(1.0f, 2.0f, Color.YELLOW, 4.0f, 3.0f, Color.GREEN));
+        r1.setSeriesPaint(1, Color.BLACK);
+        r1.setSeriesPaint(2, new GradientPaint(1.0f, 2.0f, Color.YELLOW, 4.0f, 3.0f, Color.GREEN));
+        r1.setSeriesStroke(0, new BasicStroke(2.0f));
+        AreaRenderer r2 = TestUtils.serialised(r1);
+        assertEquals(r1, r2);
+        TestUtils.checkIndependence(r1, r2);
+    }
+Smell List: ['Eager_Test']
+
+Refactor#4
+
+private void setupTestSerialization() {
+    AreaRenderer r1 = new AreaRenderer();
+    r1.setSeriesFillPaint(1, new GradientPaint(1.0f, 2.0f, Color.YELLOW, 4.0f, 3.0f, Color.GREEN));
+    r1.setSeriesPaint(1, Color.BLACK);
+    r1.setSeriesPaint(2, new GradientPaint(1.0f, 2.0f, Color.YELLOW, 4.0f, 3.0f, Color.GREEN));
+    r1.setSeriesStroke(0, new BasicStroke(2.0f));
+}
+
+@Test
+public void testSerialization_Equality() {
+    setupTestSerialization();
+    AreaRenderer r1 = new AreaRenderer();
+    r1.setSeriesFillPaint(1, new GradientPaint(1.0f, 2.0f, Color.YELLOW, 4.0f, 3.0f, Color.GREEN));
+    r1.setSeriesPaint(1, Color.BLACK);
+    r1.setSeriesPaint(2, new GradientPaint(1.0f, 2.0f, Color.YELLOW, 4.0f, 3.0f, Color.GREEN));
+    r1.setSeriesStroke(0, new BasicStroke(2.0f));
+    AreaRenderer r2 = TestUtils.serialised(r1);
+    assertEquals(r1, r2);
+}
+
+@Test
+public void testSerialization_Independence() {
+    setupTestSerialization();
+    AreaRenderer r1 = new AreaRenderer();
+    r1.setSeriesFillPaint(1, new GradientPaint(1.0f, 2.0f, Color.YELLOW, 4.0f, 3.0f, Color.GREEN));
+    r1.setSeriesPaint(1, Color.BLACK);
+    r1.setSeriesPaint(2, new GradientPaint(1.0f, 2.0f, Color.YELLOW, 4.0f, 3.0f, Color.GREEN));
+    r1.setSeriesStroke(0, new BasicStroke(2.0f));
+    AreaRenderer r2 = TestUtils.serialised(r1);
+    TestUtils.checkIndependence(r1, r2);
+}
+
+Input#5
+ @Test
+    public void testGetLegendItemSeriesIndex() {
+        DefaultCategoryDataset<String,String> dataset0 = new DefaultCategoryDataset<>();
+        dataset0.addValue(21.0, "R1", "C1");
+        dataset0.addValue(22.0, "R2", "C1");
+        DefaultCategoryDataset<String,String> dataset1 = new DefaultCategoryDataset<>();
+        dataset1.addValue(23.0, "R3", "C1");
+        dataset1.addValue(24.0, "R4", "C1");
+        dataset1.addValue(25.0, "R5", "C1");
+        AreaRenderer r = new AreaRenderer();
+        CategoryPlot<String, String> plot = new CategoryPlot<>(dataset0, new CategoryAxis("x"),
+                new NumberAxis("y"), r);
+        plot.setDataset(1, dataset1);
+        /*JFreeChart chart =*/ new JFreeChart(plot);
+        LegendItem li = r.getLegendItem(1, 2);
+        assertEquals("R5", li.getLabel());
+        assertEquals(1, li.getDatasetIndex());
+        assertEquals(2, li.getSeriesIndex());
+    }
+Smell List: ['Assertion_Roulette', 'Magic_Number_Test']
+
+
+Refactor#5
+
+@Test
+public void testGetLegendItemSeriesIndex() {
+    // Arrange
+    DefaultCategoryDataset<String, String> dataset0 = new DefaultCategoryDataset<>();
+    dataset0.addValue(21.0, "R1", "C1");
+    dataset0.addValue(22.0, "R2", "C1");
+    DefaultCategoryDataset<String, String> dataset1 = new DefaultCategoryDataset<>();
+    dataset1.addValue(23.0, "R3", "C1");
+    dataset1.addValue(24.0, "R4", "C1");
+    dataset1.addValue(25.0, "R5", "C1");
+    AreaRenderer r = new AreaRenderer();
+    CategoryPlot<String, String> plot = new CategoryPlot<>(dataset0, new CategoryAxis("x"),
+            new NumberAxis("y"), r);
+    plot.setDataset(1, dataset1);
+    /*JFreeChart chart =*/ new JFreeChart(plot);
+
+    // Act
+    LegendItem li = r.getLegendItem(1, 2);
+
+    // Assert
+    int expectedDatasetIndex = 1;
+    int expectedSeriesIndex = 2;
+    String expectedLabel = "R5";
+
+    assertEquals(expectedLabel, li.getLabel(), "The label of the legend item should be R5");
+    assertEquals(expectedDatasetIndex, li.getDatasetIndex(), "The dataset index of the legend item should be 1");
+    assertEquals(expectedSeriesIndex, li.getSeriesIndex(), "The series index of the legend item should be 2");
+}
+
+
+
+Input#6
+
+Refactor#6
+
+
+Input#7
+
+Refactor#7
+
+
+Input#8
+
+Refactor#8
+
+
+Input#9
+
+Refactor#9
+
+
+Input#10
+
+Refactor#10
+
+
+Input#11
+
+Refactor#11
+
+
+Input#12
+
+Refactor#12
+
+
+Input#13
+
+Refactor#13
+
+
+Input#14
+
+Refactor#14
+
+
+Input#15
+
+Refactor#15
+
+
+Input#16
+
+Refactor#16
+
+
+Input#17
+
+Refactor#17
+
+
+Input#18
+
+Refactor#18
+
+
+
+Input#19
+
+Refactor#19
+
+
+
+Input#20
+
+Refactor#20
+
+
+
+Input#21
+
+Refactor#21
+
+
+Input#22
+
+Refactor#22
+
+
+Input#23
+
+Refactor#23
+
+
+Input#24
+
+Refactor#24
+
+
+Input#25
+
+Refactor#25
+
+
+Input#26
+
+Refactor#26
+
+
+Input#27
+
+Refactor#27
+
+
+
+Input#28
+
+Refactor#28
+
+
+
+Input#29
+
+Refactor#29
+
+
+
+Input#30
+
+Refactor#30
+
+
+Input#31
+
+Refactor#31
+
+
+
+Input#32
+
+Refactor#32
+
+
+
+Input#33
+
+Refactor#33
+
+
+
+Input#34
+
+Refactor#34
+
+
+
+Input#35
+
+Refactor#35
+

@@ -1,0 +1,301 @@
+File#1
+
+
+Input#1
+@Test
+    public void testCompareAscii() {
+        final byte[] buffer1 = { 'a', 'b', 'c' };
+        final byte[] buffer2 = { 'd', 'e', 'f', 0 };
+        assertTrue(ArchiveUtils.matchAsciiBuffer("abc", buffer1));
+        assertFalse(ArchiveUtils.matchAsciiBuffer("abc\0", buffer1));
+        assertTrue(ArchiveUtils.matchAsciiBuffer("def\0", buffer2));
+        assertFalse(ArchiveUtils.matchAsciiBuffer("def", buffer2));
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+
+Refactor#1
+private byte[] buffer1;
+private byte[] buffer2;
+
+@Before
+public void setupTestCompareAscii() {
+    buffer1 = new byte[] { 'a', 'b', 'c' };
+    buffer2 = new byte[] { 'd', 'e', 'f', 0 };
+}
+
+@Test
+public void testCompareAscii_Buffer1Matches() {
+    setupTestCompareAscii();
+    assertTrue(ArchiveUtils.matchAsciiBuffer("abc", buffer1), "Buffer1 should match 'abc'");
+}
+
+@Test
+public void testCompareAscii_Buffer1DoesNotMatchWithNull() {
+    setupTestCompareAscii();
+    assertFalse(ArchiveUtils.matchAsciiBuffer("abc\0", buffer1), "Buffer1 should not match 'abc\\0'");
+}
+
+@Test
+public void testCompareAscii_Buffer2MatchesWithNull() {
+    setupTestCompareAscii();
+    assertTrue(ArchiveUtils.matchAsciiBuffer("def\0", buffer2), "Buffer2 should match 'def\\0'");
+}
+
+@Test
+public void testCompareAscii_Buffer2DoesNotMatchWithoutNull() {
+    setupTestCompareAscii();
+    assertFalse(ArchiveUtils.matchAsciiBuffer("def", buffer2), "Buffer2 should not match 'def'");
+}
+
+Input#2
+@Test
+    public void testCompareBA() {
+        final byte[] buffer1 = { 1, 2, 3 };
+        final byte[] buffer2 = { 1, 2, 3, 0 };
+        final byte[] buffer3 = { 1, 2, 3 };
+        assertTrue(ArchiveUtils.isEqual(buffer1, buffer2, true));
+        assertFalse(ArchiveUtils.isEqual(buffer1, buffer2, false));
+        assertFalse(ArchiveUtils.isEqual(buffer1, buffer2));
+        assertTrue(ArchiveUtils.isEqual(buffer2, buffer1, true));
+        assertFalse(ArchiveUtils.isEqual(buffer2, buffer1, false));
+        assertFalse(ArchiveUtils.isEqual(buffer2, buffer1));
+        assertTrue(ArchiveUtils.isEqual(buffer1, buffer3));
+        assertTrue(ArchiveUtils.isEqual(buffer3, buffer1));
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+
+Refactor#2
+
+private byte[] buffer1;
+private byte[] buffer2;
+private byte[] buffer3;
+
+
+private void setupTestCompareBA() {
+    buffer1 = new byte[]{1, 2, 3};
+    buffer2 = new byte[]{1, 2, 3, 0};
+    buffer3 = new byte[]{1, 2, 3};
+}
+
+@Test
+public void testCompareBA_WithTrailingZero() {
+    setupTestCompareBA();
+    assertTrue(ArchiveUtils.isEqual(buffer1, buffer2, true), "buffer1 and buffer2 should be equal when trailing zeros are ignored");
+    assertFalse(ArchiveUtils.isEqual(buffer1, buffer2, false), "buffer1 and buffer2 should not be equal when trailing zeros are considered");
+    assertFalse(ArchiveUtils.isEqual(buffer1, buffer2), "buffer1 and buffer2 should not be equal by default");
+}
+
+@Test
+public void testCompareBA_ReverseOrder() {
+    setupTestCompareBA();
+    assertTrue(ArchiveUtils.isEqual(buffer2, buffer1, true), "buffer2 and buffer1 should be equal when trailing zeros are ignored");
+    assertFalse(ArchiveUtils.isEqual(buffer2, buffer1, false), "buffer2 and buffer1 should not be equal when trailing zeros are considered");
+    assertFalse(ArchiveUtils.isEqual(buffer2, buffer1), "buffer2 and buffer1 should not be equal by default");
+}
+
+@Test
+public void testCompareBA_EqualBuffers() {
+    setupTestCompareBA();
+    assertTrue(ArchiveUtils.isEqual(buffer1, buffer3), "buffer1 and buffer3 should be equal");
+    assertTrue(ArchiveUtils.isEqual(buffer3, buffer1), "buffer3 and buffer1 should be equal");
+}
+
+
+Input#3
+ @Test
+    public void testToAsciiBytes() {
+        final byte[] byteArray = ArchiveUtils.toAsciiBytes("SOCKET");
+        assertArrayEquals(new byte[] { (byte) 83, (byte) 79, (byte) 67, (byte) 75, (byte) 69, (byte) 84 }, byteArray);
+        assertFalse(ArchiveUtils.isEqualWithNull(byteArray, 0, 46, byteArray, 63, 0));
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+
+Refactor#3
+
+private byte[] setupTestToAsciiBytes() {
+    return ArchiveUtils.toAsciiBytes("SOCKET");
+}
+
+@Test
+public void testToAsciiBytes_Conversion() {
+    byte[] byteArray = setupTestToAsciiBytes();
+    assertArrayEquals(new byte[] { (byte) 83, (byte) 79, (byte) 67, (byte) 75, (byte) 69, (byte) 84 }, byteArray, "ASCII byte conversion should match expected values");
+}
+
+@Test
+public void testToAsciiBytes_EqualityCheck() {
+    byte[] byteArray = setupTestToAsciiBytes();
+    assertFalse(ArchiveUtils.isEqualWithNull(byteArray, 0, 46, byteArray, 63, 0), "Equality check with invalid parameters should return false");
+}
+
+
+
+Input#4
+
+Refactor#4
+
+
+Input#5
+
+Refactor#5
+
+
+Input#6
+
+Refactor#6
+
+
+Input#7
+
+Refactor#7
+
+
+Input#8
+
+Refactor#8
+
+
+Input#9
+
+Refactor#9
+
+
+Input#10
+
+Refactor#10
+
+
+Input#11
+
+Refactor#11
+
+
+Input#12
+
+Refactor#12
+
+
+Input#13
+
+Refactor#13
+
+
+Input#14
+
+Refactor#14
+
+
+Input#15
+
+Refactor#15
+
+
+Input#16
+
+Refactor#16
+
+
+Input#17
+
+Refactor#17
+
+
+Input#18
+
+Refactor#18
+
+
+
+Input#19
+
+Refactor#19
+
+
+
+Input#20
+
+Refactor#20
+
+
+
+Input#21
+
+Refactor#21
+
+
+Input#22
+
+Refactor#22
+
+
+Input#23
+
+Refactor#23
+
+
+Input#24
+
+Refactor#24
+
+
+Input#25
+
+Refactor#25
+
+
+Input#26
+
+Refactor#26
+
+
+Input#27
+
+Refactor#27
+
+
+
+Input#28
+
+Refactor#28
+
+
+
+Input#29
+
+Refactor#29
+
+
+
+Input#30
+
+Refactor#30
+
+
+Input#31
+
+Refactor#31
+
+
+
+Input#32
+
+Refactor#32
+
+
+
+Input#33
+
+Refactor#33
+
+
+
+Input#34
+
+Refactor#34
+
+
+
+Input#35
+
+Refactor#35
+

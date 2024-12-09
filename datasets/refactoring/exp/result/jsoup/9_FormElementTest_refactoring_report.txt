@@ -1,0 +1,586 @@
+File#1
+
+
+Input#1
+ @Test public void hasAssociatedControls() {
+        //"button", "fieldset", "input", "keygen", "object", "output", "select", "textarea"
+        String html = "<form id=1><button id=1><fieldset id=2 /><input id=3><keygen id=4><object id=5><output id=6>" +
+                "<select id=7><option></select><textarea id=8><p id=9>";
+        Document doc = Jsoup.parse(html);
+
+        FormElement form = (FormElement) doc.select("form").first();
+        assertEquals(8, form.elements().size());
+    }
+Smell List: ['Eager_Test', 'Magic_Number_Test']
+Refactor#1
+
+private static final String HTML = "<form id=1><button id=1><fieldset id=2 /><input id=3><keygen id=4><object id=5><output id=6>" +
+        "<select id=7><option></select><textarea id=8><p id=9>";
+
+private FormElement setupHasAssociatedControls() {
+    Document doc = Jsoup.parse(HTML);
+    return (FormElement) doc.select("form").first();
+}
+
+@Test
+public void testHasAssociatedControls_ElementsCount() {
+    FormElement form = setupHasAssociatedControls();
+    int expectedElementsCount = 8;
+    assertEquals(expectedElementsCount, form.elements().size());
+}
+
+Input#2
+ @Test public void createsFormData() {
+        String html = "<form><input name='one' value='two'><select name='three'><option value='not'>" +
+                "<option value='four' selected><option value='five' selected><textarea name=six>seven</textarea>" +
+                "<input name='seven' type='radio' value='on' checked><input name='seven' type='radio' value='off'>" +
+                "<input name='eight' type='checkbox' checked><input name='nine' type='checkbox' value='unset'>" +
+                "<input name='ten' value='text' disabled>" +
+                "<input name='eleven' value='text' type='button'>" +
+                "</form>";
+        Document doc = Jsoup.parse(html);
+        FormElement form = (FormElement) doc.select("form").first();
+        List<Connection.KeyVal> data = form.formData();
+
+        assertEquals(6, data.size());
+        assertEquals("one=two", data.get(0).toString());
+        assertEquals("three=four", data.get(1).toString());
+        assertEquals("three=five", data.get(2).toString());
+        assertEquals("six=seven", data.get(3).toString());
+        assertEquals("seven=on", data.get(4).toString()); // set
+        assertEquals("eight=on", data.get(5).toString()); // default
+        // nine should not appear, not checked checkbox
+        // ten should not appear, disabled
+        // eleven should not appear, button
+    }
+Smell List: ['Assertion_Roulette', 'Sensitive_Equality', 'Magic_Number_Test']
+Refactor#2
+@Test
+public void createsFormData() {
+    String html = "<form><input name='one' value='two'><select name='three'><option value='not'>" +
+            "<option value='four' selected><option value='five' selected><textarea name=six>seven</textarea>" +
+            "<input name='seven' type='radio' value='on' checked><input name='seven' type='radio' value='off'>" +
+            "<input name='eight' type='checkbox' checked><input name='nine' type='checkbox' value='unset'>" +
+            "<input name='ten' value='text' disabled>" +
+            "<input name='eleven' value='text' type='button'>" +
+            "</form>";
+    Document doc = Jsoup.parse(html);
+    FormElement form = (FormElement) doc.select("form").first();
+    List<Connection.KeyVal> data = form.formData();
+
+    int expectedSize = 6;
+    assertEquals(expectedSize, data.size(), "The form data size should be 6");
+
+    String actualOne = data.get(0).toString();
+    assertEquals("one=two", actualOne, "The first form element should be 'one=two'");
+
+    String actualThreeFirst = data.get(1).toString();
+    assertEquals("three=four", actualThreeFirst, "The second form element should be 'three=four'");
+
+    String actualThreeSecond = data.get(2).toString();
+    assertEquals("three=five", actualThreeSecond, "The third form element should be 'three=five'");
+
+    String actualSix = data.get(3).toString();
+    assertEquals("six=seven", actualSix, "The fourth form element should be 'six=seven'");
+
+    String actualSeven = data.get(4).toString();
+    assertEquals("seven=on", actualSeven, "The fifth form element should be 'seven=on'");
+
+    String actualEight = data.get(5).toString();
+    assertEquals("eight=on", actualEight, "The sixth form element should be 'eight=on'");
+}
+
+
+Input#3
+ @Test public void formDataUsesFirstAttribute() {
+        String html = "<form><input name=test value=foo name=test2 value=bar>";
+        Document doc = Jsoup.parse(html);
+        FormElement form = (FormElement) doc.selectFirst("form");
+        assertEquals("test=foo", form.formData().get(0).toString());
+    }
+Smell List: ['Sensitive_Equality', 'Eager_Test']
+Refactor#3
+private FormElement setupFormDataUsesFirstAttribute() {
+    String html = "<form><input name=test value=foo name=test2 value=bar>";
+    Document doc = Jsoup.parse(html);
+    FormElement form = (FormElement) doc.selectFirst("form");
+    return form;
+}
+
+@Test
+public void testFormDataUsesFirstAttribute_Name() {
+    FormElement form = setupFormDataUsesFirstAttribute();
+    String actualValue = form.formData().get(0).key();
+    assertEquals("test", actualValue);
+}
+
+@Test
+public void testFormDataUsesFirstAttribute_Value() {
+    FormElement form = setupFormDataUsesFirstAttribute();
+    String actualValue = form.formData().get(0).value();
+    assertEquals("foo", actualValue);
+}
+
+
+Input#4
+ @Test public void createsSubmitableConnection() {
+        String html = "<form action='/search'><input name='q'></form>";
+        Document doc = Jsoup.parse(html, "http://example.com/");
+        doc.select("[name=q]").attr("value", "jsoup");
+
+        FormElement form = ((FormElement) doc.select("form").first());
+        Connection con = form.submit();
+
+        assertEquals(Connection.Method.GET, con.request().method());
+        assertEquals("http://example.com/search", con.request().url().toExternalForm());
+        List<Connection.KeyVal> dataList = (List<Connection.KeyVal>) con.request().data();
+        assertEquals("q=jsoup", dataList.get(0).toString());
+
+        doc.select("form").attr("method", "post");
+        Connection con2 = form.submit();
+        assertEquals(Connection.Method.POST, con2.request().method());
+    }
+Smell List: ['Assertion_Roulette', 'Sensitive_Equality', 'Eager_Test']
+Refactor#4
+
+private Document setupTestCreatesSubmitableConnection() {
+    String html = "<form action='/search'><input name='q'></form>";
+    Document doc = Jsoup.parse(html, "http://example.com/");
+    doc.select("[name=q]").attr("value", "jsoup");
+    return doc;
+}
+
+@Test
+public void testCreatesSubmitableConnection_GET() {
+    Document doc = setupTestCreatesSubmitableConnection();
+    FormElement form = ((FormElement) doc.select("form").first());
+    Connection con = form.submit();
+
+    assertEquals(Connection.Method.GET, con.request().method(), "The connection method should be GET");
+    assertEquals("http://example.com/search", con.request().url().toExternalForm(), "The connection URL should match the expected URL");
+
+    List<Connection.KeyVal> dataList = (List<Connection.KeyVal>) con.request().data();
+    String actualValue = dataList.get(0).toString();
+    assertEquals("q=jsoup", actualValue, "The data list should contain the expected key-value pair");
+}
+
+@Test
+public void testCreatesSubmitableConnection_POST() {
+    Document doc = setupTestCreatesSubmitableConnection();
+    doc.select("form").attr("method", "post");
+    FormElement form = ((FormElement) doc.select("form").first());
+    Connection con = form.submit();
+
+    assertEquals(Connection.Method.POST, con.request().method(), "The connection method should be POST");
+}
+
+
+Input#5
+ @Test public void actionWithNoBaseUri() {
+        String html = "<form><input name='q'></form>";
+        Document doc = Jsoup.parse(html);
+        FormElement form = ((FormElement) doc.select("form").first());
+
+
+        boolean threw = false;
+        try {
+            Connection con = form.submit();
+        } catch (IllegalArgumentException e) {
+            threw = true;
+            assertEquals("Could not determine a form action URL for submit. Ensure you set a base URI when parsing.",
+                    e.getMessage());
+        }
+        assertTrue(threw);
+    }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing']
+Refactor#5
+
+@Test
+public void actionWithNoBaseUri() {
+    String html = "<form><input name='q'></form>";
+    Document doc = Jsoup.parse(html);
+    FormElement form = ((FormElement) doc.select("form").first());
+
+    IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+        form.submit();
+    }, "Expected IllegalArgumentException to be thrown when trying to submit a form without a base URI");
+
+    assertEquals("Could not determine a form action URL for submit. Ensure you set a base URI when parsing.", exception.getMessage(), "The exception message should match the expected message");
+}
+
+
+Input#6
+ @Test public void formsAddedAfterParseAreFormElements() {
+        Document doc = Jsoup.parse("<body />");
+        doc.body().html("<form action='http://example.com/search'><input name='q' value='search'>");
+        Element formEl = doc.select("form").first();
+        assertTrue(formEl instanceof FormElement);
+
+        FormElement form = (FormElement) formEl;
+        assertEquals(1, form.elements().size());
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test', 'Magic_Number_Test']
+Refactor#6
+private Document setupFormsAddedAfterParseAreFormElements() {
+    Document doc = Jsoup.parse("<body />");
+    doc.body().html("<form action='http://example.com/search'><input name='q' value='search'>");
+    return doc;
+}
+
+@Test
+public void testFormsAddedAfterParseAreFormElements_IsInstanceOfFormElement() {
+    Document doc = setupFormsAddedAfterParseAreFormElements();
+    Element formEl = doc.select("form").first();
+    assertTrue(formEl instanceof FormElement, "The element selected should be an instance of FormElement");
+}
+
+@Test
+public void testFormsAddedAfterParseAreFormElements_HasOneInputElement() {
+    Document doc = setupFormsAddedAfterParseAreFormElements();
+    Element formEl = doc.select("form").first();
+    FormElement form = (FormElement) formEl;
+    int expectedElementCount = 1; // Expected number of form elements
+    assertEquals(expectedElementCount, form.elements().size(), "The form should contain exactly one input element");
+}
+
+Input#7
+ @Test public void controlsAddedAfterParseAreLinkedWithForms() {
+        Document doc = Jsoup.parse("<body />");
+        doc.body().html("<form />");
+
+        Element formEl = doc.select("form").first();
+        formEl.append("<input name=foo value=bar>");
+
+        assertTrue(formEl instanceof FormElement);
+        FormElement form = (FormElement) formEl;
+        assertEquals(1, form.elements().size());
+
+        List<Connection.KeyVal> data = form.formData();
+        assertEquals("foo=bar", data.get(0).toString());
+    }
+Smell List: ['Assertion_Roulette', 'Sensitive_Equality', 'Eager_Test', 'Magic_Number_Test']
+Refactor#7
+
+private Document setupControlsAddedAfterParseAreLinkedWithForms() {
+    Document doc = Jsoup.parse("<body />");
+    doc.body().html("<form />");
+
+    Element formEl = doc.select("form").first();
+    formEl.append("<input name=foo value=bar>");
+
+    return doc;
+}
+
+@Test
+public void testControlsAddedAfterParseAreLinkedWithForms_FormElementInstance() {
+    Document doc = setupControlsAddedAfterParseAreLinkedWithForms();
+    Element formEl = doc.select("form").first();
+
+    assertTrue(formEl instanceof FormElement, "The selected element should be an instance of FormElement");
+}
+
+@Test
+public void testControlsAddedAfterParseAreLinkedWithForms_ElementsSize() {
+    Document doc = setupControlsAddedAfterParseAreLinkedWithForms();
+    Element formEl = doc.select("form").first();
+    FormElement form = (FormElement) formEl;
+
+    final int expectedElementsSize = 1;
+    assertEquals(expectedElementsSize, form.elements().size(), "The form should contain exactly one element");
+}
+
+@Test
+public void testControlsAddedAfterParseAreLinkedWithForms_FormDataContent() {
+    Document doc = setupControlsAddedAfterParseAreLinkedWithForms();
+    Element formEl = doc.select("form").first();
+    FormElement form = (FormElement) formEl;
+
+    List<Connection.KeyVal> data = form.formData();
+    String actualValue = data.get(0).toString();
+    final String expectedFormData = "foo=bar";
+    assertEquals(expectedFormData, actualValue, "The form data should contain 'foo=bar'");
+}
+
+Input#8
+ @Test public void usesOnForCheckboxValueIfNoValueSet() {
+        Document doc = Jsoup.parse("<form><input type=checkbox checked name=foo></form>");
+        FormElement form = (FormElement) doc.select("form").first();
+        List<Connection.KeyVal> data = form.formData();
+        assertEquals("on", data.get(0).value());
+        assertEquals("foo", data.get(0).key());
+    }
+Smell List: ['Assertion_Roulette']
+Refactor#8
+@Test
+public void usesOnForCheckboxValueIfNoValueSet() {
+    Document doc = Jsoup.parse("<form><input type=checkbox checked name=foo></form>");
+    FormElement form = (FormElement) doc.select("form").first();
+    List<Connection.KeyVal> data = form.formData();
+    assertEquals("on", data.get(0).value(), "The value of the checkbox should default to 'on' if no value is set");
+    assertEquals("foo", data.get(0).key(), "The key of the checkbox should match the name attribute 'foo'");
+}
+
+Input#9
+ @Test public void adoptedFormsRetainInputs() {
+        // test for https://github.com/jhy/jsoup/issues/249
+        String html = "<html>\n" +
+                "<body>  \n" +
+                "  <table>\n" +
+                "      <form action=\"/hello.php\" method=\"post\">\n" +
+                "      <tr><td>User:</td><td> <input type=\"text\" name=\"user\" /></td></tr>\n" +
+                "      <tr><td>Password:</td><td> <input type=\"password\" name=\"pass\" /></td></tr>\n" +
+                "      <tr><td><input type=\"submit\" name=\"login\" value=\"login\" /></td></tr>\n" +
+                "   </form>\n" +
+                "  </table>\n" +
+                "</body>\n" +
+                "</html>";
+        Document doc = Jsoup.parse(html);
+        FormElement form = (FormElement) doc.select("form").first();
+        List<Connection.KeyVal> data = form.formData();
+        assertEquals(3, data.size());
+        assertEquals("user", data.get(0).key());
+        assertEquals("pass", data.get(1).key());
+        assertEquals("login", data.get(2).key());
+    }
+Smell List: ['Assertion_Roulette', 'Magic_Number_Test']
+Refactor#9
+
+@Test
+public void adoptedFormsRetainInputs() {
+    // test for https://github.com/jhy/jsoup/issues/249
+    String html = "<html>\n" +
+            "<body>  \n" +
+            "  <table>\n" +
+            "      <form action=\"/hello.php\" method=\"post\">\n" +
+            "      <tr><td>User:</td><td> <input type=\"text\" name=\"user\" /></td></tr>\n" +
+            "      <tr><td>Password:</td><td> <input type=\"password\" name=\"pass\" /></td></tr>\n" +
+            "      <tr><td><input type=\"submit\" name=\"login\" value=\"login\" /></td></tr>\n" +
+            "   </form>\n" +
+            "  </table>\n" +
+            "</body>\n" +
+            "</html>";
+    Document doc = Jsoup.parse(html);
+    FormElement form = (FormElement) doc.select("form").first();
+    List<Connection.KeyVal> data = form.formData();
+
+    int expectedDataSize = 3;
+    assertEquals(expectedDataSize, data.size(), "The form should contain exactly 3 input elements");
+
+    String expectedUserKey = "user";
+    assertEquals(expectedUserKey, data.get(0).key(), "The first input element should be named 'user'");
+
+    String expectedPassKey = "pass";
+    assertEquals(expectedPassKey, data.get(1).key(), "The second input element should be named 'pass'");
+
+    String expectedLoginKey = "login";
+    assertEquals(expectedLoginKey, data.get(2).key(), "The third input element should be named 'login'");
+}
+
+Input#10
+ @Test public void removeFormElement() {
+        String html = "<html>\n" +
+                "  <body> \n" +
+                "      <form action=\"/hello.php\" method=\"post\">\n" +
+                "      User:<input type=\"text\" name=\"user\" />\n" +
+                "      Password:<input type=\"password\" name=\"pass\" />\n" +
+                "      <input type=\"submit\" name=\"login\" value=\"login\" />\n" +
+                "   </form>\n" +
+                "  </body>\n" +
+                "</html>  ";
+        Document doc = Jsoup.parse(html);
+        FormElement form = (FormElement) doc.selectFirst("form");
+        Element pass = form.selectFirst("input[name=pass]");
+        pass.remove();
+
+        List<Connection.KeyVal> data = form.formData();
+        assertEquals(2, data.size());
+        assertEquals("user", data.get(0).key());
+        assertEquals("login", data.get(1).key());
+        assertEquals(null, doc.selectFirst("input[name=pass]"));
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test', 'Magic_Number_Test']
+Refactor#10
+
+
+private Document setupRemoveFormElement() {
+    String html = "<html>\n" +
+            "  <body> \n" +
+            "      <form action=\"/hello.php\" method=\"post\">\n" +
+            "      User:<input type=\"text\" name=\"user\" />\n" +
+            "      Password:<input type=\"password\" name=\"pass\" />\n" +
+            "      <input type=\"submit\" name=\"login\" value=\"login\" />\n" +
+            "   </form>\n" +
+            "  </body>\n" +
+            "</html>  ";
+    Document doc = Jsoup.parse(html);
+    FormElement form = (FormElement) doc.selectFirst("form");
+    Element pass = form.selectFirst("input[name=pass]");
+    pass.remove();
+    return doc;
+}
+
+@Test
+public void testRemoveFormElement_FormDataSize() {
+    Document doc = setupRemoveFormElement();
+    FormElement form = (FormElement) doc.selectFirst("form");
+    List<Connection.KeyVal> data = form.formData();
+    int expectedFormDataSize = 2;
+    assertEquals(expectedFormDataSize, data.size(), "The form data size should be 2 after removing the password field");
+}
+
+@Test
+public void testRemoveFormElement_UserFieldKey() {
+    Document doc = setupRemoveFormElement();
+    FormElement form = (FormElement) doc.selectFirst("form");
+    List<Connection.KeyVal> data = form.formData();
+    assertEquals("user", data.get(0).key(), "The first key in form data should be 'user'");
+}
+
+@Test
+public void testRemoveFormElement_LoginFieldKey() {
+    Document doc = setupRemoveFormElement();
+    FormElement form = (FormElement) doc.selectFirst("form");
+    List<Connection.KeyVal> data = form.formData();
+    assertEquals("login", data.get(1).key(), "The second key in form data should be 'login'");
+}
+
+@Test
+public void testRemoveFormElement_PasswordFieldRemoved() {
+    Document doc = setupRemoveFormElement();
+    assertNull(doc.selectFirst("input[name=pass]"), "The password field should be removed from the document");
+}
+
+Input#11
+
+Refactor#11
+
+
+Input#12
+
+Refactor#12
+
+
+Input#13
+
+Refactor#13
+
+
+Input#14
+
+Refactor#14
+
+
+Input#15
+
+Refactor#15
+
+
+Input#16
+
+Refactor#16
+
+
+Input#17
+
+Refactor#17
+
+
+Input#18
+
+Refactor#18
+
+
+
+Input#19
+
+Refactor#19
+
+
+
+Input#20
+
+Refactor#20
+
+
+
+Input#21
+
+Refactor#21
+
+
+Input#22
+
+Refactor#22
+
+
+Input#23
+
+Refactor#23
+
+
+Input#24
+
+Refactor#24
+
+
+Input#25
+
+Refactor#25
+
+
+Input#26
+
+Refactor#26
+
+
+Input#27
+
+Refactor#27
+
+
+
+Input#28
+
+Refactor#28
+
+
+
+Input#29
+
+Refactor#29
+
+
+
+Input#30
+
+Refactor#30
+
+
+Input#31
+
+Refactor#31
+
+
+
+Input#32
+
+Refactor#32
+
+
+
+Input#33
+
+Refactor#33
+
+
+
+Input#34
+
+Refactor#34
+
+
+
+Input#35
+
+Refactor#35
+

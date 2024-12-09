@@ -1,0 +1,370 @@
+File#1
+
+
+Input#1
+
+Refactor#1
+
+
+Input#2
+
+Refactor#2
+
+
+Input#3
+
+Refactor#3
+
+
+Input#4
+
+Refactor#4
+
+
+Input#5
+ @Test
+  public void skipArrayElements() throws IOException {
+    JsonReader reader = factory.create("[1,2,3]");
+    reader.beginArray();
+    reader.skipValue();
+    reader.skipValue();
+    assertThat(reader.getPreviousPath()).isEqualTo("$[1]");
+    assertThat(reader.getPath()).isEqualTo("$[2]");
+  }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing']
+
+Refactor#5
+
+@Test
+public void skipArrayElements() {
+    JsonReader reader = factory.create("[1,2,3]");
+    assertDoesNotThrow(() -> {
+        reader.beginArray();
+        reader.skipValue();
+        reader.skipValue();
+    }, "Unexpected exception occurred while skipping array elements");
+
+    assertThat(reader.getPreviousPath(), is("$[1]"), "Previous path should be $[1] after skipping two values");
+    assertThat(reader.getPath(), is("$[2]"), "Current path should be $[2] after skipping two values");
+}
+
+
+Input#6
+ @Test
+  public void skipArrayEnd() throws IOException {
+    JsonReader reader = factory.create("[[],1]");
+    reader.beginArray();
+    reader.beginArray();
+    assertThat(reader.getPreviousPath()).isEqualTo("$[0][0]");
+    assertThat(reader.getPath()).isEqualTo("$[0][0]");
+    reader.skipValue(); // skip end of array
+    assertThat(reader.getPreviousPath()).isEqualTo("$[0]");
+    assertThat(reader.getPath()).isEqualTo("$[1]");
+  }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing', 'Duplicate_Assert']
+
+Refactor#6
+
+  @Test
+  public void skipArrayEnd() {
+    assertDoesNotThrow(() -> {
+      JsonReader reader = factory.create("[[],1]");
+      reader.beginArray();
+      reader.beginArray();
+      assertThat(reader.getPreviousPath()).isEqualTo("$[0][0]", "Previous path after beginning inner array should be $[0][0]");
+      assertThat(reader.getPath()).isEqualTo("$[0][0]", "Current path after beginning inner array should be $[0][0]");
+      reader.skipValue(); // skip end of array
+      assertThat(reader.getPreviousPath()).isEqualTo("$[0]", "Previous path after skipping value should be $[0]");
+      assertThat(reader.getPath()).isEqualTo("$[1]", "Current path after skipping value should be $[1]");
+    }, "Unexpected exception occurred during the test");
+  }
+
+Input#7
+ @Test
+  public void skipObjectNames() throws IOException {
+    JsonReader reader = factory.create("{\"a\":[]}");
+    reader.beginObject();
+    reader.skipValue();
+    assertThat(reader.getPreviousPath()).isEqualTo("$.<skipped>");
+    assertThat(reader.getPath()).isEqualTo("$.<skipped>");
+
+    reader.beginArray();
+    assertThat(reader.getPreviousPath()).isEqualTo("$.<skipped>[0]");
+    assertThat(reader.getPath()).isEqualTo("$.<skipped>[0]");
+  }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing', 'Duplicate_Assert']
+
+
+Refactor#7
+
+  @Test
+  public void skipObjectNames() {
+    JsonReader reader = factory.create("{\"a\":[]}");
+    assertDoesNotThrow(() -> {
+      reader.beginObject();
+      reader.skipValue();
+      assertThat(reader.getPreviousPath()).isEqualTo("$.<skipped>", "Previous path after skipping value");
+      assertThat(reader.getPath()).isEqualTo("$.<skipped>", "Current path after skipping value");
+
+      reader.beginArray();
+      assertThat(reader.getPreviousPath()).isEqualTo("$.<skipped>[0]", "Previous path after beginning array");
+      assertThat(reader.getPath()).isEqualTo("$.<skipped>[0]", "Current path after beginning array");
+    }, "Unexpected exception occurred during the test");
+  }
+
+Input#8
+@Test
+  public void skipObjectValues() throws IOException {
+    JsonReader reader = factory.create("{\"a\":1,\"b\":2}");
+    reader.beginObject();
+    assertThat(reader.getPreviousPath()).isEqualTo("$.");
+    assertThat(reader.getPath()).isEqualTo("$.");
+    String unused1 = reader.nextName();
+    reader.skipValue();
+    assertThat(reader.getPreviousPath()).isEqualTo("$.a");
+    assertThat(reader.getPath()).isEqualTo("$.a");
+    String unused2 = reader.nextName();
+    assertThat(reader.getPreviousPath()).isEqualTo("$.b");
+    assertThat(reader.getPath()).isEqualTo("$.b");
+  }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing', 'Duplicate_Assert']
+
+Refactor#8
+@Test
+  public void skipObjectValues() {
+    JsonReader reader = factory.create("{\"a\":1,\"b\":2}");
+    assertDoesNotThrow(() -> {
+        reader.beginObject();
+        assertThat(reader.getPreviousPath(), "Previous path after beginObject").isEqualTo("$.");
+        assertThat(reader.getPath(), "Current path after beginObject").isEqualTo("$.");
+
+        String unused1 = reader.nextName();
+        reader.skipValue();
+
+        assertThat(reader.getPreviousPath(), "Previous path after skipping first value").isEqualTo("$.a");
+        assertThat(reader.getPath(), "Current path after skipping first value").isEqualTo("$.a");
+
+        String unused2 = reader.nextName();
+        assertThat(reader.getPreviousPath(), "Previous path after moving to next name").isEqualTo("$.b");
+        assertThat(reader.getPath(), "Current path after moving to next name").isEqualTo("$.b");
+    }, "Unexpected exception occurred while beginning object");
+  }
+
+Input#9
+ @Test
+  public void skipObjectEnd() throws IOException {
+    JsonReader reader = factory.create("{\"a\":{},\"b\":2}");
+    reader.beginObject();
+    String unused = reader.nextName();
+    reader.beginObject();
+    assertThat(reader.getPreviousPath()).isEqualTo("$.a.");
+    assertThat(reader.getPath()).isEqualTo("$.a.");
+    reader.skipValue(); // skip end of object
+    assertThat(reader.getPreviousPath()).isEqualTo("$.a");
+    assertThat(reader.getPath()).isEqualTo("$.a");
+  }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing', 'Duplicate_Assert']
+
+Refactor#9
+ @Test
+  public void skipObjectEnd() {
+    assertDoesNotThrow(() -> {
+      JsonReader reader = factory.create("{\"a\":{},\"b\":2}");
+      reader.beginObject();
+      String unused = reader.nextName();
+      reader.beginObject();
+      assertThat(reader.getPreviousPath(), is("$.a."), "Previous path after beginning object should be $.a.");
+      assertThat(reader.getPath(), is("$.a."), "Current path after beginning object should be $.a.");
+      reader.skipValue(); // skip end of object
+      assertThat(reader.getPreviousPath(), is("$.a"), "Previous path after skipping value should be $.a");
+      assertThat(reader.getPath(), is("$.a"), "Current path after skipping value should be $.a");
+    }, "Unexpected exception occurred during the test");
+  }
+
+Input#10
+@Test
+  public void skipNestedStructures() throws IOException {
+    JsonReader reader = factory.create("[[1,2,3],4]");
+    reader.beginArray();
+    reader.skipValue();
+    assertThat(reader.getPreviousPath()).isEqualTo("$[0]");
+    assertThat(reader.getPath()).isEqualTo("$[1]");
+  }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing']
+
+Refactor#10
+@Test
+public void skipNestedStructures() {
+    JsonReader reader = factory.create("[[1,2,3],4]");
+    assertDoesNotThrow(() -> {
+        reader.beginArray();
+        reader.skipValue();
+        assertThat(reader.getPreviousPath(), equalTo("$[0]"), "Previous path should be $[0]");
+        assertThat(reader.getPath(), equalTo("$[1]"), "Current path should be $[1]");
+    }, "Unexpected exception occurred during the test");
+}
+
+Input#11
+@Test
+  public void skipEndOfDocument() throws IOException {
+    JsonReader reader = factory.create("[]");
+    reader.beginArray();
+    reader.endArray();
+    assertThat(reader.getPreviousPath()).isEqualTo("$");
+    assertThat(reader.getPath()).isEqualTo("$");
+    reader.skipValue();
+    assertThat(reader.getPreviousPath()).isEqualTo("$");
+    assertThat(reader.getPath()).isEqualTo("$");
+    reader.skipValue();
+    assertThat(reader.getPreviousPath()).isEqualTo("$");
+    assertThat(reader.getPath()).isEqualTo("$");
+  }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing', 'Duplicate_Assert']
+
+Refactor#11
+@Test
+  public void skipEndOfDocument() {
+    assertDoesNotThrow(() -> {
+      JsonReader reader = factory.create("[]");
+      reader.beginArray();
+      reader.endArray();
+      assertThat(reader.getPreviousPath()).as("Previous path after endArray").isEqualTo("$");
+      assertThat(reader.getPath()).as("Current path after endArray").isEqualTo("$");
+      reader.skipValue();
+      assertThat(reader.getPreviousPath()).as("Previous path after first skipValue").isEqualTo("$");
+      assertThat(reader.getPath()).as("Current path after first skipValue").isEqualTo("$");
+      reader.skipValue();
+      assertThat(reader.getPreviousPath()).as("Previous path after second skipValue").isEqualTo("$");
+      assertThat(reader.getPath()).as("Current path after second skipValue").isEqualTo("$");
+    }, "Unexpected exception occurred during the test");
+  }
+
+Input#12
+
+Refactor#12
+
+
+Input#13
+
+Refactor#13
+
+
+Input#14
+
+Refactor#14
+
+
+Input#15
+
+Refactor#15
+
+
+Input#16
+
+Refactor#16
+
+
+Input#17
+
+Refactor#17
+
+
+Input#18
+
+Refactor#18
+
+
+
+Input#19
+
+Refactor#19
+
+
+
+Input#20
+
+Refactor#20
+
+
+
+Input#21
+
+Refactor#21
+
+
+Input#22
+
+Refactor#22
+
+
+Input#23
+
+Refactor#23
+
+
+Input#24
+
+Refactor#24
+
+
+Input#25
+
+Refactor#25
+
+
+Input#26
+
+Refactor#26
+
+
+Input#27
+
+Refactor#27
+
+
+
+Input#28
+
+Refactor#28
+
+
+
+Input#29
+
+Refactor#29
+
+
+
+Input#30
+
+Refactor#30
+
+
+Input#31
+
+Refactor#31
+
+
+
+Input#32
+
+Refactor#32
+
+
+
+Input#33
+
+Refactor#33
+
+
+
+Input#34
+
+Refactor#34
+
+
+
+Input#35
+
+Refactor#35
+

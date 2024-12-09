@@ -1,0 +1,246 @@
+File#1
+
+
+Input#1
+@Test
+    public void testPolynomialFit() {
+        final Random randomizer = new Random(53882150042L);
+        final ContinuousDistribution.Sampler rng
+            = UniformContinuousDistribution.of(-100, 100).createSampler(RandomSource.WELL_512_A.create(64925784253L));
+
+        final double[] coeff = { 12.9, -3.4, 2.1 }; // 12.9 - 3.4 x + 2.1 x^2
+        final PolynomialFunction f = new PolynomialFunction(coeff);
+
+        // Collect data from a known polynomial.
+        final WeightedObservedPoints obs = new WeightedObservedPoints();
+        for (int i = 0; i < 100; i++) {
+            final double x = rng.sample();
+            obs.add(x, f.value(x) + 0.1 * randomizer.nextGaussian());
+        }
+
+        final ParametricUnivariateFunction function = new PolynomialFunction.Parametric();
+        // Start fit from initial guesses that are far from the optimal values.
+        final SimpleCurveFitter fitter
+            = SimpleCurveFitter.create(function,
+                                       new double[] { -1e20, 3e15, -5e25 });
+        final double[] best = fitter.fit(obs.toList());
+
+        TestUtils.assertEquals("best != coeff", coeff, best, 2e-2);
+    }
+Smell List: ['Conditional_Test_Logic', 'Magic_Number_Test']
+Refactor#1
+
+    private static final long SEED = 53882150042L;
+    private static final long SEED_RNG = 64925784253L;
+
+    private static final double TOLERANCE = 2e-2;
+
+    @Test
+    public void testPolynomialFit() {
+        final double[] coeff = {12.9, -3.4, 2.1}; // 12.9 - 3.4 x + 2.1 x^2
+        final PolynomialFunction f = new PolynomialFunction(coeff);
+
+        // Helper method to generate data points and perform the fit
+        final WeightedObservedPoints obs = generateDataPoints(f);
+        final double[] best = fitPolynomial(obs);
+
+        TestUtils.assertEquals("best != coeff", coeff, best, TOLERANCE);
+    }
+
+
+    private WeightedObservedPoints generateDataPoints(PolynomialFunction f) {
+        Random randomizer = new Random(SEED);
+        final ContinuousDistribution.Sampler rng = UniformContinuousDistribution.of(-100, 100).createSampler(RandomSource.WELL_512_A.create(SEED_RNG));
+        final WeightedObservedPoints obs = new WeightedObservedPoints();
+        for (int i = 0; i < 100; i++) {
+            final double x = rng.sample();
+            obs.add(x, f.value(x) + 0.1 * randomizer.nextGaussian());
+        }
+        return obs;
+    }
+
+    private double[] fitPolynomial(WeightedObservedPoints obs) {
+        final ParametricUnivariateFunction function = new PolynomialFunction.Parametric();
+        final SimpleCurveFitter fitter = SimpleCurveFitter.create(function, new double[]{-1e20, 3e15, -5e25});
+        return fitter.fit(obs.toList());
+    }
+
+Input#2
+
+Refactor#2
+
+
+Input#3
+
+Refactor#3
+
+
+Input#4
+
+Refactor#4
+
+
+Input#5
+
+Refactor#5
+
+
+Input#6
+
+Refactor#6
+
+
+Input#7
+
+Refactor#7
+
+
+Input#8
+
+Refactor#8
+
+
+Input#9
+
+Refactor#9
+
+
+Input#10
+
+Refactor#10
+
+
+Input#11
+
+Refactor#11
+
+
+Input#12
+
+Refactor#12
+
+
+Input#13
+
+Refactor#13
+
+
+Input#14
+
+Refactor#14
+
+
+Input#15
+
+Refactor#15
+
+
+Input#16
+
+Refactor#16
+
+
+Input#17
+
+Refactor#17
+
+
+Input#18
+
+Refactor#18
+
+
+
+Input#19
+
+Refactor#19
+
+
+
+Input#20
+
+Refactor#20
+
+
+
+Input#21
+
+Refactor#21
+
+
+Input#22
+
+Refactor#22
+
+
+Input#23
+
+Refactor#23
+
+
+Input#24
+
+Refactor#24
+
+
+Input#25
+
+Refactor#25
+
+
+Input#26
+
+Refactor#26
+
+
+Input#27
+
+Refactor#27
+
+
+
+Input#28
+
+Refactor#28
+
+
+
+Input#29
+
+Refactor#29
+
+
+
+Input#30
+
+Refactor#30
+
+
+Input#31
+
+Refactor#31
+
+
+
+Input#32
+
+Refactor#32
+
+
+
+Input#33
+
+Refactor#33
+
+
+
+Input#34
+
+Refactor#34
+
+
+
+Input#35
+
+Refactor#35
+

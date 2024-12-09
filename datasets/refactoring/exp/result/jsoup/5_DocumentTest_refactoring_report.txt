@@ -1,0 +1,1133 @@
+File#1
+
+
+Input#1
+ @Test public void setTextPreservesDocumentStructure() {
+        Document doc = Jsoup.parse("<p>Hello</p>");
+        doc.text("Replaced");
+        assertEquals("Replaced", doc.text());
+        assertEquals("Replaced", doc.body().text());
+        assertEquals(1, doc.select("head").size());
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test', 'Magic_Number_Test']
+Refactor#1
+private Document setupTextPreservesDocumentStructure() {
+    return Jsoup.parse("<p>Hello</p>");
+}
+
+@Test
+public void testTextPreservesDocumentStructure_TextContent() {
+    Document doc = setupTextPreservesDocumentStructure();
+    doc.text("Replaced");
+    assertEquals("The document text should be replaced", "Replaced", doc.text());
+    assertEquals("The body text should reflect the replacement", "Replaced", doc.body().text());
+}
+
+@Test
+public void testTextPreservesDocumentStructure_HeadElement() {
+    Document doc = setupTextPreservesDocumentStructure();
+    doc.text("Replaced");
+    int expectedHeadElementCount = 1;
+    assertEquals("The document should contain exactly one head element", expectedHeadElementCount, doc.select("head").size());
+}
+
+Input#2
+ @Test public void testTitles() {
+        Document noTitle = Jsoup.parse("<p>Hello</p>");
+        Document withTitle = Jsoup.parse("<title>First</title><title>Ignore</title><p>Hello</p>");
+
+        assertEquals("", noTitle.title());
+        noTitle.title("Hello");
+        assertEquals("Hello", noTitle.title());
+        assertEquals("Hello", noTitle.select("title").first().text());
+
+        assertEquals("First", withTitle.title());
+        withTitle.title("Hello");
+        assertEquals("Hello", withTitle.title());
+        assertEquals("Hello", withTitle.select("title").first().text());
+
+        Document normaliseTitle = Jsoup.parse("<title>   Hello\nthere   \n   now   \n");
+        assertEquals("Hello there now", normaliseTitle.title());
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+Refactor#2
+
+private Document setupNoTitle() {
+    return Jsoup.parse("<p>Hello</p>");
+}
+
+private Document setupWithTitle() {
+    return Jsoup.parse("<title>First</title><title>Ignore</title><p>Hello</p>");
+}
+
+private Document setupNormaliseTitle() {
+    return Jsoup.parse("<title>   Hello\nthere   \n   now   \n");
+}
+
+@Test
+public void testNoTitle() {
+    Document noTitle = setupNoTitle();
+    assertEquals("", noTitle.title(), "Initial title should be empty");
+    noTitle.title("Hello");
+    assertEquals("Hello", noTitle.title(), "Title should be set to 'Hello'");
+    assertEquals("Hello", noTitle.select("title").first().text(), "Title element text should be 'Hello'");
+}
+
+@Test
+public void testWithTitle() {
+    Document withTitle = setupWithTitle();
+    assertEquals("First", withTitle.title(), "Initial title should be 'First'");
+    withTitle.title("Hello");
+    assertEquals("Hello", withTitle.title(), "Title should be set to 'Hello'");
+    assertEquals("Hello", withTitle.select("title").first().text(), "Title element text should be 'Hello'");
+}
+
+@Test
+public void testNormaliseTitle() {
+    Document normaliseTitle = setupNormaliseTitle();
+    assertEquals("Hello there now", normaliseTitle.title(), "Normalized title should be 'Hello there now'");
+}
+
+
+Input#3
+ @Test public void testOutputEncoding() {
+        Document doc = Jsoup.parse("<p title=π>π & < > </p>");
+        // default is utf-8
+        assertEquals("<p title=\"π\">π &amp; &lt; &gt; </p>", doc.body().html());
+        assertEquals("UTF-8", doc.outputSettings().charset().name());
+
+        doc.outputSettings().charset("ascii");
+        assertEquals(Entities.EscapeMode.base, doc.outputSettings().escapeMode());
+        assertEquals("<p title=\"&#x3c0;\">&#x3c0; &amp; &lt; &gt; </p>", doc.body().html());
+
+        doc.outputSettings().escapeMode(Entities.EscapeMode.extended);
+        assertEquals("<p title=\"&pi;\">&pi; &amp; &lt; &gt; </p>", doc.body().html());
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+Refactor#3
+
+private Document setupTestOutputEncoding() {
+    Document doc = Jsoup.parse("<p title=π>π & < > </p>");
+    return doc;
+}
+
+@Test
+public void testOutputEncoding_DefaultCharset() {
+    Document doc = setupTestOutputEncoding();
+    assertEquals("<p title=\"π\">π &amp; &lt; &gt; </p>", doc.body().html(), "Default charset encoding should match expected HTML output.");
+    assertEquals("UTF-8", doc.outputSettings().charset().name(), "Default charset should be UTF-8.");
+}
+
+@Test
+public void testOutputEncoding_AsciiCharset() {
+    Document doc = setupTestOutputEncoding();
+    doc.outputSettings().charset("ascii");
+    assertEquals(Entities.EscapeMode.base, doc.outputSettings().escapeMode(), "Escape mode should be base when charset is ASCII.");
+    assertEquals("<p title=\"&#x3c0;\">&#x3c0; &amp; &lt; &gt; </p>", doc.body().html(), "ASCII charset encoding should match expected HTML output.");
+}
+
+@Test
+public void testOutputEncoding_ExtendedEscapeMode() {
+    Document doc = setupTestOutputEncoding();
+    doc.outputSettings().escapeMode(Entities.EscapeMode.extended);
+    assertEquals("<p title=\"&pi;\">&pi; &amp; &lt; &gt; </p>", doc.body().html(), "Extended escape mode encoding should match expected HTML output.");
+}
+
+
+Input#4
+ @Test public void testXhtmlReferences() {
+        Document doc = Jsoup.parse("&lt; &gt; &amp; &quot; &apos; &times;");
+        doc.outputSettings().escapeMode(Entities.EscapeMode.xhtml);
+        assertEquals("&lt; &gt; &amp; \" ' ×", doc.body().html());
+    }
+Smell List: ['Eager_Test']
+Refactor#4
+Document doc;
+
+private void setupTestXhtmlReferences() {
+    doc = Jsoup.parse("&lt; &gt; &amp; &quot; &apos; &times;");
+
+}
+
+@Test
+public void testXhtmlReferences() {
+    setupTestXhtmlReferences();
+    doc.outputSettings().escapeMode(Entities.EscapeMode.xhtml);
+    assertEquals("&lt; &gt; &amp; \" ' ×", doc.body().html());
+}
+
+
+Input#5
+ @Test public void testClone() {
+        Document doc = Jsoup.parse("<title>Hello</title> <p>One<p>Two");
+        Document clone = doc.clone();
+
+        assertEquals("<html><head><title>Hello</title> </head><body><p>One</p><p>Two</p></body></html>", TextUtil.stripNewlines(clone.html()));
+        clone.title("Hello there");
+        clone.select("p").first().text("One more").attr("id", "1");
+        assertEquals("<html><head><title>Hello there</title> </head><body><p id=\"1\">One more</p><p>Two</p></body></html>", TextUtil.stripNewlines(clone.html()));
+        assertEquals("<html><head><title>Hello</title> </head><body><p>One</p><p>Two</p></body></html>", TextUtil.stripNewlines(doc.html()));
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+Refactor#5
+private Document setupTestClone() {
+    Document doc = Jsoup.parse("<title>Hello</title> <p>One<p>Two");
+    return doc;
+}
+
+@Test
+public void testClone_InitialClone() {
+    Document doc = setupTestClone();
+    Document clone = doc.clone();
+
+    assertEquals("<html><head><title>Hello</title> </head><body><p>One</p><p>Two</p></body></html>", TextUtil.stripNewlines(clone.html()), "Initial clone should match the original document");
+}
+
+@Test
+public void testClone_ModifyClone() {
+    Document doc = setupTestClone();
+    Document clone = doc.clone();
+
+    clone.title("Hello there");
+    clone.select("p").first().text("One more").attr("id", "1");
+
+    assertEquals("<html><head><title>Hello there</title> </head><body><p id=\"1\">One more</p><p>Two</p></body></html>", TextUtil.stripNewlines(clone.html()), "Modified clone should reflect changes");
+}
+
+@Test
+public void testClone_OriginalUnchanged() {
+    Document doc = setupTestClone();
+    Document clone = doc.clone();
+
+    clone.title("Hello there");
+    clone.select("p").first().text("One more").attr("id", "1");
+
+    assertEquals("<html><head><title>Hello</title> </head><body><p>One</p><p>Two</p></body></html>", TextUtil.stripNewlines(doc.html()), "Original document should remain unchanged after cloning and modifying the clone");
+}
+
+
+Input#6
+ @Test public void testClonesDeclarations() {
+        Document doc = Jsoup.parse("<!DOCTYPE html><html><head><title>Doctype test");
+        Document clone = doc.clone();
+
+        assertEquals(doc.html(), clone.html());
+        assertEquals("<!doctype html><html><head><title>Doctype test</title></head><body></body></html>",
+                TextUtil.stripNewlines(clone.html()));
+    }
+Smell List: ['Assertion_Roulette']
+Refactor#6
+@Test
+public void testClonesDeclarations() {
+    Document doc = Jsoup.parse("<!DOCTYPE html><html><head><title>Doctype test");
+    Document clone = doc.clone();
+
+    assertEquals(doc.html(), clone.html(), "The HTML content of the cloned document should match the original document");
+    assertEquals("<!doctype html><html><head><title>Doctype test</title></head><body></body></html>",
+            TextUtil.stripNewlines(clone.html()), "The stripped newline HTML content of the cloned document should match the expected output");
+}
+
+
+Input#7
+ @Test public void testLocation() throws IOException {
+    	File in = ParseTest.getFile("/htmltests/yahoo-jp.html");
+        Document doc = Jsoup.parse(in, "UTF-8", "http://www.yahoo.co.jp/index.html");
+        String location = doc.location();
+        String baseUri = doc.baseUri();
+        assertEquals("http://www.yahoo.co.jp/index.html",location);
+        assertEquals("http://www.yahoo.co.jp/_ylh=X3oDMTB0NWxnaGxsBF9TAzIwNzcyOTYyNjUEdGlkAzEyBHRtcGwDZ2Ex/",baseUri);
+        in = ParseTest.getFile("/htmltests/nyt-article-1.html");
+        doc = Jsoup.parse(in, null, "http://www.nytimes.com/2010/07/26/business/global/26bp.html?hp");
+        location = doc.location();
+        baseUri = doc.baseUri();
+        assertEquals("http://www.nytimes.com/2010/07/26/business/global/26bp.html?hp",location);
+        assertEquals("http://www.nytimes.com/2010/07/26/business/global/26bp.html?hp",baseUri);
+    }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing', 'Mystery_Guest', 'Eager_Test', 'Resource_Optimism']
+
+Refactor#7
+    @TempDir
+    public File tempDir;
+
+    private File yahooFile;
+    private File nytFile;
+
+    @BeforeEach
+    public void setUp() throws IOException {
+        yahooFile = new File(tempDir, "/htmltests/yahoo-jp.html");
+        assertTrue(yahooFile.createNewFile(), "Failed to create Yahoo file");
+
+        nytFile = new File(tempDir, "nyt-article-1.html");
+        assertTrue(nytFile.createNewFile(), "Failed to create NYT file");
+    }
+
+    @Test
+    public void testYahooLocationAndBaseUri() {
+        File in = yahooFile;
+        if (!in.exists() || in.isDirectory()) {
+            fail("File or directory does not exist or is not of the expected type.");
+        }
+        Document doc = Jsoup.parse(in, "UTF-8", "http://www.yahoo.co.jp/index.html");
+        String location = doc.location();
+        String baseUri = doc.baseUri();
+        assertEquals("http://www.yahoo.co.jp/index.html", location, "Yahoo location should match the expected URL");
+        assertEquals("http://www.yahoo.co.jp/_ylh=X3oDMTB0NWxnaGxsBF9TAzIwNzcyOTYyNjUEdGlkAzEyBHRtcGwDZ2Ex/", baseUri, "Yahoo base URI should match the expected URL");
+    }
+
+    @Test
+    public void testNytimesLocationAndBaseUri() {
+        File in = nytFile;
+        if (!in.exists() || in.isDirectory()) {
+            fail("File or directory does not exist or is not of the expected type.");
+        }
+        Document doc = Jsoup.parse(in, null, "http://www.nytimes.com/2010/07/26/business/global/26bp.html?hp");
+        String location = doc.location();
+        String baseUri = doc.baseUri();
+        assertEquals("http://www.nytimes.com/2010/07/26/business/global/26bp.html?hp", location, "NYT location should match the expected URL");
+        assertEquals("http://www.nytimes.com/2010/07/26/business/global/26bp.html?hp", baseUri, "NYT base URI should match the expected URL");
+    }
+
+Input#8
+@Test public void testHtmlAndXmlSyntax() {
+        String h = "<!DOCTYPE html><body><img async checked='checked' src='&<>\"'>&lt;&gt;&amp;&quot;<foo />bar";
+        Document doc = Jsoup.parse(h);
+
+        doc.outputSettings().syntax(Syntax.html);
+        assertEquals("<!doctype html>\n" +
+                "<html>\n" +
+                " <head></head>\n" +
+                " <body>\n" +
+                "  <img async checked src=\"&amp;<>&quot;\">&lt;&gt;&amp;\"<foo />bar\n" +
+                " </body>\n" +
+                "</html>", doc.html());
+
+        doc.outputSettings().syntax(Document.OutputSettings.Syntax.xml);
+        assertEquals("<!DOCTYPE html>\n" +
+                "<html>\n" +
+                " <head></head>\n" +
+                " <body>\n" +
+                "  <img async=\"\" checked=\"checked\" src=\"&amp;<>&quot;\" />&lt;&gt;&amp;\"<foo />bar\n" +
+                " </body>\n" +
+                "</html>", doc.html());
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+Refactor#8
+private Document setupTestHtmlAndXmlSyntax() {
+    String h = "<!DOCTYPE html><body><img async checked='checked' src='&<>\"'>&lt;&gt;&amp;&quot;<foo />bar";
+    Document doc = Jsoup.parse(h);
+    return doc;
+}
+
+@Test
+public void testHtmlSyntax() {
+    Document doc = setupTestHtmlAndXmlSyntax();
+    doc.outputSettings().syntax(Document.OutputSettings.Syntax.html);
+    assertEquals("<!doctype html>\n" +
+            "<html>\n" +
+            " <head></head>\n" +
+            " <body>\n" +
+            "  <img async checked src=\"&amp;<>&quot;\">&lt;&gt;&amp;\"<foo />bar\n" +
+            " </body>\n" +
+            "</html>", doc.html(), "HTML syntax output should match expected HTML");
+}
+
+@Test
+public void testXmlSyntax() {
+    Document doc = setupTestHtmlAndXmlSyntax();
+    doc.outputSettings().syntax(Document.OutputSettings.Syntax.xml);
+    assertEquals("<!DOCTYPE html>\n" +
+            "<html>\n" +
+            " <head></head>\n" +
+            " <body>\n" +
+            "  <img async=\"\" checked=\"checked\" src=\"&amp;<>&quot;\" />&lt;&gt;&amp;\"<foo />bar\n" +
+            " </body>\n" +
+            "</html>", doc.html(), "XML syntax output should match expected XML");
+}
+
+
+Input#9
+ @Test public void htmlParseDefaultsToHtmlOutputSyntax() {
+        Document doc = Jsoup.parse("x");
+        assertEquals(Syntax.html, doc.outputSettings().syntax());
+    }
+Smell List: ['Eager_Test']
+Refactor#9
+private Document setupHtmlParseDefaultsToHtmlOutputSyntax() {
+    return Jsoup.parse("x");
+}
+
+@Test
+public void testHtmlParseDefaultsToHtmlOutputSyntax_Syntax() {
+    Document doc = setupHtmlParseDefaultsToHtmlOutputSyntax();
+    assertEquals(Syntax.html, doc.outputSettings().syntax());
+}
+
+
+Input#10
+ @Test public void testHtmlAppendable() {
+    	String htmlContent = "<html><head><title>Hello</title></head><body><p>One</p><p>Two</p></body></html>";
+    	Document document = Jsoup.parse(htmlContent);
+    	OutputSettings outputSettings = new OutputSettings();
+
+    	outputSettings.prettyPrint(false);
+    	document.outputSettings(outputSettings);
+    	assertEquals(htmlContent, document.html(new StringWriter()).toString());
+    }
+Smell List: ['Sensitive_Equality', 'Eager_Test']
+Refactor#10
+private Document setupTestHtmlAppendable() {
+    String htmlContent = "<html><head><title>Hello</title></head><body><p>One</p><p>Two</p></body></html>";
+    Document document = Jsoup.parse(htmlContent);
+    OutputSettings outputSettings = new OutputSettings();
+    outputSettings.prettyPrint(false);
+    document.outputSettings(outputSettings);
+    return document;
+}
+
+@Test
+public void testHtmlAppendable_HtmlContent() {
+    Document document = setupTestHtmlAppendable();
+    String expectedHtmlContent = "<html><head><title>Hello</title></head><body><p>One</p><p>Two</p></body></html>";
+    String actualHtmlContent = document.html(new StringWriter()).toString();
+    assertEquals(expectedHtmlContent, actualHtmlContent);
+}
+
+Input#11
+ @Test public void DocumentsWithSameContentAreEqual() throws Exception {
+        Document docA = Jsoup.parse("<div/>One");
+        Document docB = Jsoup.parse("<div/>One");
+        Document docC = Jsoup.parse("<div/>Two");
+
+        assertFalse(docA.equals(docB));
+        assertTrue(docA.equals(docA));
+        assertEquals(docA.hashCode(), docA.hashCode());
+        assertFalse(docA.hashCode() == docC.hashCode());
+    }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing', 'Redundant_Assertion']
+Refactor#11
+@Test
+public void documentsWithSameContentAreEqual() {
+    assertDoesNotThrow(() -> {
+        Document docA = Jsoup.parse("<div/>One");
+        Document docB = Jsoup.parse("<div/>One");
+        Document docC = Jsoup.parse("<div/>Two");
+
+        assertFalse(docA.equals(docB), "Documents with different content should not be equal");
+        assertTrue(docA.equals(docA), "A document should be equal to itself");
+        // assertEquals(docA.hashCode(), docA.hashCode()); // Redundant assertion, commented out for clarity.
+        assertFalse(docA.hashCode() == docC.hashCode(), "Hash codes of documents with different content should not be equal");
+    });
+}
+
+
+Input#12
+ @Test public void DocumentsWithSameContentAreVerifiable() throws Exception {
+        Document docA = Jsoup.parse("<div/>One");
+        Document docB = Jsoup.parse("<div/>One");
+        Document docC = Jsoup.parse("<div/>Two");
+
+        assertTrue(docA.hasSameValue(docB));
+        assertFalse(docA.hasSameValue(docC));
+    }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing']
+
+Refactor#12
+@Test
+public void DocumentsWithSameContentAreVerifiable() {
+    assertDoesNotThrow(() -> {
+        Document docA = Jsoup.parse("<div/>One");
+        Document docB = Jsoup.parse("<div/>One");
+        Document docC = Jsoup.parse("<div/>Two");
+
+        assertTrue(docA.hasSameValue(docB), "Documents with the same content should be considered equal");
+        assertFalse(docA.hasSameValue(docC), "Documents with different content should not be considered equal");
+    });
+}
+
+Input#13
+@Test
+    public void testMetaCharsetUpdateUtf8() {
+        final Document doc = createHtmlDocument("changeThis");
+        doc.updateMetaCharsetElement(true);
+        doc.charset(Charset.forName(charsetUtf8));
+
+        final String htmlCharsetUTF8 = "<html>\n" +
+                                        " <head>\n" +
+                                        "  <meta charset=\"" + charsetUtf8 + "\">\n" +
+                                        " </head>\n" +
+                                        " <body></body>\n" +
+                                        "</html>";
+        assertEquals(htmlCharsetUTF8, doc.toString());
+
+        Element selectedElement = doc.select("meta[charset]").first();
+        assertEquals(charsetUtf8, doc.charset().name());
+        assertEquals(charsetUtf8, selectedElement.attr("charset"));
+        assertEquals(doc.charset(), doc.outputSettings().charset());
+    }
+Smell List: ['Assertion_Roulette', 'Sensitive_Equality', 'Eager_Test']
+Refactor#13
+private Document setupTestMetaCharsetUpdateUtf8() {
+    final Document doc = createHtmlDocument("changeThis");
+    doc.updateMetaCharsetElement(true);
+    doc.charset(Charset.forName(charsetUtf8));
+    return doc;
+}
+
+@Test
+public void testMetaCharsetUpdateUtf8_HtmlStructure() {
+    Document doc = setupTestMetaCharsetUpdateUtf8();
+
+    String actualValue = doc.toString();
+    String expectedHtmlCharsetUTF8 = "<html>\n" +
+                                      " <head>\n" +
+                                      "  <meta charset=\"" + charsetUtf8 + "\">\n" +
+                                      " </head>\n" +
+                                      " <body></body>\n" +
+                                      "</html>";
+    assertEquals(expectedHtmlCharsetUTF8, actualValue, "The HTML structure should match the expected UTF-8 charset structure");
+}
+
+@Test
+public void testMetaCharsetUpdateUtf8_Charset() {
+    Document doc = setupTestMetaCharsetUpdateUtf8();
+
+    assertEquals(charsetUtf8, doc.charset().name(), "The document charset should be set to UTF-8");
+}
+
+@Test
+public void testMetaCharsetUpdateUtf8_MetaElement() {
+    Document doc = setupTestMetaCharsetUpdateUtf8();
+
+    Element selectedElement = doc.select("meta[charset]").first();
+    assertEquals(charsetUtf8, selectedElement.attr("charset"), "The meta element charset attribute should be set to UTF-8");
+}
+
+@Test
+public void testMetaCharsetUpdateUtf8_OutputSettings() {
+    Document doc = setupTestMetaCharsetUpdateUtf8();
+
+    assertEquals(doc.charset(), doc.outputSettings().charset(), "The output settings charset should match the document charset");
+}
+
+
+Input#14
+ @Test
+    public void testMetaCharsetUpdateIso8859() {
+        final Document doc = createHtmlDocument("changeThis");
+        doc.updateMetaCharsetElement(true);
+        doc.charset(Charset.forName(charsetIso8859));
+
+        final String htmlCharsetISO = "<html>\n" +
+                                        " <head>\n" +
+                                        "  <meta charset=\"" + charsetIso8859 + "\">\n" +
+                                        " </head>\n" +
+                                        " <body></body>\n" +
+                                        "</html>";
+        assertEquals(htmlCharsetISO, doc.toString());
+
+        Element selectedElement = doc.select("meta[charset]").first();
+        assertEquals(charsetIso8859, doc.charset().name());
+        assertEquals(charsetIso8859, selectedElement.attr("charset"));
+        assertEquals(doc.charset(), doc.outputSettings().charset());
+    }
+Smell List: ['Assertion_Roulette', 'Sensitive_Equality', 'Eager_Test']
+Refactor#14
+
+
+private Document setupTestMetaCharsetUpdateIso8859() {
+    final Document doc = createHtmlDocument("changeThis");
+    doc.updateMetaCharsetElement(true);
+    doc.charset(Charset.forName(charsetIso8859));
+    return doc;
+}
+
+@Test
+public void testMetaCharsetUpdateIso8859_HtmlStructure() {
+    Document doc = setupTestMetaCharsetUpdateIso8859();
+
+    final String expectedHtmlCharsetISO = "<html>\n" +
+                                          " <head>\n" +
+                                          "  <meta charset=\"" + charsetIso8859 + "\">\n" +
+                                          " </head>\n" +
+                                          " <body></body>\n" +
+                                          "</html>";
+    String actualHtml = doc.toString();
+    assertEquals(expectedHtmlCharsetISO, actualHtml, "The HTML structure should match the expected output with the correct charset.");
+}
+
+@Test
+public void testMetaCharsetUpdateIso8859_Charset() {
+    Document doc = setupTestMetaCharsetUpdateIso8859();
+
+    assertEquals(charsetIso8859, doc.charset().name(), "The document charset should be updated to ISO-8859-1.");
+}
+
+@Test
+public void testMetaCharsetUpdateIso8859_MetaElement() {
+    Document doc = setupTestMetaCharsetUpdateIso8859();
+
+    Element selectedElement = doc.select("meta[charset]").first();
+    assertEquals(charsetIso8859, selectedElement.attr("charset"), "The meta element's charset attribute should be set to ISO-8859-1.");
+}
+
+@Test
+public void testMetaCharsetUpdateIso8859_OutputSettings() {
+    Document doc = setupTestMetaCharsetUpdateIso8859();
+
+    assertEquals(doc.charset(), doc.outputSettings().charset(), "The output settings charset should match the document charset.");
+}
+Input#15
+ @Test
+    public void testMetaCharsetUpdateNoCharset() {
+        final Document docNoCharset = Document.createShell("");
+        docNoCharset.updateMetaCharsetElement(true);
+        docNoCharset.charset(Charset.forName(charsetUtf8));
+
+        assertEquals(charsetUtf8, docNoCharset.select("meta[charset]").first().attr("charset"));
+
+        final String htmlCharsetUTF8 = "<html>\n" +
+                                        " <head>\n" +
+                                        "  <meta charset=\"" + charsetUtf8 + "\">\n" +
+                                        " </head>\n" +
+                                        " <body></body>\n" +
+                                        "</html>";
+        assertEquals(htmlCharsetUTF8, docNoCharset.toString());
+    }
+Smell List: ['Assertion_Roulette', 'Sensitive_Equality', 'Eager_Test']
+Refactor#15
+Document docNoCharset;
+
+private void setupTestMetaCharsetUpdateNoCharset() {
+    final Document docNoCharset = Document.createShell("");
+    docNoCharset.updateMetaCharsetElement(true);
+    docNoCharset.charset(Charset.forName(charsetUtf8));
+}
+
+@Test
+public void testMetaCharsetUpdateNoCharset_MetaElement() {
+    setupTestMetaCharsetUpdateNoCharset();
+
+    String metaElementCharset = docNoCharset.select("meta[charset]").first().attr("charset");
+    assertEquals(charsetUtf8, metaElementCharset, "The charset attribute of the meta element should match the expected charset.");
+}
+
+@Test
+public void testMetaCharsetUpdateNoCharset_DocumentStructure() {
+    setupTestMetaCharsetUpdateNoCharset();
+
+    final String expectedHtmlCharsetUTF8 = "<html>\n" +
+                                            " <head>\n" +
+                                            "  <meta charset=\"" + charsetUtf8 + "\">\n" +
+                                            " </head>\n" +
+                                            " <body></body>\n" +
+                                            "</html>";
+    String actualHtml = docNoCharset.toString();
+    assertEquals(expectedHtmlCharsetUTF8, actualHtml, "The document structure should match the expected HTML structure.");
+}
+
+Input#16
+ @Test
+    public void testMetaCharsetUpdateDisabled() {
+        final Document docDisabled = Document.createShell("");
+
+        final String htmlNoCharset = "<html>\n" +
+                                        " <head></head>\n" +
+                                        " <body></body>\n" +
+                                        "</html>";
+        assertEquals(htmlNoCharset, docDisabled.toString());
+        assertNull(docDisabled.select("meta[charset]").first());
+    }
+Smell List: ['Assertion_Roulette', 'Sensitive_Equality']
+Refactor#16
+@Test
+public void testMetaCharsetUpdateDisabled() {
+    final Document docDisabled = Document.createShell("");
+
+    final String htmlNoCharset = "<html>\n" +
+                                    " <head></head>\n" +
+                                    " <body></body>\n" +
+                                    "</html>";
+    String actualHtml = docDisabled.toString();
+    assertEquals(htmlNoCharset, actualHtml, "HTML content should match the expected structure without charset meta tag");
+    assertNull(docDisabled.select("meta[charset]").first(), "No meta charset tag should be present in the document");
+}
+
+Input#17
+
+Refactor#17
+
+
+Input#18
+@Test
+    public void testMetaCharsetUpdateEnabledAfterCharsetChange() {
+        final Document doc = createHtmlDocument("dontTouch");
+        doc.charset(Charset.forName(charsetUtf8));
+
+        Element selectedElement = doc.select("meta[charset]").first();
+        assertEquals(charsetUtf8, selectedElement.attr("charset"));
+        assertTrue(doc.select("meta[name=charset]").isEmpty());
+    }
+Smell List: ['Assertion_Roulette']
+Refactor#18
+@Test
+public void testMetaCharsetUpdateEnabledAfterCharsetChange() {
+    final Document doc = createHtmlDocument("dontTouch");
+    doc.charset(Charset.forName(charsetUtf8));
+
+    Element selectedElement = doc.select("meta[charset]").first();
+    assertEquals(charsetUtf8, selectedElement.attr("charset"), "The charset attribute of the meta element should match the updated charset.");
+    assertTrue(doc.select("meta[name=charset]").isEmpty(), "There should be no meta elements with name='charset' after updating the charset.");
+}
+
+
+Input#19
+ @Test
+    public void testMetaCharsetUpdateCleanup() {
+        final Document doc = createHtmlDocument("dontTouch");
+        doc.updateMetaCharsetElement(true);
+        doc.charset(Charset.forName(charsetUtf8));
+
+        final String htmlCharsetUTF8 = "<html>\n" +
+                                        " <head>\n" +
+                                        "  <meta charset=\"" + charsetUtf8 + "\">\n" +
+                                        " </head>\n" +
+                                        " <body></body>\n" +
+                                        "</html>";
+
+        assertEquals(htmlCharsetUTF8, doc.toString());
+    }
+Smell List: ['Sensitive_Equality', 'Eager_Test']
+Refactor#19
+
+private Document createAndSetupDocument() {
+    final Document doc = createHtmlDocument("dontTouch");
+    doc.updateMetaCharsetElement(true);
+    doc.charset(Charset.forName(charsetUtf8));
+    return doc;
+}
+
+@Test
+public void testMetaCharsetUpdateCharset() {
+    final Document doc = createAndSetupDocument();
+    final String expectedHtmlCharsetUTF8 = "<html>\n" +
+                                            " <head>\n" +
+                                            "  <meta charset=\"" + charsetUtf8 + "\">\n" +
+                                            " </head>\n" +
+                                            " <body></body>\n" +
+                                            "</html>";
+    final String actualHtml = doc.toString();
+    assertEquals(expectedHtmlCharsetUTF8, actualHtml);
+}
+
+
+
+Input#20
+@Test
+    public void testMetaCharsetUpdateXmlUtf8() {
+        final Document doc = createXmlDocument("1.0", "changeThis", true);
+        doc.updateMetaCharsetElement(true);
+        doc.charset(Charset.forName(charsetUtf8));
+
+        final String xmlCharsetUTF8 = "<?xml version=\"1.0\" encoding=\"" + charsetUtf8 + "\"?>\n" +
+                                        "<root>\n" +
+                                        " node\n" +
+                                        "</root>";
+        assertEquals(xmlCharsetUTF8, doc.toString());
+
+        XmlDeclaration selectedNode = (XmlDeclaration) doc.childNode(0);
+        assertEquals(charsetUtf8, doc.charset().name());
+        assertEquals(charsetUtf8, selectedNode.attr("encoding"));
+        assertEquals(doc.charset(), doc.outputSettings().charset());
+    }
+Smell List: ['Assertion_Roulette', 'Sensitive_Equality', 'Eager_Test']
+Refactor#20
+
+private Document setupTestMetaCharsetUpdateXmlUtf8() {
+    final Document doc = createXmlDocument("1.0", "changeThis", true);
+    doc.updateMetaCharsetElement(true);
+    doc.charset(Charset.forName(charsetUtf8));
+    return doc;
+}
+
+@Test
+public void testMetaCharsetUpdateXmlUtf8_ToString() {
+    final Document doc = setupTestMetaCharsetUpdateXmlUtf8();
+    final String xmlCharsetUTF8 = "<?xml version=\"1.0\" encoding=\"" + charsetUtf8 + "\"?>\n" +
+                                  "<root>\n" +
+                                  " node\n" +
+                                  "</root>";
+    String actualValue = doc.toString();
+    assertEquals(xmlCharsetUTF8, actualValue, "XML document string representation should match expected UTF-8 encoded XML");
+}
+
+@Test
+public void testMetaCharsetUpdateXmlUtf8_ChildNode() {
+    final Document doc = setupTestMetaCharsetUpdateXmlUtf8();
+    XmlDeclaration selectedNode = (XmlDeclaration) doc.childNode(0);
+    assertEquals(charsetUtf8, selectedNode.attr("encoding"), "Encoding attribute of the XML declaration should be set to UTF-8");
+}
+
+@Test
+public void testMetaCharsetUpdateXmlUtf8_DocumentCharset() {
+    final Document doc = setupTestMetaCharsetUpdateXmlUtf8();
+    assertEquals(charsetUtf8, doc.charset().name(), "Document charset should be set to UTF-8");
+}
+
+@Test
+public void testMetaCharsetUpdateXmlUtf8_OutputSettingsCharset() {
+    final Document doc = setupTestMetaCharsetUpdateXmlUtf8();
+    assertEquals(doc.charset(), doc.outputSettings().charset(), "Output settings charset should match the document charset");
+}
+
+
+Input#21
+ @Test
+    public void testMetaCharsetUpdateXmlIso8859() {
+        final Document doc = createXmlDocument("1.0", "changeThis", true);
+        doc.updateMetaCharsetElement(true);
+        doc.charset(Charset.forName(charsetIso8859));
+
+        final String xmlCharsetISO = "<?xml version=\"1.0\" encoding=\"" + charsetIso8859 + "\"?>\n" +
+                                        "<root>\n" +
+                                        " node\n" +
+                                        "</root>";
+        assertEquals(xmlCharsetISO, doc.toString());
+
+        XmlDeclaration selectedNode = (XmlDeclaration) doc.childNode(0);
+        assertEquals(charsetIso8859, doc.charset().name());
+        assertEquals(charsetIso8859, selectedNode.attr("encoding"));
+        assertEquals(doc.charset(), doc.outputSettings().charset());
+    }
+Smell List: ['Assertion_Roulette', 'Sensitive_Equality', 'Eager_Test']
+Refactor#21
+
+private Document setupTestMetaCharsetUpdateXmlIso8859() {
+    final Document doc = createXmlDocument("1.0", "changeThis", true);
+    doc.updateMetaCharsetElement(true);
+    doc.charset(Charset.forName(charsetIso8859));
+    return doc;
+}
+
+@Test
+public void testMetaCharsetUpdateXmlIso8859_XmlContent() {
+    final Document doc = setupTestMetaCharsetUpdateXmlIso8859();
+
+    final String expectedXmlCharsetISO = "<?xml version=\"1.0\" encoding=\"" + charsetIso8859 + "\"?>\n" +
+                                         "<root>\n" +
+                                         " node\n" +
+                                         "</root>";
+    String actualXmlContent = doc.toString();
+    assertEquals(expectedXmlCharsetISO, actualXmlContent, "XML content should match the expected ISO-8859-1 encoding");
+}
+
+@Test
+public void testMetaCharsetUpdateXmlIso8859_Charset() {
+    final Document doc = setupTestMetaCharsetUpdateXmlIso8859();
+
+    assertEquals(charsetIso8859, doc.charset().name(), "Document charset should be ISO-8859-1");
+}
+
+@Test
+public void testMetaCharsetUpdateXmlIso8859_XmlDeclarationEncoding() {
+    final Document doc = setupTestMetaCharsetUpdateXmlIso8859();
+
+    XmlDeclaration selectedNode = (XmlDeclaration) doc.childNode(0);
+    assertEquals(charsetIso8859, selectedNode.attr("encoding"), "XML declaration encoding should be ISO-8859-1");
+}
+
+@Test
+public void testMetaCharsetUpdateXmlIso8859_OutputSettingsCharset() {
+    final Document doc = setupTestMetaCharsetUpdateXmlIso8859();
+
+    assertEquals(doc.charset(), doc.outputSettings().charset(), "Output settings charset should match the document charset");
+}
+
+
+Input#22
+ @Test
+    public void testMetaCharsetUpdateXmlNoCharset() {
+        final Document doc = createXmlDocument("1.0", "none", false);
+        doc.updateMetaCharsetElement(true);
+        doc.charset(Charset.forName(charsetUtf8));
+
+        final String xmlCharsetUTF8 = "<?xml version=\"1.0\" encoding=\"" + charsetUtf8 + "\"?>\n" +
+                                        "<root>\n" +
+                                        " node\n" +
+                                        "</root>";
+        assertEquals(xmlCharsetUTF8, doc.toString());
+
+        XmlDeclaration selectedNode = (XmlDeclaration) doc.childNode(0);
+        assertEquals(charsetUtf8, selectedNode.attr("encoding"));
+    }
+Smell List: ['Assertion_Roulette', 'Sensitive_Equality', 'Eager_Test']
+Refactor#22
+
+private Document setupTestMetaCharsetUpdateXmlNoCharset() {
+    final Document doc = createXmlDocument("1.0", "none", false);
+    doc.updateMetaCharsetElement(true);
+    doc.charset(Charset.forName(charsetUtf8));
+    return doc;
+}
+
+@Test
+public void testMetaCharsetUpdateXmlNoCharset_DocumentToString() {
+    Document doc = setupTestMetaCharsetUpdateXmlNoCharset();
+    String expectedXmlCharsetUTF8 = "<?xml version=\"1.0\" encoding=\"" + charsetUtf8 + "\"?>\n" +
+                                    "<root>\n" +
+                                    " node\n" +
+                                    "</root>";
+    String actualXmlCharsetUTF8 = doc.toString();
+    assertEquals(expectedXmlCharsetUTF8, actualXmlCharsetUTF8, "The document's string representation should match the expected XML with UTF-8 charset");
+}
+
+@Test
+public void testMetaCharsetUpdateXmlNoCharset_XmlDeclarationEncoding() {
+    Document doc = setupTestMetaCharsetUpdateXmlNoCharset();
+    XmlDeclaration selectedNode = (XmlDeclaration) doc.childNode(0);
+    assertEquals(charsetUtf8, selectedNode.attr("encoding"), "The encoding attribute of the XML declaration should be set to UTF-8");
+}
+
+
+Input#23
+ @Test
+    public void testMetaCharsetUpdateXmlDisabled() {
+        final Document doc = createXmlDocument("none", "none", false);
+
+        final String xmlNoCharset = "<root>\n" +
+                                    " node\n" +
+                                    "</root>";
+        assertEquals(xmlNoCharset, doc.toString());
+    }
+Smell List: ['Sensitive_Equality']
+Refactor#23
+
+@Test
+public void testMetaCharsetUpdateXmlDisabled() {
+    final Document doc = createXmlDocument("none", "none", false);
+
+    final String xmlNoCharset = "<root>\n" +
+                                " node\n" +
+                                "</root>";
+    String actualValue = doc.toString();
+    assertEquals(xmlNoCharset, actualValue);
+}
+
+
+Input#24
+ @Test
+    public void testMetaCharsetUpdateXmlDisabledNoChanges() {
+        final Document doc = createXmlDocument("dontTouch", "dontTouch", true);
+
+        final String xmlCharset = "<?xml version=\"dontTouch\" encoding=\"dontTouch\"?>\n" +
+                                    "<root>\n" +
+                                    " node\n" +
+                                    "</root>";
+        assertEquals(xmlCharset, doc.toString());
+
+        XmlDeclaration selectedNode = (XmlDeclaration) doc.childNode(0);
+        assertEquals("dontTouch", selectedNode.attr("encoding"));
+        assertEquals("dontTouch", selectedNode.attr("version"));
+    }
+Smell List: ['Assertion_Roulette', 'Sensitive_Equality']
+Refactor#24
+
+@Test
+public void testMetaCharsetUpdateXmlDisabledNoChanges() {
+    final Document doc = createXmlDocument("dontTouch", "dontTouch", true);
+
+    final String xmlCharset = "<?xml version=\"dontTouch\" encoding=\"dontTouch\"?>\n" +
+                                "<root>\n" +
+                                " node\n" +
+                                "</root>";
+    String actualDocString = doc.toString();
+    assertEquals(xmlCharset, actualDocString, "The document string should match the expected XML charset");
+
+    XmlDeclaration selectedNode = (XmlDeclaration) doc.childNode(0);
+    assertEquals("dontTouch", selectedNode.attr("encoding"), "The encoding attribute should remain 'dontTouch'");
+    assertEquals("dontTouch", selectedNode.attr("version"), "The version attribute should remain 'dontTouch'");
+}
+
+Input#25
+ @Test
+    public void testShiftJisRoundtrip() throws Exception {
+        String input =
+                "<html>"
+                        +   "<head>"
+                        +     "<meta http-equiv=\"content-type\" content=\"text/html; charset=Shift_JIS\" />"
+                        +   "</head>"
+                        +   "<body>"
+                        +     "before&nbsp;after"
+                        +   "</body>"
+                        + "</html>";
+        InputStream is = new ByteArrayInputStream(input.getBytes(Charset.forName("ASCII")));
+
+        Document doc = Jsoup.parse(is, null, "http://example.com");
+        doc.outputSettings().escapeMode(Entities.EscapeMode.xhtml);
+
+        String output = new String(doc.html().getBytes(doc.outputSettings().charset()), doc.outputSettings().charset());
+
+        assertFalse("Should not have contained a '?'.", output.contains("?"));
+        assertTrue("Should have contained a '&#xa0;' or a '&nbsp;'.",
+                output.contains("&#xa0;") || output.contains("&nbsp;"));
+    }
+Smell List: ['Exception_Catching_Throwing', 'Eager_Test']
+Refactor#25
+private Document setupTestShiftJisRoundtrip() {
+        String input =
+                "<html>"
+                        +   "<head>"
+                        +     "<meta http-equiv=\"content-type\" content=\"text/html; charset=Shift_JIS\" />"
+                        +   "</head>"
+                        +   "<body>"
+                        +     "before&nbsp;after"
+                        +   "</body>"
+                        + "</html>";
+        InputStream is = new ByteArrayInputStream(input.getBytes(Charset.forName("ASCII")));
+        Document doc = Jsoup.parse(is, null, "http://example.com");
+        doc.outputSettings().escapeMode(Entities.EscapeMode.xhtml);
+        return doc;
+    }
+
+    @Test
+    public void testShiftJisRoundtrip_NoQuestionMark() {
+        Document doc = setupTestShiftJisRoundtrip();
+        String output = new String(doc.html().getBytes(doc.outputSettings().charset()), doc.outputSettings().charset());
+        assertFalse("Should not have contained a '?'.", output.contains("?"));
+    }
+
+    @Test
+    public void testShiftJisRoundtrip_NbspPresence() {
+        Document doc = setupTestShiftJisRoundtrip();
+        String output = new String(doc.html().getBytes(doc.outputSettings().charset()), doc.outputSettings().charset());
+        assertTrue("Should have contained a '&#xa0;' or a '&nbsp;'.",
+                output.contains("&#xa0;") || output.contains("&nbsp;"));
+    }
+
+Input#26
+@Test public void parseAndHtmlOnDifferentThreads() throws InterruptedException {
+        String html = "<p>Alrighty then it's not \uD83D\uDCA9. <span>Next</span></p>"; // 💩
+        String asci = "<p>Alrighty then it's not &#x1f4a9;. <span>Next</span></p>";
+
+        final Document doc = Jsoup.parse(html);
+        final String[] out = new String[1];
+        final Elements p = doc.select("p");
+        assertEquals(html, p.outerHtml());
+
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                out[0] = p.outerHtml();
+                doc.outputSettings().charset(StandardCharsets.US_ASCII);
+            }
+        });
+        thread.start();
+        thread.join();
+
+        assertEquals(html, out[0]);
+        assertEquals(StandardCharsets.US_ASCII, doc.outputSettings().charset());
+        assertEquals(asci, p.outerHtml());
+    }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing', 'Eager_Test']
+Refactor#26
+private Document setupParseAndHtmlOnDifferentThreads() {
+    String html = "<p>Alrighty then it's not \uD83D\uDCA9. <span>Next</span></p>"; // 💩
+    Document doc = Jsoup.parse(html);
+    Elements p = doc.select("p");
+    assertEquals(html, p.outerHtml(), "Initial HTML should match parsed HTML");
+    return doc;
+}
+
+@Test
+public void testParseAndHtmlOnDifferentThreads_InitialHTML() {
+    Document doc = setupParseAndHtmlOnDifferentThreads();
+    Elements p = doc.select("p");
+    assertEquals("<p>Alrighty then it's not \uD83D\uDCA9. <span>Next</span></p>", p.outerHtml(), "Initial HTML should match expected value");
+}
+
+@Test
+public void testParseAndHtmlOnDifferentThreads_ThreadOutput() {
+    Document doc = setupParseAndHtmlOnDifferentThreads();
+    final String[] out = new String[1];
+    final Elements p = doc.select("p");
+
+    assertDoesNotThrow(() -> {
+        Thread thread = new Thread(() -> {
+            out[0] = p.outerHtml();
+            doc.outputSettings().charset(StandardCharsets.US_ASCII);
+        });
+        thread.start();
+        thread.join();
+    }, "No exception should be thrown during thread execution");
+
+    assertEquals("<p>Alrighty then it's not \uD83D\uDCA9. <span>Next</span></p>", out[0], "Thread output should match initial HTML");
+    assertEquals(StandardCharsets.US_ASCII, doc.outputSettings().charset(), "Charset should be set to US_ASCII");
+    assertEquals("<p>Alrighty then it's not &#x1f4a9;. <span>Next</span></p>", p.outerHtml(), "Final HTML should be ASCII encoded");
+}
+
+
+Input#27
+ @Test public void testDocumentTypeGet() {
+        String html = "\n\n<!-- comment -->  <!doctype html><p>One</p>";
+        Document doc = Jsoup.parse(html);
+        DocumentType documentType = doc.documentType();
+        assertNotNull(documentType);
+        assertEquals("html", documentType.name());
+    }
+Context: /org/jsoup/nodes/Document
+Smell List: ['Assertion_Roulette']
+Refactor#27
+@Test
+public void testDocumentTypeGet() {
+    String html = "\n\n<!-- comment -->  <!doctype html><p>One</p>";
+    Document doc = Jsoup.parse(html);
+    DocumentType documentType = doc.documentType();
+    assertNotNull(documentType, "Document type should not be null");
+    assertEquals("html", documentType.name(), "Document type name should be 'html'");
+}
+
+
+Input#28
+
+Refactor#28
+
+
+
+Input#29
+
+Refactor#29
+
+
+
+Input#30
+
+Refactor#30
+
+
+Input#31
+
+Refactor#31
+
+
+
+Input#32
+
+Refactor#32
+
+
+
+Input#33
+
+Refactor#33
+
+
+
+Input#34
+
+Refactor#34
+
+
+
+Input#35
+
+Refactor#35
+

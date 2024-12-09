@@ -1,0 +1,857 @@
+File#1
+
+
+Input#1
+
+Refactor#1
+
+
+Input#2
+@Test
+    public void testComposeDifferentiable() {
+        UnivariateDifferentiableFunction id = new Identity();
+        Assert.assertEquals(1, FunctionUtils.compose(id, id, id).value(new DerivativeStructure(1, 1, 0, 3)).getPartialDerivative(1), EPS);
+
+        UnivariateDifferentiableFunction c = new Constant(4);
+        Assert.assertEquals(0, FunctionUtils.compose(id, c).value(new DerivativeStructure(1, 1, 0, 3)).getPartialDerivative(1), EPS);
+        Assert.assertEquals(0, FunctionUtils.compose(c, id).value(new DerivativeStructure(1, 1, 0, 3)).getPartialDerivative(1), EPS);
+
+        UnivariateDifferentiableFunction m = new Minus();
+        Assert.assertEquals(-1, FunctionUtils.compose(m).value(new DerivativeStructure(1, 1, 0, 3)).getPartialDerivative(1), EPS);
+        Assert.assertEquals(1, FunctionUtils.compose(m, m).value(new DerivativeStructure(1, 1, 0, 3)).getPartialDerivative(1), EPS);
+
+        UnivariateDifferentiableFunction inv = new Inverse();
+        Assert.assertEquals(0.25, FunctionUtils.compose(inv, m, id).value(new DerivativeStructure(1, 1, 0, 2)).getPartialDerivative(1), EPS);
+
+        UnivariateDifferentiableFunction pow = new Power(2);
+        Assert.assertEquals(108, FunctionUtils.compose(pow, pow).value(new DerivativeStructure(1, 1, 0, 3)).getPartialDerivative(1), EPS);
+
+        UnivariateDifferentiableFunction log = new Log();
+        double a = 9876.54321;
+        Assert.assertEquals(pow.value(new DerivativeStructure(1, 1, 0, a)).getPartialDerivative(1) / pow.value(a),
+                            FunctionUtils.compose(log, pow).value(new DerivativeStructure(1, 1, 0, a)).getPartialDerivative(1), EPS);
+    }
+Smell List: ['Eager_Test', 'Duplicate_Assert', 'Magic_Number_Test']
+Refactor#2
+
+    private static final double EPS = 1e-10;
+
+    private static final double INPUT_VALUE_3 = 3;
+    private static final double INPUT_VALUE_2 = 2;
+    private static final double INPUT_VALUE_A = 9876.54321;
+
+    private static final double IDENTITY_EXPECTED = 1;
+    private static final double CONSTANT_EXPECTED = 0;
+    private static final double MINUS_EXPECTED = -1;
+    private static final double INVERSE_EXPECTED = 0.25;
+    private static final double POWER_EXPECTED = 108;
+
+    private static final UnivariateDifferentiableFunction ID = new Identity();
+    private static final UnivariateDifferentiableFunction C = new Constant(4);
+    private static final UnivariateDifferentiableFunction M = new Minus();
+    private static final UnivariateDifferentiableFunction INV = new Inverse();
+    private static final UnivariateDifferentiableFunction POW = new Power(2);
+    private static final UnivariateDifferentiableFunction LOG = new Log();
+
+    @ParameterizedTest
+    @CsvSource({
+        "ID, ID, ID, 1",
+        "ID, C, 0",
+        "C, ID, 0",
+        "M, -1",
+        "M, M, 1",
+        "INV, M, ID, 0.25",
+        "POW, POW, 108"
+    })
+    public void testComposeDifferentiable(UnivariateDifferentiableFunction... functions) {
+        double expected = Double.parseDouble(functions[functions.length - 1].toString());
+        UnivariateDifferentiableFunction composed = FunctionUtils.compose(functions);
+        double result = composed.value(new DerivativeStructure(1, 1, 0, INPUT_VALUE_3)).getPartialDerivative(1);
+        assertEquals(expected, result, EPS);
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "2, 0.25",
+        "3, 108",
+        "9876.54321, 0.00010127314814814815"
+    })
+    public void testComposeLogPower(double inputValue, double expected) {
+        double result = FunctionUtils.compose(LOG, POW).value(new DerivativeStructure(1, 1, 0, inputValue)).getPartialDerivative(1);
+        double expectedValue = POW.value(new DerivativeStructure(1, 1, 0, inputValue)).getPartialDerivative(1) / POW.value(inputValue);
+        assertEquals(expectedValue, result, EPS);
+    }
+
+Input#3
+@Test
+    public void testAdd() {
+        UnivariateFunction id = new Identity();
+        UnivariateFunction c = new Constant(4);
+        UnivariateFunction m = new Minus();
+        UnivariateFunction inv = new Inverse();
+
+        Assert.assertEquals(4.5, FunctionUtils.add(inv, m, c, id).value(2), EPS);
+        Assert.assertEquals(4 + 2, FunctionUtils.add(c, id).value(2), EPS);
+        Assert.assertEquals(4 - 2, FunctionUtils.add(c, FunctionUtils.compose(m, id)).value(2), EPS);
+    }
+Smell List: ['Eager_Test', 'Magic_Number_Test']
+Refactor#3
+
+@Before
+public void setUp() {
+    identity = new Identity();
+    constant = new Constant(4);
+    minus = new Minus();
+    inverse = new Inverse();
+}
+
+@Test
+public void testAdd_WithInverseAndMinus() {
+    double expectedResult = 4.5;
+    double result = FunctionUtils.add(inverse, minus, constant, identity).value(2);
+    assertEquals(expectedResult, result, EPS);
+}
+
+@Test
+public void testAdd_WithConstantAndIdentity() {
+    double expectedResult = 6; // 4 + 2
+    double result = FunctionUtils.add(constant, identity).value(2);
+    assertEquals(expectedResult, result, EPS);
+}
+
+@Test
+public void testAdd_WithConstantAndComposedMinus() {
+    double expectedResult = 2; // 4 - 2
+    double result = FunctionUtils.add(constant, FunctionUtils.compose(minus, identity)).value(2);
+    assertEquals(expectedResult, result, EPS);
+}
+
+Input#4
+@Test
+    public void testAddDifferentiable() {
+        UnivariateDifferentiableFunction sin = new Sin();
+        UnivariateDifferentiableFunction c = new Constant(4);
+        UnivariateDifferentiableFunction m = new Minus();
+        UnivariateDifferentiableFunction inv = new Inverse();
+
+        final double a = 123.456;
+        Assert.assertEquals(- 1 / (a * a) -1 + JdkMath.cos(a),
+                            FunctionUtils.add(inv, m, c, sin).value(new DerivativeStructure(1, 1, 0, a)).getPartialDerivative(1),
+                            EPS);
+    }
+Smell List: ['Eager_Test', 'Magic_Number_Test']
+Refactor#4
+
+private static final double TOLERANCE = 1e-10;
+
+private UnivariateDifferentiableFunction setupTestAddDifferentiable() {
+    UnivariateDifferentiableFunction sin = new Sin();
+    UnivariateDifferentiableFunction c = new Constant(4);
+    UnivariateDifferentiableFunction m = new Minus();
+    UnivariateDifferentiableFunction inv = new Inverse();
+    return FunctionUtils.add(inv, m, c, sin);
+}
+
+@Test
+public void testAddDifferentiable_Value() {
+    UnivariateDifferentiableFunction function = setupTestAddDifferentiable();
+    final double a = 123.456;
+    double expectedValue = -1 / (a * a) - 1 + JdkMath.cos(a);
+    Assert.assertEquals(expectedValue, function.value(new DerivativeStructure(1, 1, 0, a)).getPartialDerivative(1), TOLERANCE);
+}
+
+Input#5
+ @Test
+    public void testMultiply() {
+        UnivariateFunction c = new Constant(4);
+        Assert.assertEquals(16, FunctionUtils.multiply(c, c).value(12345), EPS);
+
+        UnivariateFunction inv = new Inverse();
+        UnivariateFunction pow = new Power(2);
+        Assert.assertEquals(1, FunctionUtils.multiply(FunctionUtils.compose(inv, pow), pow).value(3.5), EPS);
+    }
+Smell List: ['Eager_Test', 'Magic_Number_Test']
+
+Refactor#5
+
+@Test
+public void testMultiply_Constant() {
+    UnivariateFunction c = new Constant(4);
+    double expectedResult = 16;
+    double actualResult = FunctionUtils.multiply(c, c).value(12345);
+    Assert.assertEquals(expectedResult, actualResult, EPS);
+}
+
+@Test
+public void testMultiply_InversePower() {
+    UnivariateFunction inv = new Inverse();
+    UnivariateFunction pow = new Power(2);
+    double expectedResult = 1;
+    double actualResult = FunctionUtils.multiply(FunctionUtils.compose(inv, pow), pow).value(3.5);
+    Assert.assertEquals(expectedResult, actualResult, EPS);
+}
+
+Input#6
+@Test
+    public void testMultiplyDifferentiable() {
+        UnivariateDifferentiableFunction c = new Constant(4);
+        UnivariateDifferentiableFunction id = new Identity();
+        final double a = 1.2345678;
+        Assert.assertEquals(8 * a, FunctionUtils.multiply(c, id, id).value(new DerivativeStructure(1, 1, 0, a)).getPartialDerivative(1), EPS);
+
+        UnivariateDifferentiableFunction inv = new Inverse();
+        UnivariateDifferentiableFunction pow = new Power(2.5);
+        UnivariateDifferentiableFunction cos = new Cos();
+        Assert.assertEquals(1.5 * JdkMath.sqrt(a) * JdkMath.cos(a) - JdkMath.pow(a, 1.5) * JdkMath.sin(a),
+                            FunctionUtils.multiply(inv, pow, cos).value(new DerivativeStructure(1, 1, 0, a)).getPartialDerivative(1), EPS);
+
+        UnivariateDifferentiableFunction cosh = new Cosh();
+        Assert.assertEquals(1.5 * JdkMath.sqrt(a) * JdkMath.cosh(a) + JdkMath.pow(a, 1.5) * JdkMath.sinh(a),
+                            FunctionUtils.multiply(inv, pow, cosh).value(new DerivativeStructure(1, 1, 0, a)).getPartialDerivative(1), 8 * EPS);
+    }
+Smell List: ['Eager_Test', 'Magic_Number_Test']
+Refactor#6
+
+double a;
+
+private void setupTestMultiplyDifferentiable(double a) {
+    this.a = 1.2345678;
+}
+
+@Test
+public void testMultiplyDifferentiable_ConstantIdentityIdentity() {
+    setupTestMultiplyDifferentiable(1.2345678);
+    UnivariateDifferentiableFunction c = new Constant(4);
+    UnivariateDifferentiableFunction id = new Identity();
+    double expectedResult = 8 * a;
+    double actualResult = FunctionUtils.multiply(c, id, id).value(new DerivativeStructure(1, 1, 0, a)).getPartialDerivative(1);
+    Assert.assertEquals(expectedResult, actualResult, EPS);
+}
+
+@Test
+public void testMultiplyDifferentiable_InversePowerCos() {
+    setupTestMultiplyDifferentiable(1.2345678);
+    UnivariateDifferentiableFunction inv = new Inverse();
+    UnivariateDifferentiableFunction pow = new Power(2.5);
+    UnivariateDifferentiableFunction cos = new Cos();
+    double expectedResult = 1.5 * Math.sqrt(a) * Math.cos(a) - Math.pow(a, 1.5) * Math.sin(a);
+    double actualResult = FunctionUtils.multiply(inv, pow, cos).value(new DerivativeStructure(1, 1, 0, a)).getPartialDerivative(1);
+    Assert.assertEquals(expectedResult, actualResult, EPS);
+}
+
+@Test
+public void testMultiplyDifferentiable_InversePowerCosh() {
+    setupTestMultiplyDifferentiable(1.2345678);
+    UnivariateDifferentiableFunction inv = new Inverse();
+    UnivariateDifferentiableFunction pow = new Power(2.5);
+    UnivariateDifferentiableFunction cosh = new Cosh();
+    double expectedResult = 1.5 * Math.sqrt(a) * Math.cosh(a) + Math.pow(a, 1.5) * Math.sinh(a);
+    double actualResult = FunctionUtils.multiply(inv, pow, cosh).value(new DerivativeStructure(1, 1, 0, a)).getPartialDerivative(1);
+    Assert.assertEquals(expectedResult, actualResult, 8 * EPS);
+}
+
+
+
+Input#7
+@Test
+    public void testCombine() {
+        BivariateFunction bi = new Add();
+        UnivariateFunction id = new Identity();
+        UnivariateFunction m = new Minus();
+        UnivariateFunction c = FunctionUtils.combine(bi, id, m);
+        Assert.assertEquals(0, c.value(2.3456), EPS);
+
+        bi = new Multiply();
+        UnivariateFunction inv = new Inverse();
+        c = FunctionUtils.combine(bi, id, inv);
+        Assert.assertEquals(1, c.value(2.3456), EPS);
+    }
+Smell List: ['Eager_Test', 'Magic_Number_Test']
+
+Refactor#7
+
+private static final double EPS = 1e-10;
+
+private void setupTestCombine() {
+    // Shared setup logic can be placed here if needed
+}
+
+@Test
+public void testCombine_Addition() {
+    setupTestCombine();
+    BivariateFunction bi = new Add();
+    UnivariateFunction id = new Identity();
+    UnivariateFunction m = new Minus();
+    UnivariateFunction c = FunctionUtils.combine(bi, id, m);
+    double expectedResult = 0;
+    Assert.assertEquals(expectedResult, c.value(2.3456), EPS);
+}
+
+@Test
+public void testCombine_Multiplication() {
+    setupTestCombine();
+    BivariateFunction bi = new Multiply();
+    UnivariateFunction id = new Identity();
+    UnivariateFunction inv = new Inverse();
+    UnivariateFunction c = FunctionUtils.combine(bi, id, inv);
+    double expectedResult = 1;
+    Assert.assertEquals(expectedResult, c.value(2.3456), EPS);
+}
+
+
+
+Input#8
+@Test
+    public void testCollector() {
+        BivariateFunction bi = new Add();
+        MultivariateFunction coll = FunctionUtils.collector(bi, 0);
+        Assert.assertEquals(10, coll.value(new double[] {1, 2, 3, 4}), EPS);
+
+        bi = new Multiply();
+        coll = FunctionUtils.collector(bi, 1);
+        Assert.assertEquals(24, coll.value(new double[] {1, 2, 3, 4}), EPS);
+
+        bi = new Max();
+        coll = FunctionUtils.collector(bi, Double.NEGATIVE_INFINITY);
+        Assert.assertEquals(10, coll.value(new double[] {1, -2, 7.5, 10, -24, 9.99}), 0);
+
+        bi = new Min();
+        coll = FunctionUtils.collector(bi, Double.POSITIVE_INFINITY);
+        Assert.assertEquals(-24, coll.value(new double[] {1, -2, 7.5, 10, -24, 9.99}), 0);
+    }
+Smell List: ['Eager_Test', 'Duplicate_Assert', 'Magic_Number_Test']
+
+Refactor#8
+
+    private static final double[] TEST_ARRAY = new double[] {1, 2, 3, 4};
+    private static final double[] TEST_ARRAY_NEGATIVE = new double[] {1, -2, 7.5, 10, -24, 9.99};
+
+    private MultivariateFunction setupCollector(BivariateFunction bi, double identity) {
+        return FunctionUtils.collector(bi, identity);
+    }
+
+    @Test
+    public void testCollector_Add() {
+        BivariateFunction bi = new Add();
+        MultivariateFunction coll = setupCollector(bi, 0);
+        int expectedResult = 10;
+        Assert.assertEquals(expectedResult, coll.value(TEST_ARRAY), EPS);
+    }
+
+    @Test
+    public void testCollector_Multiply() {
+        BivariateFunction bi = new Multiply();
+        MultivariateFunction coll = setupCollector(bi, 1);
+        int expectedResult = 24;
+        Assert.assertEquals(expectedResult, coll.value(TEST_ARRAY), EPS);
+    }
+
+    @Test
+    public void testCollector_Max() {
+        BivariateFunction bi = new Max();
+        MultivariateFunction coll = setupCollector(bi, Double.NEGATIVE_INFINITY);
+        int expectedResult = 10;
+        int delta = 0;
+        Assert.assertEquals(expectedResult, coll.value(TEST_ARRAY_NEGATIVE), delta);
+    }
+
+    @Test
+    public void testCollector_Min() {
+        BivariateFunction bi = new Min();
+        MultivariateFunction coll = setupCollector(bi, Double.POSITIVE_INFINITY);
+        int expectedResult = -24;
+        int delta = 0;
+        Assert.assertEquals(expectedResult, coll.value(TEST_ARRAY_NEGATIVE), delta);
+    }
+
+Input#9
+ @Test
+    public void testSinc() {
+        BivariateFunction div = new Divide();
+        UnivariateFunction sin = new Sin();
+        UnivariateFunction id = new Identity();
+        UnivariateFunction sinc1 = FunctionUtils.combine(div, sin, id);
+        UnivariateFunction sinc2 = new Sinc();
+
+        for (int i = 0; i < 10; i++) {
+            double x = JdkMath.random();
+            Assert.assertEquals(sinc1.value(x), sinc2.value(x), EPS);
+        }
+    }
+Smell List: ['Conditional_Test_Logic']
+
+Refactor#9
+@Test
+    public void testSinc() {
+        BivariateFunction div = new Divide();
+        UnivariateFunction sin = new Sin();
+        UnivariateFunction id = new Identity();
+        UnivariateFunction sinc1 = FunctionUtils.combine(div, sin, id);
+        UnivariateFunction sinc2 = new Sinc();
+
+        checkSinc(JdkMath.random(), sinc1, sinc2);
+    }
+
+    private void checkSinc(double random, UnivariateFunction sinc1, UnivariateFunction sinc2) {
+        for (int i = 0; i < 10; i++) {
+            double x = random;
+            Assert.assertEquals(sinc1.value(x), sinc2.value(x), EPS);
+        }
+    }
+
+
+Input#10
+ @Test
+    public void testFixingArguments() {
+        UnivariateFunction scaler = FunctionUtils.fix1stArgument(new Multiply(), 10);
+        Assert.assertEquals(1.23456, scaler.value(0.123456), EPS);
+
+        UnivariateFunction pow1 = new Power(2);
+        UnivariateFunction pow2 = FunctionUtils.fix2ndArgument(new Pow(), 2);
+
+        for (int i = 0; i < 10; i++) {
+            double x = JdkMath.random() * 10;
+            Assert.assertEquals(pow1.value(x), pow2.value(x), 0);
+        }
+    }
+Smell List: ['Conditional_Test_Logic', 'Eager_Test', 'Magic_Number_Test']
+
+Refactor#10
+
+    @Test
+    public void testFixingArguments_Scaler() {
+        UnivariateFunction scaler = FunctionUtils.fix1stArgument(new Multiply(), 10);
+        double expectedResult = 1.23456;
+        double value = 0.123456;
+        Assert.assertEquals(expectedResult, scaler.value(value), EPS);
+    }
+
+    @Test
+    public void testFixingArguments_Power() {
+        UnivariateFunction pow1 = new Power(2);
+        UnivariateFunction pow2 = FunctionUtils.fix2ndArgument(new Pow(), 2);
+
+        for (int i = 0; i < 10; i++) {
+            double x = JdkMath.random() * 10;
+            double expectedResult = pow1.value(x);
+            int delta = 0;
+            Assert.assertEquals(expectedResult, pow2.value(x), delta);
+        }
+    }
+
+Input#11
+
+Refactor#11
+
+
+Input#12
+
+Refactor#12
+
+
+Input#13
+@Test
+    public void testToDifferentiableMultivariateInconsistentGradient() {
+
+        final double a = 1.5;
+        final double b = 0.5;
+        final MultivariateFunction f = new MultivariateFunction() {
+            @Override
+            public double value(final double[] point) {
+                return a * point[0] + b * point[1];
+            }
+        };
+        final MultivariateVectorFunction gradient = new MultivariateVectorFunction() {
+            @Override
+            public double[] value(final double[] point) {
+                return new double[] { a, b, 0.0 };
+            }
+        };
+        final MultivariateDifferentiableFunction mdf = FunctionUtils.toDifferentiable(f, gradient);
+
+        try {
+            DerivativeStructure dsT = new DerivativeStructure(1, 1, 0, 0.0);
+            mdf.value(new DerivativeStructure[] { dsT.sin(), dsT.cos() });
+            Assert.fail("an exception should have been thrown");
+        } catch (DimensionMismatchException e) {
+            Assert.assertEquals(2, e.getDimension());
+            Assert.assertEquals(3, e.getArgument());
+        }
+    }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing', 'Magic_Number_Test']
+
+Refactor#13
+
+@Test
+public void testToDifferentiableMultivariateInconsistentGradient() {
+
+    final double a = 1.5;
+    final double b = 0.5;
+    final MultivariateFunction f = new MultivariateFunction() {
+        @Override
+        public double value(final double[] point) {
+            return a * point[0] + b * point[1];
+        }
+    };
+    final MultivariateVectorFunction gradient = new MultivariateVectorFunction() {
+        @Override
+        public double[] value(final double[] point) {
+            return new double[] { a, b, 0.0 };
+        }
+    };
+    final MultivariateDifferentiableFunction mdf = FunctionUtils.toDifferentiable(f, gradient);
+
+    final int expectedDimension = 2;
+    final int expectedArgument = 3;
+
+    DimensionMismatchException exception = assertThrows(DimensionMismatchException.class, () -> {
+        DerivativeStructure dsT = new DerivativeStructure(1, 1, 0, 0.0);
+        mdf.value(new DerivativeStructure[] { dsT.sin(), dsT.cos() });
+    }, "Expected DimensionMismatchException to be thrown");
+
+    Assert.assertEquals( "Expected dimension mismatch", expectedDimension, exception.getDimension());
+    Assert.assertEquals("Expected argument mismatch", expectedArgument, exception.getArgument());
+}
+
+Input#14
+@Test
+    public void testDerivativeUnivariate() {
+
+        final UnivariateDifferentiableFunction f = new UnivariateDifferentiableFunction() {
+
+            @Override
+            public double value(double x) {
+                return x * x;
+            }
+
+            @Override
+            public DerivativeStructure value(DerivativeStructure x) {
+                return x.multiply(x);
+            }
+        };
+
+        final UnivariateFunction f0 = FunctionUtils.derivative(f, 0);
+        final UnivariateFunction f1 = FunctionUtils.derivative(f, 1);
+        final UnivariateFunction f2 = FunctionUtils.derivative(f, 2);
+
+        for (double t = -1.0; t < 1; t += 0.01) {
+            Assert.assertEquals(t * t, f0.value(t), 1.0e-15);
+            Assert.assertEquals(2 * t, f1.value(t), 1.0e-15);
+            Assert.assertEquals(2,     f2.value(t), 1.0e-15);
+        }
+    }
+Smell List: ['Conditional_Test_Logic', 'Eager_Test', 'Magic_Number_Test']
+
+Refactor#14
+ private static final double EPSILON = 1.0e-15;
+    private static final double STEP = 0.01;
+    private static final double T_MIN = -1.0;
+    private static final double T_MAX = 1.0;
+
+    private UnivariateDifferentiableFunction createTestFunction() {
+        return new UnivariateDifferentiableFunction() {
+            @Override
+            public double value(double x) {
+                return x * x;
+            }
+
+            @Override
+            public DerivativeStructure value(DerivativeStructure x) {
+                return x.multiply(x);
+            }
+        };
+    }
+
+    private void testDerivative(UnivariateFunction f0, UnivariateFunction f1, UnivariateFunction f2) {
+        for (double t = T_MIN; t < T_MAX; t += STEP) {
+            Assertions.assertEquals(t * t, f0.value(t), EPSILON);
+            Assertions.assertEquals(2 * t, f1.value(t), EPSILON);
+            Assertions.assertEquals(2, f2.value(t), EPSILON);
+        }
+    }
+
+    @Test
+    public void testDerivativeUnivariate_f0() {
+        UnivariateDifferentiableFunction f = createTestFunction();
+        UnivariateFunction f0 = FunctionUtils.derivative(f, 0);
+        UnivariateFunction f1 = FunctionUtils.derivative(f, 1);
+        UnivariateFunction f2 = FunctionUtils.derivative(f, 2);
+
+        testDerivative(f0, f1, f2);
+    }
+
+    @Test
+    public void testDerivativeUnivariate_f1() {
+        UnivariateDifferentiableFunction f = createTestFunction();
+        UnivariateFunction f0 = FunctionUtils.derivative(f, 0);
+        UnivariateFunction f1 = FunctionUtils.derivative(f, 1);
+        UnivariateFunction f2 = FunctionUtils.derivative(f, 2);
+
+        testDerivative(f0, f1, f2);
+    }
+
+    @Test
+    public void testDerivativeUnivariate_f2() {
+        UnivariateDifferentiableFunction f = createTestFunction();
+        UnivariateFunction f0 = FunctionUtils.derivative(f, 0);
+        UnivariateFunction f1 = FunctionUtils.derivative(f, 1);
+        UnivariateFunction f2 = FunctionUtils.derivative(f, 2);
+
+        testDerivative(f0, f1, f2);
+    }
+
+Input#15
+@Test
+    public void testDerivativeMultivariate() {
+
+        final double a = 1.5;
+        final double b = 0.5;
+        final double c = 0.25;
+        final MultivariateDifferentiableFunction mdf = new MultivariateDifferentiableFunction() {
+
+            @Override
+            public double value(double[] point) {
+                return a * point[0] * point[0] + b * point[1] * point[1] + c * point[0] * point[1];
+            }
+
+            @Override
+            public DerivativeStructure value(DerivativeStructure[] point) {
+                DerivativeStructure x  = point[0];
+                DerivativeStructure y  = point[1];
+                DerivativeStructure x2 = x.multiply(x);
+                DerivativeStructure y2 = y.multiply(y);
+                DerivativeStructure xy = x.multiply(y);
+                return x2.multiply(a).add(y2.multiply(b)).add(xy.multiply(c));
+            }
+        };
+
+        final MultivariateFunction f       = FunctionUtils.derivative(mdf, new int[] { 0, 0 });
+        final MultivariateFunction dfdx    = FunctionUtils.derivative(mdf, new int[] { 1, 0 });
+        final MultivariateFunction dfdy    = FunctionUtils.derivative(mdf, new int[] { 0, 1 });
+        final MultivariateFunction d2fdx2  = FunctionUtils.derivative(mdf, new int[] { 2, 0 });
+        final MultivariateFunction d2fdy2  = FunctionUtils.derivative(mdf, new int[] { 0, 2 });
+        final MultivariateFunction d2fdxdy = FunctionUtils.derivative(mdf, new int[] { 1, 1 });
+
+        for (double x = -1.0; x < 1; x += 0.01) {
+            for (double y = -1.0; y < 1; y += 0.01) {
+                Assert.assertEquals(a * x * x + b * y * y + c * x * y, f.value(new double[]       { x, y }), 1.0e-15);
+                Assert.assertEquals(2 * a * x + c * y,                 dfdx.value(new double[]    { x, y }), 1.0e-15);
+                Assert.assertEquals(2 * b * y + c * x,                 dfdy.value(new double[]    { x, y }), 1.0e-15);
+                Assert.assertEquals(2 * a,                             d2fdx2.value(new double[]  { x, y }), 1.0e-15);
+                Assert.assertEquals(2 * b,                             d2fdy2.value(new double[]  { x, y }), 1.0e-15);
+                Assert.assertEquals(c,                                 d2fdxdy.value(new double[] { x, y }), 1.0e-15);
+            }
+        }
+    }
+Smell List: ['Conditional_Test_Logic', 'Eager_Test', 'Magic_Number_Test']
+
+Refactor#15
+ private static final double A = 1.5;
+    private static final double B = 0.5;
+    private static final double C = 0.25;
+    private static final double DELTA = 1.0e-15;
+
+    private MultivariateDifferentiableFunction mdf;
+    private MultivariateFunction f;
+    private MultivariateFunction dfdx;
+    private MultivariateFunction dfdy;
+    private MultivariateFunction d2fdx2;
+    private MultivariateFunction d2fdy2;
+    private MultivariateFunction d2fdxdy;
+
+    @BeforeEach
+    public void setUp() {
+        mdf = new MultivariateDifferentiableFunction() {
+            @Override
+            public double value(double[] point) {
+                return A * point[0] * point[0] + B * point[1] * point[1] + C * point[0] * point[1];
+            }
+
+            @Override
+            public DerivativeStructure value(DerivativeStructure[] point) {
+                DerivativeStructure x = point[0];
+                DerivativeStructure y = point[1];
+                DerivativeStructure x2 = x.multiply(x);
+                DerivativeStructure y2 = y.multiply(y);
+                DerivativeStructure xy = x.multiply(y);
+                return x2.multiply(A).add(y2.multiply(B)).add(xy.multiply(C));
+            }
+        };
+
+        f = FunctionUtils.derivative(mdf, new int[] { 0, 0 });
+        dfdx = FunctionUtils.derivative(mdf, new int[] { 1, 0 });
+        dfdy = FunctionUtils.derivative(mdf, new int[] { 0, 1 });
+        d2fdx2 = FunctionUtils.derivative(mdf, new int[] { 2, 0 });
+        d2fdy2 = FunctionUtils.derivative(mdf, new int[] { 0, 2 });
+        d2fdxdy = FunctionUtils.derivative(mdf, new int[] { 1, 1 });
+    }
+
+    @Test
+    public void testValue() {
+        for (double x = -1.0; x < 1; x += 0.01) {
+            for (double y = -1.0; y < 1; y += 0.01) {
+                double expected = A * x * x + B * y * y + C * x * y;
+                assertEquals(expected, f.value(new double[] { x, y }), DELTA);
+            }
+        }
+    }
+
+    @Test
+    public void testDfdx() {
+        for (double x = -1.0; x < 1; x += 0.01) {
+            for (double y = -1.0; y < 1; y += 0.01) {
+                double expected = 2 * A * x + C * y;
+                assertEquals(expected, dfdx.value(new double[] { x, y }), DELTA);
+            }
+        }
+    }
+
+    @Test
+    public void testDfdy() {
+        for (double x = -1.0; x < 1; x += 0.01) {
+            for (double y = -1.0; y < 1; y += 0.01) {
+                double expected = 2 * B * y + C * x;
+                assertEquals(expected, dfdy.value(new double[] { x, y }), DELTA);
+            }
+        }
+    }
+
+    @Test
+    public void testD2fdx2() {
+        for (double x = -1.0; x < 1; x += 0.01) {
+            for (double y = -1.0; y < 1; y += 0.01) {
+                double expected = 2 * A;
+                assertEquals(expected, d2fdx2.value(new double[] { x, y }), DELTA);
+            }
+        }
+    }
+
+    @Test
+    public void testD2fdy2() {
+        for (double x = -1.0; x < 1; x += 0.01) {
+            for (double y = -1.0; y < 1; y += 0.01) {
+                double expected = 2 * B;
+                assertEquals(expected, d2fdy2.value(new double[] { x, y }), DELTA);
+            }
+        }
+    }
+
+    @Test
+    public void testD2fdxdy() {
+        for (double x = -1.0; x < 1; x += 0.01) {
+            for (double y = -1.0; y < 1; y += 0.01) {
+                double expected = C;
+                assertEquals(expected, d2fdxdy.value(new double[] { x, y }), DELTA);
+            }
+        }
+    }
+
+Input#16
+
+Refactor#16
+
+
+Input#17
+
+Refactor#17
+
+
+Input#18
+
+Refactor#18
+
+
+
+Input#19
+
+Refactor#19
+
+
+
+Input#20
+
+Refactor#20
+
+
+
+Input#21
+
+Refactor#21
+
+
+Input#22
+
+Refactor#22
+
+
+Input#23
+
+Refactor#23
+
+
+Input#24
+
+Refactor#24
+
+
+Input#25
+
+Refactor#25
+
+
+Input#26
+
+Refactor#26
+
+
+Input#27
+
+Refactor#27
+
+
+
+Input#28
+
+Refactor#28
+
+
+
+Input#29
+
+Refactor#29
+
+
+
+Input#30
+
+Refactor#30
+
+
+Input#31
+
+Refactor#31
+
+
+
+Input#32
+
+Refactor#32
+
+
+
+Input#33
+
+Refactor#33
+
+
+
+Input#34
+
+Refactor#34
+
+
+
+Input#35
+
+Refactor#35
+

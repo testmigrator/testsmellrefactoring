@@ -1,0 +1,1186 @@
+File#1
+
+
+Input#1
+@Test
+  public void testLenientNonExecutePrefix() throws IOException {
+    JsonReader reader = new JsonReader(reader(")]}'\n []"));
+    reader.setStrictness(Strictness.LENIENT);
+    reader.beginArray();
+    reader.endArray();
+    assertThat(reader.peek()).isEqualTo(JsonToken.END_DOCUMENT);
+  }
+Smell List: ['Exception_Catching_Throwing', 'Eager_Test']
+
+Refactor#1
+@Test
+public void testLenientNonExecutePrefix() {
+  assertDoesNotThrow(() -> {
+    JsonReader reader = new JsonReader(reader(")]}'\n []"));
+    reader.setStrictness(Strictness.LENIENT);
+    reader.beginArray();
+    reader.endArray();
+    assertThat(reader.peek()).isEqualTo(JsonToken.END_DOCUMENT);
+  }, "Unexpected exception occurred during the test");
+}
+
+
+Input#2
+@Test
+  public void testLenientNonExecutePrefixWithLeadingWhitespace() throws IOException {
+    JsonReader reader = new JsonReader(reader("\r\n \t)]}'\n []"));
+    reader.setStrictness(Strictness.LENIENT);
+    reader.beginArray();
+    reader.endArray();
+    assertThat(reader.peek()).isEqualTo(JsonToken.END_DOCUMENT);
+  }
+Smell List: ['Exception_Catching_Throwing', 'Eager_Test']
+
+Refactor#2
+@Test
+public void testLenientNonExecutePrefixWithLeadingWhitespace() {
+  assertDoesNotThrow(() -> {
+    JsonReader reader = new JsonReader(reader("\r\n \t)]}'\n []"));
+    reader.setStrictness(Strictness.LENIENT);
+    reader.beginArray();
+    reader.endArray();
+    assertThat(reader.peek()).isEqualTo(JsonToken.END_DOCUMENT);
+  }, "Unexpected exception occurred during the test");
+}
+
+Input#3
+@Test
+  public void testLenientPartialNonExecutePrefix() throws IOException {
+    JsonReader reader = new JsonReader(reader(")]}' []"));
+    reader.setStrictness(Strictness.LENIENT);
+    assertThat(reader.nextString()).isEqualTo(")");
+    var e = assertThrows(MalformedJsonException.class, () -> reader.nextString());
+    assertThat(e)
+        .hasMessageThat()
+        .isEqualTo(
+            "Unexpected value at line 1 column 3 path $\n"
+                + "See https://github.com/google/gson/blob/main/Troubleshooting.md#malformed-json");
+  }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing', 'Eager_Test']
+
+Refactor#3
+@Test
+public void testLenientPartialNonExecutePrefix_ReadFirstCharacter() {
+    JsonReader reader = setupJsonReader(")]}' []");
+    reader.setStrictness(Strictness.LENIENT);
+    assertThat(reader.nextString(), "Expected the first character to be read correctly")
+        .isEqualTo(")");
+}
+
+@Test
+public void testLenientPartialNonExecutePrefix_ThrowsExceptionOnSecondRead() {
+    assertDoesNotThrow(() -> {
+        JsonReader reader = setupJsonReader(")]}' []");
+        reader.setStrictness(Strictness.LENIENT);
+        reader.nextString(); // Consume the first character
+        var e = assertThrows(MalformedJsonException.class, () -> {
+            reader.nextString();
+        }, "Expected MalformedJsonException to be thrown on reading the second character");
+        assertThat(e.getMessage(), "Expected the correct error message")
+                .isEqualTo(
+                        "Unexpected value at line 1 column 3 path $\n"
+                                + "See https://github.com/google/gson/blob/main/Troubleshooting.md#malformed-json");
+    }, "Unexpected exception occurred during the test when beginning object");
+}
+
+private JsonReader setupJsonReader(String content) {
+    return new JsonReader(new StringReader(content));
+}
+
+
+Input#4
+@Test
+  public void testBomForbiddenAsOtherCharacterInDocument() throws IOException {
+    JsonReader reader = new JsonReader(reader("[\ufeff]"));
+    reader.beginArray();
+    var e = assertThrows(MalformedJsonException.class, () -> reader.endArray());
+    assertStrictError(e, "line 1 column 2 path $[0]");
+  }
+Smell List: ['Exception_Catching_Throwing', 'Eager_Test']
+
+Refactor#4
+@Test
+public void testBomForbiddenAsOtherCharacterInDocument() {
+    assertDoesNotThrow(() -> {
+        JsonReader reader = new JsonReader(reader("[\ufeff]"));
+        reader.beginArray();
+        MalformedJsonException e = assertThrows(MalformedJsonException.class, () -> reader.endArray());
+        assertStrictError(e, "line 1 column 2 path $[0]");
+    }, "Unexpected exception occurred during the test when beginning object");
+}
+
+Input#5
+@Test
+  public void testFailWithPositionDeepPath() throws IOException {
+    JsonReader reader = new JsonReader(reader("[1,{\"a\":[2,3,}"));
+    reader.beginArray();
+    int unused1 = reader.nextInt();
+    reader.beginObject();
+    String unused2 = reader.nextName();
+    reader.beginArray();
+    int unused3 = reader.nextInt();
+    int unused4 = reader.nextInt();
+    var e = assertThrows(MalformedJsonException.class, () -> reader.peek());
+    assertThat(e)
+        .hasMessageThat()
+        .isEqualTo(
+            "Expected value at line 1 column 14 path $[1].a[2]\n"
+                + "See https://github.com/google/gson/blob/main/Troubleshooting.md#malformed-json");
+  }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing', 'Eager_Test']
+
+Refactor#5
+
+private JsonReader setupTestFailWithPositionDeepPath() throws IOException {
+    JsonReader reader = new JsonReader(new StringReader("[1,{\"a\":[2,3,}"));
+    reader.beginArray();
+    int unused1 = reader.nextInt();
+    reader.beginObject();
+    String unused2 = reader.nextName();
+    reader.beginArray();
+    int unused3 = reader.nextInt();
+    int unused4 = reader.nextInt();
+    return reader;
+}
+
+@Test
+public void testFailWithPositionDeepPath_ThrowsMalformedJsonException() {
+    JsonReader reader = setupTestFailWithPositionDeepPath();
+    MalformedJsonException e = assertThrows(MalformedJsonException.class, () -> {
+        reader.peek();
+    }, "Expected MalformedJsonException when peeking at invalid JSON structure");
+    assertThat(e)
+        .hasMessageThat()
+        .isEqualTo(
+            "Expected value at line 1 column 14 path $[1].a[2]\n"
+                + "See https://github.com/google/gson/blob/main/Troubleshooting.md#malformed-json");
+}
+
+
+Input#6
+ @Test
+  public void testStrictVeryLongNumber() throws IOException {
+    JsonReader reader = new JsonReader(reader("[0." + repeat('9', 8192) + "]"));
+    reader.beginArray();
+    var e = assertThrows(MalformedJsonException.class, () -> reader.nextDouble());
+    assertStrictError(e, "line 1 column 2 path $[0]");
+  }
+Smell List: ['Exception_Catching_Throwing', 'Eager_Test']
+
+Refactor#6
+@Test
+public void testStrictVeryLongNumber() {
+    assertDoesNotThrow(() -> {
+        JsonReader reader = new JsonReader(new StringReader("[0." + repeat('9', 8192) + "]"));
+        reader.beginArray();
+        MalformedJsonException e = assertThrows(MalformedJsonException.class, () -> reader.nextDouble());
+        assertStrictError(e, "line 1 column 2 path $[0]");
+    }, "Unexpected exception occurred during the test when beginning object");
+}
+
+Input#7
+
+Refactor#7
+
+
+Input#8
+Test Code:
+ @Test
+  public void testVeryLongUnquotedLiteral() throws IOException {
+    String literal = "a" + repeat('b', 8192) + "c";
+    JsonReader reader = new JsonReader(reader("[" + literal + "]"));
+    reader.setStrictness(Strictness.LENIENT);
+    reader.beginArray();
+    assertThat(reader.nextString()).isEqualTo(literal);
+    reader.endArray();
+  }
+Smell List: ['Exception_Catching_Throwing', 'Eager_Test']
+
+Refactor#8
+@Test
+public void testVeryLongUnquotedLiteral() {
+    String literal = "a" + repeat('b', 8192) + "c";
+    assertDoesNotThrow(() -> {
+        JsonReader reader = new JsonReader(reader("[" + literal + "]"));
+        reader.setStrictness(Strictness.LENIENT);
+        reader.beginArray();
+        assertThat(reader.nextString()).isEqualTo(literal);
+        reader.endArray();
+    }, "Unexpected exception occurred during the test");
+}
+
+Input#9
+
+Refactor#9
+
+
+Input#10
+
+Refactor#10
+
+
+Input#11
+@Test
+  public void testNestingLimitDefault() throws IOException {
+    int defaultLimit = JsonReader.DEFAULT_NESTING_LIMIT;
+    String json = repeat('[', defaultLimit + 1);
+    JsonReader reader = new JsonReader(reader(json));
+    assertThat(reader.getNestingLimit()).isEqualTo(defaultLimit);
+
+    for (int i = 0; i < defaultLimit; i++) {
+      reader.beginArray();
+    }
+    MalformedJsonException e =
+        assertThrows(MalformedJsonException.class, () -> reader.beginArray());
+    assertThat(e)
+        .hasMessageThat()
+        .isEqualTo(
+            "Nesting limit "
+                + defaultLimit
+                + " reached at line 1 column "
+                + (defaultLimit + 2)
+                + " path $"
+                + "[0]".repeat(defaultLimit));
+  }
+Smell List: ['Assertion_Roulette', 'Conditional_Test_Logic', 'Exception_Catching_Throwing', 'Eager_Test']
+
+
+Refactor#11
+private static final int DEFAULT_NESTING_LIMIT = JsonReader.DEFAULT_NESTING_LIMIT;
+
+private String createNestedJson(int nestingLevel) {
+    return "[".repeat(nestingLevel) + "]".repeat(nestingLevel);
+}
+
+@Test
+public void testNestingLimitDefault_getNestingLimit() {
+    // Arrange
+    JsonReader reader = new JsonReader(new StringReader(createNestedJson(DEFAULT_NESTING_LIMIT)));
+
+    // Act & Assert
+    assertThat(reader.getNestingLimit())
+            .as("Verify the default nesting limit is correctly set.")
+            .isEqualTo(DEFAULT_NESTING_LIMIT);
+}
+
+@Test
+public void testNestingLimitDefault_exceedLimit() {
+    // Arrange
+    String json = createNestedJson(DEFAULT_NESTING_LIMIT + 1);
+    JsonReader reader = new JsonReader(new StringReader(json));
+    setupReaderToLimit(reader, DEFAULT_NESTING_LIMIT);
+
+    // Act & Assert
+    MalformedJsonException exception = assertThrows(MalformedJsonException.class,
+            () -> reader.beginArray(),
+            "Expected MalformedJsonException when exceeding the nesting limit.");
+
+    assertThat(exception).hasMessageThat()
+            .isEqualTo("Nesting limit " + DEFAULT_NESTING_LIMIT
+                    + " reached at line 1 column "
+                    + (DEFAULT_NESTING_LIMIT + 2)
+                    + " path $"
+                    + "[0]".repeat(DEFAULT_NESTING_LIMIT));
+}
+
+private void setupReaderToLimit(JsonReader reader, int nestingLimit) {
+    for (int i = 0; i < nestingLimit; i++) {
+        try {
+            reader.beginArray();
+        } catch (IOException e) {
+            throw new RuntimeException("Unexpected exception during setup: " + e.getMessage(), e);
+        }
+    }
+}
+
+Input#12
+
+Refactor#12
+
+
+Input#13
+ @Test
+  public void testStringEndingInSlash() {
+    JsonReader reader = new JsonReader(reader("/"));
+    reader.setStrictness(Strictness.LENIENT);
+    var e = assertThrows(MalformedJsonException.class, () -> reader.peek());
+    assertThat(e)
+        .hasMessageThat()
+        .isEqualTo(
+            "Expected value at line 1 column 1 path $\n"
+                + "See https://github.com/google/gson/blob/main/Troubleshooting.md#malformed-json");
+  }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+Refactor#13
+private JsonReader setupTestStringEndingInSlash() {
+    JsonReader reader = new JsonReader(reader("/"));
+    reader.setStrictness(Strictness.LENIENT);
+    return reader;
+}
+
+@Test
+public void testStringEndingInSlash_PeekThrowsMalformedJsonException() {
+    JsonReader reader = setupTestStringEndingInSlash();
+    var e = assertThrows(MalformedJsonException.class, () -> reader.peek(), "Expected MalformedJsonException when peeking at string ending in slash");
+    assertThat(e)
+        .hasMessageThat()
+        .isEqualTo(
+            "Expected value at line 1 column 1 path $\n"
+                + "See https://github.com/google/gson/blob/main/Troubleshooting.md#malformed-json");
+}
+
+
+Input#14
+@Test
+  public void testDocumentWithCommentEndingInSlash() {
+    JsonReader reader = new JsonReader(reader("/* foo *//"));
+    reader.setStrictness(Strictness.LENIENT);
+    var e = assertThrows(MalformedJsonException.class, () -> reader.peek());
+    assertThat(e)
+        .hasMessageThat()
+        .isEqualTo(
+            "Expected value at line 1 column 10 path $\n"
+                + "See https://github.com/google/gson/blob/main/Troubleshooting.md#malformed-json");
+  }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+
+Refactor#14
+private JsonReader setupTestDocumentWithCommentEndingInSlash() {
+    JsonReader reader = new JsonReader(reader("/* foo *//"));
+    reader.setStrictness(Strictness.LENIENT);
+    return reader;
+}
+
+@Test
+public void testDocumentWithCommentEndingInSlash_PeekThrowsMalformedJsonException() {
+    JsonReader reader = setupTestDocumentWithCommentEndingInSlash();
+    var e = assertThrows(MalformedJsonException.class, () -> reader.peek(), "Expected MalformedJsonException when peeking at invalid JSON comment ending with slash");
+    assertThat(e)
+        .hasMessageThat()
+        .isEqualTo(
+            "Expected value at line 1 column 10 path $\n"
+                + "See https://github.com/google/gson/blob/main/Troubleshooting.md#malformed-json")
+        .withFailMessage("Expected MalformedJsonException message to match the specified pattern");
+}
+
+
+Input#15
+ @Test
+  public void testStringWithLeadingSlash() {
+    JsonReader reader = new JsonReader(reader("/x"));
+    reader.setStrictness(Strictness.LENIENT);
+    var e = assertThrows(MalformedJsonException.class, () -> reader.peek());
+    assertThat(e)
+        .hasMessageThat()
+        .isEqualTo(
+            "Expected value at line 1 column 1 path $\n"
+                + "See https://github.com/google/gson/blob/main/Troubleshooting.md#malformed-json");
+  }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+
+Refactor#15
+private JsonReader setupTestStringWithLeadingSlash() {
+    JsonReader reader = new JsonReader(reader("/x"));
+    reader.setStrictness(Strictness.LENIENT);
+    return reader;
+}
+
+@Test
+public void testStringWithLeadingSlash_PeekThrowsMalformedJsonException() {
+    JsonReader reader = setupTestStringWithLeadingSlash();
+    var e = assertThrows(MalformedJsonException.class, () -> reader.peek(), "Peek should throw MalformedJsonException for input with leading slash");
+    assertThat(e)
+        .hasMessageThat()
+        .isEqualTo(
+            "Expected value at line 1 column 1 path $\n"
+                + "See https://github.com/google/gson/blob/main/Troubleshooting.md#malformed-json")
+        .withFailMessage("MalformedJsonException message does not match expected message for input with leading slash");
+}
+
+
+Input#16
+
+@Test
+  public void testUnterminatedObject() throws IOException {
+    JsonReader reader = new JsonReader(reader("{\"a\":\"android\"x"));
+    reader.setStrictness(Strictness.LENIENT);
+    reader.beginObject();
+    assertThat(reader.nextName()).isEqualTo("a");
+    assertThat(reader.nextString()).isEqualTo("android");
+    var e = assertThrows(MalformedJsonException.class, () -> reader.peek());
+    assertThat(e)
+        .hasMessageThat()
+        .isEqualTo(
+            "Unterminated object at line 1 column 16 path $.a\n"
+                + "See https://github.com/google/gson/blob/main/Troubleshooting.md#malformed-json");
+  }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing', 'Eager_Test']
+Refactor#16
+private JsonReader createLenientJsonReader(String json) {
+    JsonReader reader = new JsonReader(new StringReader(json));
+    reader.setStrictness(Strictness.LENIENT);
+    return reader;
+}
+
+@Test
+public void testUnterminatedObject_nextName() {
+    assertDoesNotThrow(() -> {
+        JsonReader reader = createLenientJsonReader("{\"a\":\"android\"x");
+        reader.beginObject();
+        assertThat(reader.nextName())
+                .as("Verify that the first property name in the object is read correctly.")
+                .isEqualTo("a");
+    });
+}
+
+@Test
+public void testUnterminatedObject_nextString() {
+    assertDoesNotThrow(() -> {
+        JsonReader reader = createLenientJsonReader("{\"a\":\"android\"x");
+        reader.beginObject();
+        reader.nextName();
+        assertThat(reader.nextString())
+                .as("Verify that the value for the first property in the object is read correctly.")
+                .isEqualTo("android");
+    });
+}
+
+@Test
+public void testUnterminatedObject_peekThrowsException() {
+    assertDoesNotThrow(() -> {
+
+        JsonReader reader = createLenientJsonReader("{\"a\":\"android\"x");
+        reader.beginObject();
+        reader.nextName();
+        reader.nextString();
+
+        MalformedJsonException exception = assertThrows(MalformedJsonException.class,
+                reader::peek,
+                "Expected MalformedJsonException when peeking into an unterminated object.");
+        assertThat(exception).hasMessageThat()
+                .isEqualTo("Unterminated object at line 1 column 16 path $.a\n"
+                        + "See https://github.com/google/gson/blob/main/Troubleshooting.md#malformed-json");
+    });
+}
+
+
+Input#17
+ @Test
+  public void testVeryLongQuotedString() throws IOException {
+    char[] stringChars = new char[1024 * 16];
+    Arrays.fill(stringChars, 'x');
+    String string = new String(stringChars);
+    String json = "[\"" + string + "\"]";
+    JsonReader reader = new JsonReader(reader(json));
+    reader.beginArray();
+    assertThat(reader.nextString()).isEqualTo(string);
+    reader.endArray();
+  }
+Smell List: ['Exception_Catching_Throwing', 'Eager_Test']
+
+Refactor#17
+
+@Test
+public void testVeryLongQuotedString() {
+    assertDoesNotThrow(() -> {
+        char[] stringChars = new char[1024 * 16];
+        Arrays.fill(stringChars, 'x');
+        String string = new String(stringChars);
+        String json = "[\"" + string + "\"]";
+        JsonReader reader = new JsonReader(new StringReader(json));
+        reader.beginArray();
+        assertThat(reader.nextString()).isEqualTo(string);
+        reader.endArray();
+    }, "Unexpected exception occurred during the test");
+}
+
+
+
+Input#18
+@Test
+  public void testVeryLongUnquotedString() throws IOException {
+    char[] stringChars = new char[1024 * 16];
+    Arrays.fill(stringChars, 'x');
+    String string = new String(stringChars);
+    String json = "[" + string + "]";
+    JsonReader reader = new JsonReader(reader(json));
+    reader.setStrictness(Strictness.LENIENT);
+    reader.beginArray();
+    assertThat(reader.nextString()).isEqualTo(string);
+    reader.endArray();
+  }
+Smell List: ['Exception_Catching_Throwing', 'Eager_Test']
+
+Refactor#18
+
+private JsonReader setupTestVeryLongUnquotedString() throws IOException {
+    char[] stringChars = new char[1024 * 16];
+    Arrays.fill(stringChars, 'x');
+    String string = new String(stringChars);
+    String json = "[" + string + "]";
+    JsonReader reader = new JsonReader(new StringReader(json));
+    reader.setStrictness(Strictness.LENIENT);
+    return reader;
+}
+
+@Test
+public void testVeryLongUnquotedString_BeginArray() {
+    assertDoesNotThrow(() -> {
+        JsonReader reader = setupTestVeryLongUnquotedString();
+        reader.beginArray();
+    }, "Unexpected exception occurred during the test");
+}
+
+@Test
+public void testVeryLongUnquotedString_NextString() {
+    assertDoesNotThrow(() -> {
+        JsonReader reader = setupTestVeryLongUnquotedString();
+        reader.beginArray();
+        char[] stringChars = new char[1024 * 16];
+        Arrays.fill(stringChars, 'x');
+        String string = new String(stringChars);
+        assertThat(reader.nextString()).isEqualTo(string);
+    }, "Unexpected exception occurred during the test");
+}
+
+@Test
+public void testVeryLongUnquotedString_EndArray() {
+    assertDoesNotThrow(() -> {
+        JsonReader reader = setupTestVeryLongUnquotedString();
+        reader.beginArray();
+        char[] stringChars = new char[1024 * 16];
+        Arrays.fill(stringChars, 'x');
+        String string = new String(stringChars);
+        reader.nextString();
+        reader.endArray();
+    }, "Unexpected exception occurred during the test");
+}
+
+
+Input#19
+@Test
+  public void testVeryLongUnterminatedString() throws IOException {
+    char[] stringChars = new char[1024 * 16];
+    Arrays.fill(stringChars, 'x');
+    String string = new String(stringChars);
+    String json = "[" + string;
+    JsonReader reader = new JsonReader(reader(json));
+    reader.setStrictness(Strictness.LENIENT);
+    reader.beginArray();
+    assertThat(reader.nextString()).isEqualTo(string);
+    assertThrows(EOFException.class, () -> reader.peek());
+  }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing', 'Eager_Test']
+
+Refactor#19
+private JsonReader createLenientJsonReader(String json) {
+    JsonReader reader = new JsonReader(new StringReader(json));
+    reader.setStrictness(Strictness.LENIENT);
+    return reader;
+}
+
+@Test
+public void testVeryLongUnterminatedString_nextString() {
+    // Arrange
+    String string = createLongString();
+    String json = "[" + string;
+    JsonReader reader = createLenientJsonReader(json);
+
+    reader.beginArray();
+
+    assertThat(reader.nextString())
+            .as("Verify that the first string in the array matches the expected long string.")
+            .isEqualTo(string);
+}
+
+@Test
+public void testVeryLongUnterminatedString_peekThrowsEOFException() {
+    String string = createLongString();
+    String json = "[" + string;
+    JsonReader reader = createLenientJsonReader(json);
+
+    reader.beginArray();
+    reader.nextString();
+
+    EOFException exception = assertThrows(EOFException.class,
+            reader::peek,
+            "Expected EOFException when peeking into an unterminated array.");
+    assertThat(exception).hasMessage("End of input at line 1 column 1025 path $[1]");
+}
+
+private String createLongString() {
+    char[] stringChars = new char[1024 * 16];
+    Arrays.fill(stringChars, 'x');
+    return new String(stringChars);
+}
+
+
+Input#20
+@Test
+  public void testSkipTopLevelUnquotedString() throws IOException {
+    JsonReader reader = new JsonReader(reader(repeat('x', 8192)));
+    reader.setStrictness(Strictness.LENIENT);
+    reader.skipValue();
+    assertThat(reader.peek()).isEqualTo(JsonToken.END_DOCUMENT);
+  }
+Smell List: ['Exception_Catching_Throwing', 'Eager_Test']
+
+Refactor#20
+
+@Test
+public void testSkipTopLevelUnquotedString() {
+  assertDoesNotThrow(() -> {
+    JsonReader reader = new JsonReader(reader(repeat('x', 8192)));
+    reader.setStrictness(Strictness.LENIENT);
+    reader.skipValue();
+    assertThat(reader.peek()).isEqualTo(JsonToken.END_DOCUMENT);
+  }, "Unexpected exception occurred during the test");
+}
+
+
+
+Input#21
+@Test
+  public void testSkipTopLevelQuotedString() throws IOException {
+    JsonReader reader = new JsonReader(reader("\"" + repeat('x', 8192) + "\""));
+    reader.setStrictness(Strictness.LENIENT);
+    reader.skipValue();
+    assertThat(reader.peek()).isEqualTo(JsonToken.END_DOCUMENT);
+  }
+Smell List: ['Exception_Catching_Throwing', 'Eager_Test']
+
+Refactor#21
+@Test
+public void testSkipTopLevelQuotedString() {
+  assertDoesNotThrow(() -> {
+    JsonReader reader = new JsonReader(new StringReader("\"" + repeat('x', 8192) + "\""));
+    reader.setStrictness(Strictness.LENIENT);
+    reader.skipValue();
+    assertThat(reader.peek()).isEqualTo(JsonToken.END_DOCUMENT);
+  }, "Unexpected exception occurred during the test");
+}
+
+Input#22
+ @Test
+  public void testStringAsNumberWithTruncatedExponent() throws IOException {
+    JsonReader reader = new JsonReader(reader("[123e]"));
+    reader.setStrictness(Strictness.LENIENT);
+    reader.beginArray();
+    assertThat(reader.peek()).isEqualTo(STRING);
+  }
+Smell List: ['Exception_Catching_Throwing', 'Eager_Test']
+Refactor#22
+@Test
+public void testStringAsNumberWithTruncatedExponent() {
+  assertDoesNotThrow(() -> {
+    JsonReader reader = new JsonReader(reader("[123e]"));
+    reader.setStrictness(Strictness.LENIENT);
+    reader.beginArray();
+    assertThat(reader.peek()).isEqualTo(JsonToken.STRING);
+  }, "Unexpected exception occurred during the test");
+}
+
+Input#23
+ @Test
+  public void testStringAsNumberWithDigitAndNonDigitExponent() throws IOException {
+    JsonReader reader = new JsonReader(reader("[123e4b]"));
+    reader.setStrictness(Strictness.LENIENT);
+    reader.beginArray();
+    assertThat(reader.peek()).isEqualTo(STRING);
+  }
+Smell List: ['Exception_Catching_Throwing', 'Eager_Test']
+
+Refactor#23
+
+private JsonReader setupTestStringAsNumberWithDigitAndNonDigitExponent() throws IOException {
+    JsonReader reader = new JsonReader(new StringReader("[123e4b]"));
+    reader.setStrictness(JsonReader.Strictness.LENIENT);
+    reader.beginArray();
+    return reader;
+}
+
+@Test
+public void testStringAsNumberWithDigitAndNonDigitExponent_PeekString() {
+    assertDoesNotThrow(() -> {
+        JsonReader reader = setupTestStringAsNumberWithDigitAndNonDigitExponent();
+        assertThat(reader.peek()).isEqualTo(JsonToken.STRING);
+    }, "Unexpected exception occurred during the test");
+}
+
+
+Input#24
+@Test
+  public void testStringAsNumberWithNonDigitExponent() throws IOException {
+    JsonReader reader = new JsonReader(reader("[123eb]"));
+    reader.setStrictness(Strictness.LENIENT);
+    reader.beginArray();
+    assertThat(reader.peek()).isEqualTo(STRING);
+  }
+Smell List: ['Exception_Catching_Throwing', 'Eager_Test']
+
+Refactor#24
+@Test
+public void testStringAsNumberWithNonDigitExponent() {
+  assertDoesNotThrow(() -> {
+    JsonReader reader = new JsonReader(new StringReader("[123eb]"));
+    reader.setStrictness(Strictness.LENIENT);
+    reader.beginArray();
+    assertThat(reader.peek()).isEqualTo(JsonToken.STRING);
+  }, "Unexpected exception occurred during the test");
+}
+
+
+Input#25
+@Test
+  public void testEmptyStringName() throws IOException {
+    JsonReader reader = new JsonReader(reader("{\"\":true}"));
+    reader.setStrictness(Strictness.LENIENT);
+    assertThat(reader.peek()).isEqualTo(BEGIN_OBJECT);
+    reader.beginObject();
+    assertThat(reader.peek()).isEqualTo(NAME);
+    assertThat(reader.nextName()).isEqualTo("");
+    assertThat(reader.peek()).isEqualTo(JsonToken.BOOLEAN);
+    assertThat(reader.nextBoolean()).isTrue();
+    assertThat(reader.peek()).isEqualTo(JsonToken.END_OBJECT);
+    reader.endObject();
+    assertThat(reader.peek()).isEqualTo(JsonToken.END_DOCUMENT);
+  }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing', 'Eager_Test', 'Duplicate_Assert']
+
+
+Refactor#25
+
+  private JsonReader setupTestEmptyStringName() throws Exception {
+    JsonReader reader = new JsonReader(new java.io.StringReader("{\"\":true}"));
+    reader.setStrictness(Strictness.LENIENT);
+    return reader;
+  }
+
+  @Test
+  public void testEmptyStringName_BeginObject() {
+    assertDoesNotThrow(() -> {
+      JsonReader reader = setupTestEmptyStringName();
+      assertEquals(JsonToken.BEGIN_OBJECT, reader.peek(), "Expected BEGIN_OBJECT token");
+      reader.beginObject();
+    }, "Unexpected exception occurred during the test");
+  }
+
+  @Test
+  public void testEmptyStringName_Name() {
+    assertDoesNotThrow(() -> {
+      JsonReader reader = setupTestEmptyStringName();
+      reader.beginObject();
+      assertEquals(JsonToken.NAME, reader.peek(), "Expected NAME token");
+      assertEquals("", reader.nextName(), "Expected empty string as name");
+    }, "Unexpected exception occurred during the test");
+  }
+
+  @Test
+  public void testEmptyStringName_Boolean() {
+    assertDoesNotThrow(() -> {
+      JsonReader reader = setupTestEmptyStringName();
+      reader.beginObject();
+      reader.nextName();
+      assertEquals(JsonToken.BOOLEAN, reader.peek(), "Expected BOOLEAN token");
+      assertTrue(reader.nextBoolean(), "Expected true value");
+    }, "Unexpected exception occurred during the test");
+  }
+
+  @Test
+  public void testEmptyStringName_EndObject() {
+    assertDoesNotThrow(() -> {
+      JsonReader reader = setupTestEmptyStringName();
+      reader.beginObject();
+      reader.nextName();
+      reader.nextBoolean();
+      assertEquals(JsonToken.END_OBJECT, reader.peek(), "Expected END_OBJECT token");
+      reader.endObject();
+    }, "Unexpected exception occurred during the test");
+  }
+
+  @Test
+  public void testEmptyStringName_EndDocument() {
+    assertDoesNotThrow(() -> {
+      JsonReader reader = setupTestEmptyStringName();
+      reader.beginObject();
+      reader.nextName();
+      reader.nextBoolean();
+      reader.endObject();
+      assertEquals(JsonToken.END_DOCUMENT, reader.peek(), "Expected END_DOCUMENT token");
+    }, "Unexpected exception occurred during the test");
+  }
+
+Input#26
+ @Test
+  public void testStrictExtraCommasInMaps() throws IOException {
+    JsonReader reader = new JsonReader(reader("{\"a\":\"b\",}"));
+    reader.beginObject();
+    assertThat(reader.nextName()).isEqualTo("a");
+    assertThat(reader.nextString()).isEqualTo("b");
+    var e = assertThrows(MalformedJsonException.class, () -> reader.peek());
+    assertThat(e)
+        .hasMessageThat()
+        .isEqualTo(
+            "Expected name at line 1 column 11 path $.a\n"
+                + "See https://github.com/google/gson/blob/main/Troubleshooting.md#malformed-json");
+  }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing', 'Eager_Test']
+
+Refactor#26
+@Test
+public void testStrictExtraCommasInMaps() {
+    assertDoesNotThrow(()->{
+       // Setup
+        JsonReader reader = new JsonReader(new StringReader("{\"a\":\"b\",}"));
+
+        // Test object start
+        reader.beginObject();
+        assertThat(reader.nextName(), "Expected name 'a'").isEqualTo("a");
+        assertThat(reader.nextString(), "Expected value 'b'").isEqualTo("b");
+
+        // Test exception on peek
+        MalformedJsonException e = assertThrows(MalformedJsonException.class, () -> {
+            reader.peek();
+        });
+        assertThat(e.getMessage(), "Expected error message").isEqualTo(
+            "Expected name at line 1 column 11 path $.a\n"
+                + "See https://github.com/google/gson/blob/main/Troubleshooting.md#malformed-json");
+    });
+}
+
+
+
+Input#27
+@Test
+  public void testLenientExtraCommasInMaps() throws IOException {
+    JsonReader reader = new JsonReader(reader("{\"a\":\"b\",}"));
+    reader.setStrictness(Strictness.LENIENT);
+    reader.beginObject();
+    assertThat(reader.nextName()).isEqualTo("a");
+    assertThat(reader.nextString()).isEqualTo("b");
+    var e = assertThrows(MalformedJsonException.class, () -> reader.peek());
+    assertThat(e)
+        .hasMessageThat()
+        .isEqualTo(
+            "Expected name at line 1 column 11 path $.a\n"
+                + "See https://github.com/google/gson/blob/main/Troubleshooting.md#malformed-json");
+  }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing', 'Eager_Test']
+
+Refactor#27
+@Test
+    public void testLenientExtraCommasInMaps_BeginObjectAndNextName() {
+        assertDoesNotThrow(() -> {
+            JsonReader reader = new JsonReader(new StringReader("{\"a\":\"b\",}"));
+            reader.setStrictness(Strictness.LENIENT);
+            reader.beginObject();
+            assertThat(reader.nextName(), "Expected name 'a'").isEqualTo("a");
+        });
+    }
+
+    @Test
+    public void testLenientExtraCommasInMaps_NextString() {
+        assertDoesNotThrow(() -> {
+            JsonReader reader = new JsonReader(new StringReader("{\"a\":\"b\",}"));
+            reader.setStrictness(Strictness.LENIENT);
+            reader.beginObject();
+            reader.nextName();
+            assertThat(reader.nextString(), "Expected value 'b'").isEqualTo("b");
+        });
+    }
+
+    @Test
+    public void testLenientExtraCommasInMaps_PeekThrowsException() {
+        assertDoesNotThrow(() -> {
+            JsonReader reader = new JsonReader(new StringReader("{\"a\":\"b\",}"));
+            reader.setStrictness(Strictness.LENIENT);
+            reader.beginObject();
+            reader.nextName();
+            reader.nextString();
+            var e = assertThrows(MalformedJsonException.class, () -> reader.peek(), "Expected MalformedJsonException when peeking after extra comma");
+            assertThat(e.getMessage(), "Expected error message for extra comma")
+                    .isEqualTo(
+                            "Expected name at line 1 column 11 path $.a\n"
+                                    + "See https://github.com/google/gson/blob/main/Troubleshooting.md#malformed-json");
+        });
+    }
+
+
+Input#28
+@Test
+  public void testMalformedDocuments() throws IOException {
+    assertDocument("{]", BEGIN_OBJECT, MalformedJsonException.class);
+    assertDocument("{,", BEGIN_OBJECT, MalformedJsonException.class);
+    assertDocument("{{", BEGIN_OBJECT, MalformedJsonException.class);
+    assertDocument("{[", BEGIN_OBJECT, MalformedJsonException.class);
+    assertDocument("{:", BEGIN_OBJECT, MalformedJsonException.class);
+    assertDocument("{\"name\",", BEGIN_OBJECT, NAME, MalformedJsonException.class);
+    assertDocument("{\"name\",", BEGIN_OBJECT, NAME, MalformedJsonException.class);
+    assertDocument("{\"name\":}", BEGIN_OBJECT, NAME, MalformedJsonException.class);
+    assertDocument("{\"name\"::", BEGIN_OBJECT, NAME, MalformedJsonException.class);
+    assertDocument("{\"name\":,", BEGIN_OBJECT, NAME, MalformedJsonException.class);
+    assertDocument("{\"name\"=}", BEGIN_OBJECT, NAME, MalformedJsonException.class);
+    assertDocument("{\"name\"=>}", BEGIN_OBJECT, NAME, MalformedJsonException.class);
+    assertDocument(
+        "{\"name\"=>\"string\":", BEGIN_OBJECT, NAME, STRING, MalformedJsonException.class);
+    assertDocument(
+        "{\"name\"=>\"string\"=", BEGIN_OBJECT, NAME, STRING, MalformedJsonException.class);
+    assertDocument(
+        "{\"name\"=>\"string\"=>", BEGIN_OBJECT, NAME, STRING, MalformedJsonException.class);
+    assertDocument("{\"name\"=>\"string\",", BEGIN_OBJECT, NAME, STRING, EOFException.class);
+    assertDocument("{\"name\"=>\"string\",\"name\"", BEGIN_OBJECT, NAME, STRING, NAME);
+    assertDocument("[}", BEGIN_ARRAY, MalformedJsonException.class);
+    assertDocument("[,]", BEGIN_ARRAY, NULL, NULL, END_ARRAY);
+    assertDocument("{", BEGIN_OBJECT, EOFException.class);
+    assertDocument("{\"name\"", BEGIN_OBJECT, NAME, EOFException.class);
+    assertDocument("{\"name\",", BEGIN_OBJECT, NAME, MalformedJsonException.class);
+    assertDocument("{'name'", BEGIN_OBJECT, NAME, EOFException.class);
+    assertDocument("{'name',", BEGIN_OBJECT, NAME, MalformedJsonException.class);
+    assertDocument("{name", BEGIN_OBJECT, NAME, EOFException.class);
+    assertDocument("[", BEGIN_ARRAY, EOFException.class);
+    assertDocument("[string", BEGIN_ARRAY, STRING, EOFException.class);
+    assertDocument("[\"string\"", BEGIN_ARRAY, STRING, EOFException.class);
+    assertDocument("['string'", BEGIN_ARRAY, STRING, EOFException.class);
+    assertDocument("[123", BEGIN_ARRAY, NUMBER, EOFException.class);
+    assertDocument("[123,", BEGIN_ARRAY, NUMBER, EOFException.class);
+    assertDocument("{\"name\":123", BEGIN_OBJECT, NAME, NUMBER, EOFException.class);
+    assertDocument("{\"name\":123,", BEGIN_OBJECT, NAME, NUMBER, EOFException.class);
+    assertDocument("{\"name\":\"string\"", BEGIN_OBJECT, NAME, STRING, EOFException.class);
+    assertDocument("{\"name\":\"string\",", BEGIN_OBJECT, NAME, STRING, EOFException.class);
+    assertDocument("{\"name\":'string'", BEGIN_OBJECT, NAME, STRING, EOFException.class);
+    assertDocument("{\"name\":'string',", BEGIN_OBJECT, NAME, STRING, EOFException.class);
+    assertDocument("{\"name\":false", BEGIN_OBJECT, NAME, BOOLEAN, EOFException.class);
+    assertDocument("{\"name\":false,,", BEGIN_OBJECT, NAME, BOOLEAN, MalformedJsonException.class);
+  }
+Smell List: ['Exception_Catching_Throwing']
+
+Refactor#28
+
+@Test
+  public void testMalformedDocuments() {
+    assertDoesNotThrow(() -> {
+        assertDocument("{]", BEGIN_OBJECT, MalformedJsonException.class);
+        assertDocument("{,", BEGIN_OBJECT, MalformedJsonException.class);
+        assertDocument("{{", BEGIN_OBJECT, MalformedJsonException.class);
+        assertDocument("{[", BEGIN_OBJECT, MalformedJsonException.class);
+        assertDocument("{:", BEGIN_OBJECT, MalformedJsonException.class);
+        assertDocument("{\"name\",", BEGIN_OBJECT, NAME, MalformedJsonException.class);
+        assertDocument("{\"name\",", BEGIN_OBJECT, NAME, MalformedJsonException.class);
+        assertDocument("{\"name\":}", BEGIN_OBJECT, NAME, MalformedJsonException.class);
+        assertDocument("{\"name\"::", BEGIN_OBJECT, NAME, MalformedJsonException.class);
+        assertDocument("{\"name\":,", BEGIN_OBJECT, NAME, MalformedJsonException.class);
+        assertDocument("{\"name\"=}", BEGIN_OBJECT, NAME, MalformedJsonException.class);
+        assertDocument("{\"name\"=>}", BEGIN_OBJECT, NAME, MalformedJsonException.class);
+        assertDocument(
+            "{\"name\"=>\"string\":", BEGIN_OBJECT, NAME, STRING, MalformedJsonException.class);
+        assertDocument(
+            "{\"name\"=>\"string\"=", BEGIN_OBJECT, NAME, STRING, MalformedJsonException.class);
+        assertDocument(
+            "{\"name\"=>\"string\"=>", BEGIN_OBJECT, NAME, STRING, MalformedJsonException.class);
+        assertDocument("{\"name\"=>\"string\",", BEGIN_OBJECT, NAME, STRING, EOFException.class);
+        assertDocument("{\"name\"=>\"string\",\"name\"", BEGIN_OBJECT, NAME, STRING, NAME);
+        assertDocument("[}", BEGIN_ARRAY, MalformedJsonException.class);
+        assertDocument("[,]", BEGIN_ARRAY, NULL, NULL, END_ARRAY);
+        assertDocument("{", BEGIN_OBJECT, EOFException.class);
+        assertDocument("{\"name\"", BEGIN_OBJECT, NAME, EOFException.class);
+        assertDocument("{\"name\",", BEGIN_OBJECT, NAME, MalformedJsonException.class);
+        assertDocument("{'name'", BEGIN_OBJECT, NAME, EOFException.class);
+        assertDocument("{'name',", BEGIN_OBJECT, NAME, MalformedJsonException.class);
+        assertDocument("{name", BEGIN_OBJECT, NAME, EOFException.class);
+        assertDocument("[", BEGIN_ARRAY, EOFException.class);
+        assertDocument("[string", BEGIN_ARRAY, STRING, EOFException.class);
+        assertDocument("[\"string\"", BEGIN_ARRAY, STRING, EOFException.class);
+        assertDocument("['string'", BEGIN_ARRAY, STRING, EOFException.class);
+        assertDocument("[123", BEGIN_ARRAY, NUMBER, EOFException.class);
+        assertDocument("[123,", BEGIN_ARRAY, NUMBER, EOFException.class);
+        assertDocument("{\"name\":123", BEGIN_OBJECT, NAME, NUMBER, EOFException.class);
+        assertDocument("{\"name\":123,", BEGIN_OBJECT, NAME, NUMBER, EOFException.class);
+        assertDocument("{\"name\":\"string\"", BEGIN_OBJECT, NAME, STRING, EOFException.class);
+        assertDocument("{\"name\":\"string\",", BEGIN_OBJECT, NAME, STRING, EOFException.class);
+        assertDocument("{\"name\":'string'", BEGIN_OBJECT, NAME, STRING, EOFException.class);
+        assertDocument("{\"name\":'string',", BEGIN_OBJECT, NAME, STRING, EOFException.class);
+        assertDocument("{\"name\":false", BEGIN_OBJECT, NAME, BOOLEAN, EOFException.class);
+        assertDocument("{\"name\":false,,", BEGIN_OBJECT, NAME, BOOLEAN, MalformedJsonException.class);
+    });
+  }
+
+Input#29
+ @Test
+  public void testUnterminatedStringFailure() throws IOException {
+    JsonReader reader = new JsonReader(reader("[\"string"));
+    reader.setStrictness(Strictness.LENIENT);
+    reader.beginArray();
+    assertThat(reader.peek()).isEqualTo(JsonToken.STRING);
+    var e = assertThrows(MalformedJsonException.class, () -> reader.nextString());
+    assertThat(e)
+        .hasMessageThat()
+        .isEqualTo(
+            "Unterminated string at line 1 column 9 path $[0]\n"
+                + "See https://github.com/google/gson/blob/main/Troubleshooting.md#malformed-json");
+  }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing', 'Eager_Test']
+
+Refactor#29
+
+@Test
+public void testUnterminatedStringFailure() {
+    assertDoesNotThrow(() -> {
+        JsonReader reader = new JsonReader(new StringReader("[\"string"));
+        reader.setStrictness(Strictness.LENIENT);
+        reader.beginArray();
+        assertThat(reader.peek()).isEqualTo(JsonToken.STRING).withFailMessage("Expected the next token to be a STRING");
+
+        MalformedJsonException e = assertThrows(MalformedJsonException.class, () -> reader.nextString(), "Expected MalformedJsonException to be thrown for unterminated string");
+        assertThat(e.getMessage())
+            .isEqualTo(
+                "Unterminated string at line 1 column 9 path $[0]\n"
+                    + "See https://github.com/google/gson/blob/main/Troubleshooting.md#malformed-json")
+            .withFailMessage("Expected the correct error message for the MalformedJsonException");
+    });
+}
+
+
+
+Input#30
+ @Test
+  public void testReadAcrossBuffers() throws IOException {
+    StringBuilder sb = new StringBuilder("#");
+    for (int i = 0; i < JsonReader.BUFFER_SIZE - 3; i++) {
+      sb.append(' ');
+    }
+    sb.append("\n)]}'\n3");
+    JsonReader reader = new JsonReader(reader(sb.toString()));
+    reader.setStrictness(Strictness.LENIENT);
+    JsonToken token = reader.peek();
+    assertThat(token).isEqualTo(JsonToken.NUMBER);
+  }
+Smell List: ['Conditional_Test_Logic', 'Exception_Catching_Throwing', 'Eager_Test']
+
+Refactor#30
+  private JsonReader reader;
+
+  @BeforeEach
+  public void setUp() throws IOException {
+    StringBuilder sb = new StringBuilder("#");
+    for (int i = 0; i < JsonReader.BUFFER_SIZE - 3; i++) {
+      sb.append(' ');
+    }
+    sb.append("\n)]}'\n3");
+    reader = new JsonReader(new StringReader(sb.toString()));
+    reader.setStrictness(Strictness.LENIENT);
+  }
+
+  @Test
+  public void testReadAcrossBuffers_PeekToken() {
+      assertDoesNotThrow(() -> {
+        JsonToken token = reader.peek();
+        assertEquals(JsonToken.NUMBER, token);
+    });
+  }
+Input#31
+
+Refactor#31
+
+
+
+Input#32
+
+Refactor#32
+
+
+
+Input#33
+
+Refactor#33
+
+
+
+Input#34
+
+Refactor#34
+
+
+
+Input#35
+
+Refactor#35
+
+
+Input#36
+
+Refactor#36
+
+
+Input#37
+
+Refactor#37
+
+
+Input#38
+
+Refactor#38
+
+
+Input#39
+
+Refactor#39
+
+
+Input#40
+
+Refactor#40
+
+
+Input#41
+
+Refactor#41
+
+
+Input#42
+
+Refactor#42
+
+
+Input#43
+
+Refactor#43
+
+
+Input#44
+
+Refactor#44
+
+
+Input#45
+
+Refactor#45
+
+
+Input#46
+
+Refactor#46
+
+
+Input#47
+
+Refactor#47
+
+
+Input#48
+
+Refactor#48
+
+
+Input#49
+
+Refactor#49
+
+
+Input#50
+
+Refactor#50

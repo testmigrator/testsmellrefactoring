@@ -1,0 +1,589 @@
+File#1
+
+
+Input#1
+ @Test
+    public void testFit01() {
+        SimpleCurveFitter fitter = GaussianCurveFitter.create();
+        double[] parameters = fitter.fit(createDataset(DATASET1).toList());
+
+        Assert.assertEquals(3496978.1837704973, parameters[0], 1e-7);
+        Assert.assertEquals(4.054933085999146, parameters[1], 1e-16);
+        Assert.assertEquals(0.015039355620304326, parameters[2], 1e-15);
+    }
+Smell List: ['Magic_Number_Test']
+
+Refactor#1
+
+@Test
+public void testFit01() {
+    SimpleCurveFitter fitter = GaussianCurveFitter.create();
+    double[] parameters = fitter.fit(createDataset(DATASET1).toList());
+
+    double expectedAmplitude = 3496978.1837704973;
+    double expectedMean = 4.054933085999146;
+    double expectedSigma = 0.015039355620304326;
+
+    double deltaAmplitude = 1e-7;
+    double deltaMean = 1e-16;
+    double deltaSigma = 1e-15;
+
+    Assert.assertEquals(expectedAmplitude, parameters[0], deltaAmplitude);
+    Assert.assertEquals(expectedMean, parameters[1], deltaMean);
+    Assert.assertEquals(expectedSigma, parameters[2], deltaSigma);
+}
+
+
+
+Input#2
+ @Test
+    public void testDataset1LargeXShift() {
+        final SimpleCurveFitter fitter = GaussianCurveFitter.create();
+        final double xShift = 1e8;
+        final double[] parameters = fitter.fit(createDataset(DATASET1, xShift, 0).toList());
+
+        Assert.assertEquals(1, parameters[0] / 3496978.1837704973, 1e-2);
+        Assert.assertEquals(1, parameters[1] / (xShift + 4.054933085999146), 1e-6);
+        Assert.assertEquals(1, parameters[2] / 0.015039355620304326, 1e-2);
+    }
+Smell List: ['Duplicate_Assert', 'Magic_Number_Test']
+
+Refactor#2
+
+    @ParameterizedTest
+    @CsvSource({
+            "3496978.1837704973, 1e-2, 0",
+            "0.015039355620304326, 1e-2, 2"
+    })
+    public void testDataset1LargeXShift(double expectedValue, double delta, int index) {
+        final SimpleCurveFitter fitter = GaussianCurveFitter.create();
+        final double xShift = 1e8;
+        final double[] parameters = fitter.fit(createDataset(DATASET1, xShift, 0).toList());
+
+        double expectedParameterValue = 1;
+        Assert.assertEquals(expectedParameterValue, parameters[index] / expectedValue, delta);
+    }
+
+    @Test
+    public void testDataset1LargeXShift() {
+        final SimpleCurveFitter fitter = GaussianCurveFitter.create();
+        final double xShift = 1e8;
+        final double[] parameters = fitter.fit(createDataset(DATASET1, xShift, 0).toList());
+
+        double expectedParameterValue = 1;
+        double delta = 1e-6;
+        Assert.assertEquals(expectedParameterValue, parameters[1] / (xShift + 4.054933085999146), delta);
+    }
+
+
+Input#3
+@Test
+    public void testWithMaxIterations1() {
+        final int maxIter = 20;
+        final double[] init = { 3.5e6, 4.2, 0.1 };
+
+        SimpleCurveFitter fitter = GaussianCurveFitter.create();
+        double[] parameters = fitter
+            .withMaxIterations(maxIter)
+            .withStartPoint(init)
+            .fit(createDataset(DATASET1).toList());
+
+        Assert.assertEquals(3496978.1837704973, parameters[0], 1e-2);
+        Assert.assertEquals(4.054933085999146, parameters[1], 1e-4);
+        Assert.assertEquals(0.015039355620304326, parameters[2], 1e-4);
+    }
+Smell List: ['Magic_Number_Test']
+
+Refactor#3
+
+@Test
+public void testWithMaxIterations1() {
+    final int maxIter = 20;
+    final double[] init = { 3.5e6, 4.2, 0.1 };
+
+    SimpleCurveFitter fitter = GaussianCurveFitter.create();
+    double[] parameters = fitter
+            .withMaxIterations(maxIter)
+            .withStartPoint(init)
+            .fit(createDataset(DATASET1).toList());
+
+    double expectedAmplitude = 3496978.1837704973;
+    double expectedMean = 4.054933085999146;
+    double expectedSigma = 0.015039355620304326;
+
+    double delta = 1e-2;
+    double amplitudeDelta = 1e-2;
+
+    Assert.assertEquals(expectedAmplitude, parameters[0], amplitudeDelta);
+    Assert.assertEquals(expectedMean, parameters[1], delta);
+    Assert.assertEquals(expectedSigma, parameters[2], delta);
+}
+
+
+Input#4
+ @Test
+    public void testWithStartPoint() {
+        final double[] init = { 3.5e6, 4.2, 0.1 };
+
+        SimpleCurveFitter fitter = GaussianCurveFitter.create();
+        double[] parameters = fitter
+            .withStartPoint(init)
+            .fit(createDataset(DATASET1).toList());
+
+        Assert.assertEquals(3496978.1837704973, parameters[0], 1e-2);
+        Assert.assertEquals(4.054933085999146, parameters[1], 1e-4);
+        Assert.assertEquals(0.015039355620304326, parameters[2], 1e-4);
+    }
+Smell List: ['Magic_Number_Test']
+
+Refactor#4
+
+@Test
+public void testWithStartPoint() {
+    final double[] init = { 3.5e6, 4.2, 0.1 };
+
+    SimpleCurveFitter fitter = GaussianCurveFitter.create();
+    double[] parameters = fitter
+        .withStartPoint(init)
+        .fit(createDataset(DATASET1).toList());
+
+    double expectedAmplitude = 3496978.1837704973;
+    double expectedMean = 4.054933085999146;
+    double expectedSigma = 0.015039355620304326;
+
+    double delta = 1e-4;
+    double amplitudeDelta = 1e-2;
+
+    Assert.assertEquals(expectedAmplitude, parameters[0], amplitudeDelta);
+    Assert.assertEquals(expectedMean, parameters[1], delta);
+    Assert.assertEquals(expectedSigma, parameters[2], delta);
+}
+
+
+Input#5
+@Test
+    public void testFit04() {
+        SimpleCurveFitter fitter = GaussianCurveFitter.create();
+        double[] parameters = fitter.fit(createDataset(DATASET2).toList());
+
+        Assert.assertEquals(233003.2967252038, parameters[0], 1e-4);
+        Assert.assertEquals(-10.654887521095983, parameters[1], 1e-4);
+        Assert.assertEquals(4.335937353196641, parameters[2], 1e-4);
+    }
+Smell List: ['Magic_Number_Test']
+
+Refactor#5
+
+@Test
+public void testFit04() {
+    SimpleCurveFitter fitter = GaussianCurveFitter.create();
+    double[] parameters = fitter.fit(createDataset(DATASET2).toList());
+
+    double expectedAmplitude = 233003.2967252038;
+    double expectedMean = -10.654887521095983;
+    double expectedSigma = 4.335937353196641;
+    double tolerance = 1e-4;
+
+    Assert.assertEquals(expectedAmplitude, parameters[0], tolerance);
+    Assert.assertEquals(expectedMean, parameters[1], tolerance);
+    Assert.assertEquals(expectedSigma, parameters[2], tolerance);
+}
+
+
+
+
+Input#6
+@Test
+    public void testFit05() {
+        SimpleCurveFitter fitter = GaussianCurveFitter.create();
+        double[] parameters = fitter.fit(createDataset(DATASET3).toList());
+
+        Assert.assertEquals(283863.81929180305, parameters[0], 1e-4);
+        Assert.assertEquals(-13.29641995105174, parameters[1], 1e-4);
+        Assert.assertEquals(1.7297330293549908, parameters[2], 1e-4);
+    }
+Smell List: ['Magic_Number_Test']
+
+Refactor#6
+
+@Test
+public void testFit05() {
+    SimpleCurveFitter fitter = GaussianCurveFitter.create();
+    double[] parameters = fitter.fit(createDataset(DATASET3).toList());
+
+    double expectedAmplitude = 283863.81929180305;
+    double expectedMean = -13.29641995105174;
+    double expectedSigma = 1.7297330293549908;
+    double delta = 1e-4;
+
+    Assert.assertEquals(expectedAmplitude, parameters[0], delta);
+    Assert.assertEquals(expectedMean, parameters[1], delta);
+    Assert.assertEquals(expectedSigma, parameters[2], delta);
+}
+
+
+
+Input#7
+ @Test
+    public void testFit06() {
+        SimpleCurveFitter fitter = GaussianCurveFitter.create();
+        double[] parameters = fitter.fit(createDataset(DATASET4).toList());
+
+        Assert.assertEquals(285250.66754309234, parameters[0], 1e-4);
+        Assert.assertEquals(-13.528375695228455, parameters[1], 1e-4);
+        Assert.assertEquals(1.5204344894331614, parameters[2], 1e-4);
+    }
+Smell List: ['Magic_Number_Test']
+
+Refactor#7
+
+@Test
+public void testFit06() {
+    SimpleCurveFitter fitter = GaussianCurveFitter.create();
+    double[] parameters = fitter.fit(createDataset(DATASET4).toList());
+
+    double expectedAmplitude = 285250.66754309234;
+    double expectedMean = -13.528375695228455;
+    double expectedSigma = 1.5204344894331614;
+    double tolerance = 1e-4;
+
+    Assert.assertEquals(expectedAmplitude, parameters[0], tolerance);
+    Assert.assertEquals(expectedMean, parameters[1], tolerance);
+    Assert.assertEquals(expectedSigma, parameters[2], tolerance);
+}
+
+
+Input#8
+@Test
+    public void testFit07() {
+        SimpleCurveFitter fitter = GaussianCurveFitter.create();
+        double[] parameters = fitter.fit(createDataset(DATASET5).toList());
+
+        Assert.assertEquals(3514384.729342235, parameters[0], 1e-4);
+        Assert.assertEquals(4.054970307455625, parameters[1], 1e-4);
+        Assert.assertEquals(0.015029412832160017, parameters[2], 1e-4);
+    }
+Smell List: ['Magic_Number_Test']
+
+Refactor#8
+
+@Test
+public void testFit07() {
+    SimpleCurveFitter fitter = GaussianCurveFitter.create();
+    double[] parameters = fitter.fit(createDataset(DATASET5).toList());
+
+    double expectedAmplitude = 3514384.729342235;
+    double expectedMean = 4.054970307455625;
+    double expectedSigma = 0.015029412832160017;
+    double tolerance = 1e-4;
+
+    Assert.assertEquals(expectedAmplitude, parameters[0], tolerance);
+    Assert.assertEquals(expectedMean, parameters[1], tolerance);
+    Assert.assertEquals(expectedSigma, parameters[2], tolerance);
+}
+
+
+
+Input#9
+
+@Test
+    public void testMath519() {
+        // The optimizer will try negative sigma values but "GaussianCurveFitter"
+        // will catch the raised exceptions and return NaN values instead.
+
+        final double[] data = {
+            1.1143831578403364E-29,
+            4.95281403484594E-28,
+            1.1171347211930288E-26,
+            1.7044813962636277E-25,
+            1.9784716574832164E-24,
+            1.8630236407866774E-23,
+            1.4820532905097742E-22,
+            1.0241963854632831E-21,
+            6.275077366673128E-21,
+            3.461808994532493E-20,
+            1.7407124684715706E-19,
+            8.056687953553974E-19,
+            3.460193945992071E-18,
+            1.3883326374011525E-17,
+            5.233894983671116E-17,
+            1.8630791465263745E-16,
+            6.288759227922111E-16,
+            2.0204433920597856E-15,
+            6.198768938576155E-15,
+            1.821419346860626E-14,
+            5.139176445538471E-14,
+            1.3956427429045787E-13,
+            3.655705706448139E-13,
+            9.253753324779779E-13,
+            2.267636001476696E-12,
+            5.3880460095836855E-12,
+            1.2431632654852931E-11
+        };
+
+        final WeightedObservedPoints obs = new WeightedObservedPoints();
+        for (int i = 0; i < data.length; i++) {
+            obs.add(i, data[i]);
+        }
+        final double[] p = GaussianCurveFitter.create().fit(obs.toList());
+
+        Assert.assertEquals(53.1572792, p[1], 1e-7);
+        Assert.assertEquals(5.75214622, p[2], 1e-8);
+    }
+Smell List: ['Conditional_Test_Logic', 'Magic_Number_Test']
+
+Refactor#9
+
+    private static final double EXPECTED_SIGMA = 53.1572792;
+    private static final double EXPECTED_MEAN = 5.75214622;
+    private static final double DELTA_SIGMA = 1e-7;
+    private static final double DELTA_MEAN = 1e-8;
+
+    @Test
+    public void testMath519() {
+        final double[] data = {
+            1.1143831578403364E-29,
+            4.95281403484594E-28,
+            1.1171347211930288E-26,
+            1.7044813962636277E-25,
+            1.9784716574832164E-24,
+            1.8630236407866774E-23,
+            1.4820532905097742E-22,
+            1.0241963854632831E-21,
+            6.275077366673128E-21,
+            3.461808994532493E-20,
+            1.7407124684715706E-19,
+            8.056687953553974E-19,
+            3.460193945992071E-18,
+            1.3883326374011525E-17,
+            5.233894983671116E-17,
+            1.8630791465263745E-16,
+            6.288759227922111E-16,
+            2.0204433920597856E-15,
+            6.198768938576155E-15,
+            1.821419346860626E-14,
+            5.139176445538471E-14,
+            1.3956427429045787E-13,
+            3.655705706448139E-13,
+            9.253753324779779E-13,
+            2.267636001476696E-12,
+            5.3880460095836855E-12,
+            1.2431632654852931E-11
+        };
+
+        final WeightedObservedPoints obs = new WeightedObservedPoints();
+        for (int i = 0; i < data.length; i++) {
+            obs.add(i, data[i]);
+        }
+        final double[] p = GaussianCurveFitter.create().fit(obs.toList());
+
+        assertEquals(EXPECTED_SIGMA, p[1], DELTA_SIGMA);
+        assertEquals(EXPECTED_MEAN, p[2], DELTA_MEAN);
+    }
+
+
+Input#10
+@Test
+    public void testMath798() {
+        // When the data points are not commented out below, the fit stalls.
+        // This is expected however, since the whole dataset hardly looks like
+        // a Gaussian.
+        // When commented out, the fit proceeds fine.
+
+        final WeightedObservedPoints obs = new WeightedObservedPoints();
+
+        obs.add(0.23, 395.0);
+        //obs.add(0.68, 0.0);
+        obs.add(1.14, 376.0);
+        //obs.add(1.59, 0.0);
+        obs.add(2.05, 163.0);
+        //obs.add(2.50, 0.0);
+        obs.add(2.95, 49.0);
+        //obs.add(3.41, 0.0);
+        obs.add(3.86, 16.0);
+        //obs.add(4.32, 0.0);
+        obs.add(4.77, 1.0);
+
+        final double[] p = GaussianCurveFitter.create().fit(obs.toList());
+
+        // Values are copied from a previous run of this test.
+        Assert.assertEquals(420.8397296167364, p[0], 1e-12);
+        Assert.assertEquals(0.603770729862231, p[1], 1e-15);
+        Assert.assertEquals(1.0786447936766612, p[2], 1e-14);
+    }
+Smell List: ['Magic_Number_Test']
+
+Refactor#10
+
+@Test
+public void testMath798() {
+    // When the data points are not commented out below, the fit stalls.
+    // This is expected however, since the whole dataset hardly looks like
+    // a Gaussian.
+    // When commented out, the fit proceeds fine.
+
+    final WeightedObservedPoints obs = new WeightedObservedPoints();
+
+    obs.add(0.23, 395.0);
+    //obs.add(0.68, 0.0);
+    obs.add(1.14, 376.0);
+    //obs.add(1.59, 0.0);
+    obs.add(2.05, 163.0);
+    //obs.add(2.50, 0.0);
+    obs.add(2.95, 49.0);
+    //obs.add(3.41, 0.0);
+    obs.add(3.86, 16.0);
+    //obs.add(4.32, 0.0);
+    obs.add(4.77, 1.0);
+
+    final double[] p = GaussianCurveFitter.create().fit(obs.toList());
+
+    // Values are copied from a previous run of this test.
+    double expectedAmplitude = 420.8397296167364;
+    double expectedMean = 0.603770729862231;
+    double expectedSigma = 1.0786447936766612;
+
+    double toleranceAmplitude = 1e-12;
+    double toleranceMean = 1e-15;
+    double toleranceSigma = 1e-14;
+
+    Assert.assertEquals(expectedAmplitude, p[0], toleranceAmplitude);
+    Assert.assertEquals(expectedMean, p[1], toleranceMean);
+    Assert.assertEquals(expectedSigma, p[2], toleranceSigma);
+}
+
+
+Input#11
+
+Refactor#11
+
+
+Input#12
+
+Refactor#12
+
+
+Input#13
+
+Refactor#13
+
+
+Input#14
+
+Refactor#14
+
+
+Input#15
+
+Refactor#15
+
+
+Input#16
+
+Refactor#16
+
+
+Input#17
+
+Refactor#17
+
+
+Input#18
+
+Refactor#18
+
+
+
+Input#19
+
+Refactor#19
+
+
+
+Input#20
+
+Refactor#20
+
+
+
+Input#21
+
+Refactor#21
+
+
+Input#22
+
+Refactor#22
+
+
+Input#23
+
+Refactor#23
+
+
+Input#24
+
+Refactor#24
+
+
+Input#25
+
+Refactor#25
+
+
+Input#26
+
+Refactor#26
+
+
+Input#27
+
+Refactor#27
+
+
+
+Input#28
+
+Refactor#28
+
+
+
+Input#29
+
+Refactor#29
+
+
+
+Input#30
+
+Refactor#30
+
+
+Input#31
+
+Refactor#31
+
+
+
+Input#32
+
+Refactor#32
+
+
+
+Input#33
+
+Refactor#33
+
+
+
+Input#34
+
+Refactor#34
+
+
+
+Input#35
+
+Refactor#35
+

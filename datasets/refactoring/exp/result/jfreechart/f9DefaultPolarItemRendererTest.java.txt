@@ -1,0 +1,300 @@
+f1.txtFile#1
+
+
+Input#1
+ @Test
+    public void testEquals() {
+        DefaultPolarItemRenderer r1 = new DefaultPolarItemRenderer();
+        DefaultPolarItemRenderer r2 = new DefaultPolarItemRenderer();
+        assertEquals(r1, r2);
+
+        r1.setSeriesFilled(1, true);
+        assertNotEquals(r1, r2);
+        r2.setSeriesFilled(1, true);
+        assertEquals(r1, r2);
+
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test', 'Duplicate_Assert']
+
+Refactor#1
+
+private DefaultPolarItemRenderer createRenderer() {
+    return new DefaultPolarItemRenderer();
+}
+
+@Test
+public void testEquals_DefaultState() {
+    DefaultPolarItemRenderer r1 = createRenderer();
+    DefaultPolarItemRenderer r2 = createRenderer();
+    assertEquals(r1, r2, "Two default renderers should be equal");
+}
+
+@Test
+public void testEquals_SeriesFilledChanged() {
+    DefaultPolarItemRenderer r1 = createRenderer();
+    DefaultPolarItemRenderer r2 = createRenderer();
+
+    r1.setSeriesFilled(1, true);
+    assertNotEquals(r1, r2, "Renderers should not be equal after changing series filled state");
+
+    r2.setSeriesFilled(1, true);
+    assertEquals(r1, r2, "Renderers should be equal after setting the same series filled state");
+}
+
+
+
+Input#2
+ @Test
+    public void testHashcode() {
+        DefaultPolarItemRenderer r1 = new DefaultPolarItemRenderer();
+        DefaultPolarItemRenderer r2 = new DefaultPolarItemRenderer();
+        assertEquals(r1, r2);
+        int h1 = r1.hashCode();
+        int h2 = r2.hashCode();
+        assertEquals(h1, h2);
+    }
+Smell List: ['Assertion_Roulette']
+
+Refactor#2
+
+
+Input#3
+@Test
+    public void testCloning() throws CloneNotSupportedException {
+        DefaultPolarItemRenderer r1 = new DefaultPolarItemRenderer();
+        DefaultPolarItemRenderer r2 = CloneUtils.clone(r1);
+
+        assertNotSame(r1, r2);
+        assertSame(r1.getClass(), r2.getClass());
+        assertEquals(r1, r2);
+
+        r1.setSeriesFilled(1, true);
+        assertNotEquals(r1, r2);
+        r2.setSeriesFilled(1, true);
+        assertEquals(r1, r2);
+    }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing', 'Eager_Test', 'Duplicate_Assert']
+
+
+Refactor#3
+private DefaultPolarItemRenderer setupRenderer() {
+    return new DefaultPolarItemRenderer();
+}
+
+@Test
+public void testCloning_instancesAreDifferent() {
+    DefaultPolarItemRenderer r1 = setupRenderer();
+    assertDoesNotThrow(() -> {
+        DefaultPolarItemRenderer r2 = CloneUtils.clone(r1);
+        assertNotSame(r1, r2, "The cloned instances should be different objects");
+    });
+}
+
+@Test
+public void testCloning_classesAreSame() {
+    DefaultPolarItemRenderer r1 = setupRenderer();
+    assertDoesNotThrow(() -> {
+        DefaultPolarItemRenderer r2 = CloneUtils.clone(r1);
+        assertSame(r1.getClass(), r2.getClass(), "The cloned instances should be of the same class");
+    });
+}
+
+@Test
+public void testCloning_initialStateIsEqual() {
+    DefaultPolarItemRenderer r1 = setupRenderer();
+    assertDoesNotThrow(() -> {
+        DefaultPolarItemRenderer r2 = CloneUtils.clone(r1);
+        assertEquals(r1, r2, "The initial state of the cloned instance should be equal to the original");
+    });
+}
+
+@Test
+public void testCloning_stateChangeInOriginalAffectsEquality() {
+    DefaultPolarItemRenderer r1 = setupRenderer();
+    assertDoesNotThrow(() -> {
+        DefaultPolarItemRenderer r2 = CloneUtils.clone(r1);
+        r1.setSeriesFilled(1, true);
+        assertNotEquals(r1, r2, "Changing the state of the original instance should affect equality with the clone");
+    });
+}
+
+@Test
+public void testCloning_stateChangeInCloneAffectsEquality() {
+    DefaultPolarItemRenderer r1 = setupRenderer();
+    assertDoesNotThrow(() -> {
+        DefaultPolarItemRenderer r2 = CloneUtils.clone(r1);
+        r1.setSeriesFilled(1, true);
+        r2.setSeriesFilled(1, true);
+        assertEquals(r1, r2, "Changing the state of both the original and the clone should result in equal instances");
+    });
+}
+
+Input#4
+
+Refactor#4
+
+
+Input#5
+
+Refactor#5
+
+
+Input#6
+
+Refactor#6
+
+
+Input#7
+
+Refactor#7
+
+
+Input#8
+
+Refactor#8
+
+
+Input#9
+
+Refactor#9
+
+
+Input#10
+
+Refactor#10
+
+
+Input#11
+
+Refactor#11
+
+
+Input#12
+
+Refactor#12
+
+
+Input#13
+
+Refactor#13
+
+
+Input#14
+
+Refactor#14
+
+
+Input#15
+
+Refactor#15
+
+
+Input#16
+
+Refactor#16
+
+
+Input#17
+
+Refactor#17
+
+
+Input#18
+
+Refactor#18
+
+
+
+Input#19
+
+Refactor#19
+
+
+
+Input#20
+
+Refactor#20
+
+
+
+Input#21
+
+Refactor#21
+
+
+Input#22
+
+Refactor#22
+
+
+Input#23
+
+Refactor#23
+
+
+Input#24
+
+Refactor#24
+
+
+Input#25
+
+Refactor#25
+
+
+Input#26
+
+Refactor#26
+
+
+Input#27
+
+Refactor#27
+
+
+
+Input#28
+
+Refactor#28
+
+
+
+Input#29
+
+Refactor#29
+
+
+
+Input#30
+
+Refactor#30
+
+
+Input#31
+
+Refactor#31
+
+
+
+Input#32
+
+Refactor#32
+
+
+
+Input#33
+
+Refactor#33
+
+
+
+Input#34
+
+Refactor#34
+
+
+
+Input#35
+
+Refactor#35
+

@@ -1,0 +1,282 @@
+f1.txtFile#1
+
+
+Input#1
+ @Test
+    public void testEquals() {
+        CategoryStepRenderer r1 = new CategoryStepRenderer(false);
+        CategoryStepRenderer r2 = new CategoryStepRenderer(false);
+        assertEquals(r1, r2);
+
+        r1 = new CategoryStepRenderer(true);
+        assertNotEquals(r1, r2);
+        r2 = new CategoryStepRenderer(true);
+        assertEquals(r1, r2);
+    }
+Smell List: ['Assertion_Roulette', 'Duplicate_Assert']
+
+Refactor#1
+@Test
+public void testEquals_SameState() {
+    CategoryStepRenderer r1 = new CategoryStepRenderer(false);
+    CategoryStepRenderer r2 = new CategoryStepRenderer(false);
+    assertEquals(r1, r2, "Expected r1 and r2 to be equal when both have the same active state.");
+}
+
+@Test
+public void testEquals_DifferentState() {
+    CategoryStepRenderer r1 = new CategoryStepRenderer(true);
+    CategoryStepRenderer r2 = new CategoryStepRenderer(false);
+    assertNotEquals(r1, r2, "Expected r1 and r2 to not be equal when one is active and the other is not.");
+}
+
+@Test
+public void testEquals_SameActiveState() {
+    CategoryStepRenderer r1 = new CategoryStepRenderer(true);
+    CategoryStepRenderer r2 = new CategoryStepRenderer(true);
+    assertEquals(r1, r2, "Expected r1 and r2 to be equal when both are active.");
+}
+
+Input#2
+ @Test
+    public void testCloning() throws CloneNotSupportedException {
+        CategoryStepRenderer r1 = new CategoryStepRenderer(false);
+        CategoryStepRenderer r2 = CloneUtils.clone(r1);
+        assertNotSame(r1, r2);
+        assertSame(r1.getClass(), r2.getClass());
+        assertEquals(r1, r2);
+        TestUtils.checkIndependence(r1, r2);
+    }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing']
+
+Refactor#2
+    @Test
+    public void testCloning() {
+        CategoryStepRenderer r1 = new CategoryStepRenderer(false);
+        assertDoesNotThrow(() -> {
+            CategoryStepRenderer r2 = CloneUtils.clone(r1);
+            assertNotSame(r1, r2, "The cloned object should not be the same instance as the original.");
+            assertSame(r1.getClass(), r2.getClass(), "The cloned object should be of the same class as the original.");
+            assertEquals(r1, r2, "The cloned object should be equal to the original.");
+            assertDoesNotThrow(() -> TestUtils.checkIndependence(r1, r2), "Checking independence between the original and cloned objects should not throw an exception.");
+        });
+    }
+
+
+Input#3
+ @Test
+    public void testGetLegendItemSeriesIndex() {
+        DefaultCategoryDataset<String, String> dataset0 = new DefaultCategoryDataset<>();
+        dataset0.addValue(21.0, "R1", "C1");
+        dataset0.addValue(22.0, "R2", "C1");
+        DefaultCategoryDataset<String, String> dataset1 = new DefaultCategoryDataset<>();
+        dataset1.addValue(23.0, "R3", "C1");
+        dataset1.addValue(24.0, "R4", "C1");
+        dataset1.addValue(25.0, "R5", "C1");
+        CategoryStepRenderer r = new CategoryStepRenderer();
+        CategoryPlot<String, String> plot = new CategoryPlot<>(dataset0, new CategoryAxis("x"),
+                new NumberAxis("y"), r);
+        plot.setDataset(1, dataset1);
+        /*JFreeChart chart =*/ new JFreeChart(plot);
+        LegendItem li = r.getLegendItem(1, 2);
+        assertEquals("R5", li.getLabel());
+        assertEquals(1, li.getDatasetIndex());
+        assertEquals(2, li.getSeriesIndex());
+    }
+Smell List: ['Assertion_Roulette', 'Magic_Number_Test']
+Refactor#3
+
+@Test
+public void testGetLegendItemSeriesIndex() {
+    DefaultCategoryDataset<String, String> dataset0 = new DefaultCategoryDataset<>();
+    dataset0.addValue(21.0, "R1", "C1");
+    dataset0.addValue(22.0, "R2", "C1");
+    DefaultCategoryDataset<String, String> dataset1 = new DefaultCategoryDataset<>();
+    dataset1.addValue(23.0, "R3", "C1");
+    dataset1.addValue(24.0, "R4", "C1");
+    dataset1.addValue(25.0, "R5", "C1");
+    CategoryStepRenderer r = new CategoryStepRenderer();
+    CategoryPlot<String, String> plot = new CategoryPlot<>(dataset0, new CategoryAxis("x"),
+            new NumberAxis("y"), r);
+    plot.setDataset(1, dataset1);
+    /*JFreeChart chart =*/ new JFreeChart(plot);
+    LegendItem li = r.getLegendItem(1, 2);
+
+    String expectedLabel = "R5";
+    int expectedDatasetIndex = 1;
+    int expectedSeriesIndex = 2;
+
+    assertEquals(expectedLabel, li.getLabel(), "The label of the legend item should match the expected value.");
+    assertEquals(expectedDatasetIndex, li.getDatasetIndex(), "The dataset index of the legend item should match the expected value.");
+    assertEquals(expectedSeriesIndex, li.getSeriesIndex(), "The series index of the legend item should match the expected value.");
+}
+
+Input#4
+
+Refactor#4
+
+
+Input#5
+
+Refactor#5
+
+
+Input#6
+
+Refactor#6
+
+
+Input#7
+
+Refactor#7
+
+
+Input#8
+
+Refactor#8
+
+
+Input#9
+
+Refactor#9
+
+
+Input#10
+
+Refactor#10
+
+
+Input#11
+
+Refactor#11
+
+
+Input#12
+
+Refactor#12
+
+
+Input#13
+
+Refactor#13
+
+
+Input#14
+
+Refactor#14
+
+
+Input#15
+
+Refactor#15
+
+
+Input#16
+
+Refactor#16
+
+
+Input#17
+
+Refactor#17
+
+
+Input#18
+
+Refactor#18
+
+
+
+Input#19
+
+Refactor#19
+
+
+
+Input#20
+
+Refactor#20
+
+
+
+Input#21
+
+Refactor#21
+
+
+Input#22
+
+Refactor#22
+
+
+Input#23
+
+Refactor#23
+
+
+Input#24
+
+Refactor#24
+
+
+Input#25
+
+Refactor#25
+
+
+Input#26
+
+Refactor#26
+
+
+Input#27
+
+Refactor#27
+
+
+
+Input#28
+
+Refactor#28
+
+
+
+Input#29
+
+Refactor#29
+
+
+
+Input#30
+
+Refactor#30
+
+
+Input#31
+
+Refactor#31
+
+
+
+Input#32
+
+Refactor#32
+
+
+
+Input#33
+
+Refactor#33
+
+
+
+Input#34
+
+Refactor#34
+
+
+
+Input#35
+
+Refactor#35
+

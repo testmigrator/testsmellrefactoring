@@ -1,0 +1,254 @@
+File#1
+
+
+Input#1
+ @Test
+    public void testMatches() {
+        final long[] oneToTen = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+        assertEquals(6, SegmentUtils.countMatches(new long[][] { oneToTen, new long[] { 5, 6, 7 } }, even));
+        assertEquals(5, SegmentUtils.countMatches(new long[][] { oneToTen }, even));
+        assertEquals(5, SegmentUtils.countMatches(oneToTen, even));
+        assertEquals(3, SegmentUtils.countMatches(new long[][] { oneToTen, new long[] { 5, 6, 7 } }, five));
+        assertEquals(2, SegmentUtils.countMatches(new long[][] { oneToTen }, five));
+        assertEquals(2, SegmentUtils.countMatches(oneToTen, five));
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test', 'Magic_Number_Test']
+Refactor#1
+
+private final long[] oneToTen = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+private final Predicate<Long> even = x -> x % 2 == 0;
+private final Predicate<Long> five = x -> x == 5;
+
+private void setupTestMatches() {
+    // Shared setup logic if needed
+}
+
+@Test
+public void testMatches_EvenMultipleArrays() {
+    setupTestMatches();
+    int expectedCount = 6;
+    int actualCount = SegmentUtils.countMatches(new long[][] { oneToTen, new long[] { 5, 6, 7 } }, even);
+    assertEquals(expectedCount, actualCount, "Expected 6 even numbers in combined arrays");
+}
+
+@Test
+public void testMatches_EvenSingleArray() {
+    setupTestMatches();
+    int expectedCount = 5;
+    int actualCount = SegmentUtils.countMatches(new long[][] { oneToTen }, even);
+    assertEquals(expectedCount, actualCount, "Expected 5 even numbers in single array");
+}
+
+@Test
+public void testMatches_EvenSingleDimensionArray() {
+    setupTestMatches();
+    int expectedCount = 5;
+    int actualCount = SegmentUtils.countMatches(oneToTen, even);
+    assertEquals(expectedCount, actualCount, "Expected 5 even numbers in single dimension array");
+}
+
+@Test
+public void testMatches_FiveMultipleArrays() {
+    setupTestMatches();
+    int expectedCount = 3;
+    int actualCount = SegmentUtils.countMatches(new long[][] { oneToTen, new long[] { 5, 6, 7 } }, five);
+    assertEquals(expectedCount, actualCount, "Expected 3 occurrences of 5 in combined arrays");
+}
+
+@Test
+public void testMatches_FiveSingleArray() {
+    setupTestMatches();
+    int expectedCount = 2;
+    int actualCount = SegmentUtils.countMatches(new long[][] { oneToTen }, five);
+    assertEquals(expectedCount, actualCount, "Expected 2 occurrences of 5 in single array");
+}
+
+@Test
+public void testMatches_FiveSingleDimensionArray() {
+    setupTestMatches();
+    int expectedCount = 2;
+    int actualCount = SegmentUtils.countMatches(oneToTen, five);
+    assertEquals(expectedCount, actualCount, "Expected 2 occurrences of 5 in single dimension array");
+}
+
+
+
+Input#2
+
+Refactor#2
+
+
+Input#3
+
+Refactor#3
+
+
+Input#4
+
+Refactor#4
+
+
+Input#5
+
+Refactor#5
+
+
+Input#6
+
+Refactor#6
+
+
+Input#7
+
+Refactor#7
+
+
+Input#8
+
+Refactor#8
+
+
+Input#9
+
+Refactor#9
+
+
+Input#10
+
+Refactor#10
+
+
+Input#11
+
+Refactor#11
+
+
+Input#12
+
+Refactor#12
+
+
+Input#13
+
+Refactor#13
+
+
+Input#14
+
+Refactor#14
+
+
+Input#15
+
+Refactor#15
+
+
+Input#16
+
+Refactor#16
+
+
+Input#17
+
+Refactor#17
+
+
+Input#18
+
+Refactor#18
+
+
+
+Input#19
+
+Refactor#19
+
+
+
+Input#20
+
+Refactor#20
+
+
+
+Input#21
+
+Refactor#21
+
+
+Input#22
+
+Refactor#22
+
+
+Input#23
+
+Refactor#23
+
+
+Input#24
+
+Refactor#24
+
+
+Input#25
+
+Refactor#25
+
+
+Input#26
+
+Refactor#26
+
+
+Input#27
+
+Refactor#27
+
+
+
+Input#28
+
+Refactor#28
+
+
+
+Input#29
+
+Refactor#29
+
+
+
+Input#30
+
+Refactor#30
+
+
+Input#31
+
+Refactor#31
+
+
+
+Input#32
+
+Refactor#32
+
+
+
+Input#33
+
+Refactor#33
+
+
+
+Input#34
+
+Refactor#34
+
+
+
+Input#35
+
+Refactor#35
+

@@ -1,0 +1,278 @@
+File#1
+
+
+Input#1
+ @Test
+    public void testLongNoArg() {
+        assertTrue(cl.hasOption("c"));
+        assertNull(cl.getOptionValue("c"));
+    }
+Smell List: ['Assertion_Roulette']
+
+Refactor#1
+@Test
+public void testLongNoArg() {
+    assertTrue(cl.hasOption("c"), "Expected option 'c' to be present");
+    assertNull(cl.getOptionValue("c"), "Expected option 'c' to have no value");
+}
+
+
+Input#2
+ @Test
+    public void testLongNoArgWithOption() {
+        assertTrue(cl.hasOption(opts.getOption("c")));
+        assertNull(cl.getOptionValue(opts.getOption("c")));
+    }
+Smell List: ['Assertion_Roulette']
+
+Refactor#2
+@Test
+public void testLongNoArgWithOption() {
+    assertTrue(cl.hasOption(opts.getOption("c")), "Expected option 'c' to be present");
+    assertNull(cl.getOptionValue(opts.getOption("c")), "Expected option 'c' to have no value");
+}
+
+Input#3
+ @Test
+    public void testLongWithArg() {
+        assertTrue(cl.hasOption("d"));
+        assertNotNull(cl.getOptionValue("d"));
+        assertEquals(cl.getOptionValue("d"), "bar");
+    }
+Smell List: ['Assertion_Roulette']
+
+Refactor#3
+@Test
+public void testLongWithArg() {
+    assertTrue(cl.hasOption("d"), "Option 'd' should be present");
+    assertNotNull(cl.getOptionValue("d"), "Option 'd' should have a value");
+    assertEquals(cl.getOptionValue("d"), "bar", "Option 'd' value should be 'bar'");
+}
+
+Input#4
+ @Test
+    public void testLongWithArgWithOption() {
+        assertTrue(cl.hasOption(opts.getOption("d")));
+        assertNotNull(cl.getOptionValue(opts.getOption("d")));
+        assertEquals(cl.getOptionValue(opts.getOption("d")), "bar");
+    }
+Smell List: ['Assertion_Roulette']
+
+Refactor#4
+@Test
+public void testLongWithArgWithOption() {
+    assertTrue(cl.hasOption(opts.getOption("d")), "Expected option 'd' to be present");
+    assertNotNull(cl.getOptionValue(opts.getOption("d")), "Expected option 'd' to have a non-null value");
+    assertEquals(cl.getOptionValue(opts.getOption("d")), "bar", "Expected option 'd' value to be 'bar'");
+}
+
+Input#5
+ @Test
+    public void testShortNoArg() {
+        assertTrue(cl.hasOption("a"));
+        assertNull(cl.getOptionValue("a"));
+    }
+Smell List: ['Assertion_Roulette']
+
+Refactor#5
+@Test
+public void testShortNoArg() {
+    assertTrue(cl.hasOption("a"), "Option 'a' should be present");
+    assertNull(cl.getOptionValue("a"), "Option 'a' should not have a value");
+}
+
+
+Input#6
+ @Test
+    public void testShortNoArgWithOption() {
+        assertTrue(cl.hasOption(opts.getOption("a")));
+        assertNull(cl.getOptionValue(opts.getOption("a")));
+    }
+Smell List: ['Assertion_Roulette']
+
+Refactor#6
+@Test
+public void testShortNoArgWithOption() {
+    assertTrue(cl.hasOption(opts.getOption("a")), "Expected option 'a' to be present");
+    assertNull(cl.getOptionValue(opts.getOption("a")), "Expected option 'a' to have no value");
+}
+
+Input#7
+ @Test
+    public void testShortWithArg() {
+        assertTrue(cl.hasOption("b"));
+        assertNotNull(cl.getOptionValue("b"));
+        assertEquals(cl.getOptionValue("b"), "foo");
+    }
+Smell List: ['Assertion_Roulette']
+
+Refactor#7
+@Test
+public void testShortWithArg() {
+    assertTrue(cl.hasOption("b"), "Expected option 'b' to be present");
+    assertNotNull(cl.getOptionValue("b"), "Expected option value for 'b' to be non-null");
+    assertEquals("foo", cl.getOptionValue("b"), "Expected option value for 'b' to be 'foo'");
+}
+
+
+Input#8
+ @Test
+    public void testShortWithArgWithOption() {
+        assertTrue(cl.hasOption(opts.getOption("b")));
+        assertNotNull(cl.getOptionValue(opts.getOption("b")));
+        assertEquals(cl.getOptionValue(opts.getOption("b")), "foo");
+    }
+Smell List: ['Assertion_Roulette']
+
+Refactor#8
+@Test
+public void testShortWithArgWithOption() {
+    assertTrue(cl.hasOption(opts.getOption("b")), "Option 'b' should be present");
+    assertNotNull(cl.getOptionValue(opts.getOption("b")), "Option 'b' should have a value");
+    assertEquals(cl.getOptionValue(opts.getOption("b")), "foo", "Option 'b' value should be 'foo'");
+}
+
+Input#9
+
+Refactor#9
+
+
+Input#10
+
+Refactor#10
+
+
+Input#11
+
+Refactor#11
+
+
+Input#12
+
+Refactor#12
+
+
+Input#13
+
+Refactor#13
+
+
+Input#14
+
+Refactor#14
+
+
+Input#15
+
+Refactor#15
+
+
+Input#16
+
+Refactor#16
+
+
+Input#17
+
+Refactor#17
+
+
+Input#18
+
+Refactor#18
+
+
+
+Input#19
+
+Refactor#19
+
+
+
+Input#20
+
+Refactor#20
+
+
+
+Input#21
+
+Refactor#21
+
+
+Input#22
+
+Refactor#22
+
+
+Input#23
+
+Refactor#23
+
+
+Input#24
+
+Refactor#24
+
+
+Input#25
+
+Refactor#25
+
+
+Input#26
+
+Refactor#26
+
+
+Input#27
+
+Refactor#27
+
+
+
+Input#28
+
+Refactor#28
+
+
+
+Input#29
+
+Refactor#29
+
+
+
+Input#30
+
+Refactor#30
+
+
+Input#31
+
+Refactor#31
+
+
+
+Input#32
+
+Refactor#32
+
+
+
+Input#33
+
+Refactor#33
+
+
+
+Input#34
+
+Refactor#34
+
+
+
+Input#35
+
+Refactor#35
+

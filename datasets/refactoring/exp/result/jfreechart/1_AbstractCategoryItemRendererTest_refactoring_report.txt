@@ -1,0 +1,497 @@
+f1.txtFile#1
+
+
+Input#1
+
+Refactor#1
+
+
+Input#2
+@Test
+    public void testEquals_ObjectList() {
+        BarRenderer r1 = new BarRenderer();
+        r1.setSeriesItemLabelGenerator(0, new StandardCategoryItemLabelGenerator());
+        BarRenderer r2 = new BarRenderer();
+        r2.setSeriesItemLabelGenerator(0, new StandardCategoryItemLabelGenerator());
+        assertEquals(r1, r2);
+        r2.setSeriesItemLabelGenerator(1, new StandardCategoryItemLabelGenerator("X", new DecimalFormat("0.0")));
+        assertNotEquals(r1, r2);
+    }
+Smell List: ['Eager_Test']
+
+Refactor#2
+private void setupTestEquals_ObjectList() {
+    BarRenderer r1 = new BarRenderer();
+    r1.setSeriesItemLabelGenerator(0, new StandardCategoryItemLabelGenerator());
+    BarRenderer r2 = new BarRenderer();
+    r2.setSeriesItemLabelGenerator(0, new StandardCategoryItemLabelGenerator());
+}
+
+@Test
+public void testEquals_ObjectList_SameGenerators() {
+    setupTestEquals_ObjectList();
+    BarRenderer r1 = new BarRenderer();
+    r1.setSeriesItemLabelGenerator(0, new StandardCategoryItemLabelGenerator());
+    BarRenderer r2 = new BarRenderer();
+    r2.setSeriesItemLabelGenerator(0, new StandardCategoryItemLabelGenerator());
+    assertEquals(r1, r2);
+}
+
+@Test
+public void testEquals_ObjectList_DifferentGenerators() {
+    setupTestEquals_ObjectList();
+    BarRenderer r1 = new BarRenderer();
+    r1.setSeriesItemLabelGenerator(0, new StandardCategoryItemLabelGenerator());
+    BarRenderer r2 = new BarRenderer();
+    r2.setSeriesItemLabelGenerator(0, new StandardCategoryItemLabelGenerator());
+    r2.setSeriesItemLabelGenerator(1, new StandardCategoryItemLabelGenerator("X", new DecimalFormat("0.0")));
+    assertNotEquals(r1, r2);
+}
+
+
+Input#3
+@Test
+    public void testEquals_ObjectList2() {
+        BarRenderer r1 = new BarRenderer();
+        r1.setSeriesToolTipGenerator(0, new StandardCategoryToolTipGenerator());
+        BarRenderer r2 = new BarRenderer();
+        r2.setSeriesToolTipGenerator(0, new StandardCategoryToolTipGenerator());
+        assertEquals(r1, r2);
+        r2.setSeriesToolTipGenerator(1, new StandardCategoryToolTipGenerator("X", new DecimalFormat("0.0")));
+        assertNotEquals(r1, r2);
+    }
+Smell List: ['Eager_Test']
+
+Refactor#3
+
+private void setupTestEquals_ObjectList2() {
+    BarRenderer r1 = new BarRenderer();
+    r1.setSeriesToolTipGenerator(0, new StandardCategoryToolTipGenerator());
+    BarRenderer r2 = new BarRenderer();
+    r2.setSeriesToolTipGenerator(0, new StandardCategoryToolTipGenerator());
+}
+
+@Test
+public void testEquals_ObjectList2_EqualRenderers() {
+    setupTestEquals_ObjectList2();
+    BarRenderer r1 = new BarRenderer();
+    r1.setSeriesToolTipGenerator(0, new StandardCategoryToolTipGenerator());
+    BarRenderer r2 = new BarRenderer();
+    r2.setSeriesToolTipGenerator(0, new StandardCategoryToolTipGenerator());
+    assertEquals(r1, r2);
+}
+
+@Test
+public void testEquals_ObjectList2_DifferentRenderers() {
+    setupTestEquals_ObjectList2();
+    BarRenderer r1 = new BarRenderer();
+    r1.setSeriesToolTipGenerator(0, new StandardCategoryToolTipGenerator());
+    BarRenderer r2 = new BarRenderer();
+    r2.setSeriesToolTipGenerator(0, new StandardCategoryToolTipGenerator());
+    r2.setSeriesToolTipGenerator(1, new StandardCategoryToolTipGenerator("X", new DecimalFormat("0.0")));
+    assertNotEquals(r1, r2);
+}
+
+Input#4
+@Test
+    public void testEquals_ObjectList3() {
+        BarRenderer r1 = new BarRenderer();
+        r1.setSeriesItemURLGenerator(0, new StandardCategoryURLGenerator());
+        BarRenderer r2 = new BarRenderer();
+        r2.setSeriesItemURLGenerator(0, new StandardCategoryURLGenerator());
+        assertEquals(r1, r2);
+        r2.setSeriesItemURLGenerator(1, new StandardCategoryURLGenerator());
+        assertNotEquals(r1, r2);
+    }
+Smell List: ['Eager_Test']
+
+Refactor#4
+
+
+private void setupTestEquals_ObjectList3() {
+    BarRenderer r1 = new BarRenderer();
+    r1.setSeriesItemURLGenerator(0, new StandardCategoryURLGenerator());
+    BarRenderer r2 = new BarRenderer();
+    r2.setSeriesItemURLGenerator(0, new StandardCategoryURLGenerator());
+}
+
+@Test
+public void testEquals_ObjectList3_SameGenerators() {
+    setupTestEquals_ObjectList3();
+    BarRenderer r1 = new BarRenderer();
+    r1.setSeriesItemURLGenerator(0, new StandardCategoryURLGenerator());
+    BarRenderer r2 = new BarRenderer();
+    r2.setSeriesItemURLGenerator(0, new StandardCategoryURLGenerator());
+    assertEquals(r1, r2);
+}
+
+@Test
+public void testEquals_ObjectList3_DifferentGenerators() {
+    setupTestEquals_ObjectList3();
+    BarRenderer r1 = new BarRenderer();
+    r1.setSeriesItemURLGenerator(0, new StandardCategoryURLGenerator());
+    BarRenderer r2 = new BarRenderer();
+    r2.setSeriesItemURLGenerator(0, new StandardCategoryURLGenerator());
+    r2.setSeriesItemURLGenerator(1, new StandardCategoryURLGenerator());
+    assertNotEquals(r1, r2);
+}
+Input#5
+
+Refactor#5
+
+
+Input#6
+@Test
+    public void testCloning2() throws CloneNotSupportedException {
+        BarRenderer r1 = new BarRenderer();
+        r1.setDefaultItemLabelGenerator(new IntervalCategoryItemLabelGenerator());
+        BarRenderer r2 = (BarRenderer) r1.clone();
+
+        assertNotSame(r1, r2);
+        assertSame(r1.getClass(), r2.getClass());
+        assertEquals(r1, r2);
+
+        r1 = new BarRenderer();
+        r1.setSeriesItemLabelGenerator(0,
+                new IntervalCategoryItemLabelGenerator());
+        r2 = (BarRenderer) r1.clone();
+        assertNotSame(r1, r2);
+        assertSame(r1.getClass(), r2.getClass());
+        assertEquals(r1, r2);
+
+        r1 = new BarRenderer();
+        r1.setDefaultItemLabelGenerator(new IntervalCategoryItemLabelGenerator());
+        r2 = (BarRenderer) r1.clone();
+
+        assertNotSame(r1, r2);
+        assertSame(r1.getClass(), r2.getClass());
+        assertEquals(r1, r2);
+    }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing', 'Eager_Test', 'Duplicate_Assert']
+
+
+Refactor#6
+ private BarRenderer setupDefaultItemLabelGenerator() {
+        BarRenderer renderer = new BarRenderer();
+        renderer.setDefaultItemLabelGenerator(new IntervalCategoryItemLabelGenerator());
+        return renderer;
+    }
+
+    private BarRenderer setupSeriesItemLabelGenerator(int seriesIndex) {
+        BarRenderer renderer = new BarRenderer();
+        renderer.setSeriesItemLabelGenerator(seriesIndex, new IntervalCategoryItemLabelGenerator());
+        return renderer;
+    }
+
+    @Test
+    public void testCloningWithDefaultItemLabelGenerator() {
+        BarRenderer r1 = setupDefaultItemLabelGenerator();
+        BarRenderer r2 = (BarRenderer) r1.clone();
+
+        assertNotSame(r1, r2, "r1 and r2 should not be the same object");
+        assertSame(r1.getClass(), r2.getClass(), "r1 and r2 should be of the same class");
+        assertEquals(r1, r2, "r1 and r2 should be equal");
+    }
+
+    @Test
+    public void testCloningWithSeriesItemLabelGenerator() {
+        BarRenderer r1 = setupSeriesItemLabelGenerator(0);
+        BarRenderer r2 = (BarRenderer) r1.clone();
+
+        assertNotSame(r1, r2, "r1 and r2 should not be the same object");
+        assertSame(r1.getClass(), r2.getClass(), "r1 and r2 should be of the same class");
+        assertEquals(r1, r2, "r1 and r2 should be equal");
+    }
+
+Input#7
+@Test
+    public void testCloning_LegendItemLabelGenerator() throws CloneNotSupportedException {
+        StandardCategorySeriesLabelGenerator generator
+                = new StandardCategorySeriesLabelGenerator("Series {0}");
+        BarRenderer r1 = new BarRenderer();
+        r1.setLegendItemLabelGenerator(generator);
+        BarRenderer r2 = (BarRenderer) r1.clone();
+
+        assertNotSame(r1, r2);
+        assertSame(r1.getClass(), r2.getClass());
+        assertEquals(r1, r2);
+
+        // check that the generator has been cloned
+        assertNotSame(r1.getLegendItemLabelGenerator(), r2.getLegendItemLabelGenerator());
+    }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing', 'Eager_Test']
+
+
+Refactor#7
+BarRenderer r1;
+BarRenderer r2;
+
+private void setupTestCloning_LegendItemLabelGenerator() {
+    StandardCategorySeriesLabelGenerator generator = new StandardCategorySeriesLabelGenerator("Series {0}");
+    BarRenderer r1 = new BarRenderer();
+    r1.setLegendItemLabelGenerator(generator);
+    BarRenderer r2 = null;
+    try {
+        r2 = (BarRenderer) r1.clone();
+    } catch (CloneNotSupportedException e) {
+        throw new RuntimeException(e);
+    }
+
+    this.r1 = r1;
+    this.r2 = r2;
+}
+
+@Test
+public void testCloning_LegendItemLabelGenerator_Instances() {
+    setupTestCloning_LegendItemLabelGenerator();
+    assertNotSame(r1, r2, "r1 and r2 should be different instances");
+    assertSame(r1.getClass(), r2.getClass(), "r1 and r2 should be of the same class");
+}
+
+@Test
+public void testCloning_LegendItemLabelGenerator_Equality() {
+    setupTestCloning_LegendItemLabelGenerator();
+    assertEquals(r1, r2, "r1 and r2 should be equal");
+}
+
+@Test
+public void testCloning_LegendItemLabelGenerator_GeneratorCloning() {
+    setupTestCloning_LegendItemLabelGenerator();
+    assertNotSame(r1.getLegendItemLabelGenerator(), r2.getLegendItemLabelGenerator(), "Generators should be different instances after cloning");
+}
+
+Input#8
+@Test
+    public void testCloning_LegendItemToolTipGenerator() throws CloneNotSupportedException {
+        StandardCategorySeriesLabelGenerator generator
+                = new StandardCategorySeriesLabelGenerator("Series {0}");
+        BarRenderer r1 = new BarRenderer();
+        r1.setLegendItemToolTipGenerator(generator);
+        BarRenderer r2 = (BarRenderer) r1.clone();
+
+        assertNotSame(r1, r2);
+        assertSame(r1.getClass(), r2.getClass());
+        assertEquals(r1, r2);
+
+        // check that the generator has been cloned
+        assertNotSame(r1.getLegendItemToolTipGenerator(), r2.getLegendItemToolTipGenerator());
+    }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing', 'Eager_Test']
+
+Refactor#8
+
+private BarRenderer setupTestCloning_LegendItemToolTipGenerator() {
+    StandardCategorySeriesLabelGenerator generator = new StandardCategorySeriesLabelGenerator("Series {0}");
+    BarRenderer r1 = new BarRenderer();
+    r1.setLegendItemToolTipGenerator(generator);
+    return r1;
+}
+
+@Test
+public void testCloning_LegendItemToolTipGenerator_CloneCreation() {
+    BarRenderer r1 = setupTestCloning_LegendItemToolTipGenerator();
+    BarRenderer r2 = assertDoesNotThrow(() -> (BarRenderer) r1.clone(), "Unexpected exception occurred during cloning");
+
+    assertNotSame(r1, r2, "r1 and r2 should be different instances");
+    assertSame(r1.getClass(), r2.getClass(), "r1 and r2 should be of the same class");
+    assertEquals(r1, r2, "r1 and r2 should be equal");
+}
+
+@Test
+public void testCloning_LegendItemToolTipGenerator_GeneratorCloning() {
+    BarRenderer r1 = setupTestCloning_LegendItemToolTipGenerator();
+    BarRenderer r2 = assertDoesNotThrow(() -> (BarRenderer) r1.clone(), "Unexpected exception occurred during cloning");
+
+    assertNotSame(r1.getLegendItemToolTipGenerator(), r2.getLegendItemToolTipGenerator(), "The legend item tool tip generators should be different instances");
+}
+
+
+
+Input#9
+
+ @Test
+    public void testCloning_LegendItemURLGenerator() throws CloneNotSupportedException {
+        StandardCategorySeriesLabelGenerator generator
+                = new StandardCategorySeriesLabelGenerator("Series {0}");
+        BarRenderer r1 = new BarRenderer();
+        r1.setLegendItemURLGenerator(generator);
+        BarRenderer r2 = (BarRenderer) r1.clone();
+        assertNotSame(r1, r2);
+        assertSame(r1.getClass(), r2.getClass());
+        assertEquals(r1, r2);
+
+        // check that the generator has been cloned
+        assertNotSame(r1.getLegendItemURLGenerator(), r2.getLegendItemURLGenerator());
+    }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing', 'Eager_Test']
+
+Refactor#9
+private BarRenderer setupRenderer() {
+        StandardCategorySeriesLabelGenerator generator
+                = new StandardCategorySeriesLabelGenerator("Series {0}");
+        BarRenderer renderer = new BarRenderer();
+        renderer.setLegendItemURLGenerator(generator);
+        return renderer;
+    }
+
+    @Test
+    public void testCloning_LegendItemURLGenerator_Instances() {
+        BarRenderer r1 = setupRenderer();
+        BarRenderer r2 = assertDoesNotThrow(() -> (BarRenderer) r1.clone(),
+                "Clone operation should not throw an exception");
+
+        assertNotSame(r1, r2, "r1 and r2 should be different instances");
+        assertSame(r1.getClass(), r2.getClass(), "r1 and r2 should be of the same class");
+        assertEquals(r1, r2, "r1 and r2 should be equal");
+    }
+
+    @Test
+    public void testCloning_LegendItemURLGenerator_GeneratorCloning() {
+        BarRenderer r1 = setupRenderer();
+        BarRenderer r2 = assertDoesNotThrow(() -> (BarRenderer) r1.clone(),
+                "Clone operation should not throw an exception");
+
+        assertNotSame(r1.getLegendItemURLGenerator(), r2.getLegendItemURLGenerator(),
+                "The legend item URL generators should be different instances after cloning");
+    }
+
+
+Input#10
+
+Refactor#10
+
+
+Input#11
+
+Refactor#11
+
+
+Input#12
+
+Refactor#12
+
+
+Input#13
+
+Refactor#13
+
+
+Input#14
+
+Refactor#14
+
+
+Input#15
+
+Refactor#15
+
+
+Input#16
+
+Refactor#16
+
+
+Input#17
+
+Refactor#17
+
+
+Input#18
+
+Refactor#18
+
+
+
+Input#19
+
+Refactor#19
+
+
+
+Input#20
+
+Refactor#20
+
+
+
+Input#21
+
+Refactor#21
+
+
+Input#22
+
+Refactor#22
+
+
+Input#23
+
+Refactor#23
+
+
+Input#24
+
+Refactor#24
+
+
+Input#25
+
+Refactor#25
+
+
+Input#26
+
+Refactor#26
+
+
+Input#27
+
+Refactor#27
+
+
+
+Input#28
+
+Refactor#28
+
+
+
+Input#29
+
+Refactor#29
+
+
+
+Input#30
+
+Refactor#30
+
+
+Input#31
+
+Refactor#31
+
+
+
+Input#32
+
+Refactor#32
+
+
+
+Input#33
+
+Refactor#33
+
+
+
+Input#34
+
+Refactor#34
+
+
+
+Input#35
+
+Refactor#35
+

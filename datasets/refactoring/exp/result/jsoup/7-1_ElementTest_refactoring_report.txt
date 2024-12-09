@@ -1,0 +1,1816 @@
+File#1
+
+
+Input#1
+@Test public void getElementsByTagName() {
+        Document doc = Jsoup.parse(reference);
+        List<Element> divs = doc.getElementsByTag("div");
+        assertEquals(2, divs.size());
+        assertEquals("div1", divs.get(0).id());
+        assertEquals("div2", divs.get(1).id());
+
+        List<Element> ps = doc.getElementsByTag("p");
+        assertEquals(2, ps.size());
+        assertEquals("Hello", ((TextNode) ps.get(0).childNode(0)).getWholeText());
+        assertEquals("Another ", ((TextNode) ps.get(1).childNode(0)).getWholeText());
+        List<Element> ps2 = doc.getElementsByTag("P");
+        assertEquals(ps, ps2);
+
+        List<Element> imgs = doc.getElementsByTag("img");
+        assertEquals("foo.png", imgs.get(0).attr("src"));
+
+        List<Element> empty = doc.getElementsByTag("wtf");
+        assertEquals(0, empty.size());
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test', 'Magic_Number_Test']
+
+Refactor#1
+
+private Document setupTestGetElementsByTagName() {
+    return Jsoup.parse(reference);
+}
+
+@Test
+public void testGetElementsByTagName_Divs() {
+    Document doc = setupTestGetElementsByTagName();
+    List<Element> divs = doc.getElementsByTag("div");
+
+    int expectedDivCount = 2;
+    assertEquals(expectedDivCount, divs.size(), "Expected 2 div elements");
+
+    String expectedFirstDivId = "div1";
+    assertEquals(expectedFirstDivId, divs.get(0).id(), "Expected first div ID to be 'div1'");
+
+    String expectedSecondDivId = "div2";
+    assertEquals(expectedSecondDivId, divs.get(1).id(), "Expected second div ID to be 'div2'");
+}
+
+@Test
+public void testGetElementsByTagName_Paragraphs() {
+    Document doc = setupTestGetElementsByTagName();
+    List<Element> ps = doc.getElementsByTag("p");
+
+    int expectedPCount = 2;
+    assertEquals(expectedPCount, ps.size(), "Expected 2 paragraph elements");
+
+    String expectedFirstPText = "Hello";
+    assertEquals(expectedFirstPText, ((TextNode) ps.get(0).childNode(0)).getWholeText(), "Expected first paragraph text to be 'Hello'");
+
+    String expectedSecondPText = "Another ";
+    assertEquals(expectedSecondPText, ((TextNode) ps.get(1).childNode(0)).getWholeText(), "Expected second paragraph text to be 'Another '");
+
+    List<Element> ps2 = doc.getElementsByTag("P");
+    assertEquals(ps, ps2, "Expected case-insensitive tag matching for paragraphs");
+}
+
+@Test
+public void testGetElementsByTagName_Images() {
+    Document doc = setupTestGetElementsByTagName();
+    List<Element> imgs = doc.getElementsByTag("img");
+
+    String expectedImgSrc = "foo.png";
+    assertEquals(expectedImgSrc, imgs.get(0).attr("src"), "Expected image source to be 'foo.png'");
+}
+
+@Test
+public void testGetElementsByTagName_NonExistentTag() {
+    Document doc = setupTestGetElementsByTagName();
+    List<Element> empty = doc.getElementsByTag("wtf");
+
+    int expectedEmptyCount = 0;
+    assertEquals(expectedEmptyCount, empty.size(), "Expected 0 elements for non-existent tag 'wtf'");
+}
+
+Input#2
+ @Test public void getNamespacedElementsByTag() {
+        Document doc = Jsoup.parse("<div><abc:def id=1>Hello</abc:def></div>");
+        Elements els = doc.getElementsByTag("abc:def");
+        assertEquals(1, els.size());
+        assertEquals("1", els.first().id());
+        assertEquals("abc:def", els.first().tagName());
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test', 'Magic_Number_Test']
+Refactor#2
+
+private static final String EXPECTED_ELEMENT_COUNT = "1";
+private static final String EXPECTED_ELEMENT_ID = "1";
+private static final String EXPECTED_ELEMENT_TAG_NAME = "abc:def";
+
+private Document setupGetNamespacedElementsByTag() {
+    return Jsoup.parse("<div><abc:def id=1>Hello</abc:def></div>");
+}
+
+@Test
+public void testGetNamespacedElementsByTag_Count() {
+    Document doc = setupGetNamespacedElementsByTag();
+    Elements els = doc.getElementsByTag(EXPECTED_ELEMENT_TAG_NAME);
+    assertEquals(Integer.parseInt(EXPECTED_ELEMENT_COUNT), els.size(), "Expected element count does not match actual count");
+}
+
+@Test
+public void testGetNamespacedElementsByTag_Id() {
+    Document doc = setupGetNamespacedElementsByTag();
+    Elements els = doc.getElementsByTag(EXPECTED_ELEMENT_TAG_NAME);
+    assertEquals(EXPECTED_ELEMENT_ID, els.first().id(), "Expected element ID does not match actual ID");
+}
+
+@Test
+public void testGetNamespacedElementsByTag_TagName() {
+    Document doc = setupGetNamespacedElementsByTag();
+    Elements els = doc.getElementsByTag(EXPECTED_ELEMENT_TAG_NAME);
+    assertEquals(EXPECTED_ELEMENT_TAG_NAME, els.first().tagName(), "Expected element tag name does not match actual tag name");
+}
+
+
+Input#3
+ @Test public void testGetElementById() {
+        Document doc = Jsoup.parse(reference);
+        Element div = doc.getElementById("div1");
+        assertEquals("div1", div.id());
+        assertNull(doc.getElementById("none"));
+
+        Document doc2 = Jsoup.parse("<div id=1><div id=2><p>Hello <span id=2>world!</span></p></div></div>");
+        Element div2 = doc2.getElementById("2");
+        assertEquals("div", div2.tagName()); // not the span
+        Element span = div2.child(0).getElementById("2"); // called from <p> context should be span
+        assertEquals("span", span.tagName());
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+Refactor#3
+
+private Document setupDocument(String reference) {
+    return Jsoup.parse(reference);
+}
+
+@Test
+public void testGetElementById_Div1() {
+    Document doc = setupDocument(reference);
+    Element div = doc.getElementById("div1");
+    assertEquals("div1", div.id(), "The ID of the element should be 'div1'");
+    assertNull(doc.getElementById("none"), "No element with ID 'none' should exist");
+}
+
+@Test
+public void testGetElementById_Div2() {
+    Document doc2 = setupDocument("<div id=1><div id=2><p>Hello <span id=2>world!</span></p></div></div>");
+    Element div2 = doc2.getElementById("2");
+    assertEquals("div", div2.tagName(), "The tag name of the element with ID '2' should be 'div'");
+}
+
+@Test
+public void testGetElementById_Span() {
+    Document doc2 = setupDocument("<div id=1><div id=2><p>Hello <span id=2>world!</span></p></div></div>");
+    Element div2 = doc2.getElementById("2");
+    Element span = div2.child(0).getElementById("2");
+    assertEquals("span", span.tagName(), "The tag name of the element with ID '2' within the <p> context should be 'span'");
+}
+
+
+Input#4
+ @Test public void testGetText() {
+        Document doc = Jsoup.parse(reference);
+        assertEquals("Hello Another element", doc.text());
+        assertEquals("Another element", doc.getElementsByTag("p").get(1).text());
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+
+Refactor#4
+
+private Document setupTestGetText() {
+    return Jsoup.parse(reference);
+}
+
+@Test
+public void testGetText_DocumentText() {
+    Document doc = setupTestGetText();
+    assertEquals("Hello Another element", doc.text(), "Document text should match expected value");
+}
+
+@Test
+public void testGetText_ParagraphText() {
+    Document doc = setupTestGetText();
+    assertEquals("Another element", doc.getElementsByTag("p").get(1).text(), "Second paragraph text should match expected value");
+}
+
+
+Input#5
+ @Test public void testGetChildText() {
+        Document doc = Jsoup.parse("<p>Hello <b>there</b> now");
+        Element p = doc.select("p").first();
+        assertEquals("Hello there now", p.text());
+        assertEquals("Hello now", p.ownText());
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+Refactor#5
+Document doc;
+Element p;
+
+private void setupTestGetChildText() {
+    doc = Jsoup.parse("<p>Hello <b>there</b> now");
+    p = doc.select("p").first();
+}
+
+@Test
+public void testGetChildText_Text() {
+    setupTestGetChildText();
+    assertEquals("Hello there now", p.text(), "Check if the combined text of the element and its children matches");
+}
+
+@Test
+public void testGetChildText_OwnText() {
+    setupTestGetChildText();
+    assertEquals("Hello now", p.ownText(), "Check if the text of the element itself, excluding its children, matches");
+}
+
+
+Input#6
+ @Test public void testKeepsPreTextInCode() {
+        String h = "<pre><code>code\n\ncode</code></pre>";
+        Document doc = Jsoup.parse(h);
+        assertEquals("code\n\ncode", doc.text());
+        assertEquals("<pre><code>code\n\ncode</code></pre>", doc.body().html());
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+
+Refactor#6
+String h;
+Document doc;
+private void setupTestKeepsPreTextInCode() {
+    h = "<pre><code>code\n\ncode</code></pre>";
+    doc = Jsoup.parse(h);
+}
+
+@Test
+public void testKeepsPreTextInCode_TextContent() {
+    setupTestKeepsPreTextInCode();
+    assertEquals("code\n\ncode", doc.text(), "The text content within <pre><code> should match the expected value");
+}
+
+@Test
+public void testKeepsPreTextInCode_HtmlContent() {
+    setupTestKeepsPreTextInCode();
+    assertEquals("<pre><code>code\n\ncode</code></pre>", doc.body().html(), "The HTML content within <pre><code> should match the expected value");
+}
+
+Input#7
+ @Test public void testKeepsPreTextAtDepth() {
+        String h = "<pre><code><span><b>code\n\ncode</b></span></code></pre>";
+        Document doc = Jsoup.parse(h);
+        assertEquals("code\n\ncode", doc.text());
+        assertEquals("<pre><code><span><b>code\n\ncode</b></span></code></pre>", doc.body().html());
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+Refactor#7
+String h;
+Document doc;
+
+private void setupTestKeepsPreTextAtDepth() {
+    h = "<pre><code><span><b>code\n\ncode</b></span></code></pre>";
+    doc = Jsoup.parse(h);
+}
+
+@Test
+public void testKeepsPreTextAtDepth_Text() {
+    setupTestKeepsPreTextAtDepth();
+    assertEquals("code\n\ncode", doc.text(), "Text content should match the expected value");
+}
+
+@Test
+public void testKeepsPreTextAtDepth_Html() {
+    setupTestKeepsPreTextAtDepth();
+    assertEquals("<pre><code><span><b>code\n\ncode</b></span></code></pre>", doc.body().html(), "HTML content should match the expected value");
+}
+
+
+Input#8
+ @Test public void testBrHasSpace() {
+        Document doc = Jsoup.parse("<p>Hello<br>there</p>");
+        assertEquals("Hello there", doc.text());
+        assertEquals("Hello there", doc.select("p").first().ownText());
+
+        doc = Jsoup.parse("<p>Hello <br> there</p>");
+        assertEquals("Hello there", doc.text());
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test', 'Duplicate_Assert']
+
+Refactor#8
+    @ParameterizedTest
+    @CsvSource({
+        "<p>Hello<br>there</p>, Hello there",
+        "<p>Hello <br> there</p>, Hello there"
+    })
+    public void testBrHasSpace(String html, String expectedText) {
+        Document doc = Jsoup.parse(html);
+        assertEquals(expectedText, doc.text(), "Document text does not match expected text");
+        assertEquals(expectedText, doc.select("p").first().ownText(), "Paragraph own text does not match expected text");
+    }
+
+Input#9
+ @Test public void testWholeText() {
+        Document doc = Jsoup.parse("<p> Hello\nthere &nbsp;  </p>");
+        assertEquals(" Hello\nthere    ", doc.wholeText());
+
+        doc = Jsoup.parse("<p>Hello  \n  there</p>");
+        assertEquals("Hello  \n  there", doc.wholeText());
+
+        doc = Jsoup.parse("<p>Hello  <div>\n  there</div></p>");
+        assertEquals("Hello  \n  there", doc.wholeText());
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test', 'Duplicate_Assert']
+
+Refactor#9
+ private Document document;
+
+    @BeforeEach
+    public void setupDocument(String html) {
+        document = Jsoup.parse(html);
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "<p> Hello\nthere &nbsp;  </p>, Hello\\nthere ",
+        "<p>Hello  \\n  there</p>, Hello  \\n  there",
+        "<p>Hello  <div>\\n  there</div></p>, Hello  \\n  there"
+    })
+    public void testWholeText(String html, String expectedText) {
+        setupDocument(html);
+        assertEquals(expectedText, document.wholeText(), "The whole text does not match the expected output for the given HTML: " + html);
+    }
+
+Input#10
+ @Test public void testGetSiblings() {
+        Document doc = Jsoup.parse("<div><p>Hello<p id=1>there<p>this<p>is<p>an<p id=last>element</div>");
+        Element p = doc.getElementById("1");
+        assertEquals("there", p.text());
+        assertEquals("Hello", p.previousElementSibling().text());
+        assertEquals("this", p.nextElementSibling().text());
+        assertEquals("Hello", p.firstElementSibling().text());
+        assertEquals("element", p.lastElementSibling().text());
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+
+Refactor#10
+Document doc;
+Element p;
+
+private void setupTestGetSiblings() {
+    doc = Jsoup.parse("<div><p>Hello<p id=1>there<p>this<p>is<p>an<p id=last>element</div>");
+    p = doc.getElementById("1");
+}
+
+@Test
+public void testGetSiblings_Text() {
+    setupTestGetSiblings();
+    assertEquals("Text of element with id '1' should be 'there'", "there", p.text());
+}
+
+@Test
+public void testGetSiblings_PreviousElementSibling() {
+    setupTestGetSiblings();
+    assertEquals("Previous element sibling of element with id '1' should be 'Hello'", "Hello", p.previousElementSibling().text());
+}
+
+@Test
+public void testGetSiblings_NextElementSibling() {
+    setupTestGetSiblings();
+    assertEquals("Next element sibling of element with id '1' should be 'this'", "this", p.nextElementSibling().text());
+}
+
+@Test
+public void testGetSiblings_FirstElementSibling() {
+    setupTestGetSiblings();
+    assertEquals("First element sibling of element with id '1' should be 'Hello'", "Hello", p.firstElementSibling().text());
+}
+
+@Test
+public void testGetSiblings_LastElementSibling() {
+    setupTestGetSiblings();
+    assertEquals("Last element sibling of element with id '1' should be 'element'", "element", p.lastElementSibling().text());
+}
+
+Input#11
+ @Test public void testGetSiblingsWithDuplicateContent() {
+        Document doc = Jsoup.parse("<div><p>Hello<p id=1>there<p>this<p>this<p>is<p>an<p id=last>element</div>");
+        Element p = doc.getElementById("1");
+        assertEquals("there", p.text());
+        assertEquals("Hello", p.previousElementSibling().text());
+        assertEquals("this", p.nextElementSibling().text());
+        assertEquals("this", p.nextElementSibling().nextElementSibling().text());
+        assertEquals("is", p.nextElementSibling().nextElementSibling().nextElementSibling().text());
+        assertEquals("Hello", p.firstElementSibling().text());
+        assertEquals("element", p.lastElementSibling().text());
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+
+Refactor#11
+Document doc;
+Element p;
+
+private void setupTestGetSiblingsWithDuplicateContent() {
+    doc = Jsoup.parse("<div><p>Hello<p id=1>there<p>this<p>this<p>is<p>an<p id=last>element</div>");
+    p = doc.getElementById("1");
+}
+
+@Test
+public void testGetSiblingsWithDuplicateContent_TextOfP() {
+    setupTestGetSiblingsWithDuplicateContent();
+    assertEquals("there", p.text(), "Text of <p> element with id=1 should be 'there'");
+}
+
+@Test
+public void testGetSiblingsWithDuplicateContent_PreviousSibling() {
+    setupTestGetSiblingsWithDuplicateContent();
+    assertEquals("Hello", p.previousElementSibling().text(), "Text of previous sibling of <p> element with id=1 should be 'Hello'");
+}
+
+@Test
+public void testGetSiblingsWithDuplicateContent_NextSibling() {
+    setupTestGetSiblingsWithDuplicateContent();
+    assertEquals("this", p.nextElementSibling().text(), "Text of next sibling of <p> element with id=1 should be 'this'");
+}
+
+@Test
+public void testGetSiblingsWithDuplicateContent_SecondNextSibling() {
+    setupTestGetSiblingsWithDuplicateContent();
+    assertEquals("this", p.nextElementSibling().nextElementSibling().text(), "Text of second next sibling of <p> element with id=1 should be 'this'");
+}
+
+@Test
+public void testGetSiblingsWithDuplicateContent_ThirdNextSibling() {
+    setupTestGetSiblingsWithDuplicateContent();
+    assertEquals("is", p.nextElementSibling().nextElementSibling().nextElementSibling().text(), "Text of third next sibling of <p> element with id=1 should be 'is'");
+}
+
+@Test
+public void testGetSiblingsWithDuplicateContent_FirstSibling() {
+    setupTestGetSiblingsWithDuplicateContent();
+    assertEquals("Hello", p.firstElementSibling().text(), "Text of first sibling of <p> element with id=1 should be 'Hello'");
+}
+
+@Test
+public void testGetSiblingsWithDuplicateContent_LastSibling() {
+    setupTestGetSiblingsWithDuplicateContent();
+    assertEquals("element", p.lastElementSibling().text(), "Text of last sibling of <p> element with id=1 should be 'element'");
+}
+
+Input#12
+@Test public void testGetParents() {
+        Document doc = Jsoup.parse("<div><p>Hello <span>there</span></div>");
+        Element span = doc.select("span").first();
+        Elements parents = span.parents();
+
+        assertEquals(4, parents.size());
+        assertEquals("p", parents.get(0).tagName());
+        assertEquals("div", parents.get(1).tagName());
+        assertEquals("body", parents.get(2).tagName());
+        assertEquals("html", parents.get(3).tagName());
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test', 'Magic_Number_Test']
+
+Refactor#12
+
+private Element setupTestGetParents() {
+    Document doc = Jsoup.parse("<div><p>Hello <span>there</span></div>");
+    Element span = doc.select("span").first();
+    return span;
+}
+
+@Test
+public void testGetParents_Size() {
+    Element span = setupTestGetParents();
+    Elements parents = span.parents();
+    int expectedSize = 4;
+    assertEquals(expectedSize, parents.size(), "The size of the parents list should be 4");
+}
+
+@Test
+public void testGetParents_TagNames() {
+    Element span = setupTestGetParents();
+    Elements parents = span.parents();
+    String expectedFirstParentTag = "p";
+    String expectedSecondParentTag = "div";
+    String expectedThirdParentTag = "body";
+    String expectedFourthParentTag = "html";
+
+    assertEquals(expectedFirstParentTag, parents.get(0).tagName(), "The first parent tag should be 'p'");
+    assertEquals(expectedSecondParentTag, parents.get(1).tagName(), "The second parent tag should be 'div'");
+    assertEquals(expectedThirdParentTag, parents.get(2).tagName(), "The third parent tag should be 'body'");
+    assertEquals(expectedFourthParentTag, parents.get(3).tagName(), "The fourth parent tag should be 'html'");
+}
+
+
+
+
+Input#13
+ @Test public void testElementSiblingIndex() {
+        Document doc = Jsoup.parse("<div><p>One</p>...<p>Two</p>...<p>Three</p>");
+        Elements ps = doc.select("p");
+        assertTrue(0 == ps.get(0).elementSiblingIndex());
+        assertTrue(1 == ps.get(1).elementSiblingIndex());
+        assertTrue(2 == ps.get(2).elementSiblingIndex());
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+
+Refactor#13
+private Document setupTestElementSiblingIndex() {
+    return Jsoup.parse("<div><p>One</p>...<p>Two</p>...<p>Three</p>");
+}
+
+@Test
+public void testElementSiblingIndex_FirstPElement() {
+    Document doc = setupTestElementSiblingIndex();
+    Elements ps = doc.select("p");
+    int expectedIndex = 0;
+    assertTrue(expectedIndex == ps.get(0).elementSiblingIndex(), "First p element should have index 0");
+}
+
+@Test
+public void testElementSiblingIndex_SecondPElement() {
+    Document doc = setupTestElementSiblingIndex();
+    Elements ps = doc.select("p");
+    int expectedIndex = 1;
+    assertTrue(expectedIndex == ps.get(1).elementSiblingIndex(), "Second p element should have index 1");
+}
+
+@Test
+public void testElementSiblingIndex_ThirdPElement() {
+    Document doc = setupTestElementSiblingIndex();
+    Elements ps = doc.select("p");
+    int expectedIndex = 2;
+    assertTrue(expectedIndex == ps.get(2).elementSiblingIndex(), "Third p element should have index 2");
+}
+
+Input#14
+ @Test public void testElementSiblingIndexSameContent() {
+        Document doc = Jsoup.parse("<div><p>One</p>...<p>One</p>...<p>One</p>");
+        Elements ps = doc.select("p");
+        assertTrue(0 == ps.get(0).elementSiblingIndex());
+        assertTrue(1 == ps.get(1).elementSiblingIndex());
+        assertTrue(2 == ps.get(2).elementSiblingIndex());
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+Refactor#14
+private Document setupTestElementSiblingIndexSameContent() {
+    return Jsoup.parse("<div><p>One</p>...<p>One</p>...<p>One</p>");
+}
+
+@Test
+public void testElementSiblingIndexSameContent_FirstP() {
+    Document doc = setupTestElementSiblingIndexSameContent();
+    Elements ps = doc.select("p");
+    int expectedIndex = 0;
+    assertTrue(expectedIndex == ps.get(0).elementSiblingIndex(), "First <p> element should have a sibling index of 0");
+}
+
+@Test
+public void testElementSiblingIndexSameContent_SecondP() {
+    Document doc = setupTestElementSiblingIndexSameContent();
+    Elements ps = doc.select("p");
+    int expectedIndex = 1;
+    assertTrue(expectedIndex == ps.get(1).elementSiblingIndex(), "Second <p> element should have a sibling index of 1");
+}
+
+@Test
+public void testElementSiblingIndexSameContent_ThirdP() {
+    Document doc = setupTestElementSiblingIndexSameContent();
+    Elements ps = doc.select("p");
+    int expectedIndex = 2;
+    assertTrue(expectedIndex == ps.get(2).elementSiblingIndex(), "Third <p> element should have a sibling index of 2");
+}
+
+Input#15
+ @Test public void testGetElementsWithClass() {
+        Document doc = Jsoup.parse("<div class='mellow yellow'><span class=mellow>Hello <b class='yellow'>Yellow!</b></span><p>Empty</p></div>");
+
+        List<Element> els = doc.getElementsByClass("mellow");
+        assertEquals(2, els.size());
+        assertEquals("div", els.get(0).tagName());
+        assertEquals("span", els.get(1).tagName());
+
+        List<Element> els2 = doc.getElementsByClass("yellow");
+        assertEquals(2, els2.size());
+        assertEquals("div", els2.get(0).tagName());
+        assertEquals("b", els2.get(1).tagName());
+
+        List<Element> none = doc.getElementsByClass("solo");
+        assertEquals(0, none.size());
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test', 'Magic_Number_Test']
+
+Refactor#15
+private Document setupTestGetElementsWithClass() {
+    return Jsoup.parse("<div class='mellow yellow'><span class=mellow>Hello <b class='yellow'>Yellow!</b></span><p>Empty</p></div>");
+}
+
+@Test
+public void testGetElementsWithClass_Mellow() {
+    Document doc = setupTestGetElementsWithClass();
+    int expectedMellowCount = 2;
+    List<Element> els = doc.getElementsByClass("mellow");
+    assertEquals(expectedMellowCount, els.size(), "The number of elements with class 'mellow' should be 2");
+    assertEquals("div", els.get(0).tagName(), "The first element with class 'mellow' should be a div");
+    assertEquals("span", els.get(1).tagName(), "The second element with class 'mellow' should be a span");
+}
+
+@Test
+public void testGetElementsWithClass_Yellow() {
+    Document doc = setupTestGetElementsWithClass();
+    int expectedYellowCount = 2;
+    List<Element> els2 = doc.getElementsByClass("yellow");
+    assertEquals(expectedYellowCount, els2.size(), "The number of elements with class 'yellow' should be 2");
+    assertEquals("div", els2.get(0).tagName(), "The first element with class 'yellow' should be a div");
+    assertEquals("b", els2.get(1).tagName(), "The second element with class 'yellow' should be a b");
+}
+
+@Test
+public void testGetElementsWithClass_Solo() {
+    Document doc = setupTestGetElementsWithClass();
+    int expectedSoloCount = 0;
+    List<Element> none = doc.getElementsByClass("solo");
+    assertEquals(expectedSoloCount, none.size(), "The number of elements with class 'solo' should be 0");
+}
+
+
+Input#16
+ @Test public void testGetElementsWithAttribute() {
+        Document doc = Jsoup.parse("<div style='bold'><p title=qux><p><b style></b></p></div>");
+        List<Element> els = doc.getElementsByAttribute("style");
+        assertEquals(2, els.size());
+        assertEquals("div", els.get(0).tagName());
+        assertEquals("b", els.get(1).tagName());
+
+        List<Element> none = doc.getElementsByAttribute("class");
+        assertEquals(0, none.size());
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test', 'Magic_Number_Test']
+Refactor#16
+
+private Document setupTestGetElementsWithAttribute() {
+    return Jsoup.parse("<div style='bold'><p title=qux><p><b style></b></p></div>");
+}
+
+@Test
+public void testGetElementsWithAttribute_Style() {
+    Document doc = setupTestGetElementsWithAttribute();
+    List<Element> elementsWithStyle = doc.getElementsByAttribute("style");
+    int expectedElementCount = 2;
+    assertEquals(expectedElementCount, elementsWithStyle.size(), "Expected 2 elements with 'style' attribute");
+
+    String expectedFirstElementTag = "div";
+    assertEquals(expectedFirstElementTag, elementsWithStyle.get(0).tagName(), "First element with 'style' attribute should be a 'div'");
+
+    String expectedSecondElementTag = "b";
+    assertEquals(expectedSecondElementTag, elementsWithStyle.get(1).tagName(), "Second element with 'style' attribute should be a 'b'");
+}
+
+@Test
+public void testGetElementsWithAttribute_Class() {
+    Document doc = setupTestGetElementsWithAttribute();
+    List<Element> elementsWithClass = doc.getElementsByAttribute("class");
+    int expectedElementCount = 0;
+    assertEquals(expectedElementCount, elementsWithClass.size(), "Expected 0 elements with 'class' attribute");
+}
+
+
+Input#17
+ @Test public void testGetElementsWithAttributeDash() {
+        Document doc = Jsoup.parse("<meta http-equiv=content-type value=utf8 id=1> <meta name=foo content=bar id=2> <div http-equiv=content-type value=utf8 id=3>");
+        Elements meta = doc.select("meta[http-equiv=content-type], meta[charset]");
+        assertEquals(1, meta.size());
+        assertEquals("1", meta.first().id());
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test', 'Magic_Number_Test']
+Refactor#17
+private Document setupTestGetElementsWithAttributeDash() {
+    return Jsoup.parse("<meta http-equiv=content-type value=utf8 id=1> <meta name=foo content=bar id=2> <div http-equiv=content-type value=utf8 id=3>");
+}
+
+@Test
+public void testGetElementsWithAttributeDash_Size() {
+    Document doc = setupTestGetElementsWithAttributeDash();
+    Elements meta = doc.select("meta[http-equiv=content-type], meta[charset]");
+    int expectedSize = 1;
+    assertEquals(expectedSize, meta.size(), "The size of elements with attribute 'http-equiv=content-type' should be 1");
+}
+
+@Test
+public void testGetElementsWithAttributeDash_Id() {
+    Document doc = setupTestGetElementsWithAttributeDash();
+    Elements meta = doc.select("meta[http-equiv=content-type], meta[charset]");
+    String expectedId = "1";
+    assertEquals(expectedId, meta.first().id(), "The ID of the first element with attribute 'http-equiv=content-type' should be '1'");
+}
+
+
+Input#18
+@Test public void testGetElementsWithAttributeValue() {
+        Document doc = Jsoup.parse("<div style='bold'><p><p><b style></b></p></div>");
+        List<Element> els = doc.getElementsByAttributeValue("style", "bold");
+        assertEquals(1, els.size());
+        assertEquals("div", els.get(0).tagName());
+
+        List<Element> none = doc.getElementsByAttributeValue("style", "none");
+        assertEquals(0, none.size());
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test', 'Magic_Number_Test']
+Refactor#18
+private Document setupTestGetElementsWithAttributeValue() {
+    return Jsoup.parse("<div style='bold'><p><p><b style></b></p></div>");
+}
+
+@Test
+public void testGetElementsWithAttributeValue_StyleBold() {
+    Document doc = setupTestGetElementsWithAttributeValue();
+    List<Element> els = doc.getElementsByAttributeValue("style", "bold");
+    int expectedSize = 1;
+    assertEquals(expectedSize, els.size(), "Expected size of elements with style 'bold'");
+    String expectedTagName = "div";
+    assertEquals(expectedTagName, els.get(0).tagName(), "Expected tag name of the first element with style 'bold'");
+}
+
+@Test
+public void testGetElementsWithAttributeValue_StyleNone() {
+    Document doc = setupTestGetElementsWithAttributeValue();
+    List<Element> none = doc.getElementsByAttributeValue("style", "none");
+    int expectedSize = 0;
+    assertEquals(expectedSize, none.size(), "Expected size of elements with style 'none'");
+}
+
+
+
+Input#19
+@Test public void testClassDomMethods() {
+        Document doc = Jsoup.parse("<div><span class=' mellow yellow '>Hello <b>Yellow</b></span></div>");
+        List<Element> els = doc.getElementsByAttribute("class");
+        Element span = els.get(0);
+        assertEquals("mellow yellow", span.className());
+        assertTrue(span.hasClass("mellow"));
+        assertTrue(span.hasClass("yellow"));
+        Set<String> classes = span.classNames();
+        assertEquals(2, classes.size());
+        assertTrue(classes.contains("mellow"));
+        assertTrue(classes.contains("yellow"));
+
+        assertEquals("", doc.className());
+        classes = doc.classNames();
+        assertEquals(0, classes.size());
+        assertFalse(doc.hasClass("mellow"));
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test', 'Magic_Number_Test']
+
+Refactor#19
+private Document setupTestClassDomMethods() {
+    return Jsoup.parse("<div><span class=' mellow yellow '>Hello <b>Yellow</b></span></div>");
+}
+
+@Test
+public void testClassDomMethods_SpanClasses() {
+    Document doc = setupTestClassDomMethods();
+    List<Element> els = doc.getElementsByAttribute("class");
+    Element span = els.get(0);
+
+    String expectedSpanClassName = "mellow yellow";
+    assertEquals(expectedSpanClassName, span.className(), "Span element should have the correct class name");
+
+    assertTrue(span.hasClass("mellow"), "Span element should have the 'mellow' class");
+    assertTrue(span.hasClass("yellow"), "Span element should have the 'yellow' class");
+
+    int expectedNumberOfClasses = 2;
+    Set<String> classes = span.classNames();
+    assertEquals(expectedNumberOfClasses, classes.size(), "Span element should have exactly 2 classes");
+    assertTrue(classes.contains("mellow"), "Span element's classes should contain 'mellow'");
+    assertTrue(classes.contains("yellow"), "Span element's classes should contain 'yellow'");
+}
+
+@Test
+public void testClassDomMethods_DocumentClasses() {
+    Document doc = setupTestClassDomMethods();
+
+    String expectedDocumentClassName = "";
+    assertEquals(expectedDocumentClassName, doc.className(), "Document element should have no class name");
+
+    int expectedNumberOfDocumentClasses = 0;
+    Set<String> classes = doc.classNames();
+    assertEquals(expectedNumberOfDocumentClasses, classes.size(), "Document element should have no classes");
+    assertFalse(doc.hasClass("mellow"), "Document element should not have the 'mellow' class");
+}
+
+
+Input#20
+@Test public void testHasClassDomMethods() {
+        Tag tag = Tag.valueOf("a");
+        Attributes attribs = new Attributes();
+        Element el = new Element(tag, "", attribs);
+
+        attribs.put("class", "toto");
+        boolean hasClass = el.hasClass("toto");
+        assertTrue(hasClass);
+
+        attribs.put("class", " toto");
+        hasClass = el.hasClass("toto");
+        assertTrue(hasClass);
+
+        attribs.put("class", "toto ");
+        hasClass = el.hasClass("toto");
+        assertTrue(hasClass);
+
+        attribs.put("class", "\ttoto ");
+        hasClass = el.hasClass("toto");
+        assertTrue(hasClass);
+
+        attribs.put("class", "  toto ");
+        hasClass = el.hasClass("toto");
+        assertTrue(hasClass);
+
+        attribs.put("class", "ab");
+        hasClass = el.hasClass("toto");
+        assertFalse(hasClass);
+
+        attribs.put("class", "     ");
+        hasClass = el.hasClass("toto");
+        assertFalse(hasClass);
+
+        attribs.put("class", "tototo");
+        hasClass = el.hasClass("toto");
+        assertFalse(hasClass);
+
+        attribs.put("class", "raulpismuth  ");
+        hasClass = el.hasClass("raulpismuth");
+        assertTrue(hasClass);
+
+        attribs.put("class", " abcd  raulpismuth efgh ");
+        hasClass = el.hasClass("raulpismuth");
+        assertTrue(hasClass);
+
+        attribs.put("class", " abcd efgh raulpismuth");
+        hasClass = el.hasClass("raulpismuth");
+        assertTrue(hasClass);
+
+        attribs.put("class", " abcd efgh raulpismuth ");
+        hasClass = el.hasClass("raulpismuth");
+        assertTrue(hasClass);
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test', 'Duplicate_Assert']
+Refactor#20
+private Element el;
+
+    @BeforeEach
+    public void setupTestHasClassDomMethods() {
+        Tag tag = Tag.valueOf("a");
+        Attributes attribs = new Attributes();
+        el = new Element(tag, "", attribs);
+    }
+
+    @Test
+    public void testHasClass_Toto_PresentAtStart() {
+        el.attributes().put("class", "toto");
+        assertTrue(el.hasClass("toto"), "Class 'toto' should be found at the start of the class attribute.");
+    }
+
+    @Test
+    public void testHasClass_Toto_PresentWithLeadingSpace() {
+        el.attributes().put("class", " toto");
+        assertTrue(el.hasClass("toto"), "Class 'toto' should be found with leading space.");
+    }
+
+    @Test
+    public void testHasClass_Toto_PresentWithTrailingSpace() {
+        el.attributes().put("class", "toto ");
+        assertTrue(el.hasClass("toto"), "Class 'toto' should be found with trailing space.");
+    }
+
+    @Test
+    public void testHasClass_Toto_PresentWithTabAndTrailingSpace() {
+        el.attributes().put("class", "\ttoto ");
+        assertTrue(el.hasClass("toto"), "Class 'toto' should be found with tab and trailing space.");
+    }
+
+    @Test
+    public void testHasClass_Toto_PresentWithMultipleSpaces() {
+        el.attributes().put("class", "  toto ");
+        assertTrue(el.hasClass("toto"), "Class 'toto' should be found with multiple spaces.");
+    }
+
+    @Test
+    public void testHasClass_Toto_NotPresent() {
+        el.attributes().put("class", "ab");
+        assertFalse(el.hasClass("toto"), "Class 'toto' should not be found.");
+    }
+
+    @Test
+    public void testHasClass_Toto_NotPresentWithOnlySpaces() {
+        el.attributes().put("class", "     ");
+        assertFalse(el.hasClass("toto"), "Class 'toto' should not be found when only spaces are present.");
+    }
+
+    @Test
+    public void testHasClass_Toto_NotPresentInCompositeClass() {
+        el.attributes().put("class", "tototo");
+        assertFalse(el.hasClass("toto"), "Class 'toto' should not be found in composite class 'tototo'.");
+    }
+
+    @Test
+    public void testHasClass_Raulpismuth_PresentAtEnd() {
+        el.attributes().put("class", "raulpismuth  ");
+        assertTrue(el.hasClass("raulpismuth"), "Class 'raulpismuth' should be found at the end of the class attribute.");
+    }
+
+    @Test
+    public void testHasClass_Raulpismuth_PresentInMiddle() {
+        el.attributes().put("class", " abcd  raulpismuth efgh ");
+        assertTrue(el.hasClass("raulpismuth"), "Class 'raulpismuth' should be found in the middle of the class attribute.");
+    }
+
+    @Test
+    public void testHasClass_Raulpismuth_PresentAtEndWithSpaces() {
+        el.attributes().put("class", " abcd efgh raulpismuth");
+        assertTrue(el.hasClass("raulpismuth"), "Class 'raulpismuth' should be found at the end with spaces.");
+    }
+
+    @Test
+    public void testHasClass_Raulpismuth_PresentWithMultipleSpaces() {
+        el.attributes().put("class", " abcd efgh raulpismuth ");
+        assertTrue(el.hasClass("raulpismuth"), "Class 'raulpismuth' should be found with multiple spaces.");
+    }
+
+
+Input#21
+@Test public void testClassUpdates() {
+        Document doc = Jsoup.parse("<div class='mellow yellow'></div>");
+        Element div = doc.select("div").first();
+
+        div.addClass("green");
+        assertEquals("mellow yellow green", div.className());
+        div.removeClass("red"); // noop
+        div.removeClass("yellow");
+        assertEquals("mellow green", div.className());
+        div.toggleClass("green").toggleClass("red");
+        assertEquals("mellow red", div.className());
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+Refactor#21
+Test
+public void testClassUpdates_AddClass() {
+    Document doc = Jsoup.parse("<div class='mellow yellow'></div>");
+    Element div = doc.select("div").first();
+
+    div.addClass("green");
+    assertEquals("mellow yellow green", div.className(), "Class 'green' should be added to the element");
+}
+
+@Test
+public void testClassUpdates_RemoveClass() {
+    Document doc = Jsoup.parse("<div class='mellow yellow'></div>");
+    Element div = doc.select("div").first();
+
+    div.removeClass("red"); // noop
+    div.removeClass("yellow");
+    assertEquals("mellow green", div.className(), "Class 'yellow' should be removed from the element");
+}
+
+@Test
+public void testClassUpdates_ToggleClass() {
+    Document doc = Jsoup.parse("<div class='mellow yellow'></div>");
+    Element div = doc.select("div").first();
+
+    div.toggleClass("green").toggleClass("red");
+    assertEquals("mellow red", div.className(), "Class 'green' should be removed and 'red' should be added to the element");
+}
+
+Input#22
+ @Test public void testInnerHtml() {
+        Document doc = Jsoup.parse("<div>\n <p>Hello</p> </div>");
+        assertEquals("<p>Hello</p>", doc.getElementsByTag("div").get(0).html());
+    }
+Smell List: ['Eager_Test']
+
+Refactor#22
+private Document setupTestInnerHtml() {
+    return Jsoup.parse("<div>\n <p>Hello</p> </div>");
+}
+
+@Test
+public void testInnerHtml_DivContent() {
+    Document doc = setupTestInnerHtml();
+    assertEquals("<p>Hello</p>", doc.getElementsByTag("div").get(0).html());
+}
+
+Input#23
+ @Test public void testNotPretty() {
+        Document doc = Jsoup.parse("<div>   \n<p>Hello\n there\n</p></div>");
+        doc.outputSettings().prettyPrint(false);
+        assertEquals("<html><head></head><body><div>   \n<p>Hello\n there\n</p></div></body></html>", doc.html());
+
+        Element div = doc.select("div").first();
+        assertEquals("   \n<p>Hello\n there\n</p>", div.html());
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+Refactor#23
+private Document setupTestNotPretty() {
+    Document doc = Jsoup.parse("<div>   \n<p>Hello\n there\n</p></div>");
+    doc.outputSettings().prettyPrint(false);
+    return doc;
+}
+
+@Test
+public void testNotPretty_DocumentHtml() {
+    Document doc = setupTestNotPretty();
+    assertEquals("<html><head></head><body><div>   \n<p>Hello\n there\n</p></div></body></html>", doc.html(), "Document HTML should match expected output without pretty print");
+}
+
+@Test
+public void testNotPretty_DivHtml() {
+    Document doc = setupTestNotPretty();
+    Element div = doc.select("div").first();
+    assertEquals("   \n<p>Hello\n there\n</p>", div.html(), "Div HTML should match expected output without pretty print");
+}
+
+
+Input#24
+ @Test public void testContainerOutput() {
+        Document doc = Jsoup.parse("<title>Hello there</title> <div><p>Hello</p><p>there</p></div> <div>Another</div>");
+        assertEquals("<title>Hello there</title>", doc.select("title").first().outerHtml());
+        assertEquals("<div>\n <p>Hello</p>\n <p>there</p>\n</div>", doc.select("div").first().outerHtml());
+        assertEquals("<div>\n <p>Hello</p>\n <p>there</p>\n</div> \n<div>\n Another\n</div>", doc.select("body").first().html());
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+Refactor#24
+private Document setupTestContainerOutput() {
+    return Jsoup.parse("<title>Hello there</title> <div><p>Hello</p><p>there</p></div> <div>Another</div>");
+}
+
+@Test
+public void testContainerOutput_Title() {
+    Document doc = setupTestContainerOutput();
+    assertEquals("<title>Hello there</title>", doc.select("title").first().outerHtml(), "Title element does not match expected output");
+}
+
+@Test
+public void testContainerOutput_FirstDiv() {
+    Document doc = setupTestContainerOutput();
+    assertEquals("<div>\n <p>Hello</p>\n <p>there</p>\n</div>", doc.select("div").first().outerHtml(), "First div element does not match expected output");
+}
+
+@Test
+public void testContainerOutput_BodyContent() {
+    Document doc = setupTestContainerOutput();
+    assertEquals("<div>\n <p>Hello</p>\n <p>there</p>\n</div> \n<div>\n Another\n</div>", doc.select("body").first().html(), "Body content does not match expected output");
+}
+
+Input#25
+ @Test public void testSetText() {
+        String h = "<div id=1>Hello <p>there <b>now</b></p></div>";
+        Document doc = Jsoup.parse(h);
+        assertEquals("Hello there now", doc.text()); // need to sort out node whitespace
+        assertEquals("there now", doc.select("p").get(0).text());
+
+        Element div = doc.getElementById("1").text("Gone");
+        assertEquals("Gone", div.text());
+        assertEquals(0, doc.select("p").size());
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test', 'Magic_Number_Test']
+Refactor#25
+private void setupTestSetText() {
+    String h = "<div id=1>Hello <p>there <b>now</b></p></div>";
+    doc = Jsoup.parse(h);
+}
+
+@Test
+public void testSetText_DocumentText() {
+    setupTestSetText();
+    assertEquals("Document text should match expected value", "Hello there now", doc.text());
+}
+
+@Test
+public void testSetText_ParagraphText() {
+    setupTestSetText();
+    assertEquals("Paragraph text should match expected value", "there now", doc.select("p").get(0).text());
+}
+
+@Test
+public void testSetText_SetNewText() {
+    setupTestSetText();
+    Element div = doc.getElementById("1").text("Gone");
+    assertEquals("Div text should be updated to 'Gone'", "Gone", div.text());
+}
+
+@Test
+public void testSetText_ParagraphRemoved() {
+    setupTestSetText();
+    doc.getElementById("1").text("Gone");
+    int expectedParagraphCount = 0;
+    assertEquals("Paragraph count should be 0 after setting new text", expectedParagraphCount, doc.select("p").size());
+}
+
+
+Input#26
+
+Refactor#26
+
+
+Input#27
+ @Test public void testAddBooleanAttribute() {
+        Element div = new Element(Tag.valueOf("div"), "");
+
+        div.attr("true", true);
+
+        div.attr("false", "value");
+        div.attr("false", false);
+
+        assertTrue(div.hasAttr("true"));
+        assertEquals("", div.attr("true"));
+
+        List<Attribute> attributes = div.attributes().asList();
+        assertEquals("There should be one attribute", 1, attributes.size());
+        assertFalse(div.hasAttr("false"));
+
+        assertEquals("<div true></div>", div.outerHtml());
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test', 'Magic_Number_Test']
+Refactor#27
+
+private Element setupTestAddBooleanAttribute() {
+    Element div = new Element(Tag.valueOf("div"), "");
+    return div;
+}
+
+@Test
+public void testAddBooleanAttribute_True() {
+    Element div = setupTestAddBooleanAttribute();
+    div.attr("true", true);
+
+    assertTrue(div.hasAttr("true"), "The 'true' attribute should exist.");
+    assertEquals("", div.attr("true"), "The value of the 'true' attribute should be an empty string.");
+}
+
+@Test
+public void testAddBooleanAttribute_False() {
+    Element div = setupTestAddBooleanAttribute();
+    div.attr("false", "value");
+    div.attr("false", false);
+
+    assertFalse(div.hasAttr("false"), "The 'false' attribute should not exist after setting it to false.");
+}
+
+@Test
+public void testAddBooleanAttribute_AttributeCount() {
+    Element div = setupTestAddBooleanAttribute();
+    div.attr("true", true);
+    div.attr("false", "value");
+    div.attr("false", false);
+
+    List<Attribute> attributes = div.attributes().asList();
+    int expectedAttributeCount = 1;
+    assertEquals(expectedAttributeCount, attributes.size(), "There should be one attribute.");
+}
+
+@Test
+public void testAddBooleanAttribute_OuterHtml() {
+    Element div = setupTestAddBooleanAttribute();
+    div.attr("true", true);
+    div.attr("false", "value");
+    div.attr("false", false);
+
+    assertEquals("<div true></div>", div.outerHtml(), "The outer HTML should reflect the 'true' attribute only.");
+}
+
+
+Input#28
+ @Test public void testAppendRowToTable() {
+        Document doc = Jsoup.parse("<table><tr><td>1</td></tr></table>");
+        Element table = doc.select("tbody").first();
+        table.append("<tr><td>2</td></tr>");
+
+        assertEquals("<table><tbody><tr><td>1</td></tr><tr><td>2</td></tr></tbody></table>", TextUtil.stripNewlines(doc.body().html()));
+    }
+Smell List: ['Eager_Test']
+Refactor#28
+Document doc;
+private void setupTestAppendRowToTable() {
+    doc = Jsoup.parse("<table><tr><td>1</td></tr></table>");
+    Element table = doc.select("tbody").first();
+    table.append("<tr><td>2</td></tr>");
+}
+
+@Test
+public void testAppendRowToTable_DocumentStructure() {
+    setupTestAppendRowToTable();
+    String expectedHtml = "<table><tbody><tr><td>1</td></tr><tr><td>2</td></tr></tbody></table>";
+    assertEquals(expectedHtml, TextUtil.stripNewlines(doc.body().html()));
+}
+
+
+
+Input#29
+
+Refactor#29
+
+Input#30
+ @Test public void testPrependElement() {
+        Document doc = Jsoup.parse("<div id=1><p>Hello</p></div>");
+        Element div = doc.getElementById("1");
+        div.prependElement("p").text("Before");
+        assertEquals("Before", div.child(0).text());
+        assertEquals("Hello", div.child(1).text());
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+
+Refactor#30
+Document doc;
+Element div;
+
+private void setupTestPrependElement() {
+    doc = Jsoup.parse("<div id=1><p>Hello</p></div>");
+    div = doc.getElementById("1");
+}
+
+@Test
+public void testPrependElement_FirstChildText() {
+    setupTestPrependElement();
+    div.prependElement("p").text("Before");
+    assertEquals("First child text should be 'Before'", "Before", div.child(0).text());
+}
+
+@Test
+public void testPrependElement_SecondChildText() {
+    setupTestPrependElement();
+    div.prependElement("p").text("Before");
+    assertEquals("Second child text should be 'Hello'", "Hello", div.child(1).text());
+}
+
+
+Input#31
+ @Test public void testAddNewText() {
+        Document doc = Jsoup.parse("<div id=1><p>Hello</p></div>");
+        Element div = doc.getElementById("1");
+        div.appendText(" there & now >");
+        assertEquals("<p>Hello</p> there &amp; now &gt;", TextUtil.stripNewlines(div.html()));
+    }
+Smell List: ['Eager_Test']
+Refactor#31
+Document doc;
+Element div;
+
+private void setupTestAddNewText() {
+    doc = Jsoup.parse("<div id=1><p>Hello</p></div>");
+    div = doc.getElementById("1");
+    div.appendText(" there & now >");
+}
+
+@Test
+public void testAddNewText_AppendText() {
+    setupTestAddNewText();
+    assertEquals("<p>Hello</p> there &amp; now &gt;", TextUtil.stripNewlines(div.html()));
+}
+
+
+
+Input#32
+ @Test public void testPrependText() {
+        Document doc = Jsoup.parse("<div id=1><p>Hello</p></div>");
+        Element div = doc.getElementById("1");
+        div.prependText("there & now > ");
+        assertEquals("there & now > Hello", div.text());
+        assertEquals("there &amp; now &gt; <p>Hello</p>", TextUtil.stripNewlines(div.html()));
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+Refactor#32
+Document doc;
+Element div;
+
+private void setupTestPrependText() {
+    doc = Jsoup.parse("<div id=1><p>Hello</p></div>");
+    div = doc.getElementById("1");
+    div.prependText("there & now > ");
+}
+
+@Test
+public void testPrependText_TextContent() {
+    setupTestPrependText();
+    assertEquals("there & now > Hello", div.text(), "Text content should include prepended text");
+}
+
+@Test
+public void testPrependText_HtmlContent() {
+    setupTestPrependText();
+    assertEquals("there &amp; now &gt; <p>Hello</p>", TextUtil.stripNewlines(div.html()), "HTML content should include properly escaped prepended text");
+}
+
+
+Input#33
+ @Test(expected = IllegalArgumentException.class) public void testThrowsOnAddNullText() {
+        Document doc = Jsoup.parse("<div id=1><p>Hello</p></div>");
+        Element div = doc.getElementById("1");
+        div.appendText(null);
+    }
+Smell List: ['Eager_Test']
+Refactor#33
+
+
+
+Input#34
+
+Refactor#34
+
+
+
+Input#35
+
+Refactor#35
+
+
+
+Input#36
+
+Refactor#36
+
+
+
+Input#37
+ @Test public void testSetHtml() {
+        Document doc = Jsoup.parse("<div id=1><p>Hello</p></div>");
+        Element div = doc.getElementById("1");
+        div.html("<p>there</p><p>now</p>");
+        assertEquals("<p>there</p><p>now</p>", TextUtil.stripNewlines(div.html()));
+    }
+Smell List: ['Eager_Test']
+
+Refactor#37
+private void setupTestSetHtml() {
+    Document doc = Jsoup.parse("<div id=1><p>Hello</p></div>");
+    Element div = doc.getElementById("1");
+    div.html("<p>there</p><p>now</p>");
+}
+
+@Test
+public void testSetHtml_ReplaceContent() {
+    setupTestSetHtml();
+    assertEquals("<p>there</p><p>now</p>", TextUtil.stripNewlines(doc.getElementById("1").html()));
+}
+
+
+Input#38
+ @Test public void testSetHtmlTitle() {
+        Document doc = Jsoup.parse("<html><head id=2><title id=1></title></head></html>");
+
+        Element title = doc.getElementById("1");
+        title.html("good");
+        assertEquals("good", title.html());
+        title.html("<i>bad</i>");
+        assertEquals("&lt;i&gt;bad&lt;/i&gt;", title.html());
+
+        Element head = doc.getElementById("2");
+        head.html("<title><i>bad</i></title>");
+        assertEquals("<title>&lt;i&gt;bad&lt;/i&gt;</title>", head.html());
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+Refactor#38
+private Document setupTestSetHtmlTitle() {
+    return Jsoup.parse("<html><head id=2><title id=1></title></head></html>");
+}
+
+@Test
+public void testSetHtmlTitle_SetSimpleText() {
+    Document doc = setupTestSetHtmlTitle();
+    Element title = doc.getElementById("1");
+    title.html("good");
+    assertEquals("good", title.html(), "The title element should contain the text 'good'");
+}
+
+@Test
+public void testSetHtmlTitle_SetHtmlContent() {
+    Document doc = setupTestSetHtmlTitle();
+    Element title = doc.getElementById("1");
+    title.html("<i>bad</i>");
+    assertEquals("&lt;i&gt;bad&lt;/i&gt;", title.html(), "The title element should contain the escaped HTML '<i>bad</i>'");
+}
+
+@Test
+public void testSetHtmlTitle_SetHtmlInHead() {
+    Document doc = setupTestSetHtmlTitle();
+    Element head = doc.getElementById("2");
+    head.html("<title><i>bad</i></title>");
+    assertEquals("<title>&lt;i&gt;bad&lt;/i&gt;</title>", head.html(), "The head element should contain the escaped HTML '<title><i>bad</i></title>'");
+}
+
+
+Input#39
+ @Test public void testWrap() {
+        Document doc = Jsoup.parse("<div><p>Hello</p><p>There</p></div>");
+        Element p = doc.select("p").first();
+        p.wrap("<div class='head'></div>");
+        assertEquals("<div><div class=\"head\"><p>Hello</p></div><p>There</p></div>", TextUtil.stripNewlines(doc.body().html()));
+
+        Element ret = p.wrap("<div><div class=foo></div><p>What?</p></div>");
+        assertEquals("<div><div class=\"head\"><div><div class=\"foo\"><p>Hello</p></div><p>What?</p></div></div><p>There</p></div>",
+                TextUtil.stripNewlines(doc.body().html()));
+
+        assertEquals(ret, p);
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+Refactor#39
+private Document setupTestWrap() {
+    Document doc = Jsoup.parse("<div><p>Hello</p><p>There</p></div>");
+    return doc;
+}
+
+@Test
+public void testWrap_SingleDiv() {
+    Document doc = setupTestWrap();
+    Element p = doc.select("p").first();
+    p.wrap("<div class='head'></div>");
+    assertEquals("<div><div class=\"head\"><p>Hello</p></div><p>There</p></div>", TextUtil.stripNewlines(doc.body().html()), "Single div wrap did not produce expected HTML");
+}
+
+@Test
+public void testWrap_NestedDivs() {
+    Document doc = setupTestWrap();
+    Element p = doc.select("p").first();
+    p.wrap("<div><div class=foo></div><p>What?</p></div>");
+    assertEquals("<div><div class=\"head\"><div><div class=\"foo\"><p>Hello</p></div><p>What?</p></div></div><p>There</p></div>", TextUtil.stripNewlines(doc.body().html()), "Nested divs wrap did not produce expected HTML");
+}
+
+@Test
+public void testWrap_ReturnValue() {
+    Document doc = setupTestWrap();
+    Element p = doc.select("p").first();
+    Element ret = p.wrap("<div><div class=foo></div><p>What?</p></div>");
+    assertEquals(ret, p, "Return value from wrap method is incorrect");
+}
+
+Input#40
+@Test public void before() {
+        Document doc = Jsoup.parse("<div><p>Hello</p><p>There</p></div>");
+        Element p1 = doc.select("p").first();
+        p1.before("<div>one</div><div>two</div>");
+        assertEquals("<div><div>one</div><div>two</div><p>Hello</p><p>There</p></div>", TextUtil.stripNewlines(doc.body().html()));
+
+        doc.select("p").last().before("<p>Three</p><!-- four -->");
+        assertEquals("<div><div>one</div><div>two</div><p>Hello</p><p>Three</p><!-- four --><p>There</p></div>", TextUtil.stripNewlines(doc.body().html()));
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+Refactor#40
+Document doc;
+Element p1;
+
+private void setupBeforeTest() {
+    doc = Jsoup.parse("<div><p>Hello</p><p>There</p></div>");
+    p1 = doc.select("p").first();
+    p1.before("<div>one</div><div>two</div>");
+}
+
+@Test
+public void testBefore_InsertMultipleDivs() {
+    setupBeforeTest();
+    p1.before("<div>one</div><div>two</div>");
+    assertEquals("<div><div>one</div><div>two</div><p>Hello</p><p>There</p></div>", TextUtil.stripNewlines(doc.body().html()), "Verify inserting multiple divs before the first paragraph");
+}
+
+@Test
+public void testBefore_InsertPAndComment() {
+    setupBeforeTest();
+    doc.select("p").last().before("<p>Three</p><!-- four -->");
+    assertEquals("<div><div>one</div><div>two</div><p>Hello</p><p>Three</p><!-- four --><p>There</p></div>", TextUtil.stripNewlines(doc.body().html()), "Verify inserting a paragraph and a comment before the last paragraph");
+}
+
+
+
+
+Input#41
+ @Test public void after() {
+        Document doc = Jsoup.parse("<div><p>Hello</p><p>There</p></div>");
+        Element p1 = doc.select("p").first();
+        p1.after("<div>one</div><div>two</div>");
+        assertEquals("<div><p>Hello</p><div>one</div><div>two</div><p>There</p></div>", TextUtil.stripNewlines(doc.body().html()));
+
+        doc.select("p").last().after("<p>Three</p><!-- four -->");
+        assertEquals("<div><p>Hello</p><div>one</div><div>two</div><p>There</p><p>Three</p><!-- four --></div>", TextUtil.stripNewlines(doc.body().html()));
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+
+Refactor#41
+private Document setupAfterTest() {
+    Document doc = Jsoup.parse("<div><p>Hello</p><p>There</p></div>");
+    return doc;
+}
+
+@Test
+public void testAfter_AddingDivsToFirstP() {
+    Document doc = setupAfterTest();
+    Element p1 = doc.select("p").first();
+    p1.after("<div>one</div><div>two</div>");
+    assertEquals("<div><p>Hello</p><div>one</div><div>two</div><p>There</p></div>", TextUtil.stripNewlines(doc.body().html()), "Check if divs are correctly added after the first paragraph");
+}
+
+@Test
+public void testAfter_AddingPAndCommentToLastP() {
+    Document doc = setupAfterTest();
+    doc.select("p").last().after("<p>Three</p><!-- four -->");
+    assertEquals("<div><p>Hello</p><p>There</p><p>Three</p><!-- four --></div>", TextUtil.stripNewlines(doc.body().html()), "Check if paragraph and comment are correctly added after the last paragraph");
+}
+
+
+
+Input#42
+ @Test public void testWrapWithRemainder() {
+        Document doc = Jsoup.parse("<div><p>Hello</p></div>");
+        Element p = doc.select("p").first();
+        p.wrap("<div class='head'></div><p>There!</p>");
+        assertEquals("<div><div class=\"head\"><p>Hello</p><p>There!</p></div></div>", TextUtil.stripNewlines(doc.body().html()));
+    }
+Smell List: ['Eager_Test']
+Refactor#42
+Document doc;
+Element p;
+private void setupTestWrapWithRemainder() {
+    doc = Jsoup.parse("<div><p>Hello</p></div>");
+    p = doc.select("p").first();
+    p.wrap("<div class='head'></div><p>There!</p>");
+}
+
+@Test
+public void testWrapWithRemainder_WrapElement() {
+    setupTestWrapWithRemainder();
+    assertEquals("<div><div class=\"head\"><p>Hello</p><p>There!</p></div></div>", TextUtil.stripNewlines(doc.body().html()));
+}
+
+Input#43
+ @Test public void testHasText() {
+        Document doc = Jsoup.parse("<div><p>Hello</p><p></p></div>");
+        Element div = doc.select("div").first();
+        Elements ps = doc.select("p");
+
+        assertTrue(div.hasText());
+        assertTrue(ps.first().hasText());
+        assertFalse(ps.last().hasText());
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+Refactor#43
+Document doc;
+Element div;
+Elements ps;
+
+private void setupTestHasText() {
+    doc = Jsoup.parse("<div><p>Hello</p><p></p></div>");
+    div = doc.select("div").first();
+    ps = doc.select("p");
+}
+
+@Test
+public void testHasText_Div() {
+    setupTestHasText();
+    assertTrue(div.hasText(), "The div element should contain text.");
+}
+
+@Test
+public void testHasText_FirstP() {
+    setupTestHasText();
+    assertTrue(ps.first().hasText(), "The first p element should contain text.");
+}
+
+@Test
+public void testHasText_LastP() {
+    setupTestHasText();
+    assertFalse(ps.last().hasText(), "The last p element should not contain text.");
+}
+
+
+Input#44
+
+Refactor#44
+
+Input#45
+
+Refactor#45
+
+Input#46
+ @Test public void testClone() {
+        Document doc = Jsoup.parse("<div><p>One<p><span>Two</div>");
+
+        Element p = doc.select("p").get(1);
+        Element clone = p.clone();
+
+        assertNull(clone.parent()); // should be orphaned
+        assertEquals(0, clone.siblingIndex);
+        assertEquals(1, p.siblingIndex);
+        assertNotNull(p.parent());
+
+        clone.append("<span>Three");
+        assertEquals("<p><span>Two</span><span>Three</span></p>", TextUtil.stripNewlines(clone.outerHtml()));
+        assertEquals("<div><p>One</p><p><span>Two</span></p></div>", TextUtil.stripNewlines(doc.body().html())); // not modified
+
+        doc.body().appendChild(clone); // adopt
+        assertNotNull(clone.parent());
+        assertEquals("<div><p>One</p><p><span>Two</span></p></div><p><span>Two</span><span>Three</span></p>", TextUtil.stripNewlines(doc.body().html()));
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test', 'Magic_Number_Test']
+Refactor#46
+
+private Document setupTestClone() {
+    Document doc = Jsoup.parse("<div><p>One<p><span>Two</div>");
+    return doc;
+}
+
+@Test
+public void testClone_OrphanedClone() {
+    Document doc = setupTestClone();
+    Element p = doc.select("p").get(1);
+    Element clone = p.clone();
+
+    assertNull(clone.parent(), "Cloned element should be orphaned");
+    assertEquals(0, clone.siblingIndex, "Cloned element should have sibling index 0");
+    assertEquals(1, p.siblingIndex, "Original element should have sibling index 1");
+    assertNotNull(p.parent(), "Original element should have a parent");
+}
+
+@Test
+public void testClone_AppendChild() {
+    Document doc = setupTestClone();
+    Element p = doc.select("p").get(1);
+    Element clone = p.clone();
+
+    clone.append("<span>Three");
+    assertEquals("<p><span>Two</span><span>Three</span></p>", TextUtil.stripNewlines(clone.outerHtml()), "Cloned element should have appended child");
+    assertEquals("<div><p>One</p><p><span>Two</span></p></div>", TextUtil.stripNewlines(doc.body().html()), "Original document should not be modified");
+}
+
+@Test
+public void testClone_AdoptClone() {
+    Document doc = setupTestClone();
+    Element p = doc.select("p").get(1);
+    Element clone = p.clone();
+
+    doc.body().appendChild(clone); // adopt
+    assertNotNull(clone.parent(), "Cloned element should have a parent after adoption");
+    assertEquals("<div><p>One</p><p><span>Two</span></p></div><p><span>Two</span><span>Three</span></p>", TextUtil.stripNewlines(doc.body().html()), "Cloned element should be adopted into the document");
+}
+
+Input#47
+
+Refactor#47
+
+
+Input#48
+Input Parameters:
+Test Code:
+ @Test public void testShallowClone() {
+        String base = "http://example.com/";
+        Document doc = Jsoup.parse("<div id=1 class=one><p id=2 class=two>One", base);
+        Element d = doc.selectFirst("div");
+        Element p = doc.selectFirst("p");
+        TextNode t = p.textNodes().get(0);
+
+        Element d2 = d.shallowClone();
+        Element p2 = p.shallowClone();
+        TextNode t2 = (TextNode) t.shallowClone();
+
+        assertEquals(1, d.childNodeSize());
+        assertEquals(0, d2.childNodeSize());
+
+        assertEquals(1, p.childNodeSize());
+        assertEquals(0, p2.childNodeSize());
+
+        assertEquals("", p2.text());
+        assertEquals("One", t2.text());
+
+        assertEquals("two", p2.className());
+        p2.removeClass("two");
+        assertEquals("two", p.className());
+
+        d2.append("<p id=3>Three");
+        assertEquals(1, d2.childNodeSize());
+        assertEquals("Three", d2.text());
+        assertEquals("One", d.text());
+        assertEquals(base, d2.baseUri());
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test', 'Magic_Number_Test']
+Refactor#48
+
+private static final String BASE_URI = "http://example.com/";
+private static final String DIV_ID = "1";
+private static final String DIV_CLASS = "one";
+private static final String P_ID = "2";
+private static final String P_CLASS = "two";
+private static final String TEXT_CONTENT = "One";
+private static final String NEW_P_ID = "3";
+private static final String NEW_TEXT_CONTENT = "Three";
+
+private void setupTestShallowClone() {
+    Document doc = Jsoup.parse("<div id=" + DIV_ID + " class=" + DIV_CLASS + "><p id=" + P_ID + " class=" + P_CLASS + ">" + TEXT_CONTENT, BASE_URI);
+    Element d = doc.selectFirst("div");
+    Element p = doc.selectFirst("p");
+    TextNode t = p.textNodes().get(0);
+
+    Element d2 = d.shallowClone();
+    Element p2 = p.shallowClone();
+    TextNode t2 = (TextNode) t.shallowClone();
+
+    testChildNodeSize(d, d2);
+    testTextContent(p2, t2);
+    testClassName(p, p2);
+    testAppendingElement(d, d2);
+}
+
+@Test
+public void testChildNodeSize() {
+    setupTestShallowClone();
+    assertEquals(1, d.childNodeSize(), "Original div should have 1 child node");
+    assertEquals(0, d2.childNodeSize(), "Cloned div should have 0 child nodes");
+
+    assertEquals(1, p.childNodeSize(), "Original p should have 1 child node");
+    assertEquals(0, p2.childNodeSize(), "Cloned p should have 0 child nodes");
+}
+
+@Test
+public void testTextContent() {
+    setupTestShallowClone();
+    assertEquals("", p2.text(), "Cloned p should have no text content");
+    assertEquals(TEXT_CONTENT, t2.text(), "Cloned text node should have the same text content");
+}
+
+@Test
+public void testClassName() {
+    setupTestShallowClone();
+    assertEquals(P_CLASS, p2.className(), "Cloned p should have the same class name");
+    p2.removeClass(P_CLASS);
+    assertEquals(P_CLASS, p.className(), "Original p should retain its class name after removing from cloned p");
+}
+
+@Test
+public void testAppendingElement() {
+    setupTestShallowClone();
+    d2.append("<p id=" + NEW_P_ID + ">" + NEW_TEXT_CONTENT + "</p>");
+    assertEquals(1, d2.childNodeSize(), "Cloned div should have 1 child node after appending");
+    assertEquals(NEW_TEXT_CONTENT, d2.text(), "Cloned div should have the new text content");
+    assertEquals(TEXT_CONTENT, d.text(), "Original div should retain its original text content");
+    assertEquals(BASE_URI, d2.baseUri(), "Cloned div should have the same base URI");
+}
+
+
+Input#49
+ @Test public void testTagNameSet() {
+        Document doc = Jsoup.parse("<div><i>Hello</i>");
+        doc.select("i").first().tagName("em");
+        assertEquals(0, doc.select("i").size());
+        assertEquals(1, doc.select("em").size());
+        assertEquals("<em>Hello</em>", doc.select("div").first().html());
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test', 'Magic_Number_Test']
+Refactor#49
+
+private Document setupTestTagNameSet() {
+    Document doc = Jsoup.parse("<div><i>Hello</i>");
+    doc.select("i").first().tagName("em");
+    return doc;
+}
+
+@Test
+public void testTagNameSet_iTagRemoved() {
+    Document doc = setupTestTagNameSet();
+    assertEquals(0, doc.select("i").size(), "No <i> tags should remain after changing the tag name.");
+}
+
+@Test
+public void testTagNameSet_emTagAdded() {
+    Document doc = setupTestTagNameSet();
+    assertEquals(1, doc.select("em").size(), "One <em> tag should be present after changing the tag name.");
+}
+
+@Test
+public void testTagNameSet_htmlContent() {
+    Document doc = setupTestTagNameSet();
+    String expectedHtml = "<em>Hello</em>";
+    assertEquals(expectedHtml, doc.select("div").first().html(), "The content of the <div> should be updated to <em>Hello</em>.");
+}
+
+
+
+Input#50
+ @Test public void testHtmlContainsOuter() {
+        Document doc = Jsoup.parse("<title>Check</title> <div>Hello there</div>");
+        doc.outputSettings().indentAmount(0);
+        assertTrue(doc.html().contains(doc.select("title").outerHtml()));
+        assertTrue(doc.html().contains(doc.select("div").outerHtml()));
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+
+Refactor#50
+
+
+private Document setupTestHtmlContainsOuter() {
+    Document doc = Jsoup.parse("<title>Check</title> <div>Hello there</div>");
+    doc.outputSettings().indentAmount(0);
+    return doc;
+}
+
+@Test
+public void testHtmlContainsTitleOuter() {
+    Document doc = setupTestHtmlContainsOuter();
+    assertTrue(doc.html().contains(doc.select("title").outerHtml()), "Document HTML should contain the outer HTML of the title element");
+}
+
+@Test
+public void testHtmlContainsDivOuter() {
+    Document doc = setupTestHtmlContainsOuter();
+    assertTrue(doc.html().contains(doc.select("div").outerHtml()), "Document HTML should contain the outer HTML of the div element");
+}

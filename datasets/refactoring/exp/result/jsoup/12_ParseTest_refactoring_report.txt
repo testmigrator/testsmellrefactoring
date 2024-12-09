@@ -1,0 +1,260 @@
+File#1
+
+
+Input#1
+ @Test
+    public void testSmhBizArticle() throws IOException {
+        File in = getFile("/htmltests/smh-biz-article-1.html");
+        Document doc = Jsoup.parse(in, "UTF-8",
+                "http://www.smh.com.au/business/the-boards-next-fear-the-female-quota-20100106-lteq.html");
+        assertEquals("The board’s next fear: the female quota",
+                doc.title()); // note that the apos in the source is a literal ’ (8217), not escaped or '
+        assertEquals("en", doc.select("html").attr("xml:lang"));
+
+        Elements articleBody = doc.select(".articleBody > *");
+        assertEquals(17, articleBody.size());
+        // todo: more tests!
+
+    }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing', 'Mystery_Guest', 'Resource_Optimism', 'Magic_Number_Test']
+
+Refactor#1
+@Test
+    public void testSmhBizArticle(@TempDir File tempDir) throws IOException {
+        File inputFile = new File(tempDir, "/htmltests/smh-biz-article-1.html");
+        if (!inputFile.exists() || inputFile.isDirectory()) {
+            fail("Input file does not exist or is not of the expected type.");
+        }
+
+        Document doc = Jsoup.parse(inputFile, "UTF-8",
+                "http://www.smh.com.au/business/the-boards-next-fear-the-female-quota-20100106-lteq.html");
+
+        String expectedTitle = "The board’s next fear: the female quota";
+        assertEquals(expectedTitle, doc.title(), "The title of the document does not match the expected value.");
+
+        String expectedLanguage = "en";
+        assertEquals(expectedLanguage, doc.select("html").attr("xml:lang"), "The language attribute of the HTML tag does not match the expected value.");
+
+        int expectedArticleBodySize = 17;
+        Elements articleBody = doc.select(".articleBody > *");
+        assertEquals(expectedArticleBodySize, articleBody.size(), "The size of the article body elements does not match the expected value.");
+    }
+
+Input#2
+@Test
+    public void testNewsHomepage() throws IOException {
+        File in = getFile("/htmltests/news-com-au-home.html");
+        Document doc = Jsoup.parse(in, "UTF-8", "http://www.news.com.au/");
+        assertEquals("News.com.au | News from Australia and around the world online | NewsComAu", doc.title());
+        assertEquals("Brace yourself for Metro meltdown", doc.select(".id1225817868581 h4").text().trim());
+
+        Element a = doc.select("a[href=/entertainment/horoscopes]").first();
+        assertEquals("/entertainment/horoscopes", a.attr("href"));
+        assertEquals("http://www.news.com.au/entertainment/horoscopes", a.attr("abs:href"));
+
+        Element hs = doc.select("a[href*=naughty-corners-are-a-bad-idea]").first();
+        assertEquals(
+                "http://www.heraldsun.com.au/news/naughty-corners-are-a-bad-idea-for-kids/story-e6frf7jo-1225817899003",
+                hs.attr("href"));
+        assertEquals(hs.attr("href"), hs.attr("abs:href"));
+    }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing', 'Mystery_Guest', 'Resource_Optimism']
+
+Refactor#2
+@Test
+public void testNewsHomepage(@TempDir File tempDir) throws IOException {
+    File in = new File(tempDir, "/htmltests/news-com-au-home.html");
+    assertTrue(in.exists() && !in.isDirectory(), "Input file does not exist or is not a regular file.");
+
+    Document doc = Jsoup.parse(in, "UTF-8", "http://www.news.com.au/");
+    assertEquals("News.com.au | News from Australia and around the world online | NewsComAu", doc.title(), "Title does not match expected value");
+
+    Element headline = doc.select(".id1225817868581 h4").first();
+    assertNotNull(headline, "Headline element not found");
+    assertEquals("Brace yourself for Metro meltdown", headline.text().trim(), "Headline text does not match expected value");
+
+    Element horoscopesLink = doc.select("a[href=/entertainment/horoscopes]").first();
+    assertNotNull(horoscopesLink, "Horoscopes link not found");
+    assertEquals("/entertainment/horoscopes", horoscopesLink.attr("href"), "Relative href attribute does not match expected value");
+    assertEquals("http://www.news.com.au/entertainment/horoscopes", horoscopesLink.attr("abs:href"), "Absolute href attribute does not match expected value");
+
+    Element naughtyCornersLink = doc.select("a[href*=naughty-corners-are-a-bad-idea]").first();
+    assertNotNull(naughtyCornersLink, "Naughty corners link not found");
+    assertEquals("http://www.heraldsun.com.au/news/naughty-corners-are-a-bad-idea-for-kids/story-e6frf7jo-1225817899003", naughtyCornersLink.attr("href"), "Href attribute does not match expected value");
+    assertEquals(naughtyCornersLink.attr("href"), naughtyCornersLink.attr("abs:href"), "Absolute href attribute does not match href attribute");
+}
+
+Input#3
+
+Refactor#3
+
+
+Input#4
+
+Refactor#4
+
+
+Input#5
+
+Refactor#5
+
+
+Input#6
+
+Refactor#6
+
+
+Input#7
+
+Refactor#7
+
+
+Input#8
+
+Refactor#8
+
+
+Input#9
+
+Refactor#9
+
+
+Input#10
+
+Refactor#10
+
+
+Input#11
+
+Refactor#11
+
+
+Input#12
+
+Refactor#12
+
+
+Input#13
+
+Refactor#13
+
+
+Input#14
+
+Refactor#14
+
+
+Input#15
+
+Refactor#15
+
+
+Input#16
+
+Refactor#16
+
+
+Input#17
+
+Refactor#17
+
+
+Input#18
+
+Refactor#18
+
+
+
+Input#19
+
+Refactor#19
+
+
+
+Input#20
+
+Refactor#20
+
+
+
+Input#21
+
+Refactor#21
+
+
+Input#22
+
+Refactor#22
+
+
+Input#23
+
+Refactor#23
+
+
+Input#24
+
+Refactor#24
+
+
+Input#25
+
+Refactor#25
+
+
+Input#26
+
+Refactor#26
+
+
+Input#27
+
+Refactor#27
+
+
+
+Input#28
+
+Refactor#28
+
+
+
+Input#29
+
+Refactor#29
+
+
+
+Input#30
+
+Refactor#30
+
+
+Input#31
+
+Refactor#31
+
+
+
+Input#32
+
+Refactor#32
+
+
+
+Input#33
+
+Refactor#33
+
+
+
+Input#34
+
+Refactor#34
+
+
+
+Input#35
+
+Refactor#35
+

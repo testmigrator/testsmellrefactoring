@@ -1,0 +1,599 @@
+File#1
+
+
+Input#1
+ @Test
+    public void testEmptyLayout() throws IOException, Pack200Exception {
+        final MockNewAttributeBands newAttributeBands = new MockNewAttributeBands(new MockSegment(),
+                new AttributeLayout("test", AttributeLayout.CONTEXT_CLASS, "", 25));
+        final List<?> layoutElements = newAttributeBands.getLayoutElements();
+        assertEquals(0, layoutElements.size());
+    }
+Smell List: ['Exception_Catching_Throwing', 'Magic_Number_Test']
+Refactor#1
+
+@Test
+public void testEmptyLayout() {
+    assertDoesNotThrow(()->{
+        final MockNewAttributeBands newAttributeBands = new MockNewAttributeBands(new MockSegment(),
+                new AttributeLayout("test", AttributeLayout.CONTEXT_CLASS, "", 25));
+        final List<?> layoutElements = newAttributeBands.getLayoutElements();
+        int expectedSize = 0;
+        assertEquals(expectedSize, layoutElements.size());
+    }, "Unexpected exception occurred during the test");
+}
+
+Input#2
+ @ParameterizedTest
+    @ValueSource(strings = { "B", "FB", "SB", "H", "FH", "SH", "I", "FI", "SI", "PB", "OB", "OSB", "POB", "PH", "OH", "OSH", "POH", "PI", "OI", "OSI", "POI" })
+    public void testIntegralLayout(final String layoutStr) throws IOException, Pack200Exception {
+        final MockNewAttributeBands newAttributeBands = new MockNewAttributeBands(new MockSegment(),
+                new AttributeLayout("test", AttributeLayout.CONTEXT_CLASS, layoutStr, 25));
+        final List layoutElements = newAttributeBands.getLayoutElements();
+        assertEquals(1, layoutElements.size());
+        final Integral element = (Integral) layoutElements.get(0);
+        assertEquals(layoutStr, element.getTag());
+    }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing', 'Eager_Test', 'Magic_Number_Test']
+
+Refactor#2
+
+@ParameterizedTest
+@ValueSource(strings = { "B", "FB", "SB", "H", "FH", "SH", "I", "FI", "SI", "PB", "OB", "OSB", "POB", "PH", "OH", "OSH", "POH", "PI", "OI", "OSI", "POI" })
+public void testIntegralLayout(final String layoutStr) {
+    final MockNewAttributeBands newAttributeBands = setupMockNewAttributeBands(layoutStr);
+    final List layoutElements = newAttributeBands.getLayoutElements();
+    assertLayoutElementCount(layoutElements);
+    assertIntegralTag(layoutElements, layoutStr);
+}
+
+private MockNewAttributeBands setupMockNewAttributeBands(String layoutStr) {
+    try {
+        return new MockNewAttributeBands(new MockSegment(),
+                new AttributeLayout("test", AttributeLayout.CONTEXT_CLASS, layoutStr, 25));
+    } catch (IOException e) {
+        throw new RuntimeException(e);
+    }
+}
+
+private void assertLayoutElementCount(List layoutElements) {
+    int expectedElementCount = 1;
+    assertEquals(expectedElementCount, layoutElements.size(), "Expected exactly one layout element");
+}
+
+private void assertIntegralTag(List layoutElements, String layoutStr) {
+    final Integral element = (Integral) layoutElements.get(0);
+    assertEquals(layoutStr, element.getTag(), "Expected tag to match the layout string");
+}
+
+
+
+Input#3
+@Test
+    public void testLayoutWithBackwardsCall() throws IOException, Pack200Exception {
+        MockNewAttributeBands newAttributeBands = new MockNewAttributeBands(new MockSegment(),
+                new AttributeLayout("test", AttributeLayout.CONTEXT_METHOD, "[NH[(1)]][KIH][(-1)]", 20));
+        List layoutElements = newAttributeBands.getLayoutElements();
+        assertEquals(3, layoutElements.size());
+        Callable firstCallable = (Callable) layoutElements.get(0);
+        Callable secondCallable = (Callable) layoutElements.get(1);
+        Callable thirdCallable = (Callable) layoutElements.get(2);
+        List thirdBody = thirdCallable.getBody();
+        assertEquals(1, thirdBody.size());
+        Call call = (Call) thirdBody.get(0);
+        assertEquals(secondCallable, call.getCallable());
+        assertTrue(secondCallable.isBackwardsCallable());
+        assertFalse(firstCallable.isBackwardsCallable());
+        assertFalse(thirdCallable.isBackwardsCallable());
+
+        newAttributeBands = new MockNewAttributeBands(new MockSegment(),
+                new AttributeLayout("test", AttributeLayout.CONTEXT_METHOD, "[NH[(1)]][KIH][(-2)]", 20));
+        layoutElements = newAttributeBands.getLayoutElements();
+        assertEquals(3, layoutElements.size());
+        firstCallable = (Callable) layoutElements.get(0);
+        secondCallable = (Callable) layoutElements.get(1);
+        thirdCallable = (Callable) layoutElements.get(2);
+        thirdBody = thirdCallable.getBody();
+        assertEquals(1, thirdBody.size());
+        call = (Call) thirdBody.get(0);
+        assertEquals(firstCallable, call.getCallable());
+        assertTrue(firstCallable.isBackwardsCallable());
+        assertFalse(secondCallable.isBackwardsCallable());
+        assertFalse(thirdCallable.isBackwardsCallable());
+
+        newAttributeBands = new MockNewAttributeBands(new MockSegment(),
+                new AttributeLayout("test", AttributeLayout.CONTEXT_METHOD, "[NH[(1)]][KIH][(0)]", 20));
+        layoutElements = newAttributeBands.getLayoutElements();
+        assertEquals(3, layoutElements.size());
+        firstCallable = (Callable) layoutElements.get(0);
+        secondCallable = (Callable) layoutElements.get(1);
+        thirdCallable = (Callable) layoutElements.get(2);
+        thirdBody = thirdCallable.getBody();
+        assertEquals(1, thirdBody.size());
+        call = (Call) thirdBody.get(0);
+        assertEquals(thirdCallable, call.getCallable());
+        assertTrue(thirdCallable.isBackwardsCallable());
+        assertFalse(firstCallable.isBackwardsCallable());
+        assertFalse(secondCallable.isBackwardsCallable());
+        assertFalse(firstCallable.isBackwardsCallable());
+    }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing', 'Eager_Test', 'Duplicate_Assert', 'Magic_Number_Test']
+
+Refactor#3
+
+    private static final int EXPECTED_LAYOUT_SIZE = 3;
+    private static final int EXPECTED_BODY_SIZE = 1;
+
+    private void setupTestLayout(String layout) {
+        try {
+            newAttributeBands = new MockNewAttributeBands(new MockSegment(),
+                    new AttributeLayout("test", AttributeLayout.CONTEXT_METHOD, layout, 20));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    public void testLayoutWithBackwardsCall_PositiveIndex() throws IOException, Pack200Exception {
+        setupTestLayout("[NH[(1)]][KIH][(-1)]");
+
+        List layoutElements = newAttributeBands.getLayoutElements();
+        assertEquals(EXPECTED_LAYOUT_SIZE, layoutElements.size(), "Expected layout elements size to be " + EXPECTED_LAYOUT_SIZE);
+
+        Callable firstCallable = (Callable) layoutElements.get(0);
+        Callable secondCallable = (Callable) layoutElements.get(1);
+        Callable thirdCallable = (Callable) layoutElements.get(2);
+
+        List thirdBody = thirdCallable.getBody();
+        assertEquals(EXPECTED_BODY_SIZE, thirdBody.size(), "Expected body size to be " + EXPECTED_BODY_SIZE);
+
+        Call call = (Call) thirdBody.get(0);
+        assertEquals(secondCallable, call.getCallable(), "Expected the call's callable to be secondCallable");
+        assertTrue(secondCallable.isBackwardsCallable(), "Expected secondCallable to be backwards callable");
+        assertFalse(firstCallable.isBackwardsCallable(), "Expected firstCallable to not be backwards callable");
+        assertFalse(thirdCallable.isBackwardsCallable(), "Expected thirdCallable to not be backwards callable");
+    }
+
+    @Test
+    public void testLayoutWithBackwardsCall_NegativeIndex() throws IOException, Pack200Exception {
+        setupTestLayout("[NH[(1)]][KIH][(-2)]");
+
+        List layoutElements = newAttributeBands.getLayoutElements();
+        assertEquals(EXPECTED_LAYOUT_SIZE, layoutElements.size(), "Expected layout elements size to be " + EXPECTED_LAYOUT_SIZE);
+
+        Callable firstCallable = (Callable) layoutElements.get(0);
+        Callable secondCallable = (Callable) layoutElements.get(1);
+        Callable thirdCallable = (Callable) layoutElements.get(2);
+
+        List thirdBody = thirdCallable.getBody();
+        assertEquals(EXPECTED_BODY_SIZE, thirdBody.size(), "Expected body size to be " + EXPECTED_BODY_SIZE);
+
+        Call call = (Call) thirdBody.get(0);
+        assertEquals(firstCallable, call.getCallable(), "Expected the call's callable to be firstCallable");
+        assertTrue(firstCallable.isBackwardsCallable(), "Expected firstCallable to be backwards callable");
+        assertFalse(secondCallable.isBackwardsCallable(), "Expected secondCallable to not be backwards callable");
+        assertFalse(thirdCallable.isBackwardsCallable(), "Expected thirdCallable to not be backwards callable");
+    }
+
+    @Test
+    public void testLayoutWithBackwardsCall_ZeroIndex() throws IOException, Pack200Exception {
+        setupTestLayout("[NH[(1)]][KIH][(0)]");
+
+        List layoutElements = newAttributeBands.getLayoutElements();
+        assertEquals(EXPECTED_LAYOUT_SIZE, layoutElements.size(), "Expected layout elements size to be " + EXPECTED_LAYOUT_SIZE);
+
+        Callable firstCallable = (Callable) layoutElements.get(0);
+        Callable secondCallable = (Callable) layoutElements.get(1);
+        Callable thirdCallable = (Callable) layoutElements.get(2);
+
+        List thirdBody = thirdCallable.getBody();
+        assertEquals(EXPECTED_BODY_SIZE, thirdBody.size(), "Expected body size to be " + EXPECTED_BODY_SIZE);
+
+        Call call = (Call) thirdBody.get(0);
+        assertEquals(thirdCallable, call.getCallable(), "Expected the call's callable to be thirdCallable");
+        assertTrue(thirdCallable.isBackwardsCallable(), "Expected thirdCallable to be backwards callable");
+        assertFalse(firstCallable.isBackwardsCallable(), "Expected firstCallable to not be backwards callable");
+        assertFalse(secondCallable.isBackwardsCallable(), "Expected secondCallable to not be backwards callable");
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "[NH[(1)]][KIH][(-1)], secondCallable, firstCallable, thirdCallable",
+            "[NH[(1)]][KIH][(-2)], firstCallable, secondCallable, thirdCallable",
+            "[NH[(1)]][KIH][(0)], thirdCallable, firstCallable, secondCallable"
+    })
+    public void testLayoutWithBackwardsCall_Parametrized(String layout, Callable expectedThirdCallable, Callable expectedFirstCallable, Callable expectedSecondCallable) throws IOException, Pack200Exception {
+        setupTestLayout(layout);
+
+        List layoutElements = newAttributeBands.getLayoutElements();
+        assertEquals(EXPECTED_LAYOUT_SIZE, layoutElements.size(), "Expected layout elements size to be " + EXPECTED_LAYOUT_SIZE);
+
+        Callable firstCallable = (Callable) layoutElements.get(0);
+        Callable secondCallable = (Callable) layoutElements.get(1);
+        Callable thirdCallable = (Callable) layoutElements.get(2);
+
+        List thirdBody = thirdCallable.getBody();
+        assertEquals(EXPECTED_BODY_SIZE, thirdBody.size(), "Expected body size to be " + EXPECTED_BODY_SIZE);
+
+        Call call = (Call) thirdBody.get(0);
+        assertEquals(expectedThirdCallable, call.getCallable(), "Expected the call's callable to match expected thirdCallable");
+        assertTrue(expectedThirdCallable.isBackwardsCallable(), "Expected " + expectedThirdCallable + " to be backwards callable");
+        assertFalse(expectedFirstCallable.isBackwardsCallable(), "Expected " + expectedFirstCallable + " to not be backwards callable");
+        assertFalse(expectedSecondCallable.isBackwardsCallable(), "Expected " + expectedSecondCallable + " to not be backwards callable");
+    }
+
+
+Input#4
+
+Refactor#4
+
+
+Input#5
+ @ParameterizedTest
+    @ValueSource(strings = { "KIB", "KIH", "KII", "KINH", "KJH", "KDH", "KSH", "KQH", "RCH", "RSH", "RDH", "RFH", "RMH", "RIH", "RUH", "RQH", "RQNH", "RQNI" })
+    public void testReferenceLayouts(final String layout) throws IOException, Pack200Exception {
+        final MockNewAttributeBands newAttributeBands = new MockNewAttributeBands(new MockSegment(),
+                new AttributeLayout("test", AttributeLayout.CONTEXT_CODE, layout, 26));
+        final List layoutElements = newAttributeBands.getLayoutElements();
+        assertEquals(1, layoutElements.size());
+        final Reference element = (Reference) layoutElements.get(0);
+        assertEquals(layout, element.getTag());
+    }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing', 'Eager_Test', 'Magic_Number_Test']
+
+Refactor#5
+
+@ParameterizedTest
+@ValueSource(strings = { "KIB", "KIH", "KII", "KINH", "KJH", "KDH", "KSH", "KQH", "RCH", "RSH", "RDH", "RFH", "RMH", "RIH", "RUH", "RQH", "RQNH", "RQNI" })
+public void testReferenceLayouts(final String layout) {
+    final MockNewAttributeBands newAttributeBands = setupMockNewAttributeBands(layout);
+    final List<LayoutElement> layoutElements = newAttributeBands.getLayoutElements();
+    final int expectedSize = 1;
+    assertEquals(expectedSize, layoutElements.size(), "The size of layout elements should be 1");
+    final LayoutElement element = layoutElements.get(0);
+    assertTrue(element instanceof Reference, "The layout element should be an instance of Reference");
+    final Reference referenceElement = (Reference) element;
+    assertEquals(layout, referenceElement.getTag(), "The tag of the reference element should match the input layout");
+}
+
+private MockNewAttributeBands setupMockNewAttributeBands(String layout) {
+    try {
+        return new MockNewAttributeBands(new MockSegment(),
+                new AttributeLayout("test", AttributeLayout.CONTEXT_CODE, layout, 26));
+    } catch (IOException e) {
+        throw new RuntimeException(e);
+    }
+}
+
+Input#6
+@Test
+    public void testReplicationLayout() throws IOException, Pack200Exception {
+        final MockNewAttributeBands newAttributeBands = new MockNewAttributeBands(new MockSegment(),
+                new AttributeLayout("test", AttributeLayout.CONTEXT_CLASS, "NH[PHOHRUHRSHH]", 25));
+        final List layoutElements = newAttributeBands.getLayoutElements();
+        assertEquals(1, layoutElements.size());
+        final Replication element = (Replication) layoutElements.get(0);
+        final Integral countElement = element.getCountElement();
+        assertEquals("H", countElement.getTag());
+        final List replicatedElements = element.getLayoutElements();
+        assertEquals(5, replicatedElements.size());
+        final Integral firstElement = (Integral) replicatedElements.get(0);
+        assertEquals("PH", firstElement.getTag());
+        final Integral secondElement = (Integral) replicatedElements.get(1);
+        assertEquals("OH", secondElement.getTag());
+        final Reference thirdElement = (Reference) replicatedElements.get(2);
+        assertEquals("RUH", thirdElement.getTag());
+        final Reference fourthElement = (Reference) replicatedElements.get(3);
+        assertEquals("RSH", fourthElement.getTag());
+        final Integral fifthElement = (Integral) replicatedElements.get(4);
+        assertEquals("H", fifthElement.getTag());
+    }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing', 'Eager_Test', 'Magic_Number_Test']
+
+Refactor#6
+
+    @BeforeEach
+    public void setUp() {
+        newAttributeBands = new MockNewAttributeBands(new MockSegment(),
+                new AttributeLayout("test", AttributeLayout.CONTEXT_CLASS, "NH[PHOHRUHRSHH]", 25));
+    }
+
+    @Test
+    public void testReplicationLayoutSize() {
+        final List layoutElements = newAttributeBands.getLayoutElements();
+        int expectedSize = 1;
+        assertEquals(expectedSize, layoutElements.size(), "The size of layout elements should be " + expectedSize);
+    }
+
+    @Test
+    public void testReplicationCountTag() {
+        final List layoutElements = newAttributeBands.getLayoutElements();
+        final Replication element = (Replication) layoutElements.get(0);
+        final Integral countElement = element.getCountElement();
+        String expectedTag = "H";
+        assertEquals(expectedTag, countElement.getTag(), "The tag of the count element should be " + expectedTag);
+    }
+
+    @Test
+    public void testReplicatedElementsSize() {
+        final List layoutElements = newAttributeBands.getLayoutElements();
+        final Replication element = (Replication) layoutElements.get(0);
+        final List replicatedElements = element.getLayoutElements();
+        int expectedSize = 5;
+        assertEquals(expectedSize, replicatedElements.size(), "The size of replicated elements should be " + expectedSize);
+    }
+
+    @Test
+    public void testFirstReplicatedElementTag() {
+        final List layoutElements = newAttributeBands.getLayoutElements();
+        final Replication element = (Replication) layoutElements.get(0);
+        final List replicatedElements = element.getLayoutElements();
+        final Integral firstElement = (Integral) replicatedElements.get(0);
+        String expectedTag = "PH";
+        assertEquals(expectedTag, firstElement.getTag(), "The tag of the first replicated element should be " + expectedTag);
+    }
+
+    @Test
+    public void testSecondReplicatedElementTag() {
+        final List layoutElements = newAttributeBands.getLayoutElements();
+        final Replication element = (Replication) layoutElements.get(0);
+        final List replicatedElements = element.getLayoutElements();
+        final Integral secondElement = (Integral) replicatedElements.get(1);
+        String expectedTag = "OH";
+        assertEquals(expectedTag, secondElement.getTag(), "The tag of the second replicated element should be " + expectedTag);
+    }
+
+    @Test
+    public void testThirdReplicatedElementTag() {
+        final List layoutElements = newAttributeBands.getLayoutElements();
+        final Replication element = (Replication) layoutElements.get(0);
+        final List replicatedElements = element.getLayoutElements();
+        final Reference thirdElement = (Reference) replicatedElements.get(2);
+        String expectedTag = "RUH";
+        assertEquals(expectedTag, thirdElement.getTag(), "The tag of the third replicated element should be " + expectedTag);
+    }
+
+    @Test
+    public void testFourthReplicatedElementTag() {
+        final List layoutElements = newAttributeBands.getLayoutElements();
+        final Replication element = (Replication) layoutElements.get(0);
+        final List replicatedElements = element.getLayoutElements();
+        final Reference fourthElement = (Reference) replicatedElements.get(3);
+        String expectedTag = "RSH";
+        assertEquals(expectedTag, fourthElement.getTag(), "The tag of the fourth replicated element should be " + expectedTag);
+    }
+
+    @Test
+    public void testFifthReplicatedElementTag() {
+        final List layoutElements = newAttributeBands.getLayoutElements();
+        final Replication element = (Replication) layoutElements.get(0);
+        final List replicatedElements = element.getLayoutElements();
+        final Integral fifthElement = (Integral) replicatedElements.get(4);
+        String expectedTag = "H";
+        assertEquals(expectedTag, fifthElement.getTag(), "The tag of the fifth replicated element should be " + expectedTag);
+    }
+
+Input#7
+@Test
+    public void testUnionLayout() throws IOException, Pack200Exception {
+        final MockNewAttributeBands newAttributeBands = new MockNewAttributeBands(new MockSegment(),
+                new AttributeLayout("test", AttributeLayout.CONTEXT_CODE, "TB(55)[FH](23)[]()[RSH]", 26));
+        final List layoutElements = newAttributeBands.getLayoutElements();
+        assertEquals(1, layoutElements.size());
+        final Union element = (Union) layoutElements.get(0);
+        final Integral tag = element.getUnionTag();
+        assertEquals("B", tag.getTag());
+        final List unionCases = element.getUnionCases();
+        assertEquals(2, unionCases.size());
+        final UnionCase firstCase = (UnionCase) unionCases.get(0);
+        assertTrue(firstCase.hasTag(55));
+        assertFalse(firstCase.hasTag(23));
+        List body = firstCase.getBody();
+        assertEquals(1, body.size());
+        final Integral bodyElement = (Integral) body.get(0);
+        assertEquals("FH", bodyElement.getTag());
+        final UnionCase secondCase = (UnionCase) unionCases.get(1);
+        assertTrue(secondCase.hasTag(23));
+        assertFalse(secondCase.hasTag(55));
+        body = secondCase.getBody();
+        assertEquals(0, body.size());
+        final List defaultBody = element.getDefaultCaseBody();
+        assertEquals(1, defaultBody.size());
+        final Reference ref = (Reference) defaultBody.get(0);
+        assertEquals("RSH", ref.getTag());
+    }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing', 'Eager_Test', 'Magic_Number_Test']
+
+Refactor#7
+
+@Test
+public void testUnionLayout() {
+    // Setup
+    final MockNewAttributeBands newAttributeBands = new MockNewAttributeBands(new MockSegment(),
+            new AttributeLayout("test", AttributeLayout.CONTEXT_CODE, "TB(55)[FH](23)[]()[RSH]", 26));
+    final List layoutElements = newAttributeBands.getLayoutElements();
+
+    // Assertions
+    assertEquals(1, layoutElements.size(), "Expected 1 layout element");
+
+    final Union element = (Union) layoutElements.get(0);
+    final Integral tag = element.getUnionTag();
+    assertEquals("B", tag.getTag(), "Expected tag 'B'");
+
+    final List unionCases = element.getUnionCases();
+    assertEquals(2, unionCases.size(), "Expected 2 union cases");
+
+    final UnionCase firstCase = (UnionCase) unionCases.get(0);
+    assertTrue(firstCase.hasTag(55), "First case should have tag 55");
+    assertFalse(firstCase.hasTag(23), "First case should not have tag 23");
+
+    List body = firstCase.getBody();
+    assertEquals(1, body.size(), "Expected 1 body element in the first case");
+
+    final Integral bodyElement = (Integral) body.get(0);
+    assertEquals("FH", bodyElement.getTag(), "Expected tag 'FH' in the first case body");
+
+    final UnionCase secondCase = (UnionCase) unionCases.get(1);
+    assertTrue(secondCase.hasTag(23), "Second case should have tag 23");
+    assertFalse(secondCase.hasTag(55), "Second case should not have tag 55");
+
+    body = secondCase.getBody();
+    assertEquals(0, body.size(), "Expected 0 body elements in the second case");
+
+    final List defaultBody = element.getDefaultCaseBody();
+    assertEquals(1, defaultBody.size(), "Expected 1 default case body element");
+
+    final Reference ref = (Reference) defaultBody.get(0);
+    assertEquals("RSH", ref.getTag(), "Expected tag 'RSH' in the default case body");
+}
+
+
+Input#8
+
+Refactor#8
+
+
+Input#9
+
+Refactor#9
+
+
+Input#10
+
+Refactor#10
+
+
+Input#11
+
+Refactor#11
+
+
+Input#12
+
+Refactor#12
+
+
+Input#13
+
+Refactor#13
+
+
+Input#14
+
+Refactor#14
+
+
+Input#15
+
+Refactor#15
+
+
+Input#16
+
+Refactor#16
+
+
+Input#17
+
+Refactor#17
+
+
+Input#18
+
+Refactor#18
+
+
+
+Input#19
+
+Refactor#19
+
+
+
+Input#20
+
+Refactor#20
+
+
+
+Input#21
+
+Refactor#21
+
+
+Input#22
+
+Refactor#22
+
+
+Input#23
+
+Refactor#23
+
+
+Input#24
+
+Refactor#24
+
+
+Input#25
+
+Refactor#25
+
+
+Input#26
+
+Refactor#26
+
+
+Input#27
+
+Refactor#27
+
+
+
+Input#28
+
+Refactor#28
+
+
+
+Input#29
+
+Refactor#29
+
+
+
+Input#30
+
+Refactor#30
+
+
+Input#31
+
+Refactor#31
+
+
+
+Input#32
+
+Refactor#32
+
+
+
+Input#33
+
+Refactor#33
+
+
+
+Input#34
+
+Refactor#34
+
+
+
+Input#35
+
+Refactor#35
+

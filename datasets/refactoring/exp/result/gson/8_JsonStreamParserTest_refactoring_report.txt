@@ -1,0 +1,252 @@
+File#1
+
+
+Input#1
+@Test
+  public void testParseTwoStrings() {
+    String actualOne = parser.next().getAsString();
+    assertThat(actualOne).isEqualTo("one");
+    String actualTwo = parser.next().getAsString();
+    assertThat(actualTwo).isEqualTo("two");
+  }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+
+Refactor#1
+@Test
+public void testParseTwoStrings_FirstString() {
+    String actualOne = parser.next().getAsString();
+    assertThat(actualOne).isEqualTo("one").withFailMessage("Expected first string to be 'one'");
+}
+
+@Test
+public void testParseTwoStrings_SecondString() {
+    parser.next(); // Consume the first string
+    String actualTwo = parser.next().getAsString();
+    assertThat(actualTwo).isEqualTo("two").withFailMessage("Expected second string to be 'two'");
+}
+
+Input#2
+
+Refactor#2
+
+
+Input#3
+
+Refactor#3
+
+
+Input#4
+ @Test
+  public void testCallingNextBeyondAvailableInput() {
+    JsonElement unused1 = parser.next();
+    JsonElement unused2 = parser.next();
+    // Parser should not go beyond available input
+    assertThrows(NoSuchElementException.class, parser::next);
+  }
+Smell List: ['Eager_Test']
+
+Refactor#4
+private void setupTestCallingNextBeyondAvailableInput() {
+    parser.next();
+    parser.next();
+}
+
+
+@Test
+public void testCallingNextBeyondAvailableInput_NoSuchElementException() {
+    setupTestCallingNextBeyondAvailableInput();
+    assertThrows(NoSuchElementException.class, parser::next);
+}
+
+
+Input#5
+
+Refactor#5
+
+
+Input#6
+ @Test
+  public void testIncompleteInput() {
+    JsonStreamParser parser = new JsonStreamParser("[");
+    assertThat(parser.hasNext()).isTrue();
+    assertThrows(JsonSyntaxException.class, parser::next);
+  }
+Smell List: ['Assertion_Roulette']
+
+Refactor#6
+@Test
+public void testIncompleteInput() {
+    JsonStreamParser parser = new JsonStreamParser("[");
+    assertThat(parser.hasNext(), "Expected parser to have next element").isTrue();
+    assertThrows(JsonSyntaxException.class, parser::next, "Expected JsonSyntaxException when parsing incomplete input");
+}
+
+Input#7
+ @Test
+  public void testMalformedInput() {
+    JsonStreamParser parser = new JsonStreamParser(":");
+    assertThrows(JsonSyntaxException.class, parser::hasNext);
+
+    parser = new JsonStreamParser(":");
+    assertThrows(JsonSyntaxException.class, parser::next);
+  }
+Smell List: ['Assertion_Roulette']
+Refactor#7
+@Test
+public void testMalformedInput() {
+    JsonStreamParser parser = new JsonStreamParser(":");
+    assertThrows(JsonSyntaxException.class, parser::hasNext, "Expected JsonSyntaxException when checking hasNext on malformed input");
+
+    parser = new JsonStreamParser(":");
+    assertThrows(JsonSyntaxException.class, parser::next, "Expected JsonSyntaxException when calling next on malformed input");
+}
+
+Input#8
+
+Refactor#8
+
+
+Input#9
+
+Refactor#9
+
+
+Input#10
+
+Refactor#10
+
+
+Input#11
+
+Refactor#11
+
+
+Input#12
+
+Refactor#12
+
+
+Input#13
+
+Refactor#13
+
+
+Input#14
+
+Refactor#14
+
+
+Input#15
+
+Refactor#15
+
+
+Input#16
+
+Refactor#16
+
+
+Input#17
+
+Refactor#17
+
+
+Input#18
+
+Refactor#18
+
+
+
+Input#19
+
+Refactor#19
+
+
+
+Input#20
+
+Refactor#20
+
+
+
+Input#21
+
+Refactor#21
+
+
+Input#22
+
+Refactor#22
+
+
+Input#23
+
+Refactor#23
+
+
+Input#24
+
+Refactor#24
+
+
+Input#25
+
+Refactor#25
+
+
+Input#26
+
+Refactor#26
+
+
+Input#27
+
+Refactor#27
+
+
+
+Input#28
+
+Refactor#28
+
+
+
+Input#29
+
+Refactor#29
+
+
+
+Input#30
+
+Refactor#30
+
+
+Input#31
+
+Refactor#31
+
+
+
+Input#32
+
+Refactor#32
+
+
+
+Input#33
+
+Refactor#33
+
+
+
+Input#34
+
+Refactor#34
+
+
+
+Input#35
+
+Refactor#35
+

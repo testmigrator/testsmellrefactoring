@@ -1,0 +1,56 @@
+Test smell num :
+After:
+
+Refactoring Test num :314
+CPR:95
+EPR:81
+
+!!!!=>254 tests
+
+
+
+f1: 15 tests
+f2: 0 tests
+f3: 7 tests
+f4: 19 tests
+f5: 16 tests
+f6: 3 tests
+f7: 16 tests
+f8: 2 tests
+f9: 7 tests
+f10: 2 tests
+
+
+f11: 7 tests
+f12: 3 tests
+f13: 8 tests
+f14: 14 tests
+f15: 8 tests
+f16: 9 tests
+f17: 4 tests
+f18: 6 tests
+f19: 6 tests
+f20: 3 tests
+
+f21: 7 tests
+f22: 3 tests
+f23: 2 tests
+f24: 2 tests
+f25: 31  tests
+f26: 2 tests
+f27: 4 tests
+f28: 5 tests
+f29: 3 tests
+f30: 0 tests
+
+f31: 2 tests
+f32: 3 tests
+f33: 7 tests
+f34: 12 tests
+f35: 2 tests
+
+
+
+
+
+

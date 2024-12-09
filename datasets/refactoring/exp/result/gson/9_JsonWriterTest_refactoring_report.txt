@@ -1,0 +1,2489 @@
+File#1
+
+
+Input#1
+ @Test
+  public void testDefaultStrictness() throws IOException {
+    JsonWriter jsonWriter = new JsonWriter(new StringWriter());
+    assertThat(jsonWriter.getStrictness()).isEqualTo(Strictness.LEGACY_STRICT);
+    jsonWriter.value(false);
+    jsonWriter.close();
+  }
+Smell List: ['Exception_Catching_Throwing', 'Eager_Test']
+
+Refactor#1
+
+
+private JsonWriter setupTestDefaultStrictness() {
+    return new JsonWriter(new StringWriter());
+}
+
+@Test
+public void testDefaultStrictness_StrictnessValue() {
+    JsonWriter jsonWriter = setupTestDefaultStrictness();
+    assertDoesNotThrow(() -> {
+        assertThat(jsonWriter.getStrictness()).isEqualTo(Strictness.LEGACY_STRICT);
+    }, "Unexpected exception occurred during the test");
+}
+
+@Test
+public void testDefaultStrictness_ValueWrite() {
+    JsonWriter jsonWriter = setupTestDefaultStrictness();
+    assertDoesNotThrow(() -> {
+        jsonWriter.value(false);
+    }, "Unexpected exception occurred during the test");
+}
+
+@Test
+public void testDefaultStrictness_Close() {
+    JsonWriter jsonWriter = setupTestDefaultStrictness();
+    assertDoesNotThrow(() -> {
+        jsonWriter.close();
+    }, "Unexpected exception occurred during the test");
+}
+
+
+
+Input#2
+@SuppressWarnings("deprecation") // for JsonWriter.setLenient
+  @Test
+  public void testSetLenientTrue() throws IOException {
+    JsonWriter jsonWriter = new JsonWriter(new StringWriter());
+    jsonWriter.setLenient(true);
+    assertThat(jsonWriter.getStrictness()).isEqualTo(Strictness.LENIENT);
+    jsonWriter.value(false);
+    jsonWriter.close();
+  }
+Smell List: ['Exception_Catching_Throwing', 'Eager_Test']
+
+Refactor#2
+
+private JsonWriter setupTestSetLenientTrue() throws IOException {
+    JsonWriter jsonWriter = new JsonWriter(new StringWriter());
+    jsonWriter.setLenient(true);
+    return jsonWriter;
+}
+
+@Test
+public void testSetLenientTrue_Strictness() {
+    assertDoesNotThrow(() -> {
+        JsonWriter jsonWriter = setupTestSetLenientTrue();
+        assertThat(jsonWriter.getStrictness()).isEqualTo(Strictness.LENIENT);
+    }, "Unexpected exception occurred during the test");
+}
+
+@Test
+public void testSetLenientTrue_Value() {
+    assertDoesNotThrow(() -> {
+        JsonWriter jsonWriter = setupTestSetLenientTrue();
+        jsonWriter.value(false);
+        jsonWriter.close();
+    }, "Unexpected exception occurred during the test");
+}
+
+Input#3
+ @Test
+  public void testSetLenientFalse() throws IOException {
+    JsonWriter jsonWriter = new JsonWriter(new StringWriter());
+    jsonWriter.setLenient(false);
+    assertThat(jsonWriter.getStrictness()).isEqualTo(Strictness.LEGACY_STRICT);
+    jsonWriter.value(false);
+    jsonWriter.close();
+  }
+Smell List: ['Exception_Catching_Throwing', 'Eager_Test']
+
+
+Refactor#3
+private JsonWriter createJsonWriter() {
+    return new JsonWriter(new StringWriter());
+  }
+
+  @Test
+  public void testSetLenientFalse_Strictness() {
+    JsonWriter jsonWriter = createJsonWriter();
+    jsonWriter.setLenient(false);
+    assertEquals(Strictness.LEGACY_STRICT, jsonWriter.getStrictness());
+  }
+
+  @Test
+  public void testSetLenientFalse_WriteValue() {
+    JsonWriter jsonWriter = createJsonWriter();
+    jsonWriter.setLenient(false);
+    assertDoesNotThrow(() -> {
+      jsonWriter.value(false);
+      jsonWriter.close();
+    }, "Unexpected exception occurred during the test");
+  }
+
+Input#4
+@Test
+  public void testSetStrictness() throws IOException {
+    JsonWriter jsonWriter = new JsonWriter(new StringWriter());
+    jsonWriter.setStrictness(Strictness.STRICT);
+    assertThat(jsonWriter.getStrictness()).isEqualTo(Strictness.STRICT);
+    jsonWriter.value(false);
+    jsonWriter.close();
+  }
+Smell List: ['Exception_Catching_Throwing', 'Eager_Test']
+
+Refactor#4
+private JsonWriter setupTestSetStrictness() throws IOException {
+    JsonWriter jsonWriter = new JsonWriter(new StringWriter());
+    jsonWriter.setStrictness(Strictness.STRICT);
+    return jsonWriter;
+}
+
+@Test
+public void testSetStrictness_SettingStrictness() {
+    JsonWriter jsonWriter = assertDoesNotThrow(() -> setupTestSetStrictness(), "Unexpected exception occurred during setup");
+    assertThat(jsonWriter.getStrictness()).isEqualTo(Strictness.STRICT);
+}
+
+@Test
+public void testSetStrictness_WritingValue() {
+    JsonWriter jsonWriter = assertDoesNotThrow(() -> setupTestSetStrictness(), "Unexpected exception occurred during setup");
+    assertDoesNotThrow(() -> jsonWriter.value(false), "Unexpected exception occurred when writing value");
+}
+
+@Test
+public void testSetStrictness_ClosingWriter() {
+    JsonWriter jsonWriter = assertDoesNotThrow(() -> setupTestSetStrictness(), "Unexpected exception occurred during setup");
+    assertDoesNotThrow(() -> jsonWriter.close(), "Unexpected exception occurred when closing writer");
+}
+
+Input#5
+@Test
+  public void testSetStrictnessNull() throws IOException {
+    JsonWriter jsonWriter = new JsonWriter(new StringWriter());
+    assertThrows(NullPointerException.class, () -> jsonWriter.setStrictness(null));
+    jsonWriter.value(false);
+    jsonWriter.close();
+  }
+Smell List: ['Exception_Catching_Throwing', 'Eager_Test']
+
+Refactor#5
+private JsonWriter setupTestSetStrictnessNull() {
+    return new JsonWriter(new StringWriter());
+}
+
+@Test
+public void testSetStrictnessNull_Exception() {
+    JsonWriter jsonWriter = setupTestSetStrictnessNull();
+    assertThrows(NullPointerException.class, () -> jsonWriter.setStrictness(null));
+}
+
+@Test
+public void testSetStrictnessNull_NoExceptionOnValueAndClose() {
+    JsonWriter jsonWriter = setupTestSetStrictnessNull();
+    assertDoesNotThrow(() -> {
+        jsonWriter.value(false);
+        jsonWriter.close();
+    }, "Unexpected exception occurred during the test");
+}
+
+Input#6
+@Test
+  public void testTopLevelValueTypes() throws IOException {
+    StringWriter string1 = new StringWriter();
+    JsonWriter writer1 = new JsonWriter(string1);
+    writer1.value(true);
+    writer1.close();
+    assertThat(string1.toString()).isEqualTo("true");
+
+    StringWriter string2 = new StringWriter();
+    JsonWriter writer2 = new JsonWriter(string2);
+    writer2.nullValue();
+    writer2.close();
+    assertThat(string2.toString()).isEqualTo("null");
+
+    StringWriter string3 = new StringWriter();
+    JsonWriter writer3 = new JsonWriter(string3);
+    writer3.value(123);
+    writer3.close();
+    assertThat(string3.toString()).isEqualTo("123");
+
+    StringWriter string4 = new StringWriter();
+    JsonWriter writer4 = new JsonWriter(string4);
+    writer4.value(123.4);
+    writer4.close();
+    assertThat(string4.toString()).isEqualTo("123.4");
+
+    StringWriter string5 = new StringWriter();
+    JsonWriter writert = new JsonWriter(string5);
+    writert.value("a");
+    writert.close();
+    assertThat(string5.toString()).isEqualTo("\"a\"");
+  }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing', 'Sensitive_Equality', 'Eager_Test']
+
+
+Refactor#6
+ private StringWriter createStringWriter() {
+        return new StringWriter();
+    }
+
+    private JsonWriter createJsonWriter(StringWriter stringWriter) {
+        return new JsonWriter(stringWriter);
+    }
+
+    @Test
+    public void testTopLevelValueTypes_boolean() {
+        StringWriter string1 = createStringWriter();
+        JsonWriter writer1 = createJsonWriter(string1);
+        assertDoesNotThrow(() -> {
+            writer1.value(true);
+            writer1.close();
+            String result = string1.toString();
+            assertThat(result).isEqualTo("true", "Boolean value should be serialized as 'true'");
+        });
+    }
+
+    @Test
+    public void testTopLevelValueTypes_null() {
+        StringWriter string2 = createStringWriter();
+        JsonWriter writer2 = createJsonWriter(string2);
+        assertDoesNotThrow(() -> {
+            writer2.nullValue();
+            writer2.close();
+            String result = string2.toString();
+            assertThat(result).isEqualTo("null", "Null value should be serialized as 'null'");
+        });
+    }
+
+    @Test
+    public void testTopLevelValueTypes_integer() {
+        StringWriter string3 = createStringWriter();
+        JsonWriter writer3 = createJsonWriter(string3);
+        assertDoesNotThrow(() -> {
+            writer3.value(123);
+            writer3.close();
+            String result = string3.toString();
+            assertThat(result).isEqualTo("123", "Integer value should be serialized as '123'");
+        });
+    }
+
+    @Test
+    public void testTopLevelValueTypes_double() {
+        StringWriter string4 = createStringWriter();
+        JsonWriter writer4 = createJsonWriter(string4);
+        assertDoesNotThrow(() -> {
+            writer4.value(123.4);
+            writer4.close();
+            String result = string4.toString();
+            assertThat(result).isEqualTo("123.4", "Double value should be serialized as '123.4'");
+        });
+    }
+
+    @Test
+    public void testTopLevelValueTypes_string() {
+        StringWriter string5 = createStringWriter();
+        JsonWriter writer5 = createJsonWriter(string5);
+        assertDoesNotThrow(() -> {
+            writer5.value("a");
+            writer5.close();
+            String result = string5.toString();
+            assertThat(result).isEqualTo("\"a\"", "String value should be serialized as '\"a\"'");
+        });
+    }
+
+
+Input#7
+ @Test
+  public void testNameAsTopLevelValue() throws IOException {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+    IllegalStateException e =
+        assertThrows(IllegalStateException.class, () -> jsonWriter.name("hello"));
+    assertThat(e).hasMessageThat().isEqualTo("Please begin an object before writing a name.");
+
+    jsonWriter.value(12);
+    jsonWriter.close();
+
+    e = assertThrows(IllegalStateException.class, () -> jsonWriter.name("hello"));
+    assertThat(e).hasMessageThat().isEqualTo("JsonWriter is closed.");
+  }
+
+Refactor#7
+  private StringWriter createStringWriter() {
+        return new StringWriter();
+    }
+
+    private JsonWriter createJsonWriter(StringWriter stringWriter) {
+        return new JsonWriter(stringWriter);
+    }
+
+    @Test
+    public void testNameAsTopLevelValue_ThrowsExceptionWhenJsonWriterIsClosed() {
+        StringWriter stringWriter = createStringWriter();
+        JsonWriter jsonWriter = createJsonWriter(stringWriter);
+        assertDoesNotThrow(() -> {
+            IllegalStateException e = assertThrows(IllegalStateException.class, () -> jsonWriter.name("hello"));
+            assertThat(e.getMessage(), equalTo("Please begin an object before writing a name."));
+            jsonWriter.value(12);
+            jsonWriter.close();
+            IllegalStateException e2 = assertThrows(IllegalStateException.class, () -> jsonWriter.name("hello"));
+            assertThat(e2.getMessage(), equalTo("JsonWriter is closed."));
+        });
+    }
+
+    @Test
+    public void testNameAsTopLevelValue_ThrowsExceptionWhenNoObjectStarted() {
+        StringWriter stringWriter = createStringWriter();
+        JsonWriter jsonWriter = createJsonWriter(stringWriter);
+        assertDoesNotThrow(() -> {
+
+            IllegalStateException e = assertThrows(IllegalStateException.class, () -> jsonWriter.name("hello"));
+            assertThat(e.getMessage(), equalTo("Please begin an object before writing a name."));
+        });
+    }
+
+Input#8
+@Test
+  public void testNameInArray() throws IOException {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+
+    jsonWriter.beginArray();
+    IllegalStateException e =
+        assertThrows(IllegalStateException.class, () -> jsonWriter.name("hello"));
+    assertThat(e).hasMessageThat().isEqualTo("Please begin an object before writing a name.");
+
+    jsonWriter.value(12);
+    e = assertThrows(IllegalStateException.class, () -> jsonWriter.name("hello"));
+    assertThat(e).hasMessageThat().isEqualTo("Please begin an object before writing a name.");
+
+    jsonWriter.endArray();
+    jsonWriter.close();
+
+    assertThat(stringWriter.toString()).isEqualTo("[12]");
+  }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing', 'Sensitive_Equality', 'Eager_Test', 'Duplicate_Assert']
+
+
+Refactor#8
+@Test
+public void testNameInArray_ThrowsExceptionBeforeObject() {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+
+    assertDoesNotThrow(() -> {
+        IllegalStateException e = assertThrows(IllegalStateException.class, () -> jsonWriter.name("hello"));
+        assertThat(e).hasMessageThat().isEqualTo("Please begin an object before writing a name.");
+    });
+}
+
+@Test
+public void testNameInArray_ThrowsExceptionAfterValue() {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+
+    assertDoesNotThrow(() -> {
+        jsonWriter.beginArray();
+        jsonWriter.value(12);
+        IllegalStateException e = assertThrows(IllegalStateException.class, () -> jsonWriter.name("hello"));
+        assertThat(e).hasMessageThat().isEqualTo("Please begin an object before writing a name.");
+    });
+}
+
+@Test
+public void testNameInArray_WritesCorrectJson() {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+
+    assertDoesNotThrow(() -> {
+        jsonWriter.beginArray();
+        jsonWriter.value(12);
+        jsonWriter.endArray();
+        jsonWriter.close();
+    });
+
+    assertThat(stringWriter.toString()).isEqualTo("[12]");
+}
+
+Input#9
+ @Test
+  public void testTwoNames() throws IOException {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+    jsonWriter.beginObject();
+    jsonWriter.name("a");
+    var e = assertThrows(IllegalStateException.class, () -> jsonWriter.name("a"));
+    assertThat(e).hasMessageThat().isEqualTo("Already wrote a name, expecting a value.");
+  }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing', 'Eager_Test']
+
+Refactor#9
+private StringWriter createStringWriter() {
+    return new StringWriter();
+}
+
+private JsonWriter createJsonWriter(StringWriter stringWriter) {
+    return new JsonWriter(stringWriter);
+}
+
+@Test
+public void testTwoNames_NameAlreadyWritten() {
+    StringWriter stringWriter = createStringWriter();
+    JsonWriter jsonWriter = createJsonWriter(stringWriter);
+    assertDoesNotThrow(() -> {
+        jsonWriter.beginObject();
+        jsonWriter.name("a");
+
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
+            jsonWriter.name("a");
+        }, "Expected IllegalStateException when trying to write a name after another name has already been written");
+
+        assertThat(exception.getMessage()).isEqualTo("Already wrote a name, expecting a value.");
+    });
+}
+
+Input#10
+ @Test
+  public void testNameWithoutValue() throws IOException {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+    jsonWriter.beginObject();
+    jsonWriter.name("a");
+    var e = assertThrows(IllegalStateException.class, () -> jsonWriter.endObject());
+    assertThat(e).hasMessageThat().isEqualTo("Dangling name: a");
+  }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing', 'Eager_Test']
+
+Refactor#10
+@Test
+public void testNameWithoutValue() {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+    assertDoesNotThrow(() -> {
+        jsonWriter.beginObject();
+        jsonWriter.name("a");
+
+        IllegalStateException e = assertThrows(IllegalStateException.class, () -> {
+            jsonWriter.endObject();
+        }, "Expected IllegalStateException when ending object without value");
+
+        assertThat(e).hasMessageThat().isEqualTo("Dangling name: a").withFailMessage("Expected message to match 'Dangling name: a'");
+    });
+}
+
+
+Input#11
+@Test
+  public void testValueWithoutName() throws IOException {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+    jsonWriter.beginObject();
+    var e = assertThrows(IllegalStateException.class, () -> jsonWriter.value(true));
+    assertThat(e).hasMessageThat().isEqualTo("Nesting problem.");
+  }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing', 'Eager_Test']
+
+Refactor#11
+
+@Test
+public void testValueWithoutName() {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+    assertDoesNotThrow(() -> {
+        jsonWriter.beginObject();
+
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
+            jsonWriter.value(true);
+        }, "Expected IllegalStateException when calling value without name");
+
+        assertThat(exception.getMessage()).isEqualTo("Nesting problem.").withFailMessage("Expected message 'Nesting problem.' when calling value without name");
+    });
+}
+
+Input#12
+ @Test
+  public void testMultipleTopLevelValues() throws IOException {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+    jsonWriter.beginArray().endArray();
+
+    IllegalStateException expected =
+        assertThrows(IllegalStateException.class, jsonWriter::beginArray);
+    assertThat(expected).hasMessageThat().isEqualTo("JSON must have only one top-level value.");
+  }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing', 'Eager_Test']
+
+Refactor#12
+private StringWriter createStringWriter() {
+    return new StringWriter();
+}
+
+private JsonWriter createJsonWriter(StringWriter stringWriter) {
+    return new JsonWriter(stringWriter);
+}
+
+@Test
+public void testMultipleTopLevelValues_BeginArrayAfterEndArray() {
+    StringWriter stringWriter = createStringWriter();
+    JsonWriter jsonWriter = createJsonWriter(stringWriter);
+    assertDoesNotThrow(() -> {
+        jsonWriter.beginArray().endArray();
+
+        IllegalStateException exception = assertThrows(IllegalStateException.class, jsonWriter::beginArray, "Expected IllegalStateException when calling beginArray after endArray");
+        assertThat(exception).hasMessageThat().isEqualTo("JSON must have only one top-level value.").withFailMessage("Exception message does not match expected message");
+    });
+}
+
+Input#13
+ @Test
+  public void testMultipleTopLevelValuesStrict() throws IOException {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+    jsonWriter.setStrictness(Strictness.STRICT);
+    jsonWriter.beginArray().endArray();
+
+    IllegalStateException expected =
+        assertThrows(IllegalStateException.class, jsonWriter::beginArray);
+    assertThat(expected).hasMessageThat().isEqualTo("JSON must have only one top-level value.");
+  }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing', 'Eager_Test']
+
+Refactor#13
+private StringWriter setupTestMultipleTopLevelValuesStrict() throws IOException {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+    jsonWriter.setStrictness(Strictness.STRICT);
+    jsonWriter.beginArray().endArray();
+    return stringWriter;
+}
+
+@Test
+public void testMultipleTopLevelValuesStrict_BeginArray() {
+    assertDoesNotThrow(() -> {
+        StringWriter stringWriter = setupTestMultipleTopLevelValuesStrict();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+
+        IllegalStateException exception = assertThrows(IllegalStateException.class, jsonWriter::beginArray,
+                "Expected IllegalStateException when calling beginArray after another top-level value");
+        assertThat(exception).hasMessageThat().isEqualTo("JSON must have only one top-level value.");
+    });
+
+Input#14
+ @Test
+  public void testMultipleTopLevelValuesLenient() throws IOException {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter writer = new JsonWriter(stringWriter);
+    writer.setStrictness(Strictness.LENIENT);
+    writer.beginArray();
+    writer.endArray();
+    writer.beginArray();
+    writer.endArray();
+    writer.close();
+    assertThat(stringWriter.toString()).isEqualTo("[][]");
+  }
+Smell List: ['Exception_Catching_Throwing', 'Sensitive_Equality', 'Eager_Test']
+
+Refactor#14
+@Test
+public void testMultipleTopLevelValuesLenient() {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter writer = new JsonWriter(stringWriter);
+    writer.setStrictness(Strictness.LENIENT);
+    assertDoesNotThrow(() -> {
+        writer.beginArray();
+        writer.endArray();
+        writer.beginArray();
+        writer.endArray();
+        writer.close();
+    }, "Unexpected exception occurred during the test");
+
+    String actualValue = stringWriter.toString();
+    assertEquals("[][]", actualValue);
+}
+
+Input#15
+ @Test
+  public void testBadNestingObject() throws IOException {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+    jsonWriter.beginArray();
+    jsonWriter.beginObject();
+    var e = assertThrows(IllegalStateException.class, () -> jsonWriter.endArray());
+    assertThat(e).hasMessageThat().isEqualTo("Nesting problem.");
+  }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing', 'Eager_Test']
+
+Refactor#15
+@Test
+public void testBadNestingObject_BeginArrayBeginObjectEndArray() {
+    assertDoesNotThrow(() -> {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.beginArray();
+        jsonWriter.beginObject();
+        var e = assertThrows(IllegalStateException.class, () -> jsonWriter.endArray(), "Expected IllegalStateException when ending array after beginning object");
+        assertThat(e).hasMessageThat().isEqualTo("Nesting problem.").withFailMessage("Expected nesting problem message to be 'Nesting problem.'");
+    }, "Unexpected exception occurred during the test");
+}
+
+Input#16
+ @Test
+  public void testBadNestingArray() throws IOException {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+    jsonWriter.beginArray();
+    jsonWriter.beginArray();
+    var e = assertThrows(IllegalStateException.class, () -> jsonWriter.endObject());
+    assertThat(e).hasMessageThat().isEqualTo("Nesting problem.");
+  }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing', 'Eager_Test']
+
+Refactor#16
+@Test
+public void testBadNestingArray_beginArrayEndObject() {
+    assertDoesNotThrow(() -> {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.beginArray();
+        jsonWriter.beginArray();
+        var e = assertThrows(IllegalStateException.class, () -> jsonWriter.endObject(), "Expected IllegalStateException due to nesting problem");
+        assertThat(e).hasMessageThat().isEqualTo("Nesting problem.").withFailMessage("Expected exception message to match 'Nesting problem.'");
+    }, "Unexpected exception occurred during the test");
+}
+
+Input#17
+ @Test
+  public void testNullName() throws IOException {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+    jsonWriter.beginObject();
+    assertThrows(NullPointerException.class, () -> jsonWriter.name(null));
+  }
+Smell List: ['Exception_Catching_Throwing', 'Eager_Test']
+
+Refactor#17
+@Test
+public void testNullName() {
+    assertDoesNotThrow(() -> {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.beginObject();
+        assertThrows(NullPointerException.class, () -> jsonWriter.name(null));
+    }, "Unexpected exception occurred during the test");
+}
+
+Input#18
+ @Test
+  public void testNullStringValue() throws IOException {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+    jsonWriter.beginObject();
+    jsonWriter.name("a");
+    jsonWriter.value((String) null);
+    jsonWriter.endObject();
+    assertThat(stringWriter.toString()).isEqualTo("{\"a\":null}");
+  }
+Smell List: ['Exception_Catching_Throwing', 'Sensitive_Equality', 'Eager_Test']
+
+
+Refactor#18
+@Test
+public void testNullStringValue() {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+    setupJsonWriter(jsonWriter);
+    String expectedOutput = "{\"a\":null}";
+    String actualOutput = stringWriter.toString();
+    assertEquals(expectedOutput, actualOutput);
+}
+
+private void setupJsonWriter(JsonWriter jsonWriter) {
+    try {
+        jsonWriter.beginObject();
+        jsonWriter.name("a");
+        jsonWriter.value((String) null);
+        jsonWriter.endObject();
+    } catch (IOException e) {
+        fail("Unexpected IOException occurred during the test: " + e.getMessage());
+    }
+}
+
+
+Input#19
+ @Test
+  public void testJsonValue() throws IOException {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+    jsonWriter.beginObject();
+    jsonWriter.name("a");
+    jsonWriter.jsonValue("{\"b\":true}");
+    jsonWriter.name("c");
+    jsonWriter.value(1);
+    jsonWriter.endObject();
+    assertThat(stringWriter.toString()).isEqualTo("{\"a\":{\"b\":true},\"c\":1}");
+  }
+Smell List: ['Exception_Catching_Throwing', 'Sensitive_Equality', 'Eager_Test']
+
+Refactor#19
+
+@Test
+public void testJsonValue() {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+    assertDoesNotThrow(() -> {
+        jsonWriter.beginObject();
+        jsonWriter.name("a");
+        jsonWriter.jsonValue("{\"b\":true}");
+        jsonWriter.name("c");
+        jsonWriter.value(1);
+        jsonWriter.endObject();
+    }, "Unexpected exception occurred during the test");
+
+    String actualValue = stringWriter.toString();
+    assertThat(actualValue).isEqualTo("{\"a\":{\"b\":true},\"c\":1}");
+}
+
+
+
+Input#20
+ @Test
+  public void testNonFiniteFloats() throws IOException {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+    assertNonFiniteFloatsExceptions(jsonWriter);
+  }
+Smell List: ['Exception_Catching_Throwing']
+
+Refactor#20
+@Test
+public void testNonFiniteFloats() {
+  assertDoesNotThrow(() -> {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+    assertNonFiniteFloatsExceptions(jsonWriter);
+  }, "Unexpected exception occurred during the test");
+}
+
+
+Input#21
+ @Test
+  public void testNonFiniteFloatsWhenStrict() throws IOException {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+    jsonWriter.setStrictness(Strictness.STRICT);
+    assertNonFiniteFloatsExceptions(jsonWriter);
+  }
+Smell List: ['Exception_Catching_Throwing']
+Refactor#21
+@Test
+public void testNonFiniteFloatsWhenStrict() {
+  StringWriter stringWriter = new StringWriter();
+  JsonWriter jsonWriter = new JsonWriter(stringWriter);
+  jsonWriter.setStrictness(Strictness.STRICT);
+  assertThrows(Exception.class, () -> {
+    assertNonFiniteFloatsExceptions(jsonWriter);
+  });
+}
+
+Input#22
+ @Test
+  public void testNonFiniteDoubles() throws IOException {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+    assertNonFiniteDoublesExceptions(jsonWriter);
+  }
+Context: /com/google/gson/stream/JsonWriter
+Smell List: ['Exception_Catching_Throwing']
+
+
+Refactor#22
+@Test
+public void testNonFiniteDoubles() {
+  StringWriter stringWriter = new StringWriter();
+  JsonWriter jsonWriter = new JsonWriter(stringWriter);
+  assertDoesNotThrow(() -> {
+    assertNonFiniteDoublesExceptions(jsonWriter);
+  }, "Unexpected exception occurred during the test");
+}
+
+Input#23
+ @Test
+  public void testNonFiniteDoublesWhenStrict() throws IOException {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+    jsonWriter.setStrictness(Strictness.STRICT);
+    assertNonFiniteDoublesExceptions(jsonWriter);
+  }
+Smell List: ['Exception_Catching_Throwing']
+
+Refactor#23
+@Test
+public void testNonFiniteDoublesWhenStrict() {
+  StringWriter stringWriter = new StringWriter();
+  JsonWriter jsonWriter = new JsonWriter(stringWriter);
+  jsonWriter.setStrictness(Strictness.STRICT);
+  assertThrows(IllegalArgumentException.class, () -> {
+    assertNonFiniteDoublesExceptions(jsonWriter);
+  });
+}
+
+Input#24
+ @Test
+  public void testNonFiniteNumbers() throws IOException {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+    assertNonFiniteNumbersExceptions(jsonWriter);
+  }
+Smell List: ['Exception_Catching_Throwing']
+
+Refactor#24
+@Test
+public void testNonFiniteNumbers() {
+  StringWriter stringWriter = new StringWriter();
+  JsonWriter jsonWriter = new JsonWriter(stringWriter);
+  assertDoesNotThrow(() -> {
+    assertNonFiniteNumbersExceptions(jsonWriter);
+  }, "Unexpected exception occurred during the test");
+}
+
+
+Input#25
+ @Test
+  public void testNonFiniteNumbersWhenStrict() throws IOException {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+    jsonWriter.setStrictness(Strictness.STRICT);
+    assertNonFiniteNumbersExceptions(jsonWriter);
+  }
+Smell List: ['Exception_Catching_Throwing']
+
+Refactor#25
+@Test
+public void testNonFiniteNumbersWhenStrict() {
+  assertDoesNotThrow(() -> {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+    jsonWriter.setStrictness(Strictness.STRICT);
+    assertNonFiniteNumbersExceptions(jsonWriter);
+  }, "Unexpected exception occurred during the test");
+}
+
+Input#26
+ @Test
+  public void testNonFiniteFloatsWhenLenient() throws IOException {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+    jsonWriter.setStrictness(Strictness.LENIENT);
+    jsonWriter.beginArray();
+    jsonWriter.value(Float.NaN);
+    jsonWriter.value(Float.NEGATIVE_INFINITY);
+    jsonWriter.value(Float.POSITIVE_INFINITY);
+    jsonWriter.endArray();
+    assertThat(stringWriter.toString()).isEqualTo("[NaN,-Infinity,Infinity]");
+  }
+Smell List: ['Exception_Catching_Throwing', 'Sensitive_Equality', 'Eager_Test']
+Refactor#26
+private void setupTestNonFiniteFloatsWhenLenient() throws IOException {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+    jsonWriter.setStrictness(Strictness.LENIENT);
+    jsonWriter.beginArray();
+    jsonWriter.value(Float.NaN);
+    jsonWriter.value(Float.NEGATIVE_INFINITY);
+    jsonWriter.value(Float.POSITIVE_INFINITY);
+    jsonWriter.endArray();
+  }
+
+  @Test
+  public void testNonFiniteFloatsWhenLenient_Output() {
+    assertDoesNotThrow(() -> {
+      StringWriter stringWriter = new StringWriter();
+      JsonWriter jsonWriter = new JsonWriter(stringWriter);
+      jsonWriter.setStrictness(Strictness.LENIENT);
+      jsonWriter.beginArray();
+      jsonWriter.value(Float.NaN);
+      jsonWriter.value(Float.NEGATIVE_INFINITY);
+      jsonWriter.value(Float.POSITIVE_INFINITY);
+      jsonWriter.endArray();
+
+      String actualOutput = stringWriter.toString();
+      assertEquals("[NaN,-Infinity,Infinity]", actualOutput);
+    }, "Unexpected exception occurred during the test");
+  }
+
+Input#27
+@Test
+  public void testNonFiniteDoublesWhenLenient() throws IOException {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+    jsonWriter.setStrictness(Strictness.LENIENT);
+    jsonWriter.beginArray();
+    jsonWriter.value(Double.NaN);
+    jsonWriter.value(Double.NEGATIVE_INFINITY);
+    jsonWriter.value(Double.POSITIVE_INFINITY);
+    jsonWriter.endArray();
+    assertThat(stringWriter.toString()).isEqualTo("[NaN,-Infinity,Infinity]");
+  }
+Smell List: ['Exception_Catching_Throwing', 'Sensitive_Equality', 'Eager_Test']
+
+Refactor#27
+private StringWriter setupTestNonFiniteDoublesWhenLenient() throws IOException {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+    jsonWriter.setStrictness(Strictness.LENIENT);
+    jsonWriter.beginArray();
+    jsonWriter.value(Double.NaN);
+    jsonWriter.value(Double.NEGATIVE_INFINITY);
+    jsonWriter.value(Double.POSITIVE_INFINITY);
+    jsonWriter.endArray();
+    return stringWriter;
+  }
+
+  @Test
+  public void testNonFiniteDoublesWhenLenient_JsonArray() {
+    assertDoesNotThrow(() -> {
+      StringWriter stringWriter = setupTestNonFiniteDoublesWhenLenient();
+      String actualValue = stringWriter.toString();
+      assertThat(actualValue).isEqualTo("[NaN,-Infinity,Infinity]");
+    });
+  }
+
+
+Input#28
+@Test
+  public void testNonFiniteNumbersWhenLenient() throws IOException {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+    jsonWriter.setStrictness(Strictness.LENIENT);
+    jsonWriter.beginArray();
+    jsonWriter.value(Double.valueOf(Double.NaN));
+    jsonWriter.value(Double.valueOf(Double.NEGATIVE_INFINITY));
+    jsonWriter.value(Double.valueOf(Double.POSITIVE_INFINITY));
+    jsonWriter.value(new LazilyParsedNumber("Infinity"));
+    jsonWriter.endArray();
+    assertThat(stringWriter.toString()).isEqualTo("[NaN,-Infinity,Infinity,Infinity]");
+  }
+Smell List: ['Exception_Catching_Throwing', 'Sensitive_Equality', 'Eager_Test']
+
+Refactor#28
+private StringWriter setupTestNonFiniteNumbersWhenLenient() throws IOException {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+    jsonWriter.setStrictness(Strictness.LENIENT);
+    jsonWriter.beginArray();
+    jsonWriter.value(Double.valueOf(Double.NaN));
+    jsonWriter.value(Double.valueOf(Double.NEGATIVE_INFINITY));
+    jsonWriter.value(Double.valueOf(Double.POSITIVE_INFINITY));
+    jsonWriter.value(new LazilyParsedNumber("Infinity"));
+    jsonWriter.endArray();
+    return stringWriter;
+  }
+
+  @Test
+  public void testNonFiniteNumbersWhenLenient_Output() {
+    assertDoesNotThrow(() -> {
+      StringWriter stringWriter = setupTestNonFiniteNumbersWhenLenient();
+      String actualValue = stringWriter.toString();
+      assertEquals("[NaN,-Infinity,Infinity,Infinity]", actualValue);
+    }, "Unexpected exception occurred during the test");
+  }
+
+
+Input#29
+@Test
+  public void testFloats() throws IOException {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+    jsonWriter.beginArray();
+    jsonWriter.value(-0.0f);
+    jsonWriter.value(1.0f);
+    jsonWriter.value(Float.MAX_VALUE);
+    jsonWriter.value(Float.MIN_VALUE);
+    jsonWriter.value(0.0f);
+    jsonWriter.value(-0.5f);
+    jsonWriter.value(2.2250739E-38f);
+    jsonWriter.value(3.723379f);
+    jsonWriter.value((float) Math.PI);
+    jsonWriter.value((float) Math.E);
+    jsonWriter.endArray();
+    jsonWriter.close();
+    assertThat(stringWriter.toString())
+        .isEqualTo(
+            "[-0.0,"
+                + "1.0,"
+                + "3.4028235E38,"
+                + "1.4E-45,"
+                + "0.0,"
+                + "-0.5,"
+                + "2.2250739E-38,"
+                + "3.723379,"
+                + "3.1415927,"
+                + "2.7182817]");
+  }
+Smell List: ['Exception_Catching_Throwing', 'Sensitive_Equality', 'Eager_Test']
+
+Refactor#29
+private StringWriter setupStringWriter() {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+    jsonWriter.beginArray();
+    return stringWriter;
+  }
+
+  private void addValuesToJsonWriter(StringWriter stringWriter) throws IOException {
+    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+    jsonWriter.value(-0.0f);
+    jsonWriter.value(1.0f);
+    jsonWriter.value(Float.MAX_VALUE);
+    jsonWriter.value(Float.MIN_VALUE);
+    jsonWriter.value(0.0f);
+    jsonWriter.value(-0.5f);
+    jsonWriter.value(2.2250739E-38f);
+    jsonWriter.value(3.723379f);
+    jsonWriter.value((float) Math.PI);
+    jsonWriter.value((float) Math.E);
+  }
+
+  private void closeJsonWriter(StringWriter stringWriter) throws IOException {
+    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+    jsonWriter.endArray();
+    jsonWriter.close();
+  }
+
+  @Test
+  public void testFloats_Setup() {
+    assertDoesNotThrow(() -> {
+      StringWriter stringWriter = setupStringWriter();
+    }, "Unexpected exception occurred during setup");
+  }
+
+  @Test
+  public void testFloats_AddValues() {
+    assertDoesNotThrow(() -> {
+      StringWriter stringWriter = setupStringWriter();
+      addValuesToJsonWriter(stringWriter);
+    }, "Unexpected exception occurred during adding values");
+  }
+
+  @Test
+  public void testFloats_CloseWriter() {
+    assertDoesNotThrow(() -> {
+      StringWriter stringWriter = setupStringWriter();
+      addValuesToJsonWriter(stringWriter);
+      closeJsonWriter(stringWriter);
+    }, "Unexpected exception occurred during closing writer");
+  }
+
+  @Test
+  public void testFloats_ExpectedOutput() {
+    assertDoesNotThrow(() -> {
+      StringWriter stringWriter = setupStringWriter();
+      addValuesToJsonWriter(stringWriter);
+      closeJsonWriter(stringWriter);
+
+      String expectedOutput = "[-0.0,1.0,3.4028235E38,1.4E-45,0.0,-0.5,2.2250739E-38,3.723379,3.1415927,2.7182817]";
+      String actualOutput = stringWriter.toString();
+      assertEquals(expectedOutput, actualOutput);
+    }, "Unexpected exception occurred during the test");
+  }
+
+
+Input#30
+@Test
+  public void testDoubles() throws IOException {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+    jsonWriter.beginArray();
+    jsonWriter.value(-0.0);
+    jsonWriter.value(1.0);
+    jsonWriter.value(Double.MAX_VALUE);
+    jsonWriter.value(Double.MIN_VALUE);
+    jsonWriter.value(0.0);
+    jsonWriter.value(-0.5);
+    jsonWriter.value(2.2250738585072014E-308);
+    jsonWriter.value(Math.PI);
+    jsonWriter.value(Math.E);
+    jsonWriter.endArray();
+    jsonWriter.close();
+    assertThat(stringWriter.toString())
+        .isEqualTo(
+            "[-0.0,"
+                + "1.0,"
+                + "1.7976931348623157E308,"
+                + "4.9E-324,"
+                + "0.0,"
+                + "-0.5,"
+                + "2.2250738585072014E-308,"
+                + "3.141592653589793,"
+                + "2.718281828459045]");
+  }
+Smell List: ['Exception_Catching_Throwing', 'Sensitive_Equality', 'Eager_Test']
+
+Refactor#30
+@Test
+public void testDoubles() {
+  StringWriter stringWriter = new StringWriter();
+  JsonWriter jsonWriter = new JsonWriter(stringWriter);
+
+  writeDoubles(jsonWriter);
+
+  String actualValue = stringWriter.toString();
+  String expectedValue = "[-0.0,1.0,1.7976931348623157E308,4.9E-324,0.0,-0.5,2.2250738585072014E-308,3.141592653589793,2.718281828459045]";
+  assertThat(actualValue).isEqualTo(expectedValue);
+}
+
+private void writeDoubles(JsonWriter jsonWriter) {
+  assertDoesNotThrow(() -> {
+    jsonWriter.beginArray();
+    jsonWriter.value(-0.0);
+    jsonWriter.value(1.0);
+    jsonWriter.value(Double.MAX_VALUE);
+    jsonWriter.value(Double.MIN_VALUE);
+    jsonWriter.value(0.0);
+    jsonWriter.value(-0.5);
+    jsonWriter.value(2.2250738585072014E-308);
+    jsonWriter.value(Math.PI);
+    jsonWriter.value(Math.E);
+    jsonWriter.endArray();
+    jsonWriter.close();
+  }, "Unexpected exception occurred during the test");
+}
+
+Input#31
+@Test
+  public void testLongs() throws IOException {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+    jsonWriter.beginArray();
+    jsonWriter.value(0);
+    jsonWriter.value(1);
+    jsonWriter.value(-1);
+    jsonWriter.value(Long.MIN_VALUE);
+    jsonWriter.value(Long.MAX_VALUE);
+    jsonWriter.endArray();
+    jsonWriter.close();
+    assertThat(stringWriter.toString())
+        .isEqualTo("[0," + "1," + "-1," + "-9223372036854775808," + "9223372036854775807]");
+  }
+Smell List: ['Exception_Catching_Throwing', 'Sensitive_Equality', 'Eager_Test']
+
+
+Refactor#31
+private StringWriter createStringWriter() {
+    return new StringWriter();
+  }
+
+  private JsonWriter createJsonWriter(StringWriter stringWriter) {
+    return new JsonWriter(stringWriter);
+  }
+
+  private void writeLongValues(JsonWriter jsonWriter) throws IOException {
+    jsonWriter.beginArray();
+    jsonWriter.value(0);
+    jsonWriter.value(1);
+    jsonWriter.value(-1);
+    jsonWriter.value(Long.MIN_VALUE);
+    jsonWriter.value(Long.MAX_VALUE);
+    jsonWriter.endArray();
+  }
+
+  @Test
+  public void testLongs() {
+    StringWriter stringWriter = createStringWriter();
+    JsonWriter jsonWriter = createJsonWriter(stringWriter);
+
+    assertDoesNotThrow(() -> {
+      writeLongValues(jsonWriter);
+      jsonWriter.close();
+    });
+
+    String expectedOutput = "[0," + "1," + "-1," + "-9223372036854775808," + "9223372036854775807]";
+    String actualOutput = stringWriter.toString();
+    assertThat(actualOutput).isEqualTo(expectedOutput);
+  }
+
+
+Input#32
+@Test
+  public void testNumbers() throws IOException {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+    jsonWriter.beginArray();
+    jsonWriter.value(new BigInteger("0"));
+    jsonWriter.value(new BigInteger("9223372036854775808"));
+    jsonWriter.value(new BigInteger("-9223372036854775809"));
+    jsonWriter.value(new BigDecimal("3.141592653589793238462643383"));
+    jsonWriter.endArray();
+    jsonWriter.close();
+    assertThat(stringWriter.toString())
+        .isEqualTo(
+            "[0,"
+                + "9223372036854775808,"
+                + "-9223372036854775809,"
+                + "3.141592653589793238462643383]");
+  }
+Smell List: ['Exception_Catching_Throwing', 'Sensitive_Equality', 'Eager_Test']
+
+Refactor#32
+@Test
+public void testNumbers() {
+  StringWriter stringWriter = new StringWriter();
+  JsonWriter jsonWriter = new JsonWriter(stringWriter);
+  setupJsonWriter(jsonWriter);
+
+  String expectedOutput = "[0,9223372036854775808,-9223372036854775809,3.141592653589793238462643383]";
+  String actualOutput = stringWriter.toString();
+
+  assertEquals(expectedOutput, actualOutput);
+}
+
+private void setupJsonWriter(JsonWriter jsonWriter) {
+  assertDoesNotThrow(() -> {
+    jsonWriter.beginArray();
+    jsonWriter.value(new BigInteger("0"));
+    jsonWriter.value(new BigInteger("9223372036854775808"));
+    jsonWriter.value(new BigInteger("-9223372036854775809"));
+    jsonWriter.value(new BigDecimal("3.141592653589793238462643383"));
+    jsonWriter.endArray();
+    jsonWriter.close();
+  }, "Unexpected exception occurred during the test");
+}
+
+
+Input#33
+
+Refactor#33
+
+
+
+Input#34
+@Test
+  public void testMalformedNumbers() throws IOException {
+    String[] malformedNumbers = {
+      "some text",
+      "",
+      ".",
+      "00",
+      "01",
+      "-00",
+      "-",
+      "--1",
+      "+1", // plus sign is not allowed for integer part
+      "+",
+      "1,0",
+      "1,000",
+      "0.", // decimal digit is required
+      ".1", // integer part is required
+      "e1",
+      ".e1",
+      ".1e1",
+      "1e-",
+      "1e+",
+      "1e--1",
+      "1e+-1",
+      "1e1e1",
+      "1+e1",
+      "1e1.0",
+    };
+
+    for (String malformedNumber : malformedNumbers) {
+      JsonWriter jsonWriter = new JsonWriter(new StringWriter());
+      var e =
+          assertThrows(
+              IllegalArgumentException.class,
+              () -> jsonWriter.value(new LazilyParsedNumber(malformedNumber)));
+      assertThat(e)
+          .hasMessageThat()
+          .isEqualTo(
+              "String created by class com.google.gson.internal.LazilyParsedNumber is not a valid"
+                  + " JSON number: "
+                  + malformedNumber);
+    }
+  }
+Smell List: ['Assertion_Roulette', 'Conditional_Test_Logic', 'Exception_Catching_Throwing']
+
+Refactor#34
+private static final String MALFORMED_NUMBER_MESSAGE = "String created by class com.google.gson.internal.LazilyParsedNumber is not a valid JSON number: %s";
+
+  @Test
+  public void testMalformedNumbers() {
+    String[] malformedNumbers = {
+      "some text", "", ".", "00", "01", "-00", "-", "--1", "+1", "+", "1,0", "1,000", "0.",
+      ".1", "e1", ".e1", ".1e1", "1e-", "1e+", "1e--1", "1e+-1", "1e1e1", "1+e1", "1e1.0"
+    };
+
+    for (String malformedNumber : malformedNumbers) {
+      testMalformedNumber(malformedNumber);
+    }
+  }
+
+  private void testMalformedNumber(String malformedNumber) {
+    JsonWriter jsonWriter = new JsonWriter(new java.io.StringWriter());
+    var e = assertThrows(IllegalArgumentException.class, () ->
+        jsonWriter.value(new LazilyParsedNumber(malformedNumber)),
+        "Expected IllegalArgumentException for malformed number: " + malformedNumber);
+    assertThat(e.getMessage(), equalTo(String.format(MALFORMED_NUMBER_MESSAGE, malformedNumber)),
+        "Exception message does not match expected message for malformed number: " + malformedNumber);
+  }
+
+
+Input#35
+@Test
+  public void testBooleans() throws IOException {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+    jsonWriter.beginArray();
+    jsonWriter.value(true);
+    jsonWriter.value(false);
+    jsonWriter.endArray();
+    assertThat(stringWriter.toString()).isEqualTo("[true,false]");
+  }
+Smell List: ['Exception_Catching_Throwing', 'Sensitive_Equality', 'Eager_Test']
+
+Refactor#35
+ private StringWriter setupJsonWriter() {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+    return stringWriter;
+  }
+
+  @Test
+  public void testBooleans_BeginArray() {
+    StringWriter stringWriter = setupJsonWriter();
+    assertDoesNotThrow(() -> {
+      JsonWriter jsonWriter = new JsonWriter(stringWriter);
+      jsonWriter.beginArray();
+    }, "Unexpected exception occurred during the test");
+  }
+
+  @Test
+  public void testBooleans_WriteTrue() {
+    StringWriter stringWriter = setupJsonWriter();
+    assertDoesNotThrow(() -> {
+      JsonWriter jsonWriter = new JsonWriter(stringWriter);
+      jsonWriter.value(true);
+    }, "Unexpected exception occurred during the test");
+  }
+
+  @Test
+  public void testBooleans_WriteFalse() {
+    StringWriter stringWriter = setupJsonWriter();
+    assertDoesNotThrow(() -> {
+      JsonWriter jsonWriter = new JsonWriter(stringWriter);
+      jsonWriter.value(false);
+    }, "Unexpected exception occurred during the test");
+  }
+
+  @Test
+  public void testBooleans_EndArray() {
+    StringWriter stringWriter = setupJsonWriter();
+    assertDoesNotThrow(() -> {
+      JsonWriter jsonWriter = new JsonWriter(stringWriter);
+      jsonWriter.endArray();
+    }, "Unexpected exception occurred during the test");
+  }
+
+  @Test
+  public void testBooleans_Output() {
+    StringWriter stringWriter = setupJsonWriter();
+    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+    jsonWriter.beginArray();
+    jsonWriter.value(true);
+    jsonWriter.value(false);
+    jsonWriter.endArray();
+    String actualValue = stringWriter.toString();
+    assertThat(actualValue).isEqualTo("[true,false]");
+  }
+
+
+
+Input#36
+ @Test
+  public void testBoxedBooleans() throws IOException {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+    jsonWriter.beginArray();
+    jsonWriter.value((Boolean) true);
+    jsonWriter.value((Boolean) false);
+    jsonWriter.value((Boolean) null);
+    jsonWriter.endArray();
+    assertThat(stringWriter.toString()).isEqualTo("[true,false,null]");
+  }
+Smell List: ['Exception_Catching_Throwing', 'Sensitive_Equality', 'Eager_Test']
+Refactor#36
+@Test
+public void testBoxedBooleans() {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+    assertDoesNotThrow(() -> {
+        jsonWriter.beginArray();
+        jsonWriter.value((Boolean) true);
+        jsonWriter.value((Boolean) false);
+        jsonWriter.value((Boolean) null);
+        jsonWriter.endArray();
+    }, "Unexpected exception occurred during the test");
+    String actualValue = stringWriter.toString();
+    assertThat(actualValue).isEqualTo("[true,false,null]");
+}
+
+
+Input#37
+ @Test
+  public void testNulls() throws IOException {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+    jsonWriter.beginArray();
+    jsonWriter.nullValue();
+    jsonWriter.endArray();
+    assertThat(stringWriter.toString()).isEqualTo("[null]");
+  }
+Smell List: ['Exception_Catching_Throwing', 'Sensitive_Equality', 'Eager_Test']
+
+Refactor#37
+@Test
+public void testNulls() {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+    setupJsonWriter(jsonWriter);
+
+    String actualValue = stringWriter.toString();
+    assertThat(actualValue).isEqualTo("[null]");
+}
+
+private void setupJsonWriter(JsonWriter jsonWriter) {
+    assertDoesNotThrow(() -> {
+        jsonWriter.beginArray();
+        jsonWriter.nullValue();
+        jsonWriter.endArray();
+    }, "Unexpected exception occurred during the test");
+}
+
+Input#38
+@Test
+  public void testStrings() throws IOException {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+    jsonWriter.beginArray();
+    jsonWriter.value("a");
+    jsonWriter.value("a\"");
+    jsonWriter.value("\"");
+    jsonWriter.value(":");
+    jsonWriter.value(",");
+    jsonWriter.value("\b");
+    jsonWriter.value("\f");
+    jsonWriter.value("\n");
+    jsonWriter.value("\r");
+    jsonWriter.value("\t");
+    jsonWriter.value(" ");
+    jsonWriter.value("\\");
+    jsonWriter.value("{");
+    jsonWriter.value("}");
+    jsonWriter.value("[");
+    jsonWriter.value("]");
+    jsonWriter.value("\0");
+    jsonWriter.value("\u0019");
+    jsonWriter.endArray();
+    assertThat(stringWriter.toString())
+        .isEqualTo(
+            "[\"a\","
+                + "\"a\\\"\","
+                + "\"\\\"\","
+                + "\":\","
+                + "\",\","
+                + "\"\\b\","
+                + "\"\\f\","
+                + "\"\\n\","
+                + "\"\\r\","
+                + "\"\\t\","
+                + "\" \","
+                + "\"\\\\\","
+                + "\"{\","
+                + "\"}\","
+                + "\"[\","
+                + "\"]\","
+                + "\"\\u0000\","
+                + "\"\\u0019\"]");
+  }
+Smell List: ['Exception_Catching_Throwing', 'Sensitive_Equality', 'Eager_Test']
+
+Refactor#38
+
+  private StringWriter createStringWriter() {
+    return new StringWriter();
+  }
+
+  private JsonWriter createJsonWriter(StringWriter stringWriter) {
+    return new JsonWriter(stringWriter);
+  }
+
+  @Test
+  public void testStrings() {
+    StringWriter stringWriter = createStringWriter();
+    JsonWriter jsonWriter = createJsonWriter(stringWriter);
+
+    assertDoesNotThrow(() -> {
+      jsonWriter.beginArray();
+      jsonWriter.value("a");
+      jsonWriter.value("a\"");
+      jsonWriter.value("\"");
+      jsonWriter.value(":");
+      jsonWriter.value(",");
+      jsonWriter.value("\b");
+      jsonWriter.value("\f");
+      jsonWriter.value("\n");
+      jsonWriter.value("\r");
+      jsonWriter.value("\t");
+      jsonWriter.value(" ");
+      jsonWriter.value("\\");
+      jsonWriter.value("{");
+      jsonWriter.value("}");
+      jsonWriter.value("[");
+      jsonWriter.value("]");
+      jsonWriter.value("\0");
+      jsonWriter.value("\u0019");
+      jsonWriter.endArray();
+    }, "Unexpected exception occurred during the test");
+
+    String expectedJson = "[\"a\",\"a\\\"\",\"\\\"\",\":\",\",\",\"\\b\",\"\\f\",\"\\n\",\"\\r\",\"\\t\",\" \",\"\\\\\",\"{\",\"}\",\"[\",\"]\",\"\\u0000\",\"\\u0019\"]";
+    String actualJson = stringWriter.toString();
+    assertEquals(expectedJson, actualJson);
+  }
+
+Input#39
+@Test
+  public void testUnicodeLineBreaksEscaped() throws IOException {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+    jsonWriter.beginArray();
+    jsonWriter.value("\u2028 \u2029");
+    jsonWriter.endArray();
+    // JSON specification does not require that they are escaped, but Gson escapes them for
+    // compatibility with JavaScript where they are considered line breaks
+    assertThat(stringWriter.toString()).isEqualTo("[\"\\u2028 \\u2029\"]");
+  }
+Smell List: ['Exception_Catching_Throwing', 'Sensitive_Equality', 'Eager_Test']
+
+Refactor#39
+
+@Test
+public void testUnicodeLineBreaksEscaped() {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+
+    assertDoesNotThrow(() -> {
+        jsonWriter.beginArray();
+        jsonWriter.value("\u2028 \u2029");
+        jsonWriter.endArray();
+    }, "Unexpected exception occurred during the test");
+
+    String actualValue = stringWriter.toString();
+    assertThat(actualValue).isEqualTo("[\"\\u2028 \\u2029\"]");
+}
+
+
+Input#40
+@Test
+  public void testEmptyArray() throws IOException {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+    jsonWriter.beginArray();
+    jsonWriter.endArray();
+    assertThat(stringWriter.toString()).isEqualTo("[]");
+  }
+Smell List: ['Exception_Catching_Throwing', 'Sensitive_Equality', 'Eager_Test']
+
+Refactor#40
+
+  private StringWriter createStringWriter() {
+    return new StringWriter();
+  }
+
+  private JsonWriter createJsonWriter(StringWriter stringWriter) {
+    return new JsonWriter(stringWriter);
+  }
+
+  @Test
+  public void testEmptyArray() {
+    StringWriter stringWriter = createStringWriter();
+    JsonWriter jsonWriter = createJsonWriter(stringWriter);
+
+    assertDoesNotThrow(() -> {
+      jsonWriter.beginArray();
+      jsonWriter.endArray();
+    }, "Unexpected exception occurred during the test");
+
+    String actualValue = stringWriter.toString();
+    assertThat(actualValue).isEqualTo("[]");
+  }
+
+Input#41
+@Test
+  public void testEmptyObject() throws IOException {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+    jsonWriter.beginObject();
+    jsonWriter.endObject();
+    assertThat(stringWriter.toString()).isEqualTo("{}");
+  }
+Smell List: ['Exception_Catching_Throwing', 'Sensitive_Equality', 'Eager_Test']
+
+Refactor#41
+
+
+  private StringWriter createStringWriter() {
+    return new StringWriter();
+  }
+
+  private JsonWriter createJsonWriter(StringWriter stringWriter) throws IOException {
+    return new JsonWriter(stringWriter);
+  }
+
+  @Test
+  public void testEmptyObject_BeginObject() {
+    StringWriter stringWriter = createStringWriter();
+    JsonWriter jsonWriter = assertDoesNotThrow(() -> createJsonWriter(stringWriter), "Failed to create JsonWriter");
+    assertDoesNotThrow(jsonWriter::beginObject, "Failed to begin object");
+  }
+
+  @Test
+  public void testEmptyObject_EndObject() {
+    StringWriter stringWriter = createStringWriter();
+    JsonWriter jsonWriter = assertDoesNotThrow(() -> createJsonWriter(stringWriter), "Failed to create JsonWriter");
+    assertDoesNotThrow(jsonWriter::endObject, "Failed to end object");
+  }
+
+  @Test
+  public void testEmptyObject_ExpectedOutput() {
+    StringWriter stringWriter = createStringWriter();
+    JsonWriter jsonWriter = assertDoesNotThrow(() -> createJsonWriter(stringWriter), "Failed to create JsonWriter");
+    assertDoesNotThrow(() -> {
+      jsonWriter.beginObject();
+      jsonWriter.endObject();
+    }, "Failed to write empty object");
+
+    String actualValue = stringWriter.toString();
+    assertThat(actualValue).isEqualTo("{}");
+  }
+
+
+Input#42
+ @Test
+  public void testObjectsInArrays() throws IOException {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+    jsonWriter.beginArray();
+    jsonWriter.beginObject();
+    jsonWriter.name("a").value(5);
+    jsonWriter.name("b").value(false);
+    jsonWriter.endObject();
+    jsonWriter.beginObject();
+    jsonWriter.name("c").value(6);
+    jsonWriter.name("d").value(true);
+    jsonWriter.endObject();
+    jsonWriter.endArray();
+    assertThat(stringWriter.toString())
+        .isEqualTo("[{\"a\":5,\"b\":false}," + "{\"c\":6,\"d\":true}]");
+  }
+Smell List: ['Exception_Catching_Throwing', 'Sensitive_Equality', 'Eager_Test']
+
+Refactor#42
+@BeforeEach
+  public void setUp() {
+    stringWriter = new StringWriter();
+    jsonWriter = new JsonWriter(stringWriter);
+  }
+
+  @Test
+  public void testObjectsInArrays_beginArray() {
+    assertDoesNotThrow(() -> {
+      jsonWriter.beginArray();
+    }, "Unexpected exception occurred during the test");
+  }
+
+  @Test
+  public void testObjectsInArrays_endArray() {
+    assertDoesNotThrow(() -> {
+      jsonWriter.endArray();
+    }, "Unexpected exception occurred during the test");
+  }
+
+  @Test
+  public void testObjectsInArrays_writeFirstObject() {
+    assertDoesNotThrow(() -> {
+      jsonWriter.beginObject();
+      jsonWriter.name("a").value(5);
+      jsonWriter.name("b").value(false);
+      jsonWriter.endObject();
+    }, "Unexpected exception occurred during the test");
+  }
+
+  @Test
+  public void testObjectsInArrays_writeSecondObject() {
+    assertDoesNotThrow(() -> {
+      jsonWriter.beginObject();
+      jsonWriter.name("c").value(6);
+      jsonWriter.name("d").value(true);
+      jsonWriter.endObject();
+    }, "Unexpected exception occurred during the test");
+  }
+
+  @Test
+  public void testObjectsInArrays_fullSequence() {
+    assertDoesNotThrow(() -> {
+      jsonWriter.beginArray();
+      jsonWriter.beginObject();
+      jsonWriter.name("a").value(5);
+      jsonWriter.name("b").value(false);
+      jsonWriter.endObject();
+      jsonWriter.beginObject();
+      jsonWriter.name("c").value(6);
+      jsonWriter.name("d").value(true);
+      jsonWriter.endObject();
+      jsonWriter.endArray();
+    }, "Unexpected exception occurred during the test");
+
+    String actualValue = stringWriter.toString();
+    assertThat(actualValue).isEqualTo("[{\"a\":5,\"b\":false},{\"c\":6,\"d\":true}]");
+  }
+
+Input#43
+@Test
+  public void testArraysInObjects() throws IOException {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+    jsonWriter.beginObject();
+    jsonWriter.name("a");
+    jsonWriter.beginArray();
+    jsonWriter.value(5);
+    jsonWriter.value(false);
+    jsonWriter.endArray();
+    jsonWriter.name("b");
+    jsonWriter.beginArray();
+    jsonWriter.value(6);
+    jsonWriter.value(true);
+    jsonWriter.endArray();
+    jsonWriter.endObject();
+    assertThat(stringWriter.toString()).isEqualTo("{\"a\":[5,false]," + "\"b\":[6,true]}");
+  }
+Smell List: ['Exception_Catching_Throwing', 'Sensitive_Equality', 'Eager_Test']
+
+Refactor#43
+@Test
+public void testArraysInObjects() {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+
+    setupJsonWriter(jsonWriter);
+
+    String actualValue = stringWriter.toString();
+    String expectedValue = "{\"a\":[5,false],\"b\":[6,true]}";
+    assertThat(actualValue).isEqualTo(expectedValue);
+}
+
+private void setupJsonWriter(JsonWriter jsonWriter) {
+    try {
+        jsonWriter.beginObject();
+        jsonWriter.name("a");
+        jsonWriter.beginArray();
+        jsonWriter.value(5);
+        jsonWriter.value(false);
+        jsonWriter.endArray();
+        jsonWriter.name("b");
+        jsonWriter.beginArray();
+        jsonWriter.value(6);
+        jsonWriter.value(true);
+        jsonWriter.endArray();
+        jsonWriter.endObject();
+    } catch (IOException e) {
+        throw new RuntimeException(e);
+    }
+}
+
+
+Input#44
+@Test
+  public void testDeepNestingArrays() throws IOException {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+    for (int i = 0; i < 20; i++) {
+      jsonWriter.beginArray();
+    }
+    for (int i = 0; i < 20; i++) {
+      jsonWriter.endArray();
+    }
+    assertThat(stringWriter.toString()).isEqualTo("[[[[[[[[[[[[[[[[[[[[]]]]]]]]]]]]]]]]]]]]");
+  }
+Smell List: ['Conditional_Test_Logic', 'Exception_Catching_Throwing', 'Sensitive_Equality', 'Eager_Test']
+
+Refactor#44
+private StringWriter stringWriter;
+  private JsonWriter jsonWriter;
+
+  @BeforeEach
+  public void setUp() throws IOException {
+    stringWriter = new StringWriter();
+    jsonWriter = new JsonWriter(stringWriter);
+  }
+
+  @Test
+  public void testDeepNestingArrays() {
+    writeDeepNestingArrays(jsonWriter, 20);
+    assertDoesNotThrow(() -> jsonWriter.flush());
+    String expectedOutput = "[[[[[[[[[[[[[[[[[[[[]]]]]]]]]]]]]]]]]]]]";
+    String actualOutput = stringWriter.toString();
+    assertThat(actualOutput).isEqualTo(expectedOutput);
+  }
+
+  private void writeDeepNestingArrays(JsonWriter jsonWriter, int depth) {
+        try {
+            for (int i = 0; i < depth; i++) {
+                jsonWriter.beginArray();
+            }
+            for (int i = 0; i < depth; i++) {
+                jsonWriter.endArray();
+            }
+        } catch (Exception e) {
+        }
+    }
+
+Input#45
+@Test
+  public void testDeepNestingObjects() throws IOException {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+    jsonWriter.beginObject();
+    for (int i = 0; i < 20; i++) {
+      jsonWriter.name("a");
+      jsonWriter.beginObject();
+    }
+    for (int i = 0; i < 20; i++) {
+      jsonWriter.endObject();
+    }
+    jsonWriter.endObject();
+    assertThat(stringWriter.toString())
+        .isEqualTo(
+            "{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":"
+                + "{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{\"a\":{"
+                + "}}}}}}}}}}}}}}}}}}}}}");
+  }
+Smell List: ['Conditional_Test_Logic', 'Exception_Catching_Throwing', 'Sensitive_Equality', 'Eager_Test']
+
+
+Refactor#45
+private static final int NESTING_DEPTH = 20;
+
+  @Test
+  public void testDeepNestingObjects() {
+    assertDoesNotThrow(this::performDeepNestingTest, "Unexpected exception occurred during the test");
+  }
+
+  private void performDeepNestingTest() throws IOException {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+    writeNestedObjects(jsonWriter, NESTING_DEPTH);
+    closeNestedObjects(jsonWriter, NESTING_DEPTH);
+    jsonWriter.endObject();
+    String expectedJson = buildExpectedJson(NESTING_DEPTH);
+    String actualJson = stringWriter.toString();
+    assertEquals(expectedJson, actualJson);
+  }
+
+  private void writeNestedObjects(JsonWriter jsonWriter, int depth) throws IOException {
+    jsonWriter.beginObject();
+    for (int i = 0; i < depth; i++) {
+      jsonWriter.name("a");
+      jsonWriter.beginObject();
+    }
+  }
+
+  private void closeNestedObjects(JsonWriter jsonWriter, int depth) throws IOException {
+    for (int i = 0; i < depth; i++) {
+      jsonWriter.endObject();
+    }
+  }
+
+  private String buildExpectedJson(int depth) {
+    StringBuilder sb = new StringBuilder();
+    sb.append("{");
+    for (int i = 0; i < depth; i++) {
+      sb.append("\"a\":{");
+    }
+    for (int i = 0; i < depth; i++) {
+      sb.append("}");
+    }
+    sb.append("}");
+    return sb.toString();
+  }
+
+Input#46
+@Test
+  public void testRepeatedName() throws IOException {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+    jsonWriter.beginObject();
+    jsonWriter.name("a").value(true);
+    jsonWriter.name("a").value(false);
+    jsonWriter.endObject();
+    // JsonWriter doesn't attempt to detect duplicate names
+    assertThat(stringWriter.toString()).isEqualTo("{\"a\":true,\"a\":false}");
+  }
+Smell List: ['Exception_Catching_Throwing', 'Sensitive_Equality', 'Eager_Test']
+
+Refactor#46
+@Test
+    public void testRepeatedName() {
+        assertDoesNotThrow(() -> {
+            StringWriter stringWriter = new StringWriter();
+            JsonWriter jsonWriter = new JsonWriter(stringWriter);
+            jsonWriter.beginObject();
+            jsonWriter.name("a").value(true);
+            jsonWriter.name("a").value(false);
+            jsonWriter.endObject();
+
+            String jsonString = stringWriter.toString();
+            assertEquals("{\"a\":true,\"a\":false}", jsonString);
+        }, "Unexpected exception occurred during the test");
+    }
+
+Input#47
+@Test
+  public void testPrettyPrintObject() throws IOException {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+    jsonWriter.setIndent("   ");
+
+    jsonWriter.beginObject();
+    jsonWriter.name("a").value(true);
+    jsonWriter.name("b").value(false);
+    jsonWriter.name("c").value(5.0);
+    jsonWriter.name("e").nullValue();
+    jsonWriter.name("f").beginArray();
+    jsonWriter.value(6.0);
+    jsonWriter.value(7.0);
+    jsonWriter.endArray();
+    jsonWriter.name("g").beginObject();
+    jsonWriter.name("h").value(8.0);
+    jsonWriter.name("i").value(9.0);
+    jsonWriter.endObject();
+    jsonWriter.endObject();
+
+    String expected =
+        "{\n"
+            + "   \"a\": true,\n"
+            + "   \"b\": false,\n"
+            + "   \"c\": 5.0,\n"
+            + "   \"e\": null,\n"
+            + "   \"f\": [\n"
+            + "      6.0,\n"
+            + "      7.0\n"
+            + "   ],\n"
+            + "   \"g\": {\n"
+            + "      \"h\": 8.0,\n"
+            + "      \"i\": 9.0\n"
+            + "   }\n"
+            + "}";
+    assertThat(stringWriter.toString()).isEqualTo(expected);
+  }
+Smell List: ['Exception_Catching_Throwing', 'Sensitive_Equality', 'Eager_Test']
+Refactor#47
+private StringWriter setupJsonWriter() throws IOException {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+    jsonWriter.setIndent("   ");
+
+    jsonWriter.beginObject();
+    jsonWriter.name("a").value(true);
+    jsonWriter.name("b").value(false);
+    jsonWriter.name("c").value(5.0);
+    jsonWriter.name("e").nullValue();
+    jsonWriter.name("f").beginArray();
+    jsonWriter.value(6.0);
+    jsonWriter.value(7.0);
+    jsonWriter.endArray();
+    jsonWriter.name("g").beginObject();
+    jsonWriter.name("h").value(8.0);
+    jsonWriter.name("i").value(9.0);
+    jsonWriter.endObject();
+    jsonWriter.endObject();
+
+    return stringWriter;
+  }
+
+  @Test
+  public void testPrettyPrintObject_JsonWriter() {
+    assertDoesNotThrow(() -> {
+      StringWriter stringWriter = setupJsonWriter();
+      String expected =
+          "{\n"
+              + "   \"a\": true,\n"
+              + "   \"b\": false,\n"
+              + "   \"c\": 5.0,\n"
+              + "   \"e\": null,\n"
+              + "   \"f\": [\n"
+              + "      6.0,\n"
+              + "      7.0\n"
+              + "   ],\n"
+              + "   \"g\": {\n"
+              + "      \"h\": 8.0,\n"
+              + "      \"i\": 9.0\n"
+              + "   }\n"
+              + "}";
+      String actualValue = stringWriter.toString();
+      assertEquals(expected, actualValue);
+    }, "Unexpected exception occurred during the test");
+  }
+
+Input#48
+@Test
+  public void testPrettyPrintArray() throws IOException {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+    jsonWriter.setIndent("   ");
+
+    jsonWriter.beginArray();
+    jsonWriter.value(true);
+    jsonWriter.value(false);
+    jsonWriter.value(5.0);
+    jsonWriter.nullValue();
+    jsonWriter.beginObject();
+    jsonWriter.name("a").value(6.0);
+    jsonWriter.name("b").value(7.0);
+    jsonWriter.endObject();
+    jsonWriter.beginArray();
+    jsonWriter.value(8.0);
+    jsonWriter.value(9.0);
+    jsonWriter.endArray();
+    jsonWriter.endArray();
+
+    String expected =
+        "[\n"
+            + "   true,\n"
+            + "   false,\n"
+            + "   5.0,\n"
+            + "   null,\n"
+            + "   {\n"
+            + "      \"a\": 6.0,\n"
+            + "      \"b\": 7.0\n"
+            + "   },\n"
+            + "   [\n"
+            + "      8.0,\n"
+            + "      9.0\n"
+            + "   ]\n"
+            + "]";
+    assertThat(stringWriter.toString()).isEqualTo(expected);
+  }
+Smell List: ['Exception_Catching_Throwing', 'Sensitive_Equality', 'Eager_Test']
+Refactor#48
+private StringWriter setupTestPrettyPrintArray() {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+    jsonWriter.setIndent("   ");
+
+    jsonWriter.beginArray();
+    jsonWriter.value(true);
+    jsonWriter.value(false);
+    jsonWriter.value(5.0);
+    jsonWriter.nullValue();
+    jsonWriter.beginObject();
+    jsonWriter.name("a").value(6.0);
+    jsonWriter.name("b").value(7.0);
+    jsonWriter.endObject();
+    jsonWriter.beginArray();
+    jsonWriter.value(8.0);
+    jsonWriter.value(9.0);
+    jsonWriter.endArray();
+    jsonWriter.endArray();
+
+    return stringWriter;
+  }
+
+  @Test
+  public void testPrettyPrintArray_Content() {
+    StringWriter stringWriter = setupTestPrettyPrintArray();
+
+    String expected =
+        "[\n"
+            + "   true,\n"
+            + "   false,\n"
+            + "   5.0,\n"
+            + "   null,\n"
+            + "   {\n"
+            + "      \"a\": 6.0,\n"
+            + "      \"b\": 7.0\n"
+            + "   },\n"
+            + "   [\n"
+            + "      8.0,\n"
+            + "      9.0\n"
+            + "   ]\n"
+            + "]";
+    String actualValue = stringWriter.toString();
+    assertThat(actualValue).isEqualTo(expected);
+  }
+
+  @Test
+  public void testPrettyPrintArray_NoExceptionThrown() {
+    assertDoesNotThrow(() -> {
+      setupTestPrettyPrintArray();
+    }, "Unexpected exception occurred during the test");
+  }
+
+Input#49
+@Test
+  public void testClosedWriterThrowsOnStructure() throws IOException {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter writer = new JsonWriter(stringWriter);
+    writer.beginArray();
+    writer.endArray();
+    writer.close();
+
+    String expectedMessage = "JsonWriter is closed.";
+    var e = assertThrows(IllegalStateException.class, () -> writer.beginArray());
+    assertThat(e).hasMessageThat().isEqualTo(expectedMessage);
+
+    e = assertThrows(IllegalStateException.class, () -> writer.endArray());
+    assertThat(e).hasMessageThat().isEqualTo(expectedMessage);
+
+    e = assertThrows(IllegalStateException.class, () -> writer.beginObject());
+    assertThat(e).hasMessageThat().isEqualTo(expectedMessage);
+
+    e = assertThrows(IllegalStateException.class, () -> writer.endObject());
+    assertThat(e).hasMessageThat().isEqualTo(expectedMessage);
+  }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing', 'Eager_Test', 'Duplicate_Assert']
+
+Refactor#49
+private StringWriter stringWriter;
+  private JsonWriter writer;
+  private String expectedMessage = "JsonWriter is closed.";
+
+  @BeforeEach
+  public void setUp() throws IOException {
+    stringWriter = new StringWriter();
+    writer = new JsonWriter(stringWriter);
+    writer.beginArray();
+    writer.endArray();
+    writer.close();
+  }
+
+  @Test
+  public void testClosedWriterThrowsOnBeginArray() {
+    var e = assertThrows(IllegalStateException.class, () -> writer.beginArray(), "Expected IllegalStateException when calling beginArray on a closed JsonWriter");
+    assertThat(e.getMessage(), is(expectedMessage));
+  }
+
+  @Test
+  public void testClosedWriterThrowsOnEndArray() {
+    var e = assertThrows(IllegalStateException.class, () -> writer.endArray(), "Expected IllegalStateException when calling endArray on a closed JsonWriter");
+    assertThat(e.getMessage(), is(expectedMessage));
+  }
+
+  @Test
+  public void testClosedWriterThrowsOnBeginObject() {
+    var e = assertThrows(IllegalStateException.class, () -> writer.beginObject(), "Expected IllegalStateException when calling beginObject on a closed JsonWriter");
+    assertThat(e.getMessage(), is(expectedMessage));
+  }
+
+  @Test
+  public void testClosedWriterThrowsOnEndObject() {
+    var e = assertThrows(IllegalStateException.class, () -> writer.endObject(), "Expected IllegalStateException when calling endObject on a closed JsonWriter");
+    assertThat(e.getMessage(), is(expectedMessage));
+  }
+
+Input#50
+@Test
+  public void testClosedWriterThrowsOnName() throws IOException {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter writer = new JsonWriter(stringWriter);
+    writer.beginArray();
+    writer.endArray();
+    writer.close();
+    var e = assertThrows(IllegalStateException.class, () -> writer.name("a"));
+    assertThat(e).hasMessageThat().isEqualTo("JsonWriter is closed.");
+  }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing', 'Eager_Test']
+Refactor#50
+private StringWriter createStringWriter() {
+    return new StringWriter();
+}
+
+private JsonWriter createJsonWriter(StringWriter stringWriter) {
+    return new JsonWriter(stringWriter);
+}
+
+private void closeWriter(JsonWriter writer) throws IOException {
+    writer.close();
+}
+
+@Test
+public void testClosedWriterThrowsOnName() {
+    StringWriter stringWriter = createStringWriter();
+    JsonWriter writer = createJsonWriter(stringWriter);
+
+    try {
+        writer.beginArray();
+        writer.endArray();
+        closeWriter(writer);
+        assertThrows(IllegalStateException.class, () -> writer.name("a"), "Expected IllegalStateException when calling name on a closed JsonWriter");
+    } catch (IOException e) {
+        fail("Unexpected IOException during test setup", e);
+    }
+}
+
+Input#51
+@Test
+  public void testClosedWriterThrowsOnValue() throws IOException {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter writer = new JsonWriter(stringWriter);
+    writer.beginArray();
+    writer.endArray();
+    writer.close();
+    var e = assertThrows(IllegalStateException.class, () -> writer.value("a"));
+    assertThat(e).hasMessageThat().isEqualTo("JsonWriter is closed.");
+  }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing', 'Eager_Test']
+Refactor#51
+private StringWriter setupStringWriter() {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter writer = new JsonWriter(stringWriter);
+    writer.beginArray();
+    writer.endArray();
+    writer.close();
+    return stringWriter;
+}
+
+@Test
+public void testClosedWriterThrowsOnValue() {
+    StringWriter stringWriter = setupStringWriter();
+    JsonWriter writer = new JsonWriter(stringWriter);
+
+    IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
+        writer.value("a");
+    }, "Expected IllegalStateException when writing value to closed JsonWriter");
+
+    assertThat(exception.getMessage()).isEqualTo("JsonWriter is closed.", "Exception message should indicate that the JsonWriter is closed");
+}
+
+
+Input#52
+ @Test
+  public void testClosedWriterThrowsOnFlush() throws IOException {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter writer = new JsonWriter(stringWriter);
+    writer.beginArray();
+    writer.endArray();
+    writer.close();
+    var e = assertThrows(IllegalStateException.class, () -> writer.flush());
+    assertThat(e).hasMessageThat().isEqualTo("JsonWriter is closed.");
+  }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing', 'Eager_Test']
+
+Refactor#52
+private StringWriter createStringWriter() {
+    return new StringWriter();
+}
+
+private JsonWriter createAndCloseJsonWriter(StringWriter stringWriter) throws IOException {
+    assertDoesNotThrow(() -> {
+        JsonWriter writer = new JsonWriter(stringWriter);
+        writer.beginArray();
+        writer.endArray();
+        writer.close();
+        return writer;
+    }, "Unexpected exception occurred during the test");
+}
+
+@Test
+public void testClosedWriterThrowsOnFlush() {
+    StringWriter stringWriter = createStringWriter();
+    JsonWriter writer = createAndCloseJsonWriter(stringWriter);
+    IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
+        writer.flush();
+    }, "Expected IllegalStateException to be thrown when flushing a closed JsonWriter");
+    assertThat(exception.getMessage()).isEqualTo("JsonWriter is closed.", "Exception message should indicate that the JsonWriter is closed");
+}
+
+
+Input#53
+ @Test
+  public void testWriterCloseIsIdempotent() throws IOException {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter writer = new JsonWriter(stringWriter);
+    writer.beginArray();
+    writer.endArray();
+    writer.close();
+    assertThat(stringWriter.toString()).isEqualTo("[]");
+    writer.close();
+    assertThat(stringWriter.toString()).isEqualTo("[]");
+  }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing', 'Sensitive_Equality', 'Eager_Test', 'Duplicate_Assert']
+
+
+Refactor#53
+@Test
+public void testWriterCloseIsIdempotent() {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter writer = new JsonWriter(stringWriter);
+    assertDoesNotThrow(() -> {
+        // Setup initial state
+        writer.beginArray();
+        writer.endArray();
+
+        // First close call
+        writer.close();
+        String firstCloseResult = stringWriter.toString();
+        assertEquals("[]", firstCloseResult, "First close call should result in an empty JSON array");
+
+        // Second close call
+        writer.close();
+        String secondCloseResult = stringWriter.toString();
+        assertEquals("[]", secondCloseResult, "Second close call should not change the output");
+    }, "Unexpected exception occurred during the test");
+}
+
+Input#54
+@Test
+  public void testSetGetFormattingStyle() throws IOException {
+    String lineSeparator = "\r\n";
+
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+    // Default should be FormattingStyle.COMPACT
+    assertThat(jsonWriter.getFormattingStyle()).isSameInstanceAs(FormattingStyle.COMPACT);
+    jsonWriter.setFormattingStyle(
+        FormattingStyle.PRETTY.withIndent(" \t ").withNewline(lineSeparator));
+
+    jsonWriter.beginArray();
+    jsonWriter.value(true);
+    jsonWriter.value("text");
+    jsonWriter.value(5.0);
+    jsonWriter.nullValue();
+    jsonWriter.endArray();
+
+    String expected =
+        "[\r\n" //
+            + " \t true,\r\n" //
+            + " \t \"text\",\r\n" //
+            + " \t 5.0,\r\n" //
+            + " \t null\r\n" //
+            + "]";
+    assertThat(stringWriter.toString()).isEqualTo(expected);
+
+    assertThat(jsonWriter.getFormattingStyle().getNewline()).isEqualTo(lineSeparator);
+  }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing', 'Sensitive_Equality', 'Eager_Test']
+
+Refactor#54
+private StringWriter createStringWriter() {
+    return new StringWriter();
+}
+
+private JsonWriter createJsonWriter(StringWriter stringWriter) {
+    return new JsonWriter(stringWriter);
+}
+
+private void configureFormattingStyle(JsonWriter jsonWriter, String lineSeparator) {
+    jsonWriter.setFormattingStyle(
+        FormattingStyle.PRETTY.withIndent(" \t ").withNewline(lineSeparator));
+}
+
+private void writeJsonArray(JsonWriter jsonWriter) throws IOException {
+    jsonWriter.beginArray();
+    jsonWriter.value(true);
+    jsonWriter.value("text");
+    jsonWriter.value(5.0);
+    jsonWriter.nullValue();
+    jsonWriter.endArray();
+}
+
+@Test
+public void testSetGetFormattingStyle_DefaultFormattingStyle() {
+    StringWriter stringWriter = createStringWriter();
+    JsonWriter jsonWriter = createJsonWriter(stringWriter);
+    assertThat(jsonWriter.getFormattingStyle(), "Default formatting style should be COMPACT").isSameInstanceAs(FormattingStyle.COMPACT);
+}
+
+@Test
+public void testSetGetFormattingStyle_SetFormattingStyle() {
+    StringWriter stringWriter = createStringWriter();
+    JsonWriter jsonWriter = createJsonWriter(stringWriter);
+    String lineSeparator = "\r\n";
+    configureFormattingStyle(jsonWriter, lineSeparator);
+    assertThat(jsonWriter.getFormattingStyle().getNewline(), "Newline should match the provided line separator").isEqualTo(lineSeparator);
+}
+
+@Test
+public void testSetGetFormattingStyle_WriteFormattedJson() {
+    StringWriter stringWriter = createStringWriter();
+    JsonWriter jsonWriter = createJsonWriter(stringWriter);
+    String lineSeparator = "\r\n";
+    configureFormattingStyle(jsonWriter, lineSeparator);
+    assertDoesNotThrow(() -> {
+        writeJsonArray(jsonWriter);
+        String expected =
+            "[\r\n" +
+            " \t true,\r\n" +
+            " \t \"text\",\r\n" +
+            " \t 5.0,\r\n" +
+            " \t null\r\n" +
+            "]";
+        String actual = stringWriter.toString();
+        assertThat(actual, "Written JSON should match the expected formatted output").isEqualTo(expected);
+    }, "Unexpected exception occurred during the test");
+}
+
+Input#55
+Test
+  public void testIndentOverwritesFormattingStyle() throws IOException {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+    jsonWriter.setFormattingStyle(FormattingStyle.COMPACT);
+    // Should overwrite formatting style
+    jsonWriter.setIndent("  ");
+
+    jsonWriter.beginObject();
+    jsonWriter.name("a");
+    jsonWriter.beginArray();
+    jsonWriter.value(1);
+    jsonWriter.value(2);
+    jsonWriter.endArray();
+    jsonWriter.endObject();
+
+    String expected =
+        "{\n" //
+            + "  \"a\": [\n" //
+            + "    1,\n" //
+            + "    2\n" //
+            + "  ]\n" //
+            + "}";
+    assertThat(stringWriter.toString()).isEqualTo(expected);
+  }
+Smell List: ['Exception_Catching_Throwing', 'Sensitive_Equality', 'Eager_Test']
+
+
+Refactor#55
+private void setupTestIndentOverwritesFormattingStyle() throws IOException {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+    jsonWriter.setFormattingStyle(FormattingStyle.COMPACT);
+    // Should overwrite formatting style
+    jsonWriter.setIndent("  ");
+
+    jsonWriter.beginObject();
+    jsonWriter.name("a");
+    jsonWriter.beginArray();
+    jsonWriter.value(1);
+    jsonWriter.value(2);
+    jsonWriter.endArray();
+    jsonWriter.endObject();
+
+    String actualValue = stringWriter.toString();
+    String expected =
+        "{\n" //
+            + "  \"a\": [\n" //
+            + "    1,\n" //
+            + "    2\n" //
+            + "  ]\n" //
+            + "}";
+    assertEquals(expected, actualValue);
+  }
+
+  @Test
+  public void testIndentOverwritesFormattingStyle() {
+    assertDoesNotThrow(this::setupTestIndentOverwritesFormattingStyle, "Unexpected exception occurred during the test");
+  }
+

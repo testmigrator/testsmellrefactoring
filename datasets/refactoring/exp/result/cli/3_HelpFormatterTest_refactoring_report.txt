@@ -1,0 +1,1501 @@
+File#1
+
+
+Input#1
+@Test
+public void testAccessors() {
+    final HelpFormatter formatter = new HelpFormatter();
+
+    formatter.setArgName("argname");
+    assertEquals("argname", formatter.getArgName(), "arg name");
+
+    formatter.setDescPadding(3);
+    assertEquals(3, formatter.getDescPadding(), "desc padding");
+
+    formatter.setLeftPadding(7);
+    assertEquals(7, formatter.getLeftPadding(), "left padding");
+
+    formatter.setLongOptPrefix("~~");
+    assertEquals("~~", formatter.getLongOptPrefix(), "long opt prefix");
+
+    formatter.setNewLine("\n");
+    assertEquals("\n", formatter.getNewLine(), "new line");
+
+    formatter.setOptPrefix("~");
+    assertEquals("~", formatter.getOptPrefix(), "opt prefix");
+
+    formatter.setSyntaxPrefix("-> ");
+    assertEquals("-> ", formatter.getSyntaxPrefix(), "syntax prefix");
+
+    formatter.setWidth(80);
+    assertEquals(80, formatter.getWidth(), "width");
+}
+Smell List: ['Eager_Test', 'Magic_Number_Test']
+
+Refactor#1
+private HelpFormatter setupTestAccessors() {
+    final HelpFormatter formatter = new HelpFormatter();
+    return formatter;
+}
+
+@Test
+public void testAccessors_ArgName() {
+    final HelpFormatter formatter = setupTestAccessors();
+    String expectedArgName = "argname";
+    formatter.setArgName(expectedArgName);
+    assertEquals(expectedArgName, formatter.getArgName(), "arg name");
+}
+
+@Test
+public void testAccessors_DescPadding() {
+    final HelpFormatter formatter = setupTestAccessors();
+    int expectedDescPadding = 3;
+    formatter.setDescPadding(expectedDescPadding);
+    assertEquals(expectedDescPadding, formatter.getDescPadding(), "desc padding");
+}
+
+@Test
+public void testAccessors_LeftPadding() {
+    final HelpFormatter formatter = setupTestAccessors();
+    int expectedLeftPadding = 7;
+    formatter.setLeftPadding(expectedLeftPadding);
+    assertEquals(expectedLeftPadding, formatter.getLeftPadding(), "left padding");
+}
+
+@Test
+public void testAccessors_LongOptPrefix() {
+    final HelpFormatter formatter = setupTestAccessors();
+    String expectedLongOptPrefix = "~~";
+    formatter.setLongOptPrefix(expectedLongOptPrefix);
+    assertEquals(expectedLongOptPrefix, formatter.getLongOptPrefix(), "long opt prefix");
+}
+
+@Test
+public void testAccessors_NewLine() {
+    final HelpFormatter formatter = setupTestAccessors();
+    String expectedNewLine = "\n";
+    formatter.setNewLine(expectedNewLine);
+    assertEquals(expectedNewLine, formatter.getNewLine(), "new line");
+}
+
+@Test
+public void testAccessors_OptPrefix() {
+    final HelpFormatter formatter = setupTestAccessors();
+    String expectedOptPrefix = "~";
+    formatter.setOptPrefix(expectedOptPrefix);
+    assertEquals(expectedOptPrefix, formatter.getOptPrefix(), "opt prefix");
+}
+
+@Test
+public void testAccessors_SyntaxPrefix() {
+    final HelpFormatter formatter = setupTestAccessors();
+    String expectedSyntaxPrefix = "-> ";
+    formatter.setSyntaxPrefix(expectedSyntaxPrefix);
+    assertEquals(expectedSyntaxPrefix, formatter.getSyntaxPrefix(), "syntax prefix");
+}
+
+@Test
+public void testAccessors_Width() {
+    final HelpFormatter formatter = setupTestAccessors();
+    int expectedWidth = 80;
+    formatter.setWidth(expectedWidth);
+    assertEquals(expectedWidth, formatter.getWidth(), "width");
+}
+
+
+Input#2
+ @Test
+    public void testAutomaticUsage() {
+        final HelpFormatter hf = new HelpFormatter();
+        Options options;
+        String expected = "usage: app [-a]";
+        final ByteArrayOutputStream out = new ByteArrayOutputStream();
+        final PrintWriter pw = new PrintWriter(out);
+
+        options = new Options().addOption("a", false, "aaaa aaaa aaaa aaaa aaaa");
+        hf.printUsage(pw, 60, "app", options);
+        pw.flush();
+        assertEquals(expected, out.toString().trim(), "simple auto usage");
+        out.reset();
+
+        expected = "usage: app [-a] [-b]";
+        options = new Options().addOption("a", false, "aaaa aaaa aaaa aaaa aaaa").addOption("b", false, "bbb");
+        hf.printUsage(pw, 60, "app", options);
+        pw.flush();
+        assertEquals(expected, out.toString().trim(), "simple auto usage");
+        out.reset();
+    }
+Smell List: ['Sensitive_Equality', 'Eager_Test', 'Duplicate_Assert']
+
+Refactor#2
+@Test
+public void testAutomaticUsageWithSingleOption() {
+    final HelpFormatter hf = new HelpFormatter();
+    final ByteArrayOutputStream out = new ByteArrayOutputStream();
+    final PrintWriter pw = new PrintWriter(out);
+
+    Options options = createOptions("a", "aaaa aaaa aaaa aaaa aaaa");
+    hf.printUsage(pw, 60, "app", options);
+    pw.flush();
+
+    String actualValue = out.toString().trim();
+    assertEquals("usage: app [-a]", actualValue, "Expected usage string did not match for single option");
+}
+
+@Test
+public void testAutomaticUsageWithMultipleOptions() {
+    final HelpFormatter hf = new HelpFormatter();
+    final ByteArrayOutputStream out = new ByteArrayOutputStream();
+    final PrintWriter pw = new PrintWriter(out);
+
+    Options options = createOptions(
+        "a", "aaaa aaaa aaaa aaaa aaaa",
+        "b", "bbb"
+    );
+    hf.printUsage(pw, 60, "app", options);
+    pw.flush();
+
+    String actualValue = out.toString().trim();
+    assertEquals("usage: app [-a] [-b]", actualValue, "Expected usage string did not match for multiple options");
+}
+
+private Options createOptions(String... optionsAndDescriptions) {
+    Options options = new Options();
+    for (int i = 0; i < optionsAndDescriptions.length; i += 2) {
+        options.addOption(optionsAndDescriptions[i], false, optionsAndDescriptions[i + 1]);
+    }
+    return options;
+}
+
+Input#3
+@Test
+public void testDefaultArgName() {
+    final Option option = Option.builder("f").hasArg().required(true).build();
+
+    final Options options = new Options();
+    options.addOption(option);
+
+    final StringWriter out = new StringWriter();
+
+    final HelpFormatter formatter = new HelpFormatter();
+    formatter.setArgName("argument");
+    formatter.printUsage(new PrintWriter(out), 80, "app", options);
+
+    assertEquals("usage: app -f <argument>" + EOL, out.toString());
+}
+Smell List: ['Sensitive_Equality', 'Eager_Test']
+
+Refactor#3
+@Test
+public void testDefaultArgName_UsageFormat() {
+    Options options = setupTestDefaultArgNameOptions();
+    String usage = generateUsageMessage(options);
+
+    assertEquals("usage: app -f <argument>" + EOL, usage);
+}
+
+private Options setupTestDefaultArgNameOptions() {
+    final Option option = Option.builder("f").hasArg().required(true).build();
+    final Options options = new Options();
+    options.addOption(option);
+    return options;
+}
+
+private String generateUsageMessage(Options options) {
+    final StringWriter out = new StringWriter();
+    final HelpFormatter formatter = new HelpFormatter();
+    formatter.setArgName("argument");
+    formatter.printUsage(new PrintWriter(out), 80, "app", options);
+    return out.toString();
+}
+
+
+Input#4
+@Test
+public void testFindWrapPos() {
+    final HelpFormatter hf = new HelpFormatter();
+
+    String text = "This is a test.";
+    // text width should be max 8; the wrap position is 7
+    assertEquals(7, hf.findWrapPos(text, 8, 0), "wrap position");
+
+    // starting from 8 must give -1 - the wrap pos is after end
+    assertEquals(-1, hf.findWrapPos(text, 8, 8), "wrap position 2");
+
+    // words longer than the width are cut
+    text = "aaaa aa";
+    assertEquals(3, hf.findWrapPos(text, 3, 0), "wrap position 3");
+
+    // last word length is equal to the width
+    text = "aaaaaa aaaaaa";
+    assertEquals(6, hf.findWrapPos(text, 6, 0), "wrap position 4");
+    assertEquals(-1, hf.findWrapPos(text, 6, 7), "wrap position 4");
+
+    text = "aaaaaa\n aaaaaa";
+    assertEquals(7, hf.findWrapPos(text, 6, 0), "wrap position 5");
+
+    text = "aaaaaa\t aaaaaa";
+    assertEquals(7, hf.findWrapPos(text, 6, 0), "wrap position 6");
+}
+Smell List: ['Eager_Test', 'Duplicate_Assert', 'Magic_Number_Test']
+
+Refactor#4
+private static final int MAX_WIDTH = 8;
+private static final int START_POSITION = 0;
+
+@ParameterizedTest
+@CsvSource({
+    "'This is a test.', 8, 0, 7",
+    "'This is a test.', 8, 8, -1",
+    "'aaaa aa', 3, 0, 3",
+    "'aaaaaa aaaaaa', 6, 0, 6",
+    "'aaaaaa aaaaaa', 6, 7, -1",
+    "'aaaaaa\n aaaaaa', 6, 0, 7",
+    "'aaaaaa\t aaaaaa', 6, 0, 7"
+})
+public void testFindWrapPos(String text, int width, int start, int expected) {
+    assertEquals(expected, hf.findWrapPos(text, width, start), "wrap position");
+}
+
+Input#5
+@Test
+    public void testHeaderStartingWithLineSeparator0() {
+        // related to Bugzilla #21215
+        final Options options = new Options();
+        final HelpFormatter formatter = new HelpFormatter();
+        final String header = EOL + "Header";
+        final String footer = "Footer";
+        final StringWriter out = new StringWriter();
+        formatter.printHelp(new PrintWriter(out), 80, "foobar", header, options, 2, 2, footer, true);
+        //@formatter:off
+        assertEquals(
+                "usage: foobar" + EOL +
+                EOL +
+                "Header" + EOL +
+                EOL +
+                "Footer" + EOL,
+                out.toString());
+        //@formatter:on
+    }
+Smell List: ['Sensitive_Equality']
+
+Refactor#5
+@Test
+public void testHeaderStartingWithLineSeparator0() {
+    // related to Bugzilla #21215
+    final Options options = new Options();
+    final HelpFormatter formatter = new HelpFormatter();
+    final String header = EOL + "Header";
+    final String footer = "Footer";
+    final StringWriter out = new StringWriter();
+    formatter.printHelp(new PrintWriter(out), 80, "foobar", header, options, 2, 2, footer, true);
+    //@formatter:off
+    String expectedOutput = "usage: foobar" + EOL +
+                            EOL +
+                            "Header" + EOL +
+                            EOL +
+                            "Footer" + EOL;
+    String actualOutput = out.toString();
+    assertEquals(expectedOutput, actualOutput);
+    //@formatter:on
+}
+
+Input#6
+
+
+Refactor#6
+
+
+Input#7
+@Test
+    public void testHelpWithLongOptSeparator() {
+        final Options options = new Options();
+        options.addOption("f", true, "the file");
+        options.addOption(Option.builder("s").longOpt("size").desc("the size").hasArg().argName("SIZE").build());
+        options.addOption(Option.builder().longOpt("age").desc("the age").hasArg().build());
+
+        final HelpFormatter formatter = new HelpFormatter();
+        assertEquals(HelpFormatter.DEFAULT_LONG_OPT_SEPARATOR, formatter.getLongOptSeparator());
+        formatter.setLongOptSeparator("=");
+        assertEquals("=", formatter.getLongOptSeparator());
+
+        final StringWriter out = new StringWriter();
+
+        formatter.printHelp(new PrintWriter(out), 80, "create", "header", options, 2, 2, "footer");
+
+        //@formatter:off
+        assertEquals(
+                "usage: create" + EOL +
+                "header" + EOL +
+                "     --age=<arg>    the age" + EOL +
+                "  -f <arg>          the file" + EOL +
+                "  -s,--size=<SIZE>  the size" + EOL +
+                "footer" + EOL,
+                out.toString());
+        //@formatter:on
+    }
+Smell List: ['Assertion_Roulette', 'Sensitive_Equality', 'Eager_Test']
+
+Refactor#7
+@Test
+public void testHelpWithLongOptSeparator_DefaultSeparator() {
+    final HelpFormatter formatter = new HelpFormatter();
+    String defaultSeparator = formatter.getLongOptSeparator();
+    assertEquals(HelpFormatter.DEFAULT_LONG_OPT_SEPARATOR, defaultSeparator, "Default long option separator should be '--'");
+}
+
+@Test
+public void testHelpWithLongOptSeparator_SetSeparator() {
+    final HelpFormatter formatter = new HelpFormatter();
+    formatter.setLongOptSeparator("=");
+    String separator = formatter.getLongOptSeparator();
+    assertEquals("=", separator, "Long option separator should be set to '='");
+}
+
+@Test
+public void testHelpWithLongOptSeparator_PrintHelp() {
+    final Options options = setupTestHelpWithLongOptSeparatorOptions();
+    String usage = generateHelpUsage(options);
+
+    //@formatter:off
+    assertEquals("usage: create" + EOL +
+                    "header" + EOL +
+                    "     --age=<arg>    the age" + EOL +
+                    "  -f <arg>          the file" + EOL +
+                    "  -s,--size=<SIZE>  the size" + EOL +
+                    "footer" + EOL,
+            usage, "The help output should match the expected format with long option separators");
+    //@formatter:on
+}
+
+private Options setupTestHelpWithLongOptSeparatorOptions() {
+    final Options options = new Options();
+    options.addOption("f", true, "the file");
+    options.addOption(Option.builder("s").longOpt("size").desc("the size").hasArg().argName("SIZE").build());
+    options.addOption(Option.builder().longOpt("age").desc("the age").hasArg().build());
+    return options;
+}
+
+private String generateHelpUsage(Options options) {
+    final StringWriter out = new StringWriter();
+    final HelpFormatter formatter = new HelpFormatter();
+    formatter.setLongOptSeparator("=");
+    formatter.printHelp(new PrintWriter(out), 80, "create", "header", options, 2, 2, "footer");
+    return out.toString();
+}
+
+
+Input#8
+@Test
+    public void testIndentedHeaderAndFooter() {
+        // related to CLI-207
+        final Options options = new Options();
+        final HelpFormatter formatter = new HelpFormatter();
+        final String header = "  Header1\n  Header2";
+        final String footer = "  Footer1\n  Footer2";
+        final StringWriter out = new StringWriter();
+        formatter.printHelp(new PrintWriter(out), 80, "foobar", header, options, 2, 2, footer, true);
+        //@formatter:off
+        assertEquals(
+                "usage: foobar" + EOL +
+                "  Header1" + EOL +
+                "  Header2" + EOL +
+                "" + EOL +
+                "  Footer1" + EOL +
+                "  Footer2" + EOL,
+                out.toString());
+        //@formatter:on
+    }
+Smell List: []
+Refactor#8
+@Test
+public void testIndentedHeaderAndFooter() {
+    // related to CLI-207
+    final Options options = new Options();
+    final HelpFormatter formatter = new HelpFormatter();
+    final String header = "  Header1\n  Header2";
+    final String footer = "  Footer1\n  Footer2";
+    final StringWriter out = new StringWriter();
+    formatter.printHelp(new PrintWriter(out), 80, "foobar", header, options, 2, 2, footer, true);
+    //@formatter:off
+    String expectedOutput =
+            "usage: foobar" + EOL +
+            "  Header1" + EOL +
+            "  Header2" + EOL +
+            "" + EOL +
+            "  Footer1" + EOL +
+            "  Footer2" + EOL;
+    String actualOutput = out.toString();
+    assertEquals(expectedOutput, actualOutput);
+    //@formatter:on
+}
+
+
+Input#9
+@Test
+    public void testOptionWithoutShortFormat() {
+        // related to Bugzilla #19383 (CLI-67)
+        final Options options = new Options();
+        options.addOption(new Option("a", "aaa", false, "aaaaaaa"));
+        options.addOption(new Option(null, "bbb", false, "bbbbbbb"));
+        options.addOption(new Option("c", null, false, "ccccccc"));
+
+        final HelpFormatter formatter = new HelpFormatter();
+        final StringWriter out = new StringWriter();
+        formatter.printHelp(new PrintWriter(out), 80, "foobar", "", options, 2, 2, "", true);
+        //@formatter:off
+        assertEquals(
+                "usage: foobar [-a] [--bbb] [-c]" + EOL +
+                "  -a,--aaa  aaaaaaa" + EOL +
+                "     --bbb  bbbbbbb" + EOL +
+                "  -c        ccccccc" + EOL,
+                out.toString());
+        //@formatter:on
+    }
+Smell List: ['Sensitive_Equality']
+
+Refactor#9
+@Test
+public void testOptionWithoutShortFormat() {
+    // related to Bugzilla #19383 (CLI-67)
+    final Options options = new Options();
+    options.addOption(new Option("a", "aaa", false, "aaaaaaa"));
+    options.addOption(new Option(null, "bbb", false, "bbbbbbb"));
+    options.addOption(new Option("c", null, false, "ccccccc"));
+
+    final HelpFormatter formatter = new HelpFormatter();
+    final StringWriter out = new StringWriter();
+    formatter.printHelp(new PrintWriter(out), 80, "foobar", "", options, 2, 2, "", true);
+
+    // Extract the value returned by toString() into a separate variable for comparison
+    String actualOutput = out.toString();
+
+    //@formatter:off
+    assertEquals(
+            "usage: foobar [-a] [--bbb] [-c]" + EOL +
+            "  -a,--aaa  aaaaaaa" + EOL +
+            "     --bbb  bbbbbbb" + EOL +
+            "  -c        ccccccc" + EOL,
+            actualOutput);
+    //@formatter:on
+}
+
+
+
+Input#10
+@Test
+    public void testOptionWithoutShortFormat2() {
+        // related to Bugzilla #27635 (CLI-26)
+        final Option help = new Option("h", "help", false, "print this message");
+        final Option version = new Option("v", "version", false, "print version information");
+        final Option newRun = new Option("n", "new", false, "Create NLT cache entries only for new items");
+        final Option trackerRun = new Option("t", "tracker", false, "Create NLT cache entries only for tracker items");
+        //@formatter:off
+        final Option timeLimit = Option.builder("l")
+                .longOpt("limit")
+                .hasArg()
+                .valueSeparator()
+                .desc("Set time limit for execution, in mintues")
+                .build();
+        final Option age = Option.builder("a").longOpt("age")
+                .hasArg()
+                .valueSeparator()
+                .desc("Age (in days) of cache item before being recomputed")
+                .build();
+        final Option server = Option.builder("s").longOpt("server")
+                .hasArg()
+                .valueSeparator()
+                .desc("The NLT server address")
+                .build();
+        final Option numResults = Option.builder("r").longOpt("results")
+                .hasArg()
+                .valueSeparator()
+                .desc("Number of results per item")
+                .build();
+        final Option configFile = Option.builder().longOpt("config")
+                .hasArg()
+                .valueSeparator()
+                .desc("Use the specified configuration file")
+                .build();
+        //@formatter:on
+
+        final Options mOptions = new Options();
+        mOptions.addOption(help);
+        mOptions.addOption(version);
+        mOptions.addOption(newRun);
+        mOptions.addOption(trackerRun);
+        mOptions.addOption(timeLimit);
+        mOptions.addOption(age);
+        mOptions.addOption(server);
+        mOptions.addOption(numResults);
+        mOptions.addOption(configFile);
+
+        final HelpFormatter formatter = new HelpFormatter();
+        final String eol = System.lineSeparator();
+        final StringWriter out = new StringWriter();
+        formatter.printHelp(new PrintWriter(out), 80, "commandline", "header", mOptions, 2, 2, "footer", true);
+        //@formatter:off
+        assertEquals(
+                "usage: commandline [-a <arg>] [--config <arg>] [-h] [-l <arg>] [-n] [-r <arg>]" + eol +
+                        "       [-s <arg>] [-t] [-v]" + eol +
+                        "header" + eol +
+                        "  -a,--age <arg>      Age (in days) of cache item before being recomputed" + eol +
+                        "     --config <arg>   Use the specified configuration file" + eol +
+                        "  -h,--help           print this message" + eol +
+                        "  -l,--limit <arg>    Set time limit for execution, in mintues" + eol +
+                        "  -n,--new            Create NLT cache entries only for new items" + eol +
+                        "  -r,--results <arg>  Number of results per item" + eol +
+                        "  -s,--server <arg>   The NLT server address" + eol +
+                        "  -t,--tracker        Create NLT cache entries only for tracker items" + eol +
+                        "  -v,--version        print version information" + eol +
+                        "footer" + eol,
+                out.toString());
+        //@formatter:on
+    }
+Smell List: ['Sensitive_Equality', 'Eager_Test']
+
+Refactor#10
+@Test
+public void testOptionWithoutShortFormat2() {
+    // related to Bugzilla #27635 (CLI-26)
+    final Option help = new Option("h", "help", false, "print this message");
+    final Option version = new Option("v", "version", false, "print version information");
+    final Option newRun = new Option("n", "new", false, "Create NLT cache entries only for new items");
+    final Option trackerRun = new Option("t", "tracker", false, "Create NLT cache entries only for tracker items");
+    //@formatter:off
+    final Option timeLimit = Option.builder("l")
+            .longOpt("limit")
+            .hasArg()
+            .valueSeparator()
+            .desc("Set time limit for execution, in minutes")
+            .build();
+    final Option age = Option.builder("a").longOpt("age")
+            .hasArg()
+            .valueSeparator()
+            .desc("Age (in days) of cache item before being recomputed")
+            .build();
+    final Option server = Option.builder("s").longOpt("server")
+            .hasArg()
+            .valueSeparator()
+            .desc("The NLT server address")
+            .build();
+    final Option numResults = Option.builder("r").longOpt("results")
+            .hasArg()
+            .valueSeparator()
+            .desc("Number of results per item")
+            .build();
+    final Option configFile = Option.builder().longOpt("config")
+            .hasArg()
+            .valueSeparator()
+            .desc("Use the specified configuration file")
+            .build();
+    //@formatter:on
+
+    final Options mOptions = new Options();
+    mOptions.addOption(help);
+    mOptions.addOption(version);
+    mOptions.addOption(newRun);
+    mOptions.addOption(trackerRun);
+    mOptions.addOption(timeLimit);
+    mOptions.addOption(age);
+    mOptions.addOption(server);
+    mOptions.addOption(numResults);
+    mOptions.addOption(configFile);
+
+    final HelpFormatter formatter = new HelpFormatter();
+    final String eol = System.lineSeparator();
+    final StringWriter out = new StringWriter();
+    formatter.printHelp(new PrintWriter(out), 80, "commandline", "header", mOptions, 2, 2, "footer", true);
+
+    String expectedOutput = "usage: commandline [-a <arg>] [--config <arg>] [-h] [-l <arg>] [-n] [-r <arg>]" + eol +
+            "       [-s <arg>] [-t] [-v]" + eol +
+            "header" + eol +
+            "  -a,--age <arg>      Age (in days) of cache item before being recomputed" + eol +
+            "     --config <arg>   Use the specified configuration file" + eol +
+            "  -h,--help           print this message" + eol +
+            "  -l,--limit <arg>    Set time limit for execution, in minutes" + eol +
+            "  -n,--new            Create NLT cache entries only for new items" + eol +
+            "  -r,--results <arg>  Number of results per item" + eol +
+            "  -s,--server <arg>   The NLT server address" + eol +
+            "  -t,--tracker        Create NLT cache entries only for tracker items" + eol +
+            "  -v,--version        print version information" + eol +
+            "footer" + eol;
+
+    String actualOutput = out.toString();
+    assertEquals(expectedOutput, actualOutput);
+}
+
+
+Input#11
+
+Refactor#11
+
+Input#12
+@Test
+    public void testPrintHelpNewlineFooter() {
+        final HelpFormatter formatter = new HelpFormatter();
+        final ByteArrayOutputStream out = new ByteArrayOutputStream();
+        final PrintWriter pw = new PrintWriter(out);
+
+        final Options options = new Options();
+        options.addOption("a", "b");
+
+        formatter.printHelp(
+            pw,
+            80,
+            "test" + EOL,
+            "header" + EOL,
+            options,
+            0,
+            0,
+            EOL
+        );
+        final String expected = "usage: test" + EOL +
+                          "header" + EOL +
+                          "-ab" + EOL +
+                          EOL;
+        pw.flush();
+        assertEquals(expected, out.toString(), "footer newline");
+    }
+Smell List: ['Sensitive_Equality']
+
+Refactor#12
+@Test
+public void testPrintHelpNewlineFooter() {
+    final HelpFormatter formatter = new HelpFormatter();
+    final ByteArrayOutputStream out = new ByteArrayOutputStream();
+    final PrintWriter pw = new PrintWriter(out);
+
+    final Options options = new Options();
+    options.addOption("a", "b");
+
+    formatter.printHelp(
+        pw,
+        80,
+        "test" + EOL,
+        "header" + EOL,
+        options,
+        0,
+        0,
+        EOL
+    );
+    final String expected = "usage: test" + EOL +
+                      "header" + EOL +
+                      "-ab" + EOL +
+                      EOL;
+    pw.flush();
+    String actualValue = out.toString();
+    assertEquals(expected, actualValue, "footer newline");
+}
+
+Input#13
+@Test
+    public void testPrintHelpNewlineHeader() {
+        final HelpFormatter formatter = new HelpFormatter();
+        final ByteArrayOutputStream out = new ByteArrayOutputStream();
+        final PrintWriter pw = new PrintWriter(out);
+
+        final Options options = new Options();
+        options.addOption("a", "b");
+
+        formatter.printHelp(
+            pw,
+            80,
+            "test" + EOL,
+            EOL,
+            options,
+            0,
+            0,
+            "footer" + EOL
+        );
+        final String expected = "usage: test" + EOL +
+                          EOL +
+                          "-ab" + EOL +
+                          "footer" + EOL;
+        pw.flush();
+        assertEquals(expected, out.toString(), "header newline");
+    }
+Smell List: ['Sensitive_Equality']
+
+Refactor#13
+@Test
+public void testPrintHelpNewlineHeader() {
+    final HelpFormatter formatter = new HelpFormatter();
+    final ByteArrayOutputStream out = new ByteArrayOutputStream();
+    final PrintWriter pw = new PrintWriter(out);
+
+    final Options options = new Options();
+    options.addOption("a", "b");
+
+    formatter.printHelp(
+        pw,
+        80,
+        "test" + EOL,
+        EOL,
+        options,
+        0,
+        0,
+        "footer" + EOL
+    );
+    final String expected = "usage: test" + EOL +
+                      EOL +
+                      "-ab" + EOL +
+                      "footer" + EOL;
+    pw.flush();
+    String actualValue = out.toString();
+    assertEquals(expected, actualValue, "header newline");
+}
+
+
+Input#14
+@Test
+    public void testPrintHelpWithEmptySyntax() {
+        final HelpFormatter formatter = new HelpFormatter();
+        assertThrows(IllegalArgumentException.class, () -> formatter.printHelp(null, new Options()), "null command line syntax should be rejected");
+        assertThrows(IllegalArgumentException.class, () -> formatter.printHelp(null, new Options(), true), "null command line syntax should be rejected");
+        assertThrows(IllegalArgumentException.class, () -> formatter.printHelp(null, new Options(), false), "null command line syntax should be rejected");
+        assertThrows(IllegalArgumentException.class, () -> formatter.printHelp("", new Options(), true), "null command line syntax should be rejected");
+        assertThrows(IllegalArgumentException.class, () -> formatter.printHelp("", new Options(), false), "null command line syntax should be rejected");
+    }
+Smell List: ['Eager_Test']
+
+Refactor#14
+private void setupTestPrintHelpWithEmptySyntax() {
+    final HelpFormatter formatter = new HelpFormatter();
+}
+
+@Test
+public void testPrintHelpWithNullSyntax() {
+    setupTestPrintHelpWithEmptySyntax();
+    assertThrows(IllegalArgumentException.class, () -> new HelpFormatter().printHelp(null, new Options()), "null command line syntax should be rejected");
+    assertThrows(IllegalArgumentException.class, () -> new HelpFormatter().printHelp(null, new Options(), true), "null command line syntax should be rejected");
+    assertThrows(IllegalArgumentException.class, () -> new HelpFormatter().printHelp(null, new Options(), false), "null command line syntax should be rejected");
+}
+
+@Test
+public void testPrintHelpWithEmptyStringSyntax() {
+    setupTestPrintHelpWithEmptySyntax();
+    assertThrows(IllegalArgumentException.class, () -> new HelpFormatter().printHelp("", new Options(), true), "empty string command line syntax should be rejected");
+    assertThrows(IllegalArgumentException.class, () -> new HelpFormatter().printHelp("", new Options(), false), "empty string command line syntax should be rejected");
+}
+
+Input#15
+@Test
+    public void testPrintHelpWithSince() {
+        final String [] expected = {"usage: Command syntax", "Header", "Options            Since   Description",
+                "  -n,--no-since    -          Description for n", "  -W,--with-since  1.19.0     Descripton for W", "footer"};
+        final Options options = new Options()
+                .addOption(Option.builder("W").longOpt("with-since").since("1.19.0").desc("Descripton for W").build())
+                .addOption(Option.builder("n").longOpt("no-since").desc("Description for n").build());
+
+        final HelpFormatter formatter = HelpFormatter.builder().setShowSince(true).get();
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try (PrintWriter pw = new PrintWriter(new OutputStreamWriter(baos))) {
+            formatter.printHelp(pw, 80, "Command syntax", "Header", options, 2, 5, "footer", false);
+        }
+        assertArrayEquals(expected, baos.toString().split(System.lineSeparator()));
+    }
+Smell List: ['Sensitive_Equality', 'Eager_Test']
+
+Refactor#15
+private void setupTestPrintHelpWithSince() {
+    final Options options = new Options()
+            .addOption(Option.builder("W").longOpt("with-since").since("1.19.0").desc("Descripton for W").build())
+            .addOption(Option.builder("n").longOpt("no-since").desc("Description for n").build());
+
+    final HelpFormatter formatter = HelpFormatter.builder().setShowSince(true).get();
+    this.options = options;
+    this.formatter = formatter;
+}
+
+@Test
+public void testPrintHelpWithSince_UsageAndHeader() {
+    setupTestPrintHelpWithSince();
+    final String[] expected = {"usage: Command syntax", "Header"};
+    final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try (PrintWriter pw = new PrintWriter(new OutputStreamWriter(baos))) {
+        formatter.printHelp(pw, 80, "Command syntax", "Header", options, 2, 5, "footer", false);
+    }
+    String actualOutput = baos.toString();
+    String[] actualLines = actualOutput.split(System.lineSeparator());
+    assertArrayEquals(expected, Arrays.copyOf(actualLines, 2));
+}
+
+@Test
+public void testPrintHelpWithSince_Options() {
+    setupTestPrintHelpWithSince();
+    final String[] expected = {"Options            Since   Description",
+            "  -n,--no-since    -          Description for n",
+            "  -W,--with-since  1.19.0     Descripton for W"};
+    final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try (PrintWriter pw = new PrintWriter(new OutputStreamWriter(baos))) {
+        formatter.printHelp(pw, 80, "Command syntax", "Header", options, 2, 5, "footer", false);
+    }
+    String actualOutput = baos.toString();
+    String[] actualLines = actualOutput.split(System.lineSeparator());
+    assertArrayEquals(expected, Arrays.copyOfRange(actualLines, 2, 5));
+}
+
+@Test
+public void testPrintHelpWithSince_Footer() {
+    setupTestPrintHelpWithSince();
+    final String[] expected = {"footer"};
+    final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    try (PrintWriter pw = new PrintWriter(new OutputStreamWriter(baos))) {
+        formatter.printHelp(pw, 80, "Command syntax", "Header", options, 2, 5, "footer", false);
+    }
+    String actualOutput = baos.toString();
+    String[] actualLines = actualOutput.split(System.lineSeparator());
+    assertArrayEquals(expected, Arrays.copyOfRange(actualLines, 5, 6));
+}
+
+Input#16
+@Test
+    public void testPrintOptionGroupUsage() {
+        final OptionGroup group = new OptionGroup();
+        group.addOption(Option.builder("a").build());
+        group.addOption(Option.builder("b").build());
+        group.addOption(Option.builder("c").build());
+
+        final Options options = new Options();
+        options.addOptionGroup(group);
+
+        final StringWriter out = new StringWriter();
+
+        final HelpFormatter formatter = new HelpFormatter();
+        formatter.printUsage(new PrintWriter(out), 80, "app", options);
+
+        assertEquals("usage: app [-a | -b | -c]" + EOL, out.toString());
+    }
+Smell List: ['Sensitive_Equality']
+
+Refactor#16
+@Test
+public void testPrintOptionGroupUsage() {
+    final OptionGroup group = new OptionGroup();
+    group.addOption(Option.builder("a").build());
+    group.addOption(Option.builder("b").build());
+    group.addOption(Option.builder("c").build());
+
+    final Options options = new Options();
+    options.addOptionGroup(group);
+
+    final StringWriter out = new StringWriter();
+
+    final HelpFormatter formatter = new HelpFormatter();
+    formatter.printUsage(new PrintWriter(out), 80, "app", options);
+
+    String expectedUsage = "usage: app [-a | -b | -c]" + EOL;
+    String actualUsage = out.toString();
+    assertEquals(expectedUsage, actualUsage);
+}
+
+
+
+Input#17
+
+Refactor#17
+
+
+Input#18
+@Test
+    public void testPrintOptionWithEmptyArgNameUsage() {
+        final Option option = new Option("f", true, null);
+        option.setArgName("");
+        option.setRequired(true);
+
+        final Options options = new Options();
+        options.addOption(option);
+
+        final StringWriter out = new StringWriter();
+
+        final HelpFormatter formatter = new HelpFormatter();
+        formatter.printUsage(new PrintWriter(out), 80, "app", options);
+
+        assertEquals("usage: app -f" + EOL, out.toString());
+    }
+Smell List: ['Sensitive_Equality', 'Eager_Test']
+
+Refactor#18
+private void setupTestPrintOptionWithEmptyArgNameUsage() {
+    final Option option = new Option("f", true, null);
+    option.setArgName("");
+    option.setRequired(true);
+
+    final Options options = new Options();
+    options.addOption(option);
+
+    final StringWriter out = new StringWriter();
+
+    final HelpFormatter formatter = new HelpFormatter();
+    formatter.printUsage(new PrintWriter(out), 80, "app", options);
+}
+
+@Test
+public void testPrintOptionWithEmptyArgNameUsage_UsageOutput() {
+    setupTestPrintOptionWithEmptyArgNameUsage();
+
+    String expectedOutput = "usage: app -f" + EOL;
+    String actualOutput = out.toString();
+    assertEquals(expectedOutput, actualOutput);
+}
+
+
+
+Input#19
+ @Test
+    public void testPrintRequiredOptionGroupUsage() {
+        final OptionGroup group = new OptionGroup();
+        group.addOption(Option.builder("a").build());
+        group.addOption(Option.builder("b").build());
+        group.addOption(Option.builder("c").build());
+        group.setRequired(true);
+
+        final Options options = new Options();
+        options.addOptionGroup(group);
+
+        final StringWriter out = new StringWriter();
+
+        final HelpFormatter formatter = new HelpFormatter();
+        formatter.printUsage(new PrintWriter(out), 80, "app", options);
+
+        assertEquals("usage: app -a | -b | -c" + EOL, out.toString());
+    }
+Smell List: ['Sensitive_Equality']
+
+
+Refactor#19
+@Test
+public void testPrintRequiredOptionGroupUsage() {
+    final OptionGroup group = new OptionGroup();
+    group.addOption(Option.builder("a").build());
+    group.addOption(Option.builder("b").build());
+    group.addOption(Option.builder("c").build());
+    group.setRequired(true);
+
+    final Options options = new Options();
+    options.addOptionGroup(group);
+
+    final StringWriter out = new StringWriter();
+
+    final HelpFormatter formatter = new HelpFormatter();
+    formatter.printUsage(new PrintWriter(out), 80, "app", options);
+
+    String expectedUsage = "usage: app -a | -b | -c" + System.lineSeparator();
+    String actualUsage = out.toString();
+    assertEquals(expectedUsage, actualUsage);
+}
+
+
+
+
+Input#20
+ @Test
+    public void testPrintSortedUsage() {
+        final Options opts = new Options();
+        opts.addOption(new Option("a", "first"));
+        opts.addOption(new Option("b", "second"));
+        opts.addOption(new Option("c", "third"));
+
+        final HelpFormatter helpFormatter = new HelpFormatter();
+        helpFormatter.setOptionComparator((opt1, opt2) -> opt2.getKey().compareToIgnoreCase(opt1.getKey()));
+
+        final StringWriter out = new StringWriter();
+        helpFormatter.printUsage(new PrintWriter(out), 80, "app", opts);
+
+        assertEquals("usage: app [-c] [-b] [-a]" + EOL, out.toString());
+    }
+Smell List: ['Sensitive_Equality', 'Eager_Test']
+
+
+Refactor#20
+
+private void setupTestPrintSortedUsage() {
+    final Options opts = new Options();
+    opts.addOption(new Option("a", "first"));
+    opts.addOption(new Option("b", "second"));
+    opts.addOption(new Option("c", "third"));
+
+    final HelpFormatter helpFormatter = new HelpFormatter();
+    helpFormatter.setOptionComparator((opt1, opt2) -> opt2.getKey().compareToIgnoreCase(opt1.getKey()));
+
+    out = new StringWriter();
+    helpFormatter.printUsage(new PrintWriter(out), 80, "app", opts);
+}
+
+@Test
+public void testPrintSortedUsage_Output() {
+    setupTestPrintSortedUsage();
+
+    String expectedOutput = "usage: app [-c] [-b] [-a]" + System.lineSeparator();
+    String actualOutput = out.toString();
+    assertEquals(expectedOutput, actualOutput);
+}
+
+
+Input#21
+@Test
+    public void testPrintSortedUsageWithNullComparator() {
+        final Options opts = new Options();
+        opts.addOption(new Option("c", "first"));
+        opts.addOption(new Option("b", "second"));
+        opts.addOption(new Option("a", "third"));
+
+        final HelpFormatter helpFormatter = new HelpFormatter();
+        helpFormatter.setOptionComparator(null);
+
+        final StringWriter out = new StringWriter();
+        helpFormatter.printUsage(new PrintWriter(out), 80, "app", opts);
+
+        assertEquals("usage: app [-c] [-b] [-a]" + EOL, out.toString());
+    }
+Smell List: ['Sensitive_Equality', 'Eager_Test']
+
+Refactor#21
+
+private void setupTestPrintSortedUsageWithNullComparator() {
+    final Options opts = new Options();
+    opts.addOption(new Option("c", "first"));
+    opts.addOption(new Option("b", "second"));
+    opts.addOption(new Option("a", "third"));
+
+    final HelpFormatter helpFormatter = new HelpFormatter();
+    helpFormatter.setOptionComparator(null);
+
+    out = new StringWriter();
+    helpFormatter.printUsage(new PrintWriter(out), 80, "app", opts);
+}
+
+@Test
+public void testPrintSortedUsageWithNullComparator_Output() {
+    setupTestPrintSortedUsageWithNullComparator();
+
+    String expectedOutput = "usage: app [-c] [-b] [-a]" + EOL;
+    String actualOutput = out.toString();
+
+    assertEquals(expectedOutput, actualOutput);
+}
+
+Input#22
+@Test
+    public void testPrintUsage() {
+        final Option optionA = new Option("a", "first");
+        final Option optionB = new Option("b", "second");
+        final Option optionC = new Option("c", "third");
+        final Options opts = new Options();
+        opts.addOption(optionA);
+        opts.addOption(optionB);
+        opts.addOption(optionC);
+        final HelpFormatter helpFormatter = new HelpFormatter();
+        final ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
+        try (PrintWriter printWriter = new PrintWriter(bytesOut)) {
+            helpFormatter.printUsage(printWriter, 80, "app", opts);
+        }
+        assertEquals("usage: app [-a] [-b] [-c]" + EOL, bytesOut.toString());
+    }
+Smell List: ['Sensitive_Equality']
+
+Refactor#22
+
+@Test
+public void testPrintUsage() {
+    final Option optionA = new Option("a", "first");
+    final Option optionB = new Option("b", "second");
+    final Option optionC = new Option("c", "third");
+    final Options opts = new Options();
+    opts.addOption(optionA);
+    opts.addOption(optionB);
+    opts.addOption(optionC);
+    final HelpFormatter helpFormatter = new HelpFormatter();
+    final ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
+    try (PrintWriter printWriter = new PrintWriter(bytesOut)) {
+        helpFormatter.printUsage(printWriter, 80, "app", opts);
+    }
+    String expectedOutput = "usage: app [-a] [-b] [-c]" + EOL;
+    String actualOutput = bytesOut.toString();
+    assertEquals(expectedOutput, actualOutput);
+}
+
+
+Input#23
+@Test
+    public void testRenderSince() throws IOException {
+        final String[] expected = {"Options            Since   Description", "  -n,--no-since    -          Description for n",
+            "  -W,--with-since  1.19.0     Descripton for W"};
+        final Options options = new Options()
+                .addOption(Option.builder("W").longOpt("with-since").since("1.19.0").desc("Descripton for W").build())
+                .addOption(Option.builder("n").longOpt("no-since").desc("Description for n").build());
+        final HelpFormatter formatter = HelpFormatter.builder().setShowSince(true).get();
+
+        final StringBuffer sb = new StringBuffer();
+        formatter.renderOptions(sb, 50, options, 2, 5);
+        assertArrayEquals(expected, sb.toString().split(System.lineSeparator()));
+        // check internal exception handling for coverage
+        final HelpFormatter spy = spy(formatter);
+        when(spy.appendOptions(sb, 50, options, 2, 5)).thenThrow(IOException.class);
+        assertThrows(UncheckedIOException.class, () -> spy.renderOptions(sb, 50, options, 2, 5));
+    }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing', 'Sensitive_Equality', 'Eager_Test']
+
+Refactor#23
+@Test
+public void testRenderSince() {
+    final String[] expected = {"Options            Since   Description", "  -n,--no-since    -          Description for n",
+        "  -W,--with-since  1.19.0     Descripton for W"};
+    final Options options = new Options()
+            .addOption(Option.builder("W").longOpt("with-since").since("1.19.0").desc("Descripton for W").build())
+            .addOption(Option.builder("n").longOpt("no-since").desc("Description for n").build());
+    final HelpFormatter formatter = HelpFormatter.builder().setShowSince(true).get();
+
+    final StringBuffer sb = new StringBuffer();
+    formatter.renderOptions(sb, 50, options, 2, 5);
+    String[] actual = sb.toString().split(System.lineSeparator());
+    assertArrayEquals(expected, actual, "Rendered options do not match expected output");
+
+    // Check internal exception handling for coverage
+    testInternalExceptionHandling(formatter, sb, options);
+}
+
+private void testInternalExceptionHandling(HelpFormatter formatter, StringBuffer sb, Options options) {
+    final HelpFormatter spy = spy(formatter);
+    try {
+        when(spy.appendOptions(sb, 50, options, 2, 5)).thenThrow(IOException.class);
+    } catch (IOException e) {
+        throw new RuntimeException(e);
+    }
+    assertThrows(UncheckedIOException.class, () -> spy.renderOptions(sb, 50, options, 2, 5), "Expected UncheckedIOException to be thrown");
+}
+
+Input#24
+@Test
+    public void testRenderWrappedTextMultiLine() {
+        // multi line text
+        final int width = 16;
+        final int padding = 0;
+        //@formatter:off
+        final String expected = "aaaa aaaa aaaa" + EOL +
+                                "aaaaaa" + EOL +
+                                "aaaaa";
+        //@formatter:on
+
+        final StringBuffer sb = new StringBuffer();
+        new HelpFormatter().renderWrappedText(sb, width, padding, expected);
+        assertEquals(expected, sb.toString(), "multi line text");
+    }
+Smell List: ['Sensitive_Equality']
+
+Refactor#24
+
+@Test
+public void testRenderWrappedTextMultiLine() {
+    // multi line text
+    final int width = 16;
+    final int padding = 0;
+    //@formatter:off
+    final String expected = "aaaa aaaa aaaa" + EOL +
+                            "aaaaaa" + EOL +
+                            "aaaaa";
+    //@formatter:on
+
+    final StringBuffer sb = new StringBuffer();
+    new HelpFormatter().renderWrappedText(sb, width, padding, expected);
+
+    String actualValue = sb.toString();
+    assertEquals(expected, actualValue, "multi line text");
+}
+
+Input#25
+@Test
+    public void testRenderWrappedTextMultiLinePadded() {
+        // multi-line padded text
+        final int width = 16;
+        final int padding = 4;
+        //@formatter:off
+        final String text = "aaaa aaaa aaaa" + EOL +
+                      "aaaaaa" + EOL +
+                      "aaaaa";
+        final String expected = "aaaa aaaa aaaa" + EOL +
+                          "    aaaaaa" + EOL +
+                          "    aaaaa";
+        //@formatter:on
+
+        final StringBuffer sb = new StringBuffer();
+        new HelpFormatter().renderWrappedText(sb, width, padding, text);
+        assertEquals(expected, sb.toString(), "multi-line padded text");
+    }
+Smell List: ['Sensitive_Equality']
+
+Refactor#25
+
+@Test
+public void testRenderWrappedTextMultiLinePadded() {
+    // multi-line padded text
+    final int width = 16;
+    final int padding = 4;
+    //@formatter:off
+    final String text = "aaaa aaaa aaaa" + EOL +
+                  "aaaaaa" + EOL +
+                  "aaaaa";
+    final String expected = "aaaa aaaa aaaa" + EOL +
+                        "    aaaaaa" + EOL +
+                        "    aaaaa";
+    //@formatter:on
+
+    final StringBuffer sb = new StringBuffer();
+    new HelpFormatter().renderWrappedText(sb, width, padding, text);
+    String actualValue = sb.toString();
+    assertEquals(expected, actualValue, "multi-line padded text");
+}
+
+
+
+Input#26
+@Test
+    public void testRenderWrappedTextSingleLine() throws IOException {
+        // single line text
+        final int width = 12;
+        final int padding = 0;
+        final String text = "This is a test.";
+        final String expected = "This is a" + EOL + "test.";
+
+        final StringBuffer sb = new StringBuffer();
+        new HelpFormatter().renderWrappedText(sb, width, padding, text);
+        assertEquals(expected, sb.toString(), "single line text");
+        // check internal exception handling for coverage
+        final HelpFormatter spy = spy(new HelpFormatter());
+        when(spy.appendWrappedText(sb, width, padding, text)).thenThrow(IOException.class);
+        assertThrows(UncheckedIOException.class, () -> spy.renderWrappedText(sb, width, padding, text));
+
+    }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing', 'Sensitive_Equality', 'Eager_Test']
+
+Refactor#26
+
+@Test
+public void testRenderWrappedTextSingleLine_TextRendering() {
+    // single line text
+    final int width = 12;
+    final int padding = 0;
+    final String text = "This is a test.";
+    final String expected = "This is a" + EOL + "test.";
+
+    final StringBuffer sb = new StringBuffer();
+    new HelpFormatter().renderWrappedText(sb, width, padding, text);
+    assertEquals(expected, sb.toString(), "Single line text rendering should match expected output");
+}
+
+@Test
+public void testRenderWrappedTextSingleLine_ExceptionHandling() throws IOException {
+    // single line text
+    final int width = 12;
+    final int padding = 0;
+    final String text = "This is a test.";
+    final StringBuffer sb = new StringBuffer();
+
+    final HelpFormatter spy = spy(new HelpFormatter());
+    when(spy.appendWrappedText(sb, width, padding, text)).thenThrow(IOException.class);
+    assertThrows(UncheckedIOException.class, () -> spy.renderWrappedText(sb, width, padding, text), "Should throw UncheckedIOException when appendWrappedText throws IOException");
+}
+
+
+Input#27
+@Test
+    public void testRenderWrappedTextSingleLinePadded() {
+        // single line padded text
+        final int width = 12;
+        final int padding = 4;
+        final String text = "This is a test.";
+        final String expected = "This is a" + EOL + "    test.";
+
+        final StringBuffer sb = new StringBuffer();
+        new HelpFormatter().renderWrappedText(sb, width, padding, text);
+        assertEquals(expected, sb.toString(), "single line padded text");
+    }
+Smell List: ['Sensitive_Equality']
+
+Refactor#27
+
+@Test
+public void testRenderWrappedTextSingleLinePadded() {
+    // single line padded text
+    final int width = 12;
+    final int padding = 4;
+    final String text = "This is a test.";
+    final String expected = "This is a" + EOL + "    test.";
+
+    final StringBuffer sb = new StringBuffer();
+    new HelpFormatter().renderWrappedText(sb, width, padding, text);
+    String actualValue = sb.toString();
+    assertEquals(expected, actualValue, "single line padded text");
+}
+
+
+Input#28
+@Test
+    public void testRenderWrappedTextSingleLinePadded2() {
+        // single line padded text 2
+        final int width = 53;
+        final int padding = 24;
+        //@formatter:off
+        final String text = "  -p,--period <PERIOD>  PERIOD is time duration of form " +
+                            "DATE[-DATE] where DATE has form YYYY[MM[DD]]";
+        final String expected = "  -p,--period <PERIOD>  PERIOD is time duration of" + EOL +
+                                "                        form DATE[-DATE] where DATE" + EOL +
+                                "                        has form YYYY[MM[DD]]";
+        //@formatter:on
+
+        final StringBuffer sb = new StringBuffer();
+        new HelpFormatter().renderWrappedText(sb, width, padding, text);
+        assertEquals(expected, sb.toString(), "single line padded text 2");
+    }
+Smell List: ['Sensitive_Equality']
+
+Refactor#28
+
+@Test
+public void testRenderWrappedTextSingleLinePadded2() {
+    // single line padded text 2
+    final int width = 53;
+    final int padding = 24;
+    //@formatter:off
+    final String text = "  -p,--period <PERIOD>  PERIOD is time duration of form " +
+                        "DATE[-DATE] where DATE has form YYYY[MM[DD]]";
+    final String expected = "  -p,--period <PERIOD>  PERIOD is time duration of" + EOL +
+                            "                        form DATE[-DATE] where DATE" + EOL +
+                            "                        has form YYYY[MM[DD]]";
+    //@formatter:on
+
+    final StringBuffer sb = new StringBuffer();
+    new HelpFormatter().renderWrappedText(sb, width, padding, text);
+    String actualValue = sb.toString();
+    assertEquals(expected, actualValue, "single line padded text 2");
+}
+
+
+
+Input#29
+@Test
+    public void testRenderWrappedTextWordCut() {
+        final int width = 7;
+        final int padding = 0;
+        final String text = "Thisisatest.";
+        final String expected = "Thisisa" + EOL + "test.";
+
+        final StringBuffer sb = new StringBuffer();
+        new HelpFormatter().renderWrappedText(sb, width, padding, text);
+        assertEquals(expected, sb.toString(), "cut and wrap");
+    }
+Smell List: ['Sensitive_Equality']
+
+Refactor#29
+
+@Test
+public void testRenderWrappedTextWordCut() {
+    final int width = 7;
+    final int padding = 0;
+    final String text = "Thisisatest.";
+    final String expected = "Thisisa" + EOL + "test.";
+
+    final StringBuffer sb = new StringBuffer();
+    new HelpFormatter().renderWrappedText(sb, width, padding, text);
+    String actualValue = sb.toString();
+    assertEquals(expected, actualValue, "cut and wrap");
+}
+
+
+
+
+Input#30
+@Test
+    public void testRtrim() {
+        final HelpFormatter formatter = new HelpFormatter();
+
+        assertNull(formatter.rtrim(null));
+        assertEquals("", formatter.rtrim(""));
+        assertEquals("  foo", formatter.rtrim("  foo  "));
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+
+Refactor#30
+
+private void setupTestRtrim() {
+    formatter = new HelpFormatter();
+}
+
+@Test
+public void testRtrim_Null() {
+    setupTestRtrim();
+    assertNull(formatter.rtrim(null), "rtrim should return null when input is null");
+}
+
+@Test
+public void testRtrim_EmptyString() {
+    setupTestRtrim();
+    assertEquals("", formatter.rtrim(""), "rtrim should return an empty string when input is an empty string");
+}
+
+@Test
+public void testRtrim_Whitespace() {
+    setupTestRtrim();
+    assertEquals("  foo", formatter.rtrim("  foo  "), "rtrim should remove trailing whitespace but preserve leading whitespace");
+}
+
+
+
+Input#31
+ @Test
+    public void testUsageWithLongOptSeparator() {
+        final Options options = new Options();
+        options.addOption("f", true, "the file");
+        options.addOption(Option.builder("s").longOpt("size").desc("the size").hasArg().argName("SIZE").build());
+        options.addOption(Option.builder().longOpt("age").desc("the age").hasArg().build());
+
+        final HelpFormatter formatter = new HelpFormatter();
+        formatter.setLongOptSeparator("=");
+
+        final StringWriter out = new StringWriter();
+
+        formatter.printUsage(new PrintWriter(out), 80, "create", options);
+
+        assertEquals("usage: create [--age=<arg>] [-f <arg>] [-s <SIZE>]", out.toString().trim());
+    }
+Smell List: ['Sensitive_Equality', 'Eager_Test']
+
+Refactor#31
+
+private void setupTestUsageWithLongOptSeparator() {
+    final Options options = new Options();
+    options.addOption("f", true, "the file");
+    options.addOption(Option.builder("s").longOpt("size").desc("the size").hasArg().argName("SIZE").build());
+    options.addOption(Option.builder().longOpt("age").desc("the age").hasArg().build());
+
+    final HelpFormatter formatter = new HelpFormatter();
+    formatter.setLongOptSeparator("=");
+
+    this.formatter = formatter;
+    this.options = options;
+}
+
+@Test
+public void testUsageWithLongOptSeparator_UsageOutput() {
+    setupTestUsageWithLongOptSeparator();
+
+    final StringWriter out = new StringWriter();
+    formatter.printUsage(new PrintWriter(out), 80, "create", options);
+
+    String expectedUsage = "usage: create [--age=<arg>] [-f <arg>] [-s <SIZE>]";
+    String actualUsage = out.toString().trim();
+
+    assertEquals(expectedUsage, actualUsage);
+}
+
+
+
+
+
+
+
+
+
+
+

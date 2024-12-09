@@ -1,0 +1,351 @@
+File#1
+
+
+Input#1
+ @Test
+    public void testLength() {
+        final OperandManager operandManager = new MockOperandManager();
+        operandManager.setSegment(segment);
+        operandManager.setCurrentClass("java/lang/Foo");
+
+        final MockCodeAttribute attribute = new MockCodeAttribute(3, // maxStack
+                2, // maxLocals
+                mixedByteArray, // codePacked
+                segment, // segment
+                operandManager, // operandManager
+                new ArrayList<>());
+        assertEquals(29, attribute.getLength());
+
+        attribute.attributes.add(new LocalVariableTableAttribute(0, null, null, null, null, null));
+        assertEquals(37, attribute.getLength());
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test', 'Magic_Number_Test']
+
+Refactor#1
+
+private MockOperandManager setupOperandManager() {
+    final MockOperandManager operandManager = new MockOperandManager();
+    operandManager.setSegment(segment);
+    operandManager.setCurrentClass("java/lang/Foo");
+    return operandManager;
+}
+
+@Test
+public void testLength_Initial() {
+    final MockOperandManager operandManager = setupOperandManager();
+
+    final MockCodeAttribute attribute = new MockCodeAttribute(
+            3, // maxStack
+            2, // maxLocals
+            mixedByteArray, // codePacked
+            segment, // segment
+            operandManager, // operandManager
+            new ArrayList<>()
+    );
+
+    int initialLength = 29;
+    assertEquals(initialLength, attribute.getLength(), "Initial length should be 29");
+}
+
+@Test
+public void testLength_WithLocalVariableTableAttribute() {
+    final MockOperandManager operandManager = setupOperandManager();
+
+    final MockCodeAttribute attribute = new MockCodeAttribute(
+            3, // maxStack
+            2, // maxLocals
+            mixedByteArray, // codePacked
+            segment, // segment
+            operandManager, // operandManager
+            new ArrayList<>()
+    );
+
+    attribute.attributes.add(new LocalVariableTableAttribute(0, null, null, null, null, null));
+
+    int expectedLengthWithLocalVariableTable = 37;
+    assertEquals(expectedLengthWithLocalVariableTable, attribute.getLength(), "Length with LocalVariableTableAttribute should be 37");
+}
+
+Input#2
+@Test
+    public void testMixedByteCodes() {
+        final OperandManager operandManager = new MockOperandManager();
+        operandManager.setSegment(segment);
+        operandManager.setCurrentClass("java/lang/Foo");
+
+        final CodeAttribute attribute = new CodeAttribute(3, // maxStack
+                2, // maxLocals
+                mixedByteArray, // codePacked
+                segment, // segment
+                operandManager, // operandManager
+                new ArrayList<>());
+        assertEquals(2, attribute.maxLocals);
+        assertEquals(3, attribute.maxStack);
+        assertEquals("aload_0_putfield_this", attribute.byteCodes.get(4).toString());
+
+        final int[] expectedLabels = { 0, 1, 4, 5, 8, 9, 10, 13, 14 };
+        for (int index = 0; index < expectedLabels.length; index++) {
+            assertEquals(expectedLabels[index], attribute.byteCodeOffsets.get(index).intValue());
+        }
+    }
+Smell List: ['Assertion_Roulette', 'Conditional_Test_Logic', 'Sensitive_Equality', 'Magic_Number_Test']
+
+
+Refactor#2
+
+@Test
+public void testMixedByteCodes() {
+    final OperandManager operandManager = new MockOperandManager();
+    operandManager.setSegment(segment);
+    operandManager.setCurrentClass("java/lang/Foo");
+
+    final int maxStack = 3;
+    final int maxLocals = 2;
+    final byte[] codePacked = mixedByteArray;
+
+    final CodeAttribute attribute = new CodeAttribute(maxStack, maxLocals, codePacked, segment, operandManager, new ArrayList<>());
+
+    assertEquals(maxLocals, attribute.maxLocals, "Max locals should match the expected value");
+    assertEquals(maxStack, attribute.maxStack, "Max stack should match the expected value");
+
+    String expectedByteCodeString = "aload_0_putfield_this";
+    String actualByteCodeString = attribute.byteCodes.get(4).toString();
+    assertEquals(expectedByteCodeString, actualByteCodeString, "Byte code at index 4 should match the expected string");
+
+    final int[] expectedLabels = { 0, 1, 4, 5, 8, 9, 10, 13, 14 };
+    for (int index = 0; index < expectedLabels.length; index++) {
+        int expectedLabel = expectedLabels[index];
+        int actualLabel = attribute.byteCodeOffsets.get(index).intValue();
+        assertEquals(expectedLabel, actualLabel, "Byte code offset at index " + index + " should match the expected label");
+    }
+}
+
+
+Input#3
+@Test
+    public void testSingleByteCodes() {
+        final OperandManager operandManager = new MockOperandManager();
+        operandManager.setSegment(segment);
+        operandManager.setCurrentClass("java/lang/Foo");
+
+        final CodeAttribute attribute = new CodeAttribute(4, // maxStack
+                3, // maxLocals
+                singleByteArray, // codePacked
+                segment, // segment
+                operandManager, // operandManager
+                new ArrayList<>());
+        assertEquals(3, attribute.maxLocals);
+        assertEquals(4, attribute.maxStack);
+        assertEquals("invokespecial_this", attribute.byteCodes.get(3).toString());
+
+        final int[] expectedLabels = { 0, 1, 2, 4 };
+        for (int index = 0; index < expectedLabels.length; index++) {
+            assertEquals(expectedLabels[index], attribute.byteCodeOffsets.get(index).intValue());
+        }
+    }
+Smell List: ['Assertion_Roulette', 'Conditional_Test_Logic', 'Sensitive_Equality', 'Magic_Number_Test']
+
+Refactor#3
+
+@Test
+public void testSingleByteCodes() {
+    final int maxStack = 4;
+    final int maxLocals = 3;
+    final int expectedMaxLocals = 3;
+    final int expectedMaxStack = 4;
+    final String expectedByteCodeToString = "invokespecial_this";
+    final int[] expectedLabels = { 0, 1, 2, 4 };
+
+    final OperandManager operandManager = new MockOperandManager();
+    operandManager.setSegment(segment);
+    operandManager.setCurrentClass("java/lang/Foo");
+
+    final CodeAttribute attribute = new CodeAttribute(maxStack, // maxStack
+            maxLocals, // maxLocals
+            singleByteArray, // codePacked
+            segment, // segment
+            operandManager, // operandManager
+            new ArrayList<>());
+
+    assertEquals(expectedMaxLocals, attribute.maxLocals, "Max locals should match the expected value");
+    assertEquals(expectedMaxStack, attribute.maxStack, "Max stack should match the expected value");
+
+    String actualByteCodeToString = attribute.byteCodes.get(3).toString();
+    assertEquals(expectedByteCodeToString, actualByteCodeToString, "Byte code at index 3 should match the expected string");
+
+    for (int index = 0; index < expectedLabels.length; index++) {
+        int expectedLabel = expectedLabels[index];
+        int actualLabel = attribute.byteCodeOffsets.get(index).intValue();
+        assertEquals(expectedLabel, actualLabel, "Byte code offset at index " + index + " should match the expected label");
+    }
+}
+
+Input#4
+
+Refactor#4
+
+
+Input#5
+
+Refactor#5
+
+
+Input#6
+
+Refactor#6
+
+
+Input#7
+
+Refactor#7
+
+
+Input#8
+
+Refactor#8
+
+
+Input#9
+
+Refactor#9
+
+
+Input#10
+
+Refactor#10
+
+
+Input#11
+
+Refactor#11
+
+
+Input#12
+
+Refactor#12
+
+
+Input#13
+
+Refactor#13
+
+
+Input#14
+
+Refactor#14
+
+
+Input#15
+
+Refactor#15
+
+
+Input#16
+
+Refactor#16
+
+
+Input#17
+
+Refactor#17
+
+
+Input#18
+
+Refactor#18
+
+
+
+Input#19
+
+Refactor#19
+
+
+
+Input#20
+
+Refactor#20
+
+
+
+Input#21
+
+Refactor#21
+
+
+Input#22
+
+Refactor#22
+
+
+Input#23
+
+Refactor#23
+
+
+Input#24
+
+Refactor#24
+
+
+Input#25
+
+Refactor#25
+
+
+Input#26
+
+Refactor#26
+
+
+Input#27
+
+Refactor#27
+
+
+
+Input#28
+
+Refactor#28
+
+
+
+Input#29
+
+Refactor#29
+
+
+
+Input#30
+
+Refactor#30
+
+
+Input#31
+
+Refactor#31
+
+
+
+Input#32
+
+Refactor#32
+
+
+
+Input#33
+
+Refactor#33
+
+
+
+Input#34
+
+Refactor#34
+
+
+
+Input#35
+
+Refactor#35
+

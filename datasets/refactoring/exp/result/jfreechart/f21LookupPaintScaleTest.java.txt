@@ -1,0 +1,294 @@
+f2.txtf1.txtFile#1
+
+
+Input#1
+
+Refactor#1
+
+
+Input#2
+@Test
+    public void testCloning() throws CloneNotSupportedException {
+        LookupPaintScale g1 = new LookupPaintScale();
+        LookupPaintScale g2 = CloneUtils.clone(g1);
+        assertNotSame(g1, g2);
+        assertSame(g1.getClass(), g2.getClass());
+        assertEquals(g1, g2);
+
+        // check independence
+        g1.add(0.5, Color.RED);
+        assertNotEquals(g1, g2);
+        g2.add(0.5, Color.RED);
+        assertEquals(g1, g2);
+
+        // try with gradient paint
+        g1 = new LookupPaintScale(1.0, 2.0, new GradientPaint(1.0f, 2.0f,
+                Color.RED, 3.0f, 4.0f, Color.GREEN));
+        g1.add(1.5, new GradientPaint(1.0f, 2.0f, Color.RED, 3.0f, 4.0f,
+                Color.BLUE));
+        g2 = (LookupPaintScale) g1.clone();
+        assertNotSame(g1, g2);
+        assertSame(g1.getClass(), g2.getClass());
+        assertEquals(g1, g2);
+    }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing', 'Eager_Test', 'Duplicate_Assert']
+
+Refactor#2
+@Test
+    public void testCloningBasicInstance() {
+        LookupPaintScale g1 = new LookupPaintScale();
+        LookupPaintScale g2 = CloneUtils.clone(g1);
+
+        assertNotSame(g1, g2, "g1 and g2 should be different instances");
+        assertSame(g1.getClass(), g2.getClass(), "g1 and g2 should be of the same class");
+        assertEquals(g1, g2, "g1 and g2 should be equal after cloning");
+
+        // Check independence
+        g1.add(0.5, Color.RED);
+        assertNotEquals(g1, g2, "g1 and g2 should not be equal after modifying g1");
+
+        g2.add(0.5, Color.RED);
+        assertEquals(g1, g2, "g1 and g2 should be equal after modifying both");
+    }
+
+    @Test
+    public void testCloningWithGradientPaint() {
+        LookupPaintScale g1 = new LookupPaintScale(1.0, 2.0, new GradientPaint(1.0f, 2.0f, Color.RED, 3.0f, 4.0f, Color.GREEN));
+        g1.add(1.5, new GradientPaint(1.0f, 2.0f, Color.RED, 3.0f, 4.0f, Color.BLUE));
+
+        LookupPaintScale g2 = (LookupPaintScale) g1.clone();
+
+        assertNotSame(g1, g2, "g1 and g2 should be different instances");
+        assertSame(g1.getClass(), g2.getClass(), "g1 and g2 should be of the same class");
+        assertEquals(g1, g2, "g1 and g2 should be equal after cloning");
+    }
+
+Input#3
+
+Refactor#3
+
+
+Input#4
+ @Test
+    public void testConstructor1() {
+        LookupPaintScale s = new LookupPaintScale();
+        assertEquals(0.0, s.getLowerBound(), EPSILON);
+        assertEquals(1.0, s.getUpperBound(), EPSILON);
+    }
+Smell List: ['Eager_Test', 'Magic_Number_Test']
+
+Refactor#4
+private static final double LOWER_BOUND_EXPECTED = 0.0;
+private static final double UPPER_BOUND_EXPECTED = 1.0;
+private static final double EPSILON = 1e-6;
+
+
+
+@Test
+public void testConstructor1_LowerBound() {
+    LookupPaintScale scale = new LookupPaintScale();
+    assertEquals(LOWER_BOUND_EXPECTED, scale.getLowerBound(), EPSILON);
+}
+
+@Test
+public void testConstructor1_UpperBound() {
+    LookupPaintScale scale = new LookupPaintScale();
+    assertEquals(UPPER_BOUND_EXPECTED, scale.getUpperBound(), EPSILON);
+}
+
+Input#5
+ @Test
+    public void testConstructor2() {
+        LookupPaintScale s = new LookupPaintScale(1.0, 2.0, Color.RED);
+        assertEquals(1.0, s.getLowerBound(), EPSILON);
+        assertEquals(2.0, s.getUpperBound(), EPSILON);
+        assertEquals(Color.RED, s.getDefaultPaint());
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test', 'Magic_Number_Test']
+Refactor#5
+
+private static final double LOWER_BOUND_VALUE = 1.0;
+private static final double UPPER_BOUND_VALUE = 2.0;
+private static final double EPSILON = 0.00001;
+
+@Test
+public void testConstructor_LowerBound() {
+    LookupPaintScale scale = createLookupPaintScale();
+    assertEquals(LOWER_BOUND_VALUE, scale.getLowerBound(), EPSILON, "Lower bound should match the expected value");
+}
+
+@Test
+public void testConstructor_UpperBound() {
+    LookupPaintScale scale = createLookupPaintScale();
+    assertEquals(UPPER_BOUND_VALUE, scale.getUpperBound(), EPSILON, "Upper bound should match the expected value");
+}
+
+@Test
+public void testConstructor_DefaultPaint() {
+    LookupPaintScale scale = createLookupPaintScale();
+    assertEquals(Color.RED, scale.getDefaultPaint(), "Default paint should match the expected color");
+}
+
+private LookupPaintScale createLookupPaintScale() {
+    return new LookupPaintScale(LOWER_BOUND_VALUE, UPPER_BOUND_VALUE, Color.RED);
+}
+
+Input#6
+
+Refactor#6
+
+
+Input#7
+
+Refactor#7
+
+
+Input#8
+
+Refactor#8
+
+
+Input#9
+
+Refactor#9
+
+
+Input#10
+
+Refactor#10
+
+
+Input#11
+
+Refactor#11
+
+
+Input#12
+
+Refactor#12
+
+
+Input#13
+
+Refactor#13
+
+
+Input#14
+
+Refactor#14
+
+
+Input#15
+
+Refactor#15
+
+
+Input#16
+
+Refactor#16
+
+
+Input#17
+
+Refactor#17
+
+
+Input#18
+
+Refactor#18
+
+
+
+Input#19
+
+Refactor#19
+
+
+
+Input#20
+
+Refactor#20
+
+
+
+Input#21
+
+Refactor#21
+
+
+Input#22
+
+Refactor#22
+
+
+Input#23
+
+Refactor#23
+
+
+Input#24
+
+Refactor#24
+
+
+Input#25
+
+Refactor#25
+
+
+Input#26
+
+Refactor#26
+
+
+Input#27
+
+Refactor#27
+
+
+
+Input#28
+
+Refactor#28
+
+
+
+Input#29
+
+Refactor#29
+
+
+
+Input#30
+
+Refactor#30
+
+
+Input#31
+
+Refactor#31
+
+
+
+Input#32
+
+Refactor#32
+
+
+
+Input#33
+
+Refactor#33
+
+
+
+Input#34
+
+Refactor#34
+
+
+
+Input#35
+
+Refactor#35
+

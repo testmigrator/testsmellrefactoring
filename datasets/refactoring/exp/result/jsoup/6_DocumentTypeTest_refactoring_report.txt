@@ -1,0 +1,269 @@
+File#1
+
+
+Input#1
+ @Test public void outerHtmlGeneration() {
+        DocumentType html5 = new DocumentType("html", "", "");
+        assertEquals("<!doctype html>", html5.outerHtml());
+
+        DocumentType publicDocType = new DocumentType("html", "-//IETF//DTD HTML//", "");
+        assertEquals("<!DOCTYPE html PUBLIC \"-//IETF//DTD HTML//\">", publicDocType.outerHtml());
+
+        DocumentType systemDocType = new DocumentType("html", "", "http://www.ibm.com/data/dtd/v11/ibmxhtml1-transitional.dtd");
+        assertEquals("<!DOCTYPE html SYSTEM \"http://www.ibm.com/data/dtd/v11/ibmxhtml1-transitional.dtd\">", systemDocType.outerHtml());
+
+        DocumentType combo = new DocumentType("notHtml", "--public", "--system");
+        assertEquals("<!DOCTYPE notHtml PUBLIC \"--public\" \"--system\">", combo.outerHtml());
+        assertEquals("notHtml", combo.name());
+        assertEquals("--public", combo.publicId());
+        assertEquals("--system", combo.systemId());
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+Refactor#1
+
+private DocumentType setupDocumentType(String name, String publicId, String systemId) {
+    return new DocumentType(name, publicId, systemId);
+}
+
+@Test
+public void testOuterHtmlGeneration_Html5() {
+    DocumentType html5 = setupDocumentType("html", "", "");
+    assertEquals("<!doctype html>", html5.outerHtml(), "HTML5 doctype should be generated correctly");
+}
+
+@Test
+public void testOuterHtmlGeneration_PublicDocType() {
+    DocumentType publicDocType = setupDocumentType("html", "-//IETF//DTD HTML//", "");
+    assertEquals("<!DOCTYPE html PUBLIC \"-//IETF//DTD HTML//\">", publicDocType.outerHtml(), "Public doctype should be generated correctly");
+}
+
+@Test
+public void testOuterHtmlGeneration_SystemDocType() {
+    DocumentType systemDocType = setupDocumentType("html", "", "http://www.ibm.com/data/dtd/v11/ibmxhtml1-transitional.dtd");
+    assertEquals("<!DOCTYPE html SYSTEM \"http://www.ibm.com/data/dtd/v11/ibmxhtml1-transitional.dtd\">", systemDocType.outerHtml(), "System doctype should be generated correctly");
+}
+
+@Test
+public void testOuterHtmlGeneration_Combo() {
+    DocumentType combo = setupDocumentType("notHtml", "--public", "--system");
+    assertEquals("<!DOCTYPE notHtml PUBLIC \"--public\" \"--system\">", combo.outerHtml(), "Combo doctype should be generated correctly");
+    assertEquals("notHtml", combo.name(), "Name should match");
+    assertEquals("--public", combo.publicId(), "Public ID should match");
+    assertEquals("--system", combo.systemId(), "System ID should match");
+}
+
+
+Input#2
+ @Test public void testRoundTrip() {
+        String base = "<!DOCTYPE html>";
+        assertEquals("<!doctype html>", htmlOutput(base));
+        assertEquals(base, xmlOutput(base));
+
+        String publicDoc = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">";
+        assertEquals(publicDoc, htmlOutput(publicDoc));
+        assertEquals(publicDoc, xmlOutput(publicDoc));
+
+        String systemDoc = "<!DOCTYPE html SYSTEM \"exampledtdfile.dtd\">";
+        assertEquals(systemDoc, htmlOutput(systemDoc));
+        assertEquals(systemDoc, xmlOutput(systemDoc));
+
+        String legacyDoc = "<!DOCTYPE html SYSTEM \"about:legacy-compat\">";
+        assertEquals(legacyDoc, htmlOutput(legacyDoc));
+        assertEquals(legacyDoc, xmlOutput(legacyDoc));
+    }
+Smell List: ['Assertion_Roulette']
+Refactor#2
+
+@Test
+public void testRoundTrip() {
+    String base = "<!DOCTYPE html>";
+    assertEquals("<!doctype html>", htmlOutput(base), "HTML output for base DOCTYPE should be lowercase");
+    assertEquals(base, xmlOutput(base), "XML output for base DOCTYPE should match input");
+
+    String publicDoc = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">";
+    assertEquals(publicDoc, htmlOutput(publicDoc), "HTML output for public DOCTYPE should match input");
+    assertEquals(publicDoc, xmlOutput(publicDoc), "XML output for public DOCTYPE should match input");
+
+    String systemDoc = "<!DOCTYPE html SYSTEM \"exampledtdfile.dtd\">";
+    assertEquals(systemDoc, htmlOutput(systemDoc), "HTML output for system DOCTYPE should match input");
+    assertEquals(systemDoc, xmlOutput(systemDoc), "XML output for system DOCTYPE should match input");
+
+    String legacyDoc = "<!DOCTYPE html SYSTEM \"about:legacy-compat\">";
+    assertEquals(legacyDoc, htmlOutput(legacyDoc), "HTML output for legacy DOCTYPE should match input");
+    assertEquals(legacyDoc, xmlOutput(legacyDoc), "XML output for legacy DOCTYPE should match input");
+}
+
+Input#3
+
+Refactor#3
+
+
+Input#4
+
+Refactor#4
+
+
+Input#5
+
+Refactor#5
+
+
+Input#6
+
+Refactor#6
+
+
+Input#7
+
+Refactor#7
+
+
+Input#8
+
+Refactor#8
+
+
+Input#9
+
+Refactor#9
+
+
+Input#10
+
+Refactor#10
+
+
+Input#11
+
+Refactor#11
+
+
+Input#12
+
+Refactor#12
+
+
+Input#13
+
+Refactor#13
+
+
+Input#14
+
+Refactor#14
+
+
+Input#15
+
+Refactor#15
+
+
+Input#16
+
+Refactor#16
+
+
+Input#17
+
+Refactor#17
+
+
+Input#18
+
+Refactor#18
+
+
+
+Input#19
+
+Refactor#19
+
+
+
+Input#20
+
+Refactor#20
+
+
+
+Input#21
+
+Refactor#21
+
+
+Input#22
+
+Refactor#22
+
+
+Input#23
+
+Refactor#23
+
+
+Input#24
+
+Refactor#24
+
+
+Input#25
+
+Refactor#25
+
+
+Input#26
+
+Refactor#26
+
+
+Input#27
+
+Refactor#27
+
+
+
+Input#28
+
+Refactor#28
+
+
+
+Input#29
+
+Refactor#29
+
+
+
+Input#30
+
+Refactor#30
+
+
+Input#31
+
+Refactor#31
+
+
+
+Input#32
+
+Refactor#32
+
+
+
+Input#33
+
+Refactor#33
+
+
+
+Input#34
+
+Refactor#34
+
+
+
+Input#35
+
+Refactor#35
+

@@ -1,0 +1,983 @@
+File#1
+
+
+Input#1
+ @Test public void handlesBaseUri() {
+        Tag tag = Tag.valueOf("a");
+        Attributes attribs = new Attributes();
+        attribs.put("relHref", "/foo");
+        attribs.put("absHref", "http://bar/qux");
+
+        Element noBase = new Element(tag, "", attribs);
+        assertEquals("", noBase.absUrl("relHref")); // with no base, should NOT fallback to href attrib, whatever it is
+        assertEquals("http://bar/qux", noBase.absUrl("absHref")); // no base but valid attrib, return attrib
+
+        Element withBase = new Element(tag, "http://foo/", attribs);
+        assertEquals("http://foo/foo", withBase.absUrl("relHref")); // construct abs from base + rel
+        assertEquals("http://bar/qux", withBase.absUrl("absHref")); // href is abs, so returns that
+        assertEquals("", withBase.absUrl("noval"));
+
+        Element dodgyBase = new Element(tag, "wtf://no-such-protocol/", attribs);
+        assertEquals("http://bar/qux", dodgyBase.absUrl("absHref")); // base fails, but href good, so get that
+        assertEquals("", dodgyBase.absUrl("relHref")); // base fails, only rel href, so return nothing
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+Refactor#1
+private Tag tag;
+private Attributes attribs;
+
+@BeforeEach
+void setup() {
+    tag = Tag.valueOf("a");
+    attribs = new Attributes();
+    attribs.put("relHref", "/foo");
+    attribs.put("absHref", "http://bar/qux");
+}
+
+@Test
+public void testHandlesBaseUri_NoBase() {
+    Element noBase = new Element(tag, "", attribs);
+
+    assertEquals("", noBase.absUrl("relHref"), "With no base, 'relHref' should not fallback to href attribute");
+    assertEquals("http://bar/qux", noBase.absUrl("absHref"), "With no base, 'absHref' should return the absolute URL from the attribute");
+}
+
+@Test
+public void testHandlesBaseUri_WithBase() {
+    Element withBase = new Element(tag, "http://foo/", attribs);
+
+    assertEquals("http://foo/foo", withBase.absUrl("relHref"), "With base URL, 'relHref' should construct an absolute URL from base + relative path");
+    assertEquals("http://bar/qux", withBase.absUrl("absHref"), "With base URL, 'absHref' should return the absolute URL from the attribute");
+    assertEquals("", withBase.absUrl("noval"), "With base URL, non-existent attribute 'noval' should return an empty string");
+}
+
+@Test
+public void testHandlesBaseUri_DodgyBase() {
+    Element dodgyBase = new Element(tag, "wtf://no-such-protocol/", attribs);
+
+    assertEquals("http://bar/qux", dodgyBase.absUrl("absHref"), "With invalid base URL, 'absHref' should return the absolute URL from the attribute");
+    assertEquals("", dodgyBase.absUrl("relHref"), "With invalid base URL, 'relHref' should return an empty string");
+}
+
+
+Input#2
+ @Test public void setBaseUriIsRecursive() {
+        Document doc = Jsoup.parse("<div><p></p></div>");
+        String baseUri = "https://jsoup.org";
+        doc.setBaseUri(baseUri);
+
+        assertEquals(baseUri, doc.baseUri());
+        assertEquals(baseUri, doc.select("div").first().baseUri());
+        assertEquals(baseUri, doc.select("p").first().baseUri());
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+Refactor#2
+Document doc;
+private void setupSetBaseUriIsRecursive() {
+    doc = Jsoup.parse("<div><p></p></div>");
+    String baseUri = "https://jsoup.org";
+    doc.setBaseUri(baseUri);
+}
+
+@Test
+public void testSetBaseUriIsRecursive_DocumentBaseUri() {
+    setupSetBaseUriIsRecursive();
+    assertEquals(baseUri, doc.baseUri(), "Document base URI should be set correctly");
+}
+
+@Test
+public void testSetBaseUriIsRecursive_DivBaseUri() {
+    setupSetBaseUriIsRecursive();
+    assertEquals(baseUri, doc.select("div").first().baseUri(), "Div element base URI should be set correctly");
+}
+
+@Test
+public void testSetBaseUriIsRecursive_PBaseUri() {
+    setupSetBaseUriIsRecursive();
+    assertEquals(baseUri, doc.select("p").first().baseUri(), "P element base URI should be set correctly");
+}
+
+
+Input#3
+ @Test public void handlesAbsPrefix() {
+        Document doc = Jsoup.parse("<a href=/foo>Hello</a>", "https://jsoup.org/");
+        Element a = doc.select("a").first();
+        assertEquals("/foo", a.attr("href"));
+        assertEquals("https://jsoup.org/foo", a.attr("abs:href"));
+        assertTrue(a.hasAttr("abs:href"));
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+Refactor#3
+Document doc;
+Element a;
+
+private void setupHandlesAbsPrefix() {
+    doc = Jsoup.parse("<a href=/foo>Hello</a>", "https://jsoup.org/");
+    a = doc.select("a").first();
+}
+
+@Test
+public void testHandlesAbsPrefix_HrefAttribute() {
+    setupHandlesAbsPrefix();
+    assertEquals("/foo", a.attr("href"), "The href attribute should be '/foo'");
+}
+
+@Test
+public void testHandlesAbsPrefix_AbsHrefAttribute() {
+    setupHandlesAbsPrefix();
+    assertEquals("https://jsoup.org/foo", a.attr("abs:href"), "The absolute href attribute should be 'https://jsoup.org/foo'");
+}
+
+@Test
+public void testHandlesAbsPrefix_HasAbsHrefAttribute() {
+    setupHandlesAbsPrefix();
+    assertTrue(a.hasAttr("abs:href"), "The element should have the 'abs:href' attribute");
+}
+
+
+Input#4
+ @Test public void handlesAbsOnImage() {
+        Document doc = Jsoup.parse("<p><img src=\"/rez/osi_logo.png\" /></p>", "https://jsoup.org/");
+        Element img = doc.select("img").first();
+        assertEquals("https://jsoup.org/rez/osi_logo.png", img.attr("abs:src"));
+        assertEquals(img.absUrl("src"), img.attr("abs:src"));
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+Refactor#4
+
+private Document setupHandlesAbsOnImage() {
+    return Jsoup.parse("<p><img src=\"/rez/osi_logo.png\" /></p>", "https://jsoup.org/");
+}
+
+@Test
+public void testHandlesAbsOnImage_AbsSrcAttribute() {
+    Document doc = setupHandlesAbsOnImage();
+    Element img = doc.select("img").first();
+    assertEquals("https://jsoup.org/rez/osi_logo.png", img.attr("abs:src"), "The absolute URL of the image src attribute should be correctly resolved");
+}
+
+@Test
+public void testHandlesAbsOnImage_AbsUrlMethod() {
+    Document doc = setupHandlesAbsOnImage();
+    Element img = doc.select("img").first();
+    assertEquals(img.absUrl("src"), img.attr("abs:src"), "The absUrl method should return the same value as the attr method for the absolute URL of the image src attribute");
+}
+
+Input#5
+ @Test public void handlesAbsPrefixOnHasAttr() {
+        // 1: no abs url; 2: has abs url
+        Document doc = Jsoup.parse("<a id=1 href='/foo'>One</a> <a id=2 href='https://jsoup.org/'>Two</a>");
+        Element one = doc.select("#1").first();
+        Element two = doc.select("#2").first();
+
+        assertFalse(one.hasAttr("abs:href"));
+        assertTrue(one.hasAttr("href"));
+        assertEquals("", one.absUrl("href"));
+
+        assertTrue(two.hasAttr("abs:href"));
+        assertTrue(two.hasAttr("href"));
+        assertEquals("https://jsoup.org/", two.absUrl("href"));
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+Refactor#5
+
+private Document setupHandlesAbsPrefixOnHasAttr() {
+    return Jsoup.parse("<a id=1 href='/foo'>One</a> <a id=2 href='https://jsoup.org/'>Two</a>");
+}
+
+@Test
+public void testHandlesAbsPrefixOnHasAttr_NoAbsUrl() {
+    Document doc = setupHandlesAbsPrefixOnHasAttr();
+    Element one = doc.select("#1").first();
+
+    assertFalse(one.hasAttr("abs:href"), "Element with id=1 should not have an absolute URL attribute");
+    assertTrue(one.hasAttr("href"), "Element with id=1 should have a relative URL attribute");
+    assertEquals("", one.absUrl("href"), "Element with id=1 should have an empty absolute URL");
+}
+
+@Test
+public void testHandlesAbsPrefixOnHasAttr_AbsUrl() {
+    Document doc = setupHandlesAbsPrefixOnHasAttr();
+    Element two = doc.select("#2").first();
+
+    assertTrue(two.hasAttr("abs:href"), "Element with id=2 should have an absolute URL attribute");
+    assertTrue(two.hasAttr("href"), "Element with id=2 should have a relative URL attribute");
+    assertEquals("https://jsoup.org/", two.absUrl("href"), "Element with id=2 should have the correct absolute URL");
+}
+
+
+Input#6
+ @Test public void literalAbsPrefix() {
+        // if there is a literal attribute "abs:xxx", don't try and make absolute.
+        Document doc = Jsoup.parse("<a abs:href='odd'>One</a>");
+        Element el = doc.select("a").first();
+        assertTrue(el.hasAttr("abs:href"));
+        assertEquals("odd", el.attr("abs:href"));
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+Refactor#6
+Document doc;
+Element el;
+
+private void setupLiteralAbsPrefix() {
+    doc = Jsoup.parse("<a abs:href='odd'>One</a>");
+    el = doc.select("a").first();
+}
+
+@Test
+public void testLiteralAbsPrefix_HasAttr() {
+    setupLiteralAbsPrefix();
+    assertTrue(el.hasAttr("abs:href"), "Element should have 'abs:href' attribute");
+}
+
+@Test
+public void testLiteralAbsPrefix_AttrValue() {
+    setupLiteralAbsPrefix();
+    assertEquals("odd", el.attr("abs:href"), "Attribute 'abs:href' should have value 'odd'");
+}
+
+Input#7
+ @Test public void handleAbsOnFileUris() {
+        Document doc = Jsoup.parse("<a href='password'>One/a><a href='/var/log/messages'>Two</a>", "file:/etc/");
+        Element one = doc.select("a").first();
+        assertEquals("file:/etc/password", one.absUrl("href"));
+        Element two = doc.select("a").get(1);
+        assertEquals("file:/var/log/messages", two.absUrl("href"));
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+Refactor#7
+private Document setupHandleAbsOnFileUris() {
+    return Jsoup.parse("<a href='password'>One</a><a href='/var/log/messages'>Two</a>", "file:/etc/");
+}
+
+@Test
+public void testHandleAbsOnFileUris_FirstLink() {
+    Document doc = setupHandleAbsOnFileUris();
+    Element one = doc.select("a").first();
+    assertEquals("file:/etc/password", one.absUrl("href"), "First link should resolve to file:/etc/password");
+}
+
+@Test
+public void testHandleAbsOnFileUris_SecondLink() {
+    Document doc = setupHandleAbsOnFileUris();
+    Element two = doc.select("a").get(1);
+    assertEquals("file:/var/log/messages", two.absUrl("href"), "Second link should resolve to file:/var/log/messages");
+}
+
+Input#8
+ @Test
+    public void handlesAbsOnProtocolessAbsoluteUris() {
+        Document doc1 = Jsoup.parse("<a href='//example.net/foo'>One</a>", "http://example.com/");
+        Document doc2 = Jsoup.parse("<a href='//example.net/foo'>One</a>", "https://example.com/");
+
+        Element one = doc1.select("a").first();
+        Element two = doc2.select("a").first();
+
+        assertEquals("http://example.net/foo", one.absUrl("href"));
+        assertEquals("https://example.net/foo", two.absUrl("href"));
+
+        Document doc3 = Jsoup.parse("<img src=//www.google.com/images/errors/logo_sm.gif alt=Google>", "https://google.com");
+        assertEquals("https://www.google.com/images/errors/logo_sm.gif", doc3.select("img").attr("abs:src"));
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+Refactor#8
+private Document setupDocumentWithLink(String html, String baseUri) {
+    return Jsoup.parse(html, baseUri);
+}
+
+@Test
+public void testHandlesAbsOnProtocolessAbsoluteUris_HttpBase() {
+    Document doc = setupDocumentWithLink("<a href='//example.net/foo'>One</a>", "http://example.com/");
+    Element link = doc.select("a").first();
+    assertEquals("http://example.net/foo", link.absUrl("href"), "The absolute URL should use the HTTP scheme from the base URI");
+}
+
+@Test
+public void testHandlesAbsOnProtocolessAbsoluteUris_HttpsBase() {
+    Document doc = setupDocumentWithLink("<a href='//example.net/foo'>One</a>", "https://example.com/");
+    Element link = doc.select("a").first();
+    assertEquals("https://example.net/foo", link.absUrl("href"), "The absolute URL should use the HTTPS scheme from the base URI");
+}
+
+@Test
+public void testHandlesAbsOnProtocolessAbsoluteUris_ImgSrc() {
+    Document doc = setupDocumentWithLink("<img src=//www.google.com/images/errors/logo_sm.gif alt=Google>", "https://google.com");
+    Element img = doc.select("img").first();
+    assertEquals("https://www.google.com/images/errors/logo_sm.gif", img.attr("abs:src"), "The absolute URL for the image source should use the HTTPS scheme from the base URI");
+}
+
+
+Input#9
+ @Test public void absHandlesRelativeQuery() {
+        Document doc = Jsoup.parse("<a href='?foo'>One</a> <a href='bar.html?foo'>Two</a>", "https://jsoup.org/path/file?bar");
+
+        Element a1 = doc.select("a").first();
+        assertEquals("https://jsoup.org/path/file?foo", a1.absUrl("href"));
+
+        Element a2 = doc.select("a").get(1);
+        assertEquals("https://jsoup.org/path/bar.html?foo", a2.absUrl("href"));
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+Refactor#9
+private Document setupAbsHandlesRelativeQuery() {
+    return Jsoup.parse("<a href='?foo'>One</a> <a href='bar.html?foo'>Two</a>", "https://jsoup.org/path/file?bar");
+}
+
+@Test
+public void testAbsHandlesRelativeQuery_A1() {
+    Document doc = setupAbsHandlesRelativeQuery();
+    Element a1 = doc.select("a").first();
+    assertEquals("https://jsoup.org/path/file?foo", a1.absUrl("href"), "A1 absolute URL should be correctly resolved");
+}
+
+@Test
+public void testAbsHandlesRelativeQuery_A2() {
+    Document doc = setupAbsHandlesRelativeQuery();
+    Element a2 = doc.select("a").get(1);
+    assertEquals("https://jsoup.org/path/bar.html?foo", a2.absUrl("href"), "A2 absolute URL should be correctly resolved");
+}
+
+
+Input#10
+ @Test public void testRemove() {
+        Document doc = Jsoup.parse("<p>One <span>two</span> three</p>");
+        Element p = doc.select("p").first();
+        p.childNode(0).remove();
+
+        assertEquals("two three", p.text());
+        assertEquals("<span>two</span> three", TextUtil.stripNewlines(p.html()));
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+Refactor#10
+Document doc;
+Element p;
+
+private void setupTestRemove() {
+    doc = Jsoup.parse("<p>One <span>two</span> three</p>");
+    p = doc.select("p").first();
+    p.childNode(0).remove();
+}
+
+@Test
+public void testRemove_TextContent() {
+    setupTestRemove();
+    assertEquals("two three", p.text(), "Text content should be 'two three' after removal");
+}
+
+@Test
+public void testRemove_HtmlContent() {
+    setupTestRemove();
+    assertEquals("<span>two</span> three", TextUtil.stripNewlines(p.html()), "HTML content should be '<span>two</span> three' after removal");
+}
+
+
+Input#11
+ @Test public void testReplace() {
+        Document doc = Jsoup.parse("<p>One <span>two</span> three</p>");
+        Element p = doc.select("p").first();
+        Element insert = doc.createElement("em").text("foo");
+        p.childNode(1).replaceWith(insert);
+
+        assertEquals("One <em>foo</em> three", p.html());
+    }
+Smell List: ['Eager_Test']
+Refactor#11
+Document doc;
+Element p;
+
+private void setupTestReplace() {
+    doc = Jsoup.parse("<p>One <span>two</span> three</p>");
+    p = doc.select("p").first();
+    Element insert = doc.createElement("em").text("foo");
+    p.childNode(1).replaceWith(insert);
+}
+
+@Test
+public void testReplace_ReplaceWithEmTag() {
+    setupTestReplace();
+    assertEquals("One <em>foo</em> three", p.html());
+}
+
+Input#12
+ @Test public void ownerDocument() {
+        Document doc = Jsoup.parse("<p>Hello");
+        Element p = doc.select("p").first();
+        assertTrue(p.ownerDocument() == doc);
+        assertTrue(doc.ownerDocument() == doc);
+        assertNull(doc.parent());
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+
+Refactor#12
+private Document setupOwnerDocumentTest() {
+    Document doc = Jsoup.parse("<p>Hello");
+    return doc;
+}
+
+@Test
+public void testOwnerDocument_ElementOwnerDocument() {
+    Document doc = setupOwnerDocumentTest();
+    Element p = doc.select("p").first();
+    assertTrue(p.ownerDocument() == doc, "Element's owner document should be the same as the parsed document");
+}
+
+@Test
+public void testOwnerDocument_DocumentOwnerDocument() {
+    Document doc = setupOwnerDocumentTest();
+    assertTrue(doc.ownerDocument() == doc, "Document's owner document should be itself");
+}
+
+@Test
+public void testOwnerDocument_DocumentParent() {
+    Document doc = setupOwnerDocumentTest();
+    assertNull(doc.parent(), "Document should not have a parent");
+}
+
+
+
+Input#13
+ @Test public void root() {
+        Document doc = Jsoup.parse("<div><p>Hello");
+        Element p = doc.select("p").first();
+        Node root = p.root();
+        assertTrue(doc == root);
+        assertNull(root.parent());
+        assertTrue(doc.root() == doc);
+        assertTrue(doc.root() == doc.ownerDocument());
+
+        Element standAlone = new Element(Tag.valueOf("p"), "");
+        assertTrue(standAlone.parent() == null);
+        assertTrue(standAlone.root() == standAlone);
+        assertTrue(standAlone.ownerDocument() == null);
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+Refactor#13
+private Document setupRootTest() {
+    Document doc = Jsoup.parse("<div><p>Hello");
+    return doc;
+}
+
+@Test
+public void testRoot_DocumentRootEqualsDocument() {
+    Document doc = setupRootTest();
+    Element p = doc.select("p").first();
+    Node root = p.root();
+    assertTrue(doc == root, "The root of the paragraph should be the document");
+}
+
+@Test
+public void testRoot_RootHasNoParent() {
+    Document doc = setupRootTest();
+    Element p = doc.select("p").first();
+    Node root = p.root();
+    assertNull(root.parent(), "The root node should have no parent");
+}
+
+@Test
+public void testRoot_DocumentRootEqualsOwnerDocument() {
+    Document doc = setupRootTest();
+    assertTrue(doc.root() == doc, "The root of the document should be the document itself");
+    assertTrue(doc.root() == doc.ownerDocument(), "The root of the document should equal its owner document");
+}
+
+@Test
+public void testRoot_StandAloneElementHasNoParent() {
+    Element standAlone = new Element(Tag.valueOf("p"), "");
+    assertTrue(standAlone.parent() == null, "A standalone element should have no parent");
+    assertTrue(standAlone.root() == standAlone, "A standalone element should be its own root");
+    assertTrue(standAlone.ownerDocument() == null, "A standalone element should have no owner document");
+}
+
+
+Input#14
+@Test public void before() {
+        Document doc = Jsoup.parse("<p>One <b>two</b> three</p>");
+        Element newNode = new Element(Tag.valueOf("em"), "");
+        newNode.appendText("four");
+
+        doc.select("b").first().before(newNode);
+        assertEquals("<p>One <em>four</em><b>two</b> three</p>", doc.body().html());
+
+        doc.select("b").first().before("<i>five</i>");
+        assertEquals("<p>One <em>four</em><i>five</i><b>two</b> three</p>", doc.body().html());
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+Refactor#14
+
+@Test
+public void testBeforeWithElement() {
+    Document doc = Jsoup.parse("<p>One <b>two</b> three</p>");
+    Element newNode = new Element(Tag.valueOf("em"), "");
+    newNode.appendText("four");
+
+    doc.select("b").first().before(newNode);
+    assertEquals("<p>One <em>four</em><b>two</b> three</p>", doc.body().html(), "Check if the new element is inserted before the <b> tag");
+}
+
+@Test
+public void testBeforeWithString() {
+    Document doc = Jsoup.parse("<p>One <b>two</b> three</p>");
+    Element newNode = new Element(Tag.valueOf("em"), "");
+    newNode.appendText("four");
+
+    doc.select("b").first().before(newNode);
+    doc.select("b").first().before("<i>five</i>");
+    assertEquals("<p>One <em>four</em><i>five</i><b>two</b> three</p>", doc.body().html(), "Check if the string is inserted before the <b> tag after the element insertion");
+}
+
+Input#15
+ @Test public void after() {
+        Document doc = Jsoup.parse("<p>One <b>two</b> three</p>");
+        Element newNode = new Element(Tag.valueOf("em"), "");
+        newNode.appendText("four");
+
+        doc.select("b").first().after(newNode);
+        assertEquals("<p>One <b>two</b><em>four</em> three</p>", doc.body().html());
+
+        doc.select("b").first().after("<i>five</i>");
+        assertEquals("<p>One <b>two</b><i>five</i><em>four</em> three</p>", doc.body().html());
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+Refactor#15
+private Document doc;
+private Element newNode;
+
+@BeforeEach
+void setup() {
+    doc = Jsoup.parse("<p>One <b>two</b> three</p>");
+    newNode = new Element(Tag.valueOf("em"), "");
+    newNode.appendText("four");
+}
+
+@Test
+public void testAfter_AddingElement() {
+    doc.select("b").first().after(newNode);
+    assertEquals("<p>One <b>two</b><em>four</em> three</p>", doc.body().html(), "Adding 'em' element after 'b' should result in the correct HTML structure");
+}
+
+@Test
+public void testAfter_AddingString() {
+    doc.select("b").first().after("<i>five</i>");
+    assertEquals("<p>One <b>two</b><i>five</i><em>four</em> three</p>", doc.body().html(), "Adding string '<i>five</i>' after 'b' should result in the correct HTML structure");
+}
+
+
+Input#16
+ @Test public void unwrap() {
+        Document doc = Jsoup.parse("<div>One <span>Two <b>Three</b></span> Four</div>");
+        Element span = doc.select("span").first();
+        Node twoText = span.childNode(0);
+        Node node = span.unwrap();
+
+        assertEquals("<div>One Two <b>Three</b> Four</div>", TextUtil.stripNewlines(doc.body().html()));
+        assertTrue(node instanceof TextNode);
+        assertEquals("Two ", ((TextNode) node).text());
+        assertEquals(node, twoText);
+        assertEquals(node.parent(), doc.select("div").first());
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+
+Refactor#16
+
+private Document doc;
+private Element span;
+private Node twoText;
+
+@BeforeEach
+void setup() {
+    doc = Jsoup.parse("<div>One <span>Two <b>Three</b></span> Four</div>");
+    span = doc.select("span").first();
+    twoText = span.childNode(0);
+}
+
+@Test
+public void testUnwrap_ReturnsCorrectHtmlStructure() {
+    Node node = span.unwrap();
+    assertEquals("<div>One Two <b>Three</b> Four</div>",
+                 TextUtil.stripNewlines(doc.body().html()),
+                 "After unwrapping the span, the HTML should have the correct structure.");
+}
+
+@Test
+public void testUnwrap_ReturnsCorrectNode() {
+    Node node = span.unwrap();
+    assertTrue(node instanceof TextNode,
+               "The unwrapped node should be an instance of TextNode.");
+    assertEquals("Two ", ((TextNode) node).text(),
+                 "The unwrapped TextNode should have the correct text.");
+    assertEquals(node, twoText,
+                 "The unwrapped node should be the same as the original child node.");
+    assertEquals(node.parent(), doc.select("div").first(),
+                 "The unwrapped node's parent should be the div element.");
+}
+
+
+Input#17
+ @Test public void unwrapNoChildren() {
+        Document doc = Jsoup.parse("<div>One <span></span> Two</div>");
+        Element span = doc.select("span").first();
+        Node node = span.unwrap();
+        assertEquals("<div>One  Two</div>", TextUtil.stripNewlines(doc.body().html()));
+        assertTrue(node == null);
+    }
+Smell List: ['Assertion_Roulette']
+Refactor#17
+@Test
+public void unwrapNoChildren() {
+    Document doc = Jsoup.parse("<div>One <span></span> Two</div>");
+    Element span = doc.select("span").first();
+    Node node = span.unwrap();
+    assertEquals("<div>One  Two</div>", TextUtil.stripNewlines(doc.body().html()), "The HTML content after unwrapping the span should match the expected output");
+    assertTrue(node == null, "The node returned from unwrap should be null since there were no children");
+}
+
+
+Input#18
+ @Test public void traverse() {
+        Document doc = Jsoup.parse("<div><p>Hello</p></div><div>There</div>");
+        final StringBuilder accum = new StringBuilder();
+        doc.select("div").first().traverse(new NodeVisitor() {
+            @Override
+            public void head(Node node, int depth) {
+                accum.append("<").append(node.nodeName()).append(">");
+            }
+
+            @Override
+            public void tail(Node node, int depth) {
+                accum.append("</").append(node.nodeName()).append(">");
+            }
+        });
+        assertEquals("<div><p><#text></#text></p></div>", accum.toString());
+    }
+Smell List: ['Sensitive_Equality', 'Eager_Test']
+Refactor#18
+
+@Test
+public void testTraverse_NodeStructure() {
+    Document doc = Jsoup.parse("<div><p>Hello</p></div><div>There</div>");
+    final StringBuilder accum = new StringBuilder();
+    setupNodeTraversal(doc, accum);
+    String expectedStructure = "<div><p><#text></#text></p></div>";
+    String actualStructure = accum.toString();
+    assertEquals(expectedStructure, actualStructure);
+}
+
+private void setupNodeTraversal(Document doc, StringBuilder accum) {
+    doc.select("div").first().traverse(new NodeVisitor() {
+        @Override
+        public void head(Node node, int depth) {
+            accum.append("<").append(node.nodeName()).append(">");
+        }
+
+        @Override
+        public void tail(Node node, int depth) {
+            accum.append("</").append(node.nodeName()).append(">");
+        }
+    });
+}
+
+
+
+
+Input#19
+ @Test public void orphanNodeReturnsNullForSiblingElements() {
+        Node node = new Element(Tag.valueOf("p"), "");
+        Element el = new Element(Tag.valueOf("p"), "");
+
+        assertEquals(0, node.siblingIndex());
+        assertEquals(0, node.siblingNodes().size());
+
+        assertNull(node.previousSibling());
+        assertNull(node.nextSibling());
+
+        assertEquals(0, el.siblingElements().size());
+        assertNull(el.previousElementSibling());
+        assertNull(el.nextElementSibling());
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test', 'Magic_Number_Test']
+Refactor#19
+
+private Node setupOrphanNode() {
+    return new Element(Tag.valueOf("p"), "");
+}
+
+@Test
+public void testOrphanNodeSiblingIndex() {
+    Node node = setupOrphanNode();
+    int expectedSiblingIndex = 0;
+    assertEquals(expectedSiblingIndex, node.siblingIndex(), "Check if the sibling index of an orphan node is 0");
+}
+
+@Test
+public void testOrphanNodeSiblingNodesSize() {
+    Node node = setupOrphanNode();
+    int expectedSiblingNodesSize = 0;
+    assertEquals(expectedSiblingNodesSize, node.siblingNodes().size(), "Check if the size of sibling nodes of an orphan node is 0");
+}
+
+@Test
+public void testOrphanNodePreviousSibling() {
+    Node node = setupOrphanNode();
+    assertNull(node.previousSibling(), "Check if the previous sibling of an orphan node is null");
+}
+
+@Test
+public void testOrphanNodeNextSibling() {
+    Node node = setupOrphanNode();
+    assertNull(node.nextSibling(), "Check if the next sibling of an orphan node is null");
+}
+
+@Test
+public void testOrphanElementSiblingElementsSize() {
+    Element el = new Element(Tag.valueOf("p"), "");
+    int expectedSiblingElementsSize = 0;
+    assertEquals(expectedSiblingElementsSize, el.siblingElements().size(), "Check if the size of sibling elements of an orphan element is 0");
+}
+
+@Test
+public void testOrphanElementPreviousElementSibling() {
+    Element el = new Element(Tag.valueOf("p"), "");
+    assertNull(el.previousElementSibling(), "Check if the previous element sibling of an orphan element is null");
+}
+
+@Test
+public void testOrphanElementNextElementSibling() {
+    Element el = new Element(Tag.valueOf("p"), "");
+    assertNull(el.nextElementSibling(), "Check if the next element sibling of an orphan element is null");
+}
+
+
+
+
+Input#20
+ @Test public void nodeIsNotASiblingOfItself() {
+        Document doc = Jsoup.parse("<div><p>One<p>Two<p>Three</div>");
+        Element p2 = doc.select("p").get(1);
+
+        assertEquals("Two", p2.text());
+        List<Node> nodes = p2.siblingNodes();
+        assertEquals(2, nodes.size());
+        assertEquals("<p>One</p>", nodes.get(0).outerHtml());
+        assertEquals("<p>Three</p>", nodes.get(1).outerHtml());
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test', 'Magic_Number_Test']
+Refactor#20
+
+Document doc;
+Element p2;
+
+private void setupNodeIsNotASiblingOfItself() {
+    doc = Jsoup.parse("<div><p>One<p>Two<p>Three</div>");
+    p2 = doc.select("p").get(1);
+}
+
+@Test
+public void testNodeIsNotASiblingOfItself_Text() {
+    setupNodeIsNotASiblingOfItself();
+    assertEquals("Two", p2.text(), "The text content of the second paragraph should be 'Two'");
+}
+
+@Test
+public void testNodeIsNotASiblingOfItself_SiblingCount() {
+    setupNodeIsNotASiblingOfItself();
+    int expectedSiblingCount = 2;
+    assertEquals(expectedSiblingCount, p2.siblingNodes().size(), "The second paragraph should have 2 sibling nodes");
+}
+
+@Test
+public void testNodeIsNotASiblingOfItself_SiblingContent() {
+    setupNodeIsNotASiblingOfItself();
+    List<Node> nodes = p2.siblingNodes();
+    assertEquals("<p>One</p>", nodes.get(0).outerHtml(), "The first sibling node should be '<p>One</p>'");
+    assertEquals("<p>Three</p>", nodes.get(1).outerHtml(), "The second sibling node should be '<p>Three</p>'");
+}
+
+
+Input#21
+@Test public void childNodesCopy() {
+        Document doc = Jsoup.parse("<div id=1>Text 1 <p>One</p> Text 2 <p>Two<p>Three</div><div id=2>");
+        Element div1 = doc.select("#1").first();
+        Element div2 = doc.select("#2").first();
+        List<Node> divChildren = div1.childNodesCopy();
+        assertEquals(5, divChildren.size());
+        TextNode tn1 = (TextNode) div1.childNode(0);
+        TextNode tn2 = (TextNode) divChildren.get(0);
+        tn2.text("Text 1 updated");
+        assertEquals("Text 1 ", tn1.text());
+        div2.insertChildren(-1, divChildren);
+        assertEquals("<div id=\"1\">Text 1 <p>One</p> Text 2 <p>Two</p><p>Three</p></div><div id=\"2\">Text 1 updated"
+            +"<p>One</p> Text 2 <p>Two</p><p>Three</p></div>", TextUtil.stripNewlines(doc.body().html()));
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test', 'Magic_Number_Test']
+Refactor#21
+private Document setupChildNodesCopy() {
+    Document doc = Jsoup.parse("<div id=1>Text 1 <p>One</p> Text 2 <p>Two<p>Three</div><div id=2>");
+    return doc;
+}
+
+@Test
+public void testChildNodesCopy_Size() {
+    Document doc = setupChildNodesCopy();
+    Element div1 = doc.select("#1").first();
+    List<Node> divChildren = div1.childNodesCopy();
+    int expectedSize = 5;
+    assertEquals(expectedSize, divChildren.size(), "The size of the copied child nodes should match the expected size.");
+}
+
+@Test
+public void testChildNodesCopy_TextNodeUpdate() {
+    Document doc = setupChildNodesCopy();
+    Element div1 = doc.select("#1").first();
+    List<Node> divChildren = div1.childNodesCopy();
+    TextNode tn1 = (TextNode) div1.childNode(0);
+    TextNode tn2 = (TextNode) divChildren.get(0);
+    String updatedText = "Text 1 updated";
+    tn2.text(updatedText);
+    assertEquals("Text 1 ", tn1.text(), "The text of the original TextNode should remain unchanged after updating the copied TextNode.");
+}
+
+@Test
+public void testChildNodesCopy_InsertChildren() {
+    Document doc = setupChildNodesCopy();
+    Element div1 = doc.select("#1").first();
+    Element div2 = doc.select("#2").first();
+    List<Node> divChildren = div1.childNodesCopy();
+    div2.insertChildren(-1, divChildren);
+    String expectedHtml = "<div id=\"1\">Text 1 <p>One</p> Text 2 <p>Two</p><p>Three</p></div><div id=\"2\">Text 1 updated" +
+                          "<p>One</p> Text 2 <p>Two</p><p>Three</p></div>";
+    assertEquals(expectedHtml, TextUtil.stripNewlines(doc.body().html()), "The HTML content of the document should match the expected structure after inserting the copied child nodes.");
+}
+
+
+Input#22
+ @Test public void supportsClone() {
+        Document doc = org.jsoup.Jsoup.parse("<div class=foo>Text</div>");
+        Element el = doc.select("div").first();
+        assertTrue(el.hasClass("foo"));
+
+        Element elClone = doc.clone().select("div").first();
+        assertTrue(elClone.hasClass("foo"));
+        assertTrue(elClone.text().equals("Text"));
+
+        el.removeClass("foo");
+        el.text("None");
+        assertFalse(el.hasClass("foo"));
+        assertTrue(elClone.hasClass("foo"));
+        assertTrue(el.text().equals("None"));
+        assertTrue(elClone.text().equals("Text"));
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test', 'Duplicate_Assert']
+Refactor#22
+private Document doc;
+    private Element el;
+
+    @BeforeEach
+    void setUp() {
+        doc = Jsoup.parse("<div class=foo>Text</div>");
+        el = doc.select("div").first();
+    }
+
+    @Test
+    public void testElementHasClassFoo() {
+        assertTrue(el.hasClass("foo"), "The element should have class 'foo'");
+    }
+
+    @Test
+    public void testClonedElementHasClassFooAndText() {
+        Element elClone = doc.clone().select("div").first();
+        assertTrue(elClone.hasClass("foo"), "The cloned element should have class 'foo'");
+        assertEquals("Text", elClone.text(), "The text of the cloned element should be 'Text'");
+    }
+
+    @Test
+    public void testElementClassModification() {
+        el.removeClass("foo");
+        assertFalse(el.hasClass("foo"), "The element should no longer have class 'foo' after removal");
+    }
+
+    @Test
+    public void testElementTextModification() {
+        el.text("None");
+        assertEquals("None", el.text(), "The text of the element should be 'None' after modification");
+    }
+
+    @Test
+    public void testClonedElementUnaffectedByOriginalModifications() {
+        Element elClone = doc.clone().select("div").first();
+        el.removeClass("foo");
+        el.text("None");
+        assertTrue(elClone.hasClass("foo"), "The cloned element should still have class 'foo' after modifying the original element");
+        assertEquals("Text", elClone.text(), "The text of the cloned element should still be 'Text' after modifying the original element");
+    }
+
+Input#23
+
+Refactor#23
+
+
+Input#24
+
+Refactor#24
+
+
+Input#25
+
+Refactor#25
+
+
+Input#26
+
+Refactor#26
+
+
+Input#27
+
+Refactor#27
+
+
+
+Input#28
+
+Refactor#28
+
+
+
+Input#29
+
+Refactor#29
+
+
+
+Input#30
+
+Refactor#30
+
+
+Input#31
+
+Refactor#31
+
+
+
+Input#32
+
+Refactor#32
+
+
+
+Input#33
+
+Refactor#33
+
+
+
+Input#34
+
+Refactor#34
+
+
+
+Input#35
+
+Refactor#35
+

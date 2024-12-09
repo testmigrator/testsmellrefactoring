@@ -1,0 +1,333 @@
+File#1
+
+
+Input#1
+ @Test
+    public void testSinFunction() {
+        UnivariateFunction f = new Sin();
+        UnivariateIntegrator integrator = new TrapezoidIntegrator();
+        double min;
+        double max;
+        double expected;
+        double result;
+        double tolerance;
+
+        min = 0; max = JdkMath.PI; expected = 2;
+        tolerance = JdkMath.abs(expected * integrator.getRelativeAccuracy());
+        result = integrator.integrate(10000, f, min, max);
+        Assert.assertTrue(integrator.getEvaluations() < 2500);
+        Assert.assertTrue(integrator.getIterations()  < 15);
+        Assert.assertEquals(expected, result, tolerance);
+
+        min = -JdkMath.PI/3; max = 0; expected = -0.5;
+        tolerance = JdkMath.abs(expected * integrator.getRelativeAccuracy());
+        result = integrator.integrate(10000, f, min, max);
+        Assert.assertTrue(integrator.getEvaluations() < 2500);
+        Assert.assertTrue(integrator.getIterations()  < 15);
+        Assert.assertEquals(expected, result, tolerance);
+    }
+Smell List: ['Assertion_Roulette', 'Duplicate_Assert']
+
+Refactor#1
+
+    private static final int MAX_EVALUATIONS = 2500;
+    private static final int MAX_ITERATIONS = 15;
+
+    @ParameterizedTest
+    @CsvSource({
+            "0, 3.14159, 2.0",
+            "-1.0471975511965976, 0, -0.5"
+    })
+    public void testSinFunction(double min, double max, double expected) {
+        UnivariateFunction f = new Sin();
+        TrapezoidIntegrator integrator = new TrapezoidIntegrator();
+
+        double tolerance = Math.abs(expected * integrator.getRelativeAccuracy());
+        double result = integrator.integrate(10000, f, min, max);
+
+        Assert.assertTrue("Too many evaluations", integrator.getEvaluations() < MAX_EVALUATIONS);
+        Assert.assertTrue("Too many iterations",  integrator.getIterations() < MAX_ITERATIONS);
+        Assert.assertEquals("Incorrect integration result", expected, result, tolerance);
+    }
+
+
+Input#2
+
+@Test
+    public void testQuinticFunction() {
+        UnivariateFunction f = new QuinticFunction();
+        UnivariateIntegrator integrator = new TrapezoidIntegrator();
+        double min;
+        double max;
+        double expected;
+        double result;
+        double tolerance;
+
+        min = 0; max = 1; expected = -1.0/48;
+        tolerance = JdkMath.abs(expected * integrator.getRelativeAccuracy());
+        result = integrator.integrate(10000, f, min, max);
+        Assert.assertTrue(integrator.getEvaluations() < 5000);
+        Assert.assertTrue(integrator.getIterations()  < 15);
+        Assert.assertEquals(expected, result, tolerance);
+
+        min = 0; max = 0.5; expected = 11.0/768;
+        tolerance = JdkMath.abs(expected * integrator.getRelativeAccuracy());
+        result = integrator.integrate(10000, f, min, max);
+        Assert.assertTrue(integrator.getEvaluations() < 2500);
+        Assert.assertTrue(integrator.getIterations()  < 15);
+        Assert.assertEquals(expected, result, tolerance);
+
+        min = -1; max = 4; expected = 2048/3.0 - 78 + 1.0/48;
+        tolerance = JdkMath.abs(expected * integrator.getRelativeAccuracy());
+        result = integrator.integrate(10000, f, min, max);
+        Assert.assertTrue(integrator.getEvaluations() < 5000);
+        Assert.assertTrue(integrator.getIterations()  < 15);
+        Assert.assertEquals(expected, result, tolerance);
+    }
+Smell List: ['Assertion_Roulette', 'Duplicate_Assert']
+Refactor#2
+ private static final int MAX_EVALUATIONS = 5000;
+    private static final int MAX_ITERATIONS = 15;
+
+    @ParameterizedTest
+    @CsvSource({
+            "0, 1, -1.0/48",
+            "0, 0.5, 11.0/768",
+            "-1, 4, 2048/3.0 - 78 + 1.0/48"
+    })
+    public void testQuinticFunction(double min, double max, double expected) {
+        UnivariateFunction f = new QuinticFunction();
+        TrapezoidIntegrator integrator = new TrapezoidIntegrator();
+
+        double tolerance = Math.abs(expected * integrator.getRelativeAccuracy());
+        double result = integrator.integrate(10000, f, min, max);
+
+        Assert.assertTrue("Too many evaluations", integrator.getEvaluations() < MAX_EVALUATIONS);
+        Assert.assertTrue("Too many iterations",  integrator.getIterations() < MAX_ITERATIONS);
+        Assert.assertEquals("Incorrect integration result", expected, result, tolerance);
+    }
+
+Input#3
+
+@Test
+    public void testParameters() {
+        UnivariateFunction f = new Sin();
+
+        try {
+            // bad interval
+            new TrapezoidIntegrator().integrate(1000, f, 1, -1);
+            Assert.fail("Expecting NumberIsTooLargeException - bad interval");
+        } catch (NumberIsTooLargeException ex) {
+            // expected
+        }
+        try {
+            // bad iteration limits
+            new TrapezoidIntegrator(5, 4);
+            Assert.fail("Expecting NumberIsTooSmallException - bad iteration limits");
+        } catch (NumberIsTooSmallException ex) {
+            // expected
+        }
+        try {
+            // bad iteration limits
+            new TrapezoidIntegrator(10,99);
+            Assert.fail("Expecting NumberIsTooLargeException - bad iteration limits");
+        } catch (NumberIsTooLargeException ex) {
+            // expected
+        }
+    }
+Smell List: ['Exception_Catching_Throwing']
+
+Refactor#3
+
+    @Test
+    public void testIntegrateWithInvalidBounds() {
+        UnivariateFunction f = new Sin();
+
+        NumberIsTooLargeException exception = assertThrows(NumberIsTooLargeException.class, () -> {
+            new TrapezoidIntegrator().integrate(1000, f, 1, -1);
+        }, "Expected NumberIsTooLargeException to be thrown for invalid bounds");
+    }
+
+    @Test
+    public void testConstructorWithTooSmallMax() {
+        NumberIsTooSmallException exception = assertThrows(NumberIsTooSmallException.class, () -> {
+            new TrapezoidIntegrator(5, 4);
+        }, "Expected NumberIsTooSmallException to be thrown for too small max");
+    }
+
+    @Test
+    public void testConstructorWithTooLargeMax() {
+        NumberIsTooLargeException exception = assertThrows(NumberIsTooLargeException.class, () -> {
+            new TrapezoidIntegrator(10, 99);
+        }, "Expected NumberIsTooLargeException to be thrown for too large max");
+    }
+
+Input#4
+
+Refactor#4
+
+
+Input#5
+
+Refactor#5
+
+
+Input#6
+
+Refactor#6
+
+
+Input#7
+
+Refactor#7
+
+
+Input#8
+
+Refactor#8
+
+
+Input#9
+
+Refactor#9
+
+
+Input#10
+
+Refactor#10
+
+
+Input#11
+
+Refactor#11
+
+
+Input#12
+
+Refactor#12
+
+
+Input#13
+
+Refactor#13
+
+
+Input#14
+
+Refactor#14
+
+
+Input#15
+
+Refactor#15
+
+
+Input#16
+
+Refactor#16
+
+
+Input#17
+
+Refactor#17
+
+
+Input#18
+
+Refactor#18
+
+
+
+Input#19
+
+Refactor#19
+
+
+
+Input#20
+
+Refactor#20
+
+
+
+Input#21
+
+Refactor#21
+
+
+Input#22
+
+Refactor#22
+
+
+Input#23
+
+Refactor#23
+
+
+Input#24
+
+Refactor#24
+
+
+Input#25
+
+Refactor#25
+
+
+Input#26
+
+Refactor#26
+
+
+Input#27
+
+Refactor#27
+
+
+
+Input#28
+
+Refactor#28
+
+
+
+Input#29
+
+Refactor#29
+
+
+
+Input#30
+
+Refactor#30
+
+
+Input#31
+
+Refactor#31
+
+
+
+Input#32
+
+Refactor#32
+
+
+
+Input#33
+
+Refactor#33
+
+
+
+Input#34
+
+Refactor#34
+
+
+
+Input#35
+
+Refactor#35
+

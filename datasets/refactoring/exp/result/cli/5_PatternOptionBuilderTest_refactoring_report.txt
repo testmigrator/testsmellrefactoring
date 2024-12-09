@@ -1,0 +1,246 @@
+File#1
+
+
+Input#1
+ @Test
+    public void testClassPattern() throws Exception {
+        final Options options = PatternOptionBuilder.parsePattern("c+d+");
+        final CommandLineParser parser = new PosixParser();
+        final CommandLine line = parser.parse(options, new String[] {"-c", "java.util.Calendar", "-d", "System.DateTime"});
+
+        assertEquals(Calendar.class, line.getOptionObject("c"), "c value");
+        assertNull(line.getOptionObject("d"), "d value");
+    }
+Smell List: ['Exception_Catching_Throwing']
+
+Refactor#1
+@Test
+public void testClassPattern() {
+    assertDoesNotThrow(() -> {
+        final Options options = PatternOptionBuilder.parsePattern("c+d+");
+        final CommandLineParser parser = new PosixParser();
+        final CommandLine line = parser.parse(options, new String[] {"-c", "java.util.Calendar", "-d", "System.DateTime"});
+
+        assertEquals(Calendar.class, line.getOptionObject("c"), "c value");
+        assertNull(line.getOptionObject("d"), "d value");
+    }, "Unexpected exception occurred during the test");
+}
+
+
+Input#2
+ @Test
+    public void testExistingFilePattern() throws Exception {
+        final Options options = PatternOptionBuilder.parsePattern("g<");
+        final CommandLineParser parser = new PosixParser();
+        final CommandLine line = parser.parse(options, new String[] {"-g", "src/test/resources/org/apache/commons/cli/existing-readable.file"});
+
+        final Object parsedReadableFileStream = line.getOptionObject("g");
+
+        assertNotNull(parsedReadableFileStream, "option g not parsed");
+        assertTrue(parsedReadableFileStream instanceof FileInputStream, "option g not FileInputStream");
+    }
+Smell List: ['Exception_Catching_Throwing']
+
+Refactor#2
+ @Test
+    public void testExistingFilePattern() {
+        assertDoesNotThrow(() -> {
+            final Options options = PatternOptionBuilder.parsePattern("g<");
+            final CommandLineParser parser = new PosixParser();
+            final CommandLine line = parser.parse(options, new String[] {"-g", "src/test/resources/org/apache/commons/cli/existing-readable.file"});
+
+            final Object parsedReadableFileStream = line.getOptionObject("g");
+
+            assertNotNull(parsedReadableFileStream, "option g not parsed");
+            assertTrue(parsedReadableFileStream instanceof FileInputStream, "option g not FileInputStream");
+        }, "Unexpected exception occurred during the test");
+    }
+
+Input#3
+ @Test
+    public void testExistingFilePatternFileNotExist() throws Exception {
+        final Options options = PatternOptionBuilder.parsePattern("f<");
+        final CommandLineParser parser = new PosixParser();
+        final CommandLine line = parser.parse(options, new String[] {"-f", "non-existing.file"});
+
+        assertNull(line.getOptionObject("f"), "option f parsed");
+    }
+Smell List: ['Exception_Catching_Throwing']
+
+Refactor#3
+@Test
+public void testExistingFilePatternFileNotExist() {
+    assertDoesNotThrow(() -> {
+        final Options options = PatternOptionBuilder.parsePattern("f<");
+        final CommandLineParser parser = new PosixParser();
+        final CommandLine line = parser.parse(options, new String[] {"-f", "non-existing.file"});
+        assertNull(line.getOptionObject("f"), "option f parsed");
+    }, "Unexpected exception occurred during the test");
+}
+
+
+
+Input#4
+ @Test
+    public void testNumberPattern() throws Exception {
+        final Options options = PatternOptionBuilder.parsePattern("n%d%x%");
+        final CommandLineParser parser = new PosixParser();
+        // 3,5 fails validation.
+        //assertThrows(ParseException.class, () -> parser.parse(options, new String[] {"-n", "1", "-d", "2.1", "-x", "3,5"}));
+
+        final CommandLine line = parser.parse(options, new String[] {"-n", "1", "-d", "2.1", "-x", "3,5"});
+        assertEquals(Long.class, line.getOptionObject("n").getClass(), "n object class");
+        assertEquals(Long.valueOf(1), line.getOptionObject("n"), "n value");
+
+        assertEquals(Double.class, line.getOptionObject("d").getClass(), "d object class");
+        assertEquals(Double.valueOf(2.1), line.getOptionObject("d"), "d value");
+
+        assertNull(line.getOptionObject("x"), "x object");
+    }
+Smell List: ['Exception_Catching_Throwing', 'Magic_Number_Test']
+
+Refactor#4
+
+@Test
+public void testNumberPattern() {
+    final Options options = PatternOptionBuilder.parsePattern("n%d%x%");
+    final CommandLineParser parser = new PosixParser();
+
+    assertDoesNotThrow(() -> {
+        final CommandLine line = parser.parse(options, new String[] {"-n", "1", "-d", "2.1", "-x", "3,5"});
+        long expectedNValue = 1;
+        double expectedDValue = 2.1;
+
+        assertEquals(Long.class, line.getOptionObject("n").getClass(), "n object class");
+        assertEquals(expectedNValue, line.getOptionObject("n"), "n value");
+
+        assertEquals(Double.class, line.getOptionObject("d").getClass(), "d object class");
+        assertEquals(expectedDValue, line.getOptionObject("d"), "d value");
+
+        assertNull(line.getOptionObject("x"), "x object");
+    }, "Unexpected exception occurred during the test");
+}
+
+
+
+Input#5
+@Test
+    public void testObjectPattern() throws Exception {
+        final Options options = PatternOptionBuilder.parsePattern("o@i@n@");
+        final CommandLineParser parser = new PosixParser();
+        final CommandLine line = parser.parse(options, new String[] {"-o", "java.lang.String", "-i", "java.util.Calendar", "-n", "System.DateTime"});
+
+        assertEquals("", line.getOptionObject("o"), "o value");
+        assertNull(line.getOptionObject("i"), "i value");
+        assertNull(line.getOptionObject("n"), "n value");
+    }
+Smell List: ['Exception_Catching_Throwing']
+
+Refactor#5
+@Test
+public void testObjectPattern() {
+    assertDoesNotThrow(() -> {
+        final Options options = PatternOptionBuilder.parsePattern("o@i@n@");
+        final CommandLineParser parser = new PosixParser();
+        final CommandLine line = parser.parse(options, new String[] {"-o", "java.lang.String", "-i", "java.util.Calendar", "-n", "System.DateTime"});
+
+        assertEquals("java.lang.String", line.getOptionObject("o"));
+        assertEquals("java.util.Calendar", line.getOptionObject("i"));
+        assertEquals("System.DateTime", line.getOptionObject("n"));
+    }, "Unexpected exception occurred during the test");
+}
+
+Input#6
+ @Test
+    public void testRequiredOption() throws Exception {
+        final Options options = PatternOptionBuilder.parsePattern("!n%m%");
+        final CommandLineParser parser = new PosixParser();
+
+        try {
+            parser.parse(options, new String[] {""});
+            fail("MissingOptionException wasn't thrown");
+        } catch (final MissingOptionException e) {
+            assertEquals(1, e.getMissingOptions().size());
+            assertTrue(e.getMissingOptions().contains("n"));
+        }
+    }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing', 'Magic_Number_Test']
+
+Refactor#6
+
+@Test
+public void testRequiredOption() {
+    final Options options = PatternOptionBuilder.parsePattern("!n%m%");
+    final CommandLineParser parser = new PosixParser();
+    final int expectedMissingOptionsCount = 1;
+
+    MissingOptionException exception = assertThrows(MissingOptionException.class, () -> {
+        parser.parse(options, new String[] {""});
+    });
+
+    assertEquals(expectedMissingOptionsCount, exception.getMissingOptions().size(), "The size of missing options does not match the expected value");
+    assertTrue(exception.getMissingOptions().contains("n"), "The missing options do not contain the expected option 'n'");
+}
+
+Input#7
+
+Refactor#7
+
+
+Input#8
+ @Test
+    public void testUntypedPattern() throws Exception {
+        final Options options = PatternOptionBuilder.parsePattern("abc");
+        final CommandLineParser parser = new PosixParser();
+        final CommandLine line = parser.parse(options, new String[] {"-abc"});
+
+        assertTrue(line.hasOption('a'));
+        assertNull(line.getOptionObject('a'), "value a");
+        assertTrue(line.hasOption('b'));
+        assertNull(line.getOptionObject('b'), "value b");
+        assertTrue(line.hasOption('c'));
+        assertNull(line.getOptionObject('c'), "value c");
+    }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing']
+
+Refactor#8
+
+@Test
+public void testUntypedPattern() {
+    final Options options = PatternOptionBuilder.parsePattern("abc");
+    final CommandLineParser parser = new PosixParser();
+    final CommandLine line = assertDoesNotThrow(() -> parser.parse(options, new String[] {"-abc"}), "Unexpected exception occurred during parsing");
+
+    assertTrue(line.hasOption('a'), "Option 'a' should be present");
+    assertNull(line.getOptionObject('a'), "Option 'a' should not have a value");
+    assertTrue(line.hasOption('b'), "Option 'b' should be present");
+    assertNull(line.getOptionObject('b'), "Option 'b' should not have a value");
+    assertTrue(line.hasOption('c'), "Option 'c' should be present");
+    assertNull(line.getOptionObject('c'), "Option 'c' should not have a value");
+}
+
+
+Input#9
+ @Test
+    public void testURLPattern() throws Exception {
+        final Options options = PatternOptionBuilder.parsePattern("u/v/");
+        final CommandLineParser parser = new PosixParser();
+        final CommandLine line = parser.parse(options, new String[] {"-u", "https://commons.apache.org", "-v", "foo://commons.apache.org"});
+
+        assertEquals(new URL("https://commons.apache.org"), line.getOptionObject("u"), "u value");
+        assertNull(line.getOptionObject("v"), "v value");
+    }
+Smell List: ['Exception_Catching_Throwing']
+
+Refactor#9
+@Test
+public void testURLPattern() {
+    assertDoesNotThrow(() -> {
+        final Options options = PatternOptionBuilder.parsePattern("u/v/");
+        final CommandLineParser parser = new PosixParser();
+        final CommandLine line = parser.parse(options, new String[] {"-u", "https://commons.apache.org", "-v", "foo://commons.apache.org"});
+
+        assertEquals(new URL("https://commons.apache.org"), line.getOptionObject("u"), "u value");
+        assertNull(line.getOptionObject("v"), "v value");
+    }, "Unexpected exception occurred during the test");
+}

@@ -1,0 +1,284 @@
+File#1
+
+
+Input#1
+ @Test
+    public void testToString() {
+        assertEquals("<!-- This is one heck of a comment! -->", comment.toString());
+
+        Document doc = Jsoup.parse("<div><!-- comment--></div>");
+        assertEquals("<div>\n <!-- comment-->\n</div>", doc.body().html());
+
+        doc = Jsoup.parse("<p>One<!-- comment -->Two</p>");
+        assertEquals("<p>One<!-- comment -->Two</p>", doc.body().html());
+        assertEquals("OneTwo", doc.text());
+    }
+Smell List: ['Assertion_Roulette', 'Sensitive_Equality']
+Refactor#1
+
+@Test
+public void testToString() {
+    Comment comment = new Comment("This is one heck of a comment!");
+    String commentString = comment.toString();
+    assertEquals("<!-- This is one heck of a comment! -->", commentString, "Check if the comment string is correctly formatted");
+
+    Document doc = Jsoup.parse("<div><!-- comment--></div>");
+    String docBodyHtml = doc.body().html();
+    assertEquals("<div>\n <!-- comment-->\n</div>", docBodyHtml, "Check if the document body HTML is correctly formatted");
+
+    doc = Jsoup.parse("<p>One<!-- comment -->Two</p>");
+    String docBodyHtmlWithComment = doc.body().html();
+    assertEquals("<p>One<!-- comment -->Two</p>", docBodyHtmlWithComment, "Check if the document body HTML with comment is correctly formatted");
+    String docText = doc.text();
+    assertEquals("OneTwo", docText, "Check if the document text is correctly extracted");
+}
+
+Input#2
+ @Test
+    public void testHtmlNoPretty() {
+        Document doc = Jsoup.parse("<!-- a simple comment -->");
+        doc.outputSettings().prettyPrint(false);
+        assertEquals("<!-- a simple comment --><html><head></head><body></body></html>", doc.html());
+        Node node = doc.childNode(0);
+        Comment c1 = (Comment) node;
+        assertEquals("<!-- a simple comment -->", c1.outerHtml());
+    }
+Smell List: ['Assertion_Roulette']
+Refactor#2
+@Test
+public void testHtmlNoPretty() {
+    Document doc = Jsoup.parse("<!-- a simple comment -->");
+    doc.outputSettings().prettyPrint(false);
+    assertEquals("<!-- a simple comment --><html><head></head><body></body></html>", doc.html(), "HTML output should match expected string when pretty printing is disabled");
+    Node node = doc.childNode(0);
+    Comment c1 = (Comment) node;
+    assertEquals("<!-- a simple comment -->", c1.outerHtml(), "Comment outer HTML should match expected string");
+}
+
+
+Input#3
+ @Test
+    public void testClone() {
+        Comment c1 = comment.clone();
+        assertNotSame(comment, c1);
+        assertEquals(comment.getData(), comment.getData());
+        c1.setData("New");
+        assertEquals("New", c1.getData());
+        assertNotEquals(c1.getData(), comment.getData());
+    }
+Smell List: ['Assertion_Roulette', 'Redundant_Assertion', 'Eager_Test']
+Refactor#3
+
+private Comment comment;
+
+@BeforeEach
+public void setUp() {
+    comment = new Comment("Original");
+}
+
+@Test
+public void testClone_ObjectIdentity() {
+    Comment c1 = comment.clone();
+    assertNotSame(comment, c1, "Cloned object should not be the same instance as the original object");
+}
+
+@Test
+public void testClone_DataEquality() {
+    Comment c1 = comment.clone();
+    assertEquals(comment.getData(), c1.getData(), "Data in cloned object should be equal to data in the original object");
+}
+
+@Test
+public void testClone_DataMutability() {
+    Comment c1 = comment.clone();
+    c1.setData("New");
+    assertEquals("New", c1.getData(), "Cloned object's data should be updated to the new value");
+    assertNotEquals(c1.getData(), comment.getData(), "Cloned object's data should not be the same as the original object's data after modification");
+}
+
+
+Input#4
+ @Test
+    public void isXmlDeclaration() {
+        assertFalse(comment.isXmlDeclaration());
+        assertTrue(decl.isXmlDeclaration());
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+Refactor#4
+
+
+@Test
+public void testIsXmlDeclaration_Comment() {
+    assertFalse(comment.isXmlDeclaration(), "Comment should not be an XML declaration");
+}
+
+@Test
+public void testIsXmlDeclaration_Declaration() {
+    assertTrue(decl.isXmlDeclaration(), "Declaration should be an XML declaration");
+}
+
+
+Input#5
+
+Refactor#5
+
+
+Input#6
+
+Refactor#6
+
+
+Input#7
+
+Refactor#7
+
+
+Input#8
+
+Refactor#8
+
+
+Input#9
+
+Refactor#9
+
+
+Input#10
+
+Refactor#10
+
+
+Input#11
+
+Refactor#11
+
+
+Input#12
+
+Refactor#12
+
+
+Input#13
+
+Refactor#13
+
+
+Input#14
+
+Refactor#14
+
+
+Input#15
+
+Refactor#15
+
+
+Input#16
+
+Refactor#16
+
+
+Input#17
+
+Refactor#17
+
+
+Input#18
+
+Refactor#18
+
+
+
+Input#19
+
+Refactor#19
+
+
+
+Input#20
+
+Refactor#20
+
+
+
+Input#21
+
+Refactor#21
+
+
+Input#22
+
+Refactor#22
+
+
+Input#23
+
+Refactor#23
+
+
+Input#24
+
+Refactor#24
+
+
+Input#25
+
+Refactor#25
+
+
+Input#26
+
+Refactor#26
+
+
+Input#27
+
+Refactor#27
+
+
+
+Input#28
+
+Refactor#28
+
+
+
+Input#29
+
+Refactor#29
+
+
+
+Input#30
+
+Refactor#30
+
+
+Input#31
+
+Refactor#31
+
+
+
+Input#32
+
+Refactor#32
+
+
+
+Input#33
+
+Refactor#33
+
+
+
+Input#34
+
+Refactor#34
+
+
+
+Input#35
+
+Refactor#35
+

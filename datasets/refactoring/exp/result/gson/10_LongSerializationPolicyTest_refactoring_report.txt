@@ -1,0 +1,310 @@
+File#1
+
+
+Input#1
+ @Test
+  public void testDefaultLongSerialization() throws Exception {
+    JsonElement element = LongSerializationPolicy.DEFAULT.serialize(1556L);
+    assertThat(element.isJsonPrimitive()).isTrue();
+
+    JsonPrimitive jsonPrimitive = element.getAsJsonPrimitive();
+    assertThat(jsonPrimitive.isString()).isFalse();
+    assertThat(jsonPrimitive.isNumber()).isTrue();
+    assertThat(element.getAsLong()).isEqualTo(1556L);
+  }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing']
+
+Refactor#1
+@Test
+public void testDefaultLongSerialization() {
+    assertDoesNotThrow(()->{
+      JsonElement element = LongSerializationPolicy.DEFAULT.serialize(1556L);
+      assertThat(element.isJsonPrimitive(), "Element should be a JSON primitive").isTrue();
+
+      JsonPrimitive jsonPrimitive = element.getAsJsonPrimitive();
+      assertThat(jsonPrimitive.isString(), "JSON primitive should not be a string").isFalse();
+      assertThat(jsonPrimitive.isNumber(), "JSON primitive should be a number").isTrue();
+      assertThat(element.getAsLong(), "Serialized value should match the original long value").isEqualTo(1556L);
+    });
+}
+
+
+Input#2
+ @Test
+  public void testDefaultLongSerializationIntegration() {
+    Gson gson =
+        new GsonBuilder().setLongSerializationPolicy(LongSerializationPolicy.DEFAULT).create();
+    assertThat(gson.toJson(new long[] {1L}, long[].class)).isEqualTo("[1]");
+    assertThat(gson.toJson(new Long[] {1L}, Long[].class)).isEqualTo("[1]");
+  }
+Smell List: ['Assertion_Roulette']
+
+Refactor#2
+@Test
+public void testDefaultLongSerializationIntegration() {
+  Gson gson = new GsonBuilder().setLongSerializationPolicy(LongSerializationPolicy.DEFAULT).create();
+  assertThat(gson.toJson(new long[] {1L}, long[].class), "Serialization of primitive long array failed").isEqualTo("[1]");
+  assertThat(gson.toJson(new Long[] {1L}, Long[].class), "Serialization of Long object array failed").isEqualTo("[1]");
+}
+
+Input#3
+ @Test
+  public void testDefaultLongSerializationNull() {
+    LongSerializationPolicy policy = LongSerializationPolicy.DEFAULT;
+    assertThat(policy.serialize(null).isJsonNull()).isTrue();
+
+    Gson gson = new GsonBuilder().setLongSerializationPolicy(policy).create();
+    assertThat(gson.toJson(null, Long.class)).isEqualTo("null");
+  }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+
+Refactor#3
+
+private LongSerializationPolicy setupTestDefaultLongSerializationNull() {
+    return LongSerializationPolicy.DEFAULT;
+}
+
+@Test
+public void testDefaultLongSerializationNull_Serialization() {
+    LongSerializationPolicy policy = setupTestDefaultLongSerializationNull();
+    assertThat(policy.serialize(null).isJsonNull()).isTrue();
+}
+
+@Test
+public void testDefaultLongSerializationNull_Gson() {
+    LongSerializationPolicy policy = setupTestDefaultLongSerializationNull();
+    Gson gson = new GsonBuilder().setLongSerializationPolicy(policy).create();
+    assertThat(gson.toJson(null, Long.class)).isEqualTo("null", "Gson should serialize null Long to JSON null");
+}
+
+
+Input#4
+ @Test
+  public void testStringLongSerialization() throws Exception {
+    JsonElement element = LongSerializationPolicy.STRING.serialize(1556L);
+    assertThat(element.isJsonPrimitive()).isTrue();
+
+    JsonPrimitive jsonPrimitive = element.getAsJsonPrimitive();
+    assertThat(jsonPrimitive.isNumber()).isFalse();
+    assertThat(jsonPrimitive.isString()).isTrue();
+    assertThat(element.getAsString()).isEqualTo("1556");
+  }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing']
+
+Refactor#4
+@Test
+public void testStringLongSerialization() {
+    assertDoesNotThrow(() -> {
+        JsonElement element = LongSerializationPolicy.STRING.serialize(1556L);
+        assertThat(element.isJsonPrimitive(), "Element should be a JsonPrimitive").isTrue();
+
+        JsonPrimitive jsonPrimitive = element.getAsJsonPrimitive();
+        assertThat(jsonPrimitive.isNumber(), "JsonPrimitive should not be a number").isFalse();
+        assertThat(jsonPrimitive.isString(), "JsonPrimitive should be a string").isTrue();
+        assertThat(element.getAsString(), "Serialized long should be equal to '1556'").isEqualTo("1556");
+    }, "Unexpected exception occurred during the test");
+}
+
+
+Input#5
+ @Test
+  public void testStringLongSerializationIntegration() {
+    Gson gson =
+        new GsonBuilder().setLongSerializationPolicy(LongSerializationPolicy.STRING).create();
+    assertThat(gson.toJson(new long[] {1L}, long[].class)).isEqualTo("[\"1\"]");
+    assertThat(gson.toJson(new Long[] {1L}, long[].class)).isEqualTo("[\"1\"]");
+  }
+Smell List: ['Assertion_Roulette']
+Refactor#5
+@Test
+public void testStringLongSerializationIntegration() {
+  Gson gson = new GsonBuilder().setLongSerializationPolicy(LongSerializationPolicy.STRING).create();
+  assertThat(gson.toJson(new long[] {1L}, long[].class), "Check serialization of primitive long array").isEqualTo("[\"1\"]");
+  assertThat(gson.toJson(new Long[] {1L}, long[].class), "Check serialization of Long object array").isEqualTo("[\"1\"]");
+}
+
+Input#6
+ @Test
+  public void testStringLongSerializationNull() {
+    LongSerializationPolicy policy = LongSerializationPolicy.STRING;
+    assertThat(policy.serialize(null).isJsonNull()).isTrue();
+
+    Gson gson = new GsonBuilder().setLongSerializationPolicy(policy).create();
+    assertThat(gson.toJson(null, Long.class)).isEqualTo("null");
+  }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+
+Refactor#6
+
+@Before
+public void setupTestStringLongSerializationNull() {
+    policy = LongSerializationPolicy.STRING;
+    gson = new GsonBuilder().setLongSerializationPolicy(policy).create();
+}
+
+@Test
+public void testStringLongSerializationNull_SerializationPolicy() {
+    assertThat(policy.serialize(null).isJsonNull()).isTrue();
+}
+
+@Test
+public void testStringLongSerializationNull_GsonToJson() {
+    assertThat(gson.toJson(null, Long.class)).isEqualTo("null", "Gson toJson should return 'null' for null Long values");
+}
+
+Input#7
+
+Refactor#7
+
+
+Input#8
+
+Refactor#8
+
+
+Input#9
+
+Refactor#9
+
+
+Input#10
+
+Refactor#10
+
+
+Input#11
+
+Refactor#11
+
+
+Input#12
+
+Refactor#12
+
+
+Input#13
+
+Refactor#13
+
+
+Input#14
+
+Refactor#14
+
+
+Input#15
+
+Refactor#15
+
+
+Input#16
+
+Refactor#16
+
+
+Input#17
+
+Refactor#17
+
+
+Input#18
+
+Refactor#18
+
+
+
+Input#19
+
+Refactor#19
+
+
+
+Input#20
+
+Refactor#20
+
+
+
+Input#21
+
+Refactor#21
+
+
+Input#22
+
+Refactor#22
+
+
+Input#23
+
+Refactor#23
+
+
+Input#24
+
+Refactor#24
+
+
+Input#25
+
+Refactor#25
+
+
+Input#26
+
+Refactor#26
+
+
+Input#27
+
+Refactor#27
+
+
+
+Input#28
+
+Refactor#28
+
+
+
+Input#29
+
+Refactor#29
+
+
+
+Input#30
+
+Refactor#30
+
+
+Input#31
+
+Refactor#31
+
+
+
+Input#32
+
+
+Refactor#32
+
+
+
+Input#33
+
+Refactor#33
+
+
+
+
+Input#34
+
+Refactor#34
+
+
+
+Input#35
+
+Refactor#35
+

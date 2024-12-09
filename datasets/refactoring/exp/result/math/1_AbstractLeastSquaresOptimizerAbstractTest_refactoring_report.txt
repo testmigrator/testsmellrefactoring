@@ -1,0 +1,701 @@
+File#1
+
+
+Input#1
+ @Test
+    public void testTrivial() {
+        LinearProblem problem
+                = new LinearProblem(new double[][]{{2}},
+                new double[]{3});
+        LeastSquaresProblem ls = problem.getBuilder().build();
+
+        Optimum optimum = optimizer.optimize(ls);
+
+        Assert.assertEquals(0, optimum.getRMS(), TOL);
+        assertEquals(TOL, optimum.getPoint(), 1.5);
+        Assert.assertEquals(0.0, optimum.getResiduals().getEntry(0), TOL);
+    }
+Smell List: ['Magic_Number_Test']
+Refactor#1
+
+@Test
+public void testTrivial() {
+    double tolerance = 1e-6;
+    double expectedRMS = 0;
+    double expectedPoint = 1.5;
+    double expectedResidual = 0.0;
+
+    LinearProblem problem = new LinearProblem(new double[][]{{2}}, new double[]{3});
+    LeastSquaresProblem ls = problem.getBuilder().build();
+
+    Optimum optimum = optimizer.optimize(ls);
+
+    Assert.assertEquals(expectedRMS, optimum.getRMS(), tolerance);
+    assertEquals(expectedPoint, optimum.getPoint(), tolerance);
+    Assert.assertEquals(expectedResidual, optimum.getResiduals().getEntry(0), tolerance);
+}
+
+
+Input#2
+ @Test
+    public void testQRColumnsPermutation() {
+        LinearProblem problem
+                = new LinearProblem(new double[][]{{1, -1}, {0, 2}, {1, -2}},
+                new double[]{4, 6, 1});
+
+        Optimum optimum = optimizer.optimize(problem.getBuilder().build());
+
+        Assert.assertEquals(0, optimum.getRMS(), TOL);
+        assertEquals(TOL, optimum.getPoint(), 7, 3);
+        assertEquals(TOL, optimum.getResiduals(), 0, 0, 0);
+    }
+Smell List: ['Magic_Number_Test']
+Refactor#2
+
+@Test
+public void testQRColumnsPermutation() {
+    double tolerance = 1e-6; // Tolerance for floating-point comparisons
+    int expectedPointDimension = 7; // Expected dimension of the point
+    int expectedPointValue = 3; // Expected value of the point
+    double[] expectedResiduals = {0, 0, 0}; // Expected residuals
+
+    LinearProblem problem
+            = new LinearProblem(new double[][]{{1, -1}, {0, 2}, {1, -2}},
+            new double[]{4, 6, 1});
+
+    Optimum optimum = optimizer.optimize(problem.getBuilder().build());
+
+    Assert.assertEquals(0, optimum.getRMS(), tolerance);
+    assertEquals(tolerance, optimum.getPoint(), expectedPointDimension, expectedPointValue);
+    assertEquals(tolerance, optimum.getResiduals(), expectedResiduals);
+}
+
+
+Input#3
+@Test
+    public void testNoDependency() {
+        LinearProblem problem = new LinearProblem(new double[][]{
+                {2, 0, 0, 0, 0, 0},
+                {0, 2, 0, 0, 0, 0},
+                {0, 0, 2, 0, 0, 0},
+                {0, 0, 0, 2, 0, 0},
+                {0, 0, 0, 0, 2, 0},
+                {0, 0, 0, 0, 0, 2}
+        }, new double[]{0, 1.1, 2.2, 3.3, 4.4, 5.5});
+
+        Optimum optimum = optimizer.optimize(problem.getBuilder().build());
+
+        Assert.assertEquals(0, optimum.getRMS(), TOL);
+        for (int i = 0; i < problem.target.length; ++i) {
+            Assert.assertEquals(0.55 * i, optimum.getPoint().getEntry(i), TOL);
+        }
+    }
+Smell List: ['Conditional_Test_Logic', 'Magic_Number_Test']
+Refactor#3
+
+    private static final double TOLERANCE = 1e-6;
+    private static final double EXPECTED_RMS = 0;
+    private static final double COEFFICIENT = 0.55;
+
+    @EnabledIf("isProblemValid")
+    @Test
+    public void testNoDependency() {
+        LinearProblem problem = new LinearProblem(new double[][]{
+                {2, 0, 0, 0, 0, 0},
+                {0, 2, 0, 0, 0, 0},
+                {0, 0, 2, 0, 0, 0},
+                {0, 0, 0, 2, 0, 0},
+                {0, 0, 0, 0, 2, 0},
+                {0, 0, 0, 0, 0, 2}
+        }, new double[]{0, 1.1, 2.2, 3.3, 4.4, 5.5});
+
+        Optimum optimum = optimizer.optimize(problem.getBuilder().build());
+
+        assertRMS(optimum);
+        assertOptimumPoints(optimum, problem);
+    }
+
+    private boolean isProblemValid() {
+        // This method should contain the logic to determine if the test should run
+        return true; // Placeholder for actual condition check
+    }
+
+    private void assertRMS(Optimum optimum) {
+        assertEquals(EXPECTED_RMS, optimum.getRMS(), TOLERANCE);
+    }
+
+    private void assertOptimumPoints(Optimum optimum, LinearProblem problem) {
+        for (int i = 0; i < problem.target.length; ++i) {
+            double expectedValue = COEFFICIENT * i;
+            assertEquals(expectedValue, optimum.getPoint().getEntry(i), TOLERANCE);
+        }
+    }
+
+Input#4
+ @Test
+    public void testOneSet() {
+        LinearProblem problem = new LinearProblem(new double[][]{
+                {1, 0, 0},
+                {-1, 1, 0},
+                {0, -1, 1}
+        }, new double[]{1, 1, 1});
+
+        Optimum optimum = optimizer.optimize(problem.getBuilder().build());
+
+        Assert.assertEquals(0, optimum.getRMS(), TOL);
+        assertEquals(TOL, optimum.getPoint(), 1, 2, 3);
+    }
+Smell List: ['Magic_Number_Test']
+Refactor#4
+
+@Test
+public void testOneSet() {
+    double[][] matrix = {
+        {1, 0, 0},
+        {-1, 1, 0},
+        {0, -1, 1}
+    };
+    double[] vector = {1, 1, 1};
+    double tolerance = 1e-6; // TOL: Meaningful name for tolerance
+
+    LinearProblem problem = new LinearProblem(matrix, vector);
+
+    Optimum optimum = optimizer.optimize(problem.getBuilder().build());
+
+    int expectedNumber = 0;
+    Assert.assertEquals(expectedNumber, optimum.getRMS(), tolerance);
+    assertEquals(tolerance, optimum.getPoint(), 1, 2, 3);
+}
+
+Input#5
+@Test
+    public void testTwoSets() {
+        double epsilon = 1e-7;
+        LinearProblem problem = new LinearProblem(new double[][]{
+                {2, 1, 0, 4, 0, 0},
+                {-4, -2, 3, -7, 0, 0},
+                {4, 1, -2, 8, 0, 0},
+                {0, -3, -12, -1, 0, 0},
+                {0, 0, 0, 0, epsilon, 1},
+                {0, 0, 0, 0, 1, 1}
+        }, new double[]{2, -9, 2, 2, 1 + epsilon * epsilon, 2});
+
+        Optimum optimum = optimizer.optimize(problem.getBuilder().build());
+
+        Assert.assertEquals(0, optimum.getRMS(), TOL);
+        assertEquals(TOL, optimum.getPoint(), 3, 4, -1, -2, 1 + epsilon, 1 - epsilon);
+    }
+Smell List: ['Magic_Number_Test']
+Refactor#5
+
+@Test
+public void testTwoSets() {
+    double epsilon = 1e-7;
+    double tolerance = 1e-6; // Meaningful name for the tolerance value
+    LinearProblem problem = new LinearProblem(new double[][]{
+            {2, 1, 0, 4, 0, 0},
+            {-4, -2, 3, -7, 0, 0},
+            {4, 1, -2, 8, 0, 0},
+            {0, -3, -12, -1, 0, 0},
+            {0, 0, 0, 0, epsilon, 1},
+            {0, 0, 0, 0, 1, 1}
+    }, new double[]{2, -9, 2, 2, 1 + epsilon * epsilon, 2});
+
+    Optimum optimum = optimizer.optimize(problem.getBuilder().build());
+    int expectedNumber = 0;
+    Assert.assertEquals(expectedNumber, optimum.getRMS(), tolerance);
+    assertEquals(tolerance, optimum.getPoint(), 3, 4, -1, -2, 1 + epsilon, 1 - epsilon);
+}
+
+
+
+Input#6
+@Test
+    public void testNonInvertible() throws Exception {
+        try {
+            LinearProblem problem = new LinearProblem(new double[][]{
+                    {1, 2, -3},
+                    {2, 1, 3},
+                    {-3, 0, -9}
+            }, new double[]{1, 1, 1});
+
+            optimizer.optimize(problem.getBuilder().build());
+
+            fail(optimizer);
+        } catch (ConvergenceException e) {
+            //expected
+        }
+    }
+Smell List: ['Exception_Catching_Throwing']
+
+Refactor#6
+
+@Test
+public void testNonInvertible() {
+    assertThrows(ConvergenceException.class, () -> {
+        LinearProblem problem = new LinearProblem(new double[][]{
+                {1, 2, -3},
+                {2, 1, 3},
+                {-3, 0, -9}
+        }, new double[]{1, 1, 1});
+
+        optimizer.optimize(problem.getBuilder().build());
+    });
+}
+
+Input#7
+
+Refactor#7
+
+
+Input#8
+@Test
+    public void testMoreEstimatedParametersSimple() {
+        LinearProblem problem = new LinearProblem(new double[][]{
+                {3, 2, 0, 0},
+                {0, 1, -1, 1},
+                {2, 0, 1, 0}
+        }, new double[]{7, 3, 5});
+
+        Optimum optimum = optimizer
+                .optimize(problem.getBuilder().start(new double[]{7, 6, 5, 4}).build());
+
+        Assert.assertEquals(0, optimum.getRMS(), TOL);
+    }
+Smell List: ['Magic_Number_Test']
+
+Refactor#8
+
+@Test
+public void testMoreEstimatedParametersSimple() {
+    double tolerance = 1e-6; // Tolerance for RMS comparison
+    LinearProblem problem = new LinearProblem(new double[][]{
+            {3, 2, 0, 0},
+            {0, 1, -1, 1},
+            {2, 0, 1, 0}
+    }, new double[]{7, 3, 5});
+
+    Optimum optimum = optimizer
+            .optimize(problem.getBuilder().start(new double[]{7, 6, 5, 4}).build());
+    int expectedNumber = 0;
+    Assert.assertEquals(expectedNumber, optimum.getRMS(), tolerance);
+}
+
+
+Input#9
+@Test
+    public void testMoreEstimatedParametersUnsorted() {
+        LinearProblem problem = new LinearProblem(new double[][]{
+                {1, 1, 0, 0, 0, 0},
+                {0, 0, 1, 1, 1, 0},
+                {0, 0, 0, 0, 1, -1},
+                {0, 0, -1, 1, 0, 1},
+                {0, 0, 0, -1, 1, 0}
+        }, new double[]{3, 12, -1, 7, 1});
+
+        Optimum optimum = optimizer.optimize(
+                problem.getBuilder().start(new double[]{2, 2, 2, 2, 2, 2}).build());
+
+        Assert.assertEquals(0, optimum.getRMS(), TOL);
+        RealVector point = optimum.getPoint();
+        //the first two elements are under constrained
+        //check first two elements obey the constraint: sum to 3
+        Assert.assertEquals(3, point.getEntry(0) + point.getEntry(1), TOL);
+        //#constrains = #states fro the last 4 elements
+        assertEquals(TOL, point.getSubVector(2, 4), 3, 4, 5, 6);
+    }
+Smell List: ['Magic_Number_Test']
+
+Refactor#9
+
+@Test
+public void testMoreEstimatedParametersUnsorted() {
+    // Define meaningful names for magic numbers
+    double expectedRMS = 0;
+    double tolerance = TOL;
+    double expectedSumFirstTwoElements = 3;
+
+    LinearProblem problem = new LinearProblem(new double[][]{
+            {1, 1, 0, 0, 0, 0},
+            {0, 0, 1, 1, 1, 0},
+            {0, 0, 0, 0, 1, -1},
+            {0, 0, -1, 1, 0, 1},
+            {0, 0, 0, -1, 1, 0}
+    }, new double[]{3, 12, -1, 7, 1});
+
+    Optimum optimum = optimizer.optimize(
+            problem.getBuilder().start(new double[]{2, 2, 2, 2, 2, 2}).build());
+
+    Assert.assertEquals(expectedRMS, optimum.getRMS(), tolerance);
+    RealVector point = optimum.getPoint();
+    // Check first two elements obey the constraint: sum to expectedSumFirstTwoElements
+    Assert.assertEquals(expectedSumFirstTwoElements, point.getEntry(0) + point.getEntry(1), tolerance);
+    // Check the last 4 elements
+    Assert.assertEquals(tolerance, point.getSubVector(2, 4), expectedSumFirstTwoElements, 4, 5, 6);
+}
+
+
+
+Input#10
+ @Test
+    public void testRedundantEquations() {
+        LinearProblem problem = new LinearProblem(new double[][]{
+                {1, 1},
+                {1, -1},
+                {1, 3}
+        }, new double[]{3, 1, 5});
+
+        Optimum optimum = optimizer
+                .optimize(problem.getBuilder().start(new double[]{1, 1}).build());
+
+        Assert.assertEquals(0, optimum.getRMS(), TOL);
+        assertEquals(TOL, optimum.getPoint(), 2, 1);
+    }
+Smell List: ['Magic_Number_Test']
+Refactor#10
+
+@Test
+public void testRedundantEquations() {
+    LinearProblem problem = new LinearProblem(new double[][]{
+            {1, 1},
+            {1, -1},
+            {1, 3}
+    }, new double[]{3, 1, 5});
+
+    double tolerance = 0.001; // TOL: meaningful variable name
+    double initialX = 1;
+    double initialY = 1;
+
+    Optimum optimum = optimizer
+            .optimize(problem.getBuilder().start(new double[]{initialX, initialY}).build());
+
+    int expectedNumber = 0;
+    Assert.assertEquals(expectedNumber, optimum.getRMS(), tolerance);
+    assertEquals(tolerance, optimum.getPoint(), 2, initialX);
+}
+
+
+Input#11
+@Test
+    public void testInconsistentSizes1() {
+        try {
+            LinearProblem problem
+                    = new LinearProblem(new double[][]{{1, 0},
+                    {0, 1}},
+                    new double[]{-1, 1});
+
+            //TODO why is this part here? hasn't it been tested already?
+            Optimum optimum = optimizer.optimize(problem.getBuilder().build());
+
+            Assert.assertEquals(0, optimum.getRMS(), TOL);
+            assertEquals(TOL, optimum.getPoint(), -1, 1);
+
+            //TODO move to builder test
+            optimizer.optimize(
+                    problem.getBuilder().weight(new DiagonalMatrix(new double[]{1})).build());
+
+            fail(optimizer);
+        } catch (DimensionMismatchException e) {
+            //expected
+        }
+    }
+Smell List: ['Exception_Catching_Throwing', 'Magic_Number_Test']
+
+Refactor#11
+
+@Test
+public void testInconsistentSizes1() {
+    double tolerance = 1e-6;
+    double expectedRMS = 0;
+    double[] expectedPoint = {-1, 1};
+
+    LinearProblem problem = new LinearProblem(new double[][]{{1, 0}, {0, 1}}, new double[]{-1, 1});
+    Optimum optimum = optimizer.optimize(problem.getBuilder().build());
+
+    Assert.assertEquals(expectedRMS, optimum.getRMS(), tolerance);
+    assertEquals(TOL, optimum.getPoint(), expectedPoint[0], expectedPoint[1]);
+
+    DimensionMismatchException exception = assertThrows(DimensionMismatchException.class, () -> {
+        optimizer.optimize(problem.getBuilder().weight(new DiagonalMatrix(new double[]{1})).build());
+    });
+}
+
+
+
+Input#12
+@Test
+    public void testInconsistentSizes2() {
+        try {
+            LinearProblem problem
+                    = new LinearProblem(new double[][]{{1, 0}, {0, 1}},
+                    new double[]{-1, 1});
+
+            Optimum optimum = optimizer.optimize(problem.getBuilder().build());
+
+            Assert.assertEquals(0, optimum.getRMS(), TOL);
+            assertEquals(TOL, optimum.getPoint(), -1, 1);
+
+            //TODO move to builder test
+            optimizer.optimize(
+                    problem.getBuilder()
+                            .target(new double[]{1})
+                            .weight(new DiagonalMatrix(new double[]{1}))
+                            .build()
+            );
+
+            fail(optimizer);
+        } catch (DimensionMismatchException e) {
+            //expected
+        }
+    }
+Smell List: ['Exception_Catching_Throwing', 'Magic_Number_Test']
+
+Refactor#12
+
+@Test
+public void testInconsistentSizes2() {
+    double tolerance = 1e-6;
+    double expectedRMS = 0;
+    double[] expectedPoint = {-1, 1};
+
+    LinearProblem problem = new LinearProblem(new double[][]{{1, 0}, {0, 1}}, new double[]{-1, 1});
+    Optimum optimum = optimizer.optimize(problem.getBuilder().build());
+
+    Assert.assertEquals(expectedRMS, optimum.getRMS(), tolerance);
+    assertEquals(TOL, optimum.getPoint(), expectedPoint[0], expectedPoint[1]);
+
+    assertThrows(DimensionMismatchException.class, () -> {
+        optimizer.optimize(
+                problem.getBuilder()
+                        .target(new double[]{1})
+                        .weight(new DiagonalMatrix(new double[]{1}))
+                        .build()
+        );
+    });
+}
+
+
+
+
+
+Input#13
+
+Refactor#13
+
+
+Input#14
+@Test
+    public void testCircleFittingBadInit() {
+        CircleVectorial circle = new CircleVectorial();
+        double[][] points = circlePoints;
+        double[] weights = new double[points.length];
+        final double[] start = {-12, -12};
+        Arrays.fill(weights, 2);
+        for (int i = 0; i < points.length; ++i) {
+            circle.addPoint(points[i][0], points[i][1]);
+        }
+
+        Optimum optimum = optimizer.optimize(builder(circle).weight(new DiagonalMatrix(weights)).start(start).build());
+
+        Vector2D center = Vector2D.of(optimum.getPoint().getEntry(0), optimum.getPoint().getEntry(1));
+        Assert.assertTrue(optimum.getEvaluations() < 25);
+        Assert.assertEquals(0.043, optimum.getRMS(), 1e-3);
+        Assert.assertEquals(0.292235, circle.getRadius(center), 1e-6);
+        Assert.assertEquals(-0.151738, center.getX(), 1e-6);
+        Assert.assertEquals(0.2075001, center.getY(), 1e-6);
+    }
+Smell List: ['Assertion_Roulette', 'Conditional_Test_Logic', 'Magic_Number_Test']
+Refactor#14
+
+@Test
+public void testCircleFittingBadInit() {
+    CircleVectorial circle = new CircleVectorial();
+    double[][] points = circlePoints;
+    double[] weights = new double[points.length];
+    final double[] start = {-12, -12};
+    Arrays.fill(weights, 2);
+    addPoint(circle, points);
+
+    Optimum optimum = optimizer.optimize(builder(circle).weight(new DiagonalMatrix(weights)).start(start).build());
+
+    Vector2D center = Vector2D.of(optimum.getPoint().getEntry(0), optimum.getPoint().getEntry(1));
+    int maxEvaluations = 25;
+    double expectedRMS = 0.043;
+    double expectedRadius = 0.292235;
+    double expectedCenterX = -0.151738;
+    double expectedCenterY = 0.2075001;
+
+    Assert.assertTrue("Optimum evaluations should be less than " + maxEvaluations,optimum.getEvaluations() < maxEvaluations);
+    Assert.assertEquals("Optimum RMS should be close to " + expectedRMS, expectedRMS, optimum.getRMS(), 1e-3);
+    Assert.assertEquals("Circle radius should be close to " + expectedRadius, expectedRadius, circle.getRadius(center), 1e-6);
+    Assert.assertEquals("Center X coordinate should be close to " + expectedCenterX, expectedCenterX, center.getX(), 1e-6);
+    Assert.assertEquals("Center Y coordinate should be close to " + expectedCenterY, expectedCenterY, center.getY(), 1e-6);
+}
+
+private static void addPoint(CircleVectorial circle, double[][] points) {
+    for (int i = 0; i < points.length; ++i) {
+        circle.addPoint(points[i][0], points[i][1]);
+    }
+}
+
+
+Input#15
+@Test
+    public void testCircleFittingGoodInit() {
+        CircleVectorial circle = new CircleVectorial();
+        double[][] points = circlePoints;
+        double[] weights = new double[points.length];
+        Arrays.fill(weights, 2);
+        for (int i = 0; i < points.length; ++i) {
+            circle.addPoint(points[i][0], points[i][1]);
+        }
+        final double[] start = {0, 0};
+
+        Optimum optimum = optimizer.optimize(
+                builder(circle).weight(new DiagonalMatrix(weights)).start(start).build());
+
+        assertEquals(1e-6, optimum.getPoint(), -0.1517383071957963, 0.2074999736353867);
+        Assert.assertEquals(0.04268731682389561, optimum.getRMS(), 1e-8);
+    }
+Smell List: ['Conditional_Test_Logic', 'Magic_Number_Test']
+Refactor#15
+
+    private static final double TOLERANCE = 1e-6;
+    private static final double EXPECTED_X = -0.1517383071957963;
+    private static final double EXPECTED_Y = 0.2074999736353867;
+
+    private static final double EXPECTED_RMS = 0.04268731682389561;
+
+    private static final double RMS_TOLERANCE = 1e-8;
+    private static final double WEIGHT_VALUE = 2;
+
+    @Test
+    public void testCircleFittingGoodInit() {
+        CircleVectorial circle = new CircleVectorial();
+        double[][] points = circlePoints;
+        double[] weights = new double[points.length];
+        Arrays.fill(weights, WEIGHT_VALUE);
+        for (double[] point : points) {
+            circle.addPoint(point[0], point[1]);
+        }
+        final double[] start = {0, 0};
+
+        Optimum optimum = optimizer.optimize(
+                builder(circle).weight(new DiagonalMatrix(weights)).start(start).build());
+
+
+        assertEquals(TOLERANCE, optimum.getPoint(), EXPECTED_X, EXPECTED_Y);
+        Assert.assertEquals(EXPECTED_RMS, optimum.getRMS(), RMS_TOLERANCE);
+    }
+
+
+
+Input#16
+
+Refactor#16
+
+
+Input#17
+
+Refactor#17
+
+
+Input#18
+
+Refactor#18
+
+
+
+Input#19
+
+Refactor#19
+
+
+
+Input#20
+
+Refactor#20
+
+
+
+Input#21
+
+Refactor#21
+
+
+Input#22
+
+Refactor#22
+
+
+Input#23
+
+Refactor#23
+
+
+Input#24
+
+Refactor#24
+
+
+Input#25
+
+Refactor#25
+
+
+Input#26
+
+Refactor#26
+
+
+Input#27
+
+Refactor#27
+
+
+
+Input#28
+
+Refactor#28
+
+
+
+Input#29
+
+Refactor#29
+
+
+
+Input#30
+
+Refactor#30
+
+
+Input#31
+
+Refactor#31
+
+
+
+Input#32
+
+Refactor#32
+
+
+
+Input#33
+
+Refactor#33
+
+
+
+Input#34
+
+Refactor#34
+
+
+
+Input#35
+
+Refactor#35
+

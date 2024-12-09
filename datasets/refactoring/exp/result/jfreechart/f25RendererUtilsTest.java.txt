@@ -1,0 +1,1023 @@
+f1.txtFile#1
+
+
+Input#1
+ @Test
+    public void testFindLiveItemsLowerBound_Unordered() {
+        DefaultXYDataset<String> d = new DefaultXYDataset<>();
+
+        // check a series with no items
+        d.addSeries("S1", new double[][] {{}, {}});
+        assertEquals(0, RendererUtils.findLiveItemsLowerBound(d, 0, 10.0,
+                11.0));
+
+        // check a series with one item
+        d.addSeries("S2", new double[][] {{0.0}, {9.9}});
+        assertEquals(0, RendererUtils.findLiveItemsLowerBound(d, 1, 0.0,
+                1.1));
+        assertEquals(0, RendererUtils.findLiveItemsLowerBound(d, 1, 2.0,
+                3.3));
+
+        // check a series with two items
+        d.addSeries("S3", new double[][] {{0.0, 1.0}, {9.9, 9.9}});
+        assertEquals(0, RendererUtils.findLiveItemsLowerBound(d, 2, 0.0, 1.1));
+        assertEquals(1, RendererUtils.findLiveItemsLowerBound(d, 2, 1.0, 2.2));
+        assertEquals(1, RendererUtils.findLiveItemsLowerBound(d, 2, 2.0, 3.3));
+        assertEquals(1, RendererUtils.findLiveItemsLowerBound(d, 2, 3.0, 4.4));
+
+        // check a series with three items
+        d.addSeries("S4", new double[][] {{1.0, 2.0, 1.5}, {9.9, 9.9, 9.9}});
+        assertEquals(0, RendererUtils.findLiveItemsLowerBound(d, 3, 0.0, 1.1));
+        assertEquals(0, RendererUtils.findLiveItemsLowerBound(d, 3, 1.0, 2.2));
+        assertEquals(1, RendererUtils.findLiveItemsLowerBound(d, 3, 2.0, 3.3));
+        assertEquals(2, RendererUtils.findLiveItemsLowerBound(d, 3, 3.0, 4.4));
+
+        // check a series with four items
+        d.addSeries("S5", new double[][] {{1.0, 2.0, 1.5, 1.8}, {9.9, 9.9,
+                9.9, 9.9}});
+        assertEquals(0, RendererUtils.findLiveItemsLowerBound(d, 4, 0.0, 1.1));
+        assertEquals(0, RendererUtils.findLiveItemsLowerBound(d, 4, 1.0, 2.2));
+        assertEquals(1, RendererUtils.findLiveItemsLowerBound(d, 4, 2.0, 3.3));
+        assertEquals(3, RendererUtils.findLiveItemsLowerBound(d, 4, 3.0, 4.4));
+        assertEquals(3, RendererUtils.findLiveItemsLowerBound(d, 4, 4.0, 5.5));
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test', 'Magic_Number_Test']
+
+Refactor#1
+
+private DefaultXYDataset<String> dataset;
+private static final double NO_ITEMS_X = 0.0;
+private static final double NO_ITEMS_Y = 10.0;
+private static final double SINGLE_ITEM_X = 0.0;
+private static final double SINGLE_ITEM_Y = 9.9;
+private static final double SINGLE_ITEM_X2 = 2.0;
+private static final double SINGLE_ITEM_Y2 = 3.3;
+private static final double TWO_ITEMS_X1 = 0.0;
+private static final double TWO_ITEMS_Y1 = 9.9;
+private static final double TWO_ITEMS_X2 = 1.0;
+private static final double TWO_ITEMS_Y2 = 9.9;
+private static final double THREE_ITEMS_X1 = 1.0;
+private static final double THREE_ITEMS_Y1 = 9.9;
+private static final double THREE_ITEMS_X2 = 2.0;
+private static final double THREE_ITEMS_Y2 = 9.9;
+private static final double THREE_ITEMS_X3 = 1.5;
+private static final double THREE_ITEMS_Y3 = 9.9;
+private static final double FOUR_ITEMS_X1 = 1.0;
+private static final double FOUR_ITEMS_Y1 = 9.9;
+private static final double FOUR_ITEMS_X2 = 2.0;
+private static final double FOUR_ITEMS_Y2 = 9.9;
+private static final double FOUR_ITEMS_X3 = 1.5;
+private static final double FOUR_ITEMS_Y3 = 9.9;
+private static final double FOUR_ITEMS_X4 = 1.8;
+private static final double FOUR_ITEMS_Y4 = 9.9;
+
+@Before
+public void setUp() {
+    dataset = new DefaultXYDataset<>();
+}
+
+@Test
+public void testFindLiveItemsLowerBound_NoItems() {
+    dataset.addSeries("S1", new double[][] {{}, {}});
+    assertEquals(0, RendererUtils.findLiveItemsLowerBound(dataset, 0, NO_ITEMS_X, NO_ITEMS_Y), "No items should return 0");
+}
+
+@Test
+public void testFindLiveItemsLowerBound_SingleItem() {
+    dataset.addSeries("S2", new double[][] {{SINGLE_ITEM_X}, {SINGLE_ITEM_Y}});
+    assertEquals(0, RendererUtils.findLiveItemsLowerBound(dataset, 1, SINGLE_ITEM_X, SINGLE_ITEM_X + 0.1), "Single item at 0.0 should return 0");
+    assertEquals(0, RendererUtils.findLiveItemsLowerBound(dataset, 1, SINGLE_ITEM_X2, SINGLE_ITEM_X2 + 1.0), "Single item at 2.0 should return 0");
+}
+
+@Test
+public void testFindLiveItemsLowerBound_TwoItems() {
+    dataset.addSeries("S3", new double[][] {{TWO_ITEMS_X1, TWO_ITEMS_X2}, {TWO_ITEMS_Y1, TWO_ITEMS_Y2}});
+    assertEquals(0, RendererUtils.findLiveItemsLowerBound(dataset, 2, TWO_ITEMS_X1, TWO_ITEMS_X1 + 0.1), "First item at 0.0 should return 0");
+    assertEquals(1, RendererUtils.findLiveItemsLowerBound(dataset, 2, TWO_ITEMS_X2, TWO_ITEMS_X2 + 1.0), "Second item at 1.0 should return 1");
+    assertEquals(1, RendererUtils.findLiveItemsLowerBound(dataset, 2, TWO_ITEMS_X2 + 1.0, TWO_ITEMS_X2 + 2.0), "Beyond second item at 2.0 should return 1");
+    assertEquals(1, RendererUtils.findLiveItemsLowerBound(dataset, 2, TWO_ITEMS_X2 + 2.0, TWO_ITEMS_X2 + 3.0), "Beyond second item at 3.0 should return 1");
+}
+
+@Test
+public void testFindLiveItemsLowerBound_ThreeItems() {
+    dataset.addSeries("S4", new double[][] {{THREE_ITEMS_X1, THREE_ITEMS_X2, THREE_ITEMS_X3}, {THREE_ITEMS_Y1, THREE_ITEMS_Y2, THREE_ITEMS_Y3}});
+    assertEquals(0, RendererUtils.findLiveItemsLowerBound(dataset, 3, THREE_ITEMS_X1 - 1.0, THREE_ITEMS_X1), "Before first item at 0.0 should return 0");
+    assertEquals(0, RendererUtils.findLiveItemsLowerBound(dataset, 3, THREE_ITEMS_X1, THREE_ITEMS_X1 + 1.0), "First item at 1.0 should return 0");
+    assertEquals(1, RendererUtils.findLiveItemsLowerBound(dataset, 3, THREE_ITEMS_X2, THREE_ITEMS_X2 + 1.0), "Second item at 2.0 should return 1");
+    assertEquals(2, RendererUtils.findLiveItemsLowerBound(dataset, 3, THREE_ITEMS_X3 + 1.0, THREE_ITEMS_X3 + 2.0), "Third item at 3.0 should return 2");
+}
+
+@Test
+public void testFindLiveItemsLowerBound_FourItems() {
+    dataset.addSeries("S5", new double[][] {{FOUR_ITEMS_X1, FOUR_ITEMS_X2, FOUR_ITEMS_X3, FOUR_ITEMS_X4}, {FOUR_ITEMS_Y1, FOUR_ITEMS_Y2, FOUR_ITEMS_Y3, FOUR_ITEMS_Y4}});
+    assertEquals(0, RendererUtils.findLiveItemsLowerBound(dataset, 4, FOUR_ITEMS_X1 - 1.0, FOUR_ITEMS_X1), "Before first item at 0.0 should return 0");
+    assertEquals(0, RendererUtils.findLiveItemsLowerBound(dataset, 4, FOUR_ITEMS_X1, FOUR_ITEMS_X1 + 1.0), "First item at 1.0 should return 0");
+    assertEquals(1, RendererUtils.findLiveItemsLowerBound(dataset, 4, FOUR_ITEMS_X2, FOUR_ITEMS_X2 + 1.0), "Second item at 2.0 should return 1");
+    assertEquals(3, RendererUtils.findLiveItemsLowerBound(dataset, 4, FOUR_ITEMS_X4, FOUR_ITEMS_X4 + 1.0), "Fourth item at 3.0 should return 3");
+    assertEquals(3, RendererUtils.findLiveItemsLowerBound(dataset, 4, FOUR_ITEMS_X4 + 1.0, FOUR_ITEMS_X4 + 2.0), "Beyond fourth item at 4.0 should return 3");
+}
+
+
+Input#2
+ @Test
+    public void testFindLiveItemsLowerBound_Ascending() {
+        var d = new DefaultXYDataset<String>() {
+            @Override
+            public DomainOrder getDomainOrder() {
+                // we're doing this for testing only, and make sure that we
+                // only add data in ascending order by x-value
+                return DomainOrder.ASCENDING;
+            }
+        };
+        // check a series with no items
+        d.addSeries("S1", new double[][] {{}, {}});
+        assertEquals(0, RendererUtils.findLiveItemsLowerBound(d, 0, 10.0, 11.1));
+
+        // check a series with one item
+        d.addSeries("S2", new double[][] {{1.0}, {9.9}});
+        assertEquals(0, RendererUtils.findLiveItemsLowerBound(d, 1, 0.0, 1.1));
+        assertEquals(0, RendererUtils.findLiveItemsLowerBound(d, 1, 2.0, 2.2));
+
+        // check a series with two items
+        d.addSeries("S3", new double[][] {{1.0, 2.0}, {9.9, 9.9}});
+        assertEquals(0, RendererUtils.findLiveItemsLowerBound(d, 2, 0.0, 1.1));
+        assertEquals(0, RendererUtils.findLiveItemsLowerBound(d, 2, 1.0, 2.2));
+        assertEquals(1, RendererUtils.findLiveItemsLowerBound(d, 2, 2.0, 3.3));
+        assertEquals(1, RendererUtils.findLiveItemsLowerBound(d, 2, 3.0, 4.4));
+
+        // check a series with three items
+        d.addSeries("S4", new double[][] {{1.0, 2.0, 3.0}, {9.9, 9.9, 9.9}});
+        assertEquals(0, RendererUtils.findLiveItemsLowerBound(d, 3, 0.0, 1.1));
+        assertEquals(0, RendererUtils.findLiveItemsLowerBound(d, 3, 1.0, 2.2));
+        assertEquals(1, RendererUtils.findLiveItemsLowerBound(d, 3, 2.0, 3.3));
+        assertEquals(2, RendererUtils.findLiveItemsLowerBound(d, 3, 3.0, 4.4));
+
+        // check a series with four items
+        d.addSeries("S5", new double[][] {{1.0, 2.0, 3.0, 4.0}, {9.9, 9.9,
+                9.9, 9.9}});
+        assertEquals(0, RendererUtils.findLiveItemsLowerBound(d, 4, 0.0, 1.1));
+        assertEquals(0, RendererUtils.findLiveItemsLowerBound(d, 4, 1.0, 2.2));
+        assertEquals(1, RendererUtils.findLiveItemsLowerBound(d, 4, 2.0, 3.3));
+        assertEquals(2, RendererUtils.findLiveItemsLowerBound(d, 4, 3.0, 4.4));
+        assertEquals(3, RendererUtils.findLiveItemsLowerBound(d, 4, 4.0, 5.5));
+
+        // check a series with repeating items
+        d.addSeries("S5", new double[][] {{1.0, 2.0, 2.0, 2.0, 3.0}, {9.9, 9.9,
+                9.9, 9.9, 9.9}});
+        assertEquals(0, RendererUtils.findLiveItemsLowerBound(d, 4, 0.0, 4.0));
+        assertEquals(0, RendererUtils.findLiveItemsLowerBound(d, 4, 1.0, 4.0));
+        assertEquals(1, RendererUtils.findLiveItemsLowerBound(d, 4, 2.0, 4.0));
+        assertEquals(4, RendererUtils.findLiveItemsLowerBound(d, 4, 3.0, 4.0));
+
+    }
+Context: /org/jfree/chart/renderer/RendererUtils
+Smell List: ['Assertion_Roulette', 'Eager_Test', 'Magic_Number_Test']
+
+
+Refactor#2
+
+@Test
+public void testFindLiveItemsLowerBound_Ascending_NoItems() {
+    var d = new DefaultXYDataset<String>() {
+        @Override
+        public DomainOrder getDomainOrder() {
+            return DomainOrder.ASCENDING;
+        }
+    };
+    d.addSeries("S1", new double[][] {{}, {}});
+    int expectedIndex = 0;
+    int result = RendererUtils.findLiveItemsLowerBound(d, 0, 10.0, 11.1);
+    assertEquals(expectedIndex, result, "Expected index 0 when there are no items");
+}
+
+@Test
+public void testFindLiveItemsLowerBound_Ascending_OneItem() {
+    var d = new DefaultXYDataset<String>() {
+        @Override
+        public DomainOrder getDomainOrder() {
+            return DomainOrder.ASCENDING;
+        }
+    };
+    d.addSeries("S2", new double[][] {{1.0}, {9.9}});
+    int expectedIndex1 = 0;
+    int result1 = RendererUtils.findLiveItemsLowerBound(d, 1, 0.0, 1.1);
+    assertEquals(expectedIndex1, result1, "Expected index 0 for x=0.0, y=1.1 with one item");
+
+    int expectedIndex2 = 0;
+    int result2 = RendererUtils.findLiveItemsLowerBound(d, 1, 2.0, 2.2);
+    assertEquals(expectedIndex2, result2, "Expected index 0 for x=2.0, y=2.2 with one item");
+}
+
+@Test
+public void testFindLiveItemsLowerBound_Ascending_TwoItems() {
+    var d = new DefaultXYDataset<String>() {
+        @Override
+        public DomainOrder getDomainOrder() {
+            return DomainOrder.ASCENDING;
+        }
+    };
+    d.addSeries("S3", new double[][] {{1.0, 2.0}, {9.9, 9.9}});
+    int expectedIndex1 = 0;
+    int result1 = RendererUtils.findLiveItemsLowerBound(d, 2, 0.0, 1.1);
+    assertEquals(expectedIndex1, result1, "Expected index 0 for x=0.0, y=1.1 with two items");
+
+    int expectedIndex2 = 0;
+    int result2 = RendererUtils.findLiveItemsLowerBound(d, 2, 1.0, 2.2);
+    assertEquals(expectedIndex2, result2, "Expected index 0 for x=1.0, y=2.2 with two items");
+
+    int expectedIndex3 = 1;
+    int result3 = RendererUtils.findLiveItemsLowerBound(d, 2, 2.0, 3.3);
+    assertEquals(expectedIndex3, result3, "Expected index 1 for x=2.0, y=3.3 with two items");
+
+    int expectedIndex4 = 1;
+    int result4 = RendererUtils.findLiveItemsLowerBound(d, 2, 3.0, 4.4);
+    assertEquals(expectedIndex4, result4, "Expected index 1 for x=3.0, y=4.4 with two items");
+}
+
+@Test
+public void testFindLiveItemsLowerBound_Ascending_ThreeItems() {
+    var d = new DefaultXYDataset<String>() {
+        @Override
+        public DomainOrder getDomainOrder() {
+            return DomainOrder.ASCENDING;
+        }
+    };
+    d.addSeries("S4", new double[][] {{1.0, 2.0, 3.0}, {9.9, 9.9, 9.9}});
+    int expectedIndex1 = 0;
+    int result1 = RendererUtils.findLiveItemsLowerBound(d, 3, 0.0, 1.1);
+    assertEquals(expectedIndex1, result1, "Expected index 0 for x=0.0, y=1.1 with three items");
+
+    int expectedIndex2 = 0;
+    int result2 = RendererUtils.findLiveItemsLowerBound(d, 3, 1.0, 2.2);
+    assertEquals(expectedIndex2, result2, "Expected index 0 for x=1.0, y=2.2 with three items");
+
+    int expectedIndex3 = 1;
+    int result3 = RendererUtils.findLiveItemsLowerBound(d, 3, 2.0, 3.3);
+    assertEquals(expectedIndex3, result3, "Expected index 1 for x=2.0, y=3.3 with three items");
+
+    int expectedIndex4 = 2;
+    int result4 = RendererUtils.findLiveItemsLowerBound(d, 3, 3.0, 4.4);
+    assertEquals(expectedIndex4, result4, "Expected index 2 for x=3.0, y=4.4 with three items");
+}
+
+@Test
+public void testFindLiveItemsLowerBound_Ascending_FourItems() {
+    var d = new DefaultXYDataset<String>() {
+        @Override
+        public DomainOrder getDomainOrder() {
+            return DomainOrder.ASCENDING;
+        }
+    };
+    d.addSeries("S5", new double[][] {{1.0, 2.0, 3.0, 4.0}, {9.9, 9.9, 9.9, 9.9}});
+    int expectedIndex1 = 0;
+    int result1 = RendererUtils.findLiveItemsLowerBound(d, 4, 0.0, 1.1);
+    assertEquals(expectedIndex1, result1, "Expected index 0 for x=0.0, y=1.1 with four items");
+
+    int expectedIndex2 = 0;
+    int result2 = RendererUtils.findLiveItemsLowerBound(d, 4, 1.0, 2.2);
+    assertEquals(expectedIndex2, result2, "Expected index 0 for x=1.0, y=2.2 with four items");
+
+    int expectedIndex3 = 1;
+    int result3 = RendererUtils.findLiveItemsLowerBound(d, 4, 2.0, 3.3);
+    assertEquals(expectedIndex3, result3, "Expected index 1 for x=2.0, y=3.3 with four items");
+
+    int expectedIndex4 = 2;
+    int result4 = RendererUtils.findLiveItemsLowerBound(d, 4, 3.0, 4.4);
+    assertEquals(expectedIndex4, result4, "Expected index 2 for x=3.0, y=4.4 with four items");
+
+    int expectedIndex5 = 3;
+    int result5 = RendererUtils.findLiveItemsLowerBound(d, 4, 4.0, 5.5);
+    assertEquals(expectedIndex5, result5, "Expected index 3 for x=4.0, y=5.5 with four items");
+}
+
+@Test
+public void testFindLiveItemsLowerBound_Ascending_RepeatingItems() {
+    var d = new DefaultXYDataset<String>() {
+        @Override
+        public DomainOrder getDomainOrder() {
+            return DomainOrder.ASCENDING;
+        }
+    };
+    d.addSeries("S6", new double[][] {{1.0, 2.0, 2.0, 2.0, 3.0}, {9.9, 9.9, 9.9, 9.9, 9.9}});
+    int expectedIndex1 = 0;
+    int result1 = RendererUtils.findLiveItemsLowerBound(d, 5, 0.0, 4.0);
+    assertEquals(expectedIndex1, result1, "Expected index 0 for x=0.0, y=4.0 with repeating items");
+
+    int expectedIndex2 = 0;
+    int result2 = RendererUtils.findLiveItemsLowerBound(d, 5, 1.0, 4.0);
+    assertEquals(expectedIndex2, result2, "Expected index 0 for x=1.0, y=4.0 with repeating items");
+
+    int expectedIndex3 = 1;
+    int result3 = RendererUtils.findLiveItemsLowerBound(d, 5, 2.0, 4.0);
+    assertEquals(expectedIndex3, result3, "Expected index 1 for x=2.0, y=4.0 with repeating items");
+
+    int expectedIndex4 = 4;
+    int result4 = RendererUtils.findLiveItemsLowerBound(d, 5, 3.0, 4.0);
+    assertEquals(expectedIndex4, result4, "Expected index 4 for x=3.0, y=4.0 with repeating items");
+}
+
+Input#3
+
+Refactor#3
+
+
+Input#4
+@Test
+    public void testFindLiveItemsUpperBound_Unordered() {
+        DefaultXYDataset<String> d = new DefaultXYDataset<>();
+
+        // check a series with no items
+        d.addSeries("S1", new double[][] {{}, {}});
+        assertEquals(0, RendererUtils.findLiveItemsUpperBound(d, 0, 10.0, 11.0));
+
+        // check a series with one item
+        d.addSeries("S2", new double[][] {{1.0}, {9.9}});
+        assertEquals(0, RendererUtils.findLiveItemsUpperBound(d, 1, 0.0, 1.1));
+        assertEquals(0, RendererUtils.findLiveItemsUpperBound(d, 1, 2.0, 3.3));
+
+        // check a series with two items
+        d.addSeries("S3", new double[][] {{1.0, 2.0}, {9.9, 9.9}});
+        assertEquals(0, RendererUtils.findLiveItemsUpperBound(d, 2, 0.0, 1.1));
+        assertEquals(1, RendererUtils.findLiveItemsUpperBound(d, 2, 1.0, 2.2));
+        assertEquals(1, RendererUtils.findLiveItemsUpperBound(d, 2, 2.0, 3.3));
+        assertEquals(1, RendererUtils.findLiveItemsUpperBound(d, 2, 3.0, 4.4));
+
+        // check a series with three items
+        d.addSeries("S4", new double[][] {{1.0, 2.0, 1.5}, {9.9, 9.9, 9.9}});
+        assertEquals(0, RendererUtils.findLiveItemsUpperBound(d, 3, 0.0, 1.1));
+        assertEquals(2, RendererUtils.findLiveItemsUpperBound(d, 3, 1.0, 2.2));
+        assertEquals(2, RendererUtils.findLiveItemsUpperBound(d, 3, 2.0, 3.3));
+        assertEquals(2, RendererUtils.findLiveItemsUpperBound(d, 3, 3.0, 4.4));
+
+        // check a series with four items
+        d.addSeries("S5", new double[][] {{1.0, 2.0, 1.5, 1.8}, {9.9, 9.9,
+                9.9, 9.9}});
+        assertEquals(0, RendererUtils.findLiveItemsUpperBound(d, 4, 0.0, 1.1));
+        assertEquals(3, RendererUtils.findLiveItemsUpperBound(d, 4, 1.0, 2.2));
+        assertEquals(3, RendererUtils.findLiveItemsUpperBound(d, 4, 2.0, 3.3));
+        assertEquals(3, RendererUtils.findLiveItemsUpperBound(d, 4, 3.0, 4.4));
+        assertEquals(3, RendererUtils.findLiveItemsUpperBound(d, 4, 4.0, 5.5));
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test', 'Magic_Number_Test']
+Refactor#4
+
+private static final double NO_ITEMS_X_UPPER_BOUND = 10.0;
+private static final double NO_ITEMS_X_LOWER_BOUND = 11.0;
+private static final double SINGLE_ITEM_X_VALUE = 1.0;
+private static final double SINGLE_ITEM_Y_VALUE = 9.9;
+private static final double SINGLE_ITEM_X_LOWER_BOUND = 0.0;
+private static final double SINGLE_ITEM_X_UPPER_BOUND_1 = 1.1;
+private static final double SINGLE_ITEM_X_UPPER_BOUND_2 = 2.2;
+private static final double TWO_ITEMS_X_VALUE_1 = 1.0;
+private static final double TWO_ITEMS_X_VALUE_2 = 2.0;
+private static final double TWO_ITEMS_X_LOWER_BOUND = 0.0;
+private static final double TWO_ITEMS_X_UPPER_BOUND_1 = 1.1;
+private static final double TWO_ITEMS_X_UPPER_BOUND_2 = 2.2;
+private static final double TWO_ITEMS_X_UPPER_BOUND_3 = 3.3;
+private static final double TWO_ITEMS_X_UPPER_BOUND_4 = 4.4;
+private static final double THREE_ITEMS_X_VALUE_1 = 1.0;
+private static final double THREE_ITEMS_X_VALUE_2 = 2.0;
+private static final double THREE_ITEMS_X_VALUE_3 = 1.5;
+private static final double THREE_ITEMS_X_LOWER_BOUND = 0.0;
+private static final double THREE_ITEMS_X_UPPER_BOUND_1 = 1.1;
+private static final double THREE_ITEMS_X_UPPER_BOUND_2 = 2.2;
+private static final double THREE_ITEMS_X_UPPER_BOUND_3 = 3.3;
+private static final double THREE_ITEMS_X_UPPER_BOUND_4 = 4.4;
+private static final double FOUR_ITEMS_X_VALUE_1 = 1.0;
+private static final double FOUR_ITEMS_X_VALUE_2 = 2.0;
+private static final double FOUR_ITEMS_X_VALUE_3 = 1.5;
+private static final double FOUR_ITEMS_X_VALUE_4 = 1.8;
+private static final double FOUR_ITEMS_X_LOWER_BOUND = 0.0;
+private static final double FOUR_ITEMS_X_UPPER_BOUND_1 = 1.1;
+private static final double FOUR_ITEMS_X_UPPER_BOUND_2 = 2.2;
+private static final double FOUR_ITEMS_X_UPPER_BOUND_3 = 3.3;
+private static final double FOUR_ITEMS_X_UPPER_BOUND_4 = 4.4;
+private static final double FOUR_ITEMS_X_UPPER_BOUND_5 = 5.5;
+
+private DefaultXYDataset<String> setupDatasetWithNoItems() {
+    DefaultXYDataset<String> d = new DefaultXYDataset<>();
+    d.addSeries("S1", new double[][] {{}, {}});
+    return d;
+}
+
+private DefaultXYDataset<String> setupDatasetWithSingleItem() {
+    DefaultXYDataset<String> d = new DefaultXYDataset<>();
+    d.addSeries("S2", new double[][] {{SINGLE_ITEM_X_VALUE}, {SINGLE_ITEM_Y_VALUE}});
+    return d;
+}
+
+private DefaultXYDataset<String> setupDatasetWithTwoItems() {
+    DefaultXYDataset<String> d = new DefaultXYDataset<>();
+    d.addSeries("S3", new double[][] {{TWO_ITEMS_X_VALUE_1, TWO_ITEMS_X_VALUE_2}, {SINGLE_ITEM_Y_VALUE, SINGLE_ITEM_Y_VALUE}});
+    return d;
+}
+
+private DefaultXYDataset<String> setupDatasetWithThreeItems() {
+    DefaultXYDataset<String> d = new DefaultXYDataset<>();
+    d.addSeries("S4", new double[][] {{THREE_ITEMS_X_VALUE_1, THREE_ITEMS_X_VALUE_2, THREE_ITEMS_X_VALUE_3}, {SINGLE_ITEM_Y_VALUE, SINGLE_ITEM_Y_VALUE, SINGLE_ITEM_Y_VALUE}});
+    return d;
+}
+
+private DefaultXYDataset<String> setupDatasetWithFourItems() {
+    DefaultXYDataset<String> d = new DefaultXYDataset<>();
+    d.addSeries("S5", new double[][] {{FOUR_ITEMS_X_VALUE_1, FOUR_ITEMS_X_VALUE_2, FOUR_ITEMS_X_VALUE_3, FOUR_ITEMS_X_VALUE_4}, {SINGLE_ITEM_Y_VALUE, SINGLE_ITEM_Y_VALUE, SINGLE_ITEM_Y_VALUE, SINGLE_ITEM_Y_VALUE}});
+    return d;
+}
+
+@Test
+public void testFindLiveItemsUpperBound_NoItems() {
+    DefaultXYDataset<String> d = setupDatasetWithNoItems();
+    assertEquals(0, RendererUtils.findLiveItemsUpperBound(d, 0, NO_ITEMS_X_UPPER_BOUND, NO_ITEMS_X_LOWER_BOUND), "No items in the dataset should return 0");
+}
+
+@Test
+public void testFindLiveItemsUpperBound_SingleItem() {
+    DefaultXYDataset<String> d = setupDatasetWithSingleItem();
+    assertEquals(0, RendererUtils.findLiveItemsUpperBound(d, 1, SINGLE_ITEM_X_LOWER_BOUND, SINGLE_ITEM_X_UPPER_BOUND_1), "Single item within bounds should return 0");
+    assertEquals(0, RendererUtils.findLiveItemsUpperBound(d, 1, SINGLE_ITEM_X_VALUE, SINGLE_ITEM_X_UPPER_BOUND_2), "Single item outside bounds should return 0");
+}
+
+@Test
+public void testFindLiveItemsUpperBound_TwoItems() {
+    DefaultXYDataset<String> d = setupDatasetWithTwoItems();
+    assertEquals(0, RendererUtils.findLiveItemsUpperBound(d, 2, TWO_ITEMS_X_LOWER_BOUND, TWO_ITEMS_X_UPPER_BOUND_1), "First item within bounds should return 0");
+    assertEquals(1, RendererUtils.findLiveItemsUpperBound(d, 2, TWO_ITEMS_X_VALUE_1, TWO_ITEMS_X_UPPER_BOUND_2), "Second item within bounds should return 1");
+    assertEquals(1, RendererUtils.findLiveItemsUpperBound(d, 2, TWO_ITEMS_X_VALUE_2, TWO_ITEMS_X_UPPER_BOUND_3), "Both items within bounds should return 1");
+    assertEquals(1, RendererUtils.findLiveItemsUpperBound(d, 2, TWO_ITEMS_X_VALUE_2 + 1, TWO_ITEMS_X_UPPER_BOUND_4), "Both items outside bounds should return 1");
+}
+
+@Test
+public void testFindLiveItemsUpperBound_ThreeItems() {
+    DefaultXYDataset<String> d = setupDatasetWithThreeItems();
+    assertEquals(0, RendererUtils.findLiveItemsUpperBound(d, 3, THREE_ITEMS_X_LOWER_BOUND, THREE_ITEMS_X_UPPER_BOUND_1), "First item within bounds should return 0");
+    assertEquals(2, RendererUtils.findLiveItemsUpperBound(d, 3, THREE_ITEMS_X_VALUE_1, THREE_ITEMS_X_UPPER_BOUND_2), "Second item within bounds should return 2");
+    assertEquals(2, RendererUtils.findLiveItemsUpperBound(d, 3, THREE_ITEMS_X_VALUE_2, THREE_ITEMS_X_UPPER_BOUND_3), "Third item within bounds should return 2");
+    assertEquals(2, RendererUtils.findLiveItemsUpperBound(d, 3, THREE_ITEMS_X_VALUE_3 + 1, THREE_ITEMS_X_UPPER_BOUND_4), "All items outside bounds should return 2");
+}
+
+@Test
+public void testFindLiveItemsUpperBound_FourItems() {
+    DefaultXYDataset<String> d = setupDatasetWithFourItems();
+    assertEquals(0, RendererUtils.findLiveItemsUpperBound(d, 4, FOUR_ITEMS_X_LOWER_BOUND, FOUR_ITEMS_X_UPPER_BOUND_1), "First item within bounds should return 0");
+    assertEquals(3, RendererUtils.findLiveItemsUpperBound(d, 4, FOUR_ITEMS_X_VALUE_1, FOUR_ITEMS_X_UPPER_BOUND_2), "Second item within bounds should return 3");
+    assertEquals(3, RendererUtils.findLiveItemsUpperBound(d, 4, FOUR_ITEMS_X_VALUE_2, FOUR_ITEMS_X_UPPER_BOUND_3), "Third item within bounds should return 3");
+    assertEquals(3, RendererUtils.findLiveItemsUpperBound(d, 4, FOUR_ITEMS_X_VALUE_3 + 1, FOUR_ITEMS_X_UPPER_BOUND_4), "Fourth item within bounds should return 3");
+    assertEquals(3, RendererUtils.findLiveItemsUpperBound(d, 4, FOUR_ITEMS_X_VALUE_4 + 1, FOUR_ITEMS_X_UPPER_BOUND_5), "All items outside bounds should return 3");
+}
+
+
+
+Input#5
+@Test
+    public void testFindLiveItemsUpperBound_Ascending() {
+        var d = new DefaultXYDataset<String>() {
+            @Override
+            public DomainOrder getDomainOrder() {
+                // we're doing this for testing only, and make sure that we
+                // only add data in ascending order by x-value
+                return DomainOrder.ASCENDING;
+            }
+        };
+        // check a series with no items
+        d.addSeries("S1", new double[][] {{}, {}});
+        assertEquals(0, RendererUtils.findLiveItemsUpperBound(d, 0, 10.0, 11.1));
+
+        // check a series with one item
+        d.addSeries("S2", new double[][] {{1.0}, {9.9}});
+        assertEquals(0, RendererUtils.findLiveItemsUpperBound(d, 1, 0.0, 1.1));
+        assertEquals(0, RendererUtils.findLiveItemsUpperBound(d, 1, 2.0, 2.2));
+
+        // check a series with two items
+        d.addSeries("S3", new double[][] {{1.0, 2.0}, {9.9, 9.9}});
+        assertEquals(0, RendererUtils.findLiveItemsUpperBound(d, 2, 0.0, 1.0));
+        assertEquals(1, RendererUtils.findLiveItemsUpperBound(d, 2, 1.0, 2.2));
+        assertEquals(1, RendererUtils.findLiveItemsUpperBound(d, 2, 2.0, 3.3));
+        assertEquals(1, RendererUtils.findLiveItemsUpperBound(d, 2, 3.0, 4.4));
+
+        // check a series with three items
+        d.addSeries("S4", new double[][] {{1.0, 2.0, 3.0}, {9.9, 9.9, 9.9}});
+        assertEquals(0, RendererUtils.findLiveItemsUpperBound(d, 3, 0.0, 1.1));
+        assertEquals(1, RendererUtils.findLiveItemsUpperBound(d, 3, 1.0, 2.2));
+        assertEquals(2, RendererUtils.findLiveItemsUpperBound(d, 3, 2.0, 3.3));
+        assertEquals(2, RendererUtils.findLiveItemsUpperBound(d, 3, 3.0, 4.4));
+
+        // check a series with four items
+        d.addSeries("S5", new double[][] {{1.0, 2.0, 3.0, 4.0}, {9.9, 9.9,
+                9.9, 9.9}});
+        assertEquals(0, RendererUtils.findLiveItemsUpperBound(d, 4, 0.0, 1.1));
+        assertEquals(1, RendererUtils.findLiveItemsUpperBound(d, 4, 1.0, 2.2));
+        assertEquals(2, RendererUtils.findLiveItemsUpperBound(d, 4, 2.0, 3.3));
+        assertEquals(3, RendererUtils.findLiveItemsUpperBound(d, 4, 3.0, 4.4));
+        assertEquals(3, RendererUtils.findLiveItemsUpperBound(d, 4, 4.0, 5.5));
+
+        // check a series with repeating items
+        d.addSeries("S5", new double[][] {{1.0, 2.0, 2.0, 2.0, 3.0}, {9.9, 9.9,
+                9.9, 9.9, 9.9}});
+        assertEquals(0, RendererUtils.findLiveItemsUpperBound(d, 4, 0.0, 1.0));
+        assertEquals(3, RendererUtils.findLiveItemsUpperBound(d, 4, 0.0, 2.0));
+        assertEquals(4, RendererUtils.findLiveItemsUpperBound(d, 4, 0.0, 3.0));
+        assertEquals(4, RendererUtils.findLiveItemsUpperBound(d, 4, 0.0, 4.0));
+
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test', 'Magic_Number_Test']
+Refactor#5
+
+    private DefaultXYDataset<String> createAscendingDataset() {
+        return new DefaultXYDataset<String>() {
+            @Override
+            public DomainOrder getDomainOrder() {
+                return DomainOrder.ASCENDING;
+            }
+        };
+    }
+
+    private void addSeries(DefaultXYDataset<String> dataset, String seriesName, double[] xValues, double[] yValues) {
+        dataset.addSeries(seriesName, new double[][] {xValues, yValues});
+    }
+
+    @Test
+    public void testFindLiveItemsUpperBound_SeriesWithNoItems() {
+        DefaultXYDataset<String> d = createAscendingDataset();
+        addSeries(d, "S1", new double[]{}, new double[]{});
+        int expectedIndex = 0;
+        int actualIndex = RendererUtils.findLiveItemsUpperBound(d, 0, 10.0, 11.1);
+        assertEquals("Expected upper bound index for series with no items", expectedIndex, actualIndex);
+    }
+
+    @Test
+    public void testFindLiveItemsUpperBound_SeriesWithOneItem() {
+        DefaultXYDataset<String> d = createAscendingDataset();
+        addSeries(d, "S2", new double[]{1.0}, new double[]{9.9});
+        int expectedIndex1 = 0;
+        int actualIndex1 = RendererUtils.findLiveItemsUpperBound(d, 1, 0.0, 1.1);
+        assertEquals("Expected upper bound index for series with one item (range 0.0-1.1)", expectedIndex1, actualIndex1);
+
+        int expectedIndex2 = 0;
+        int actualIndex2 = RendererUtils.findLiveItemsUpperBound(d, 1, 2.0, 2.2);
+        assertEquals("Expected upper bound index for series with one item (range 2.0-2.2)", expectedIndex2, actualIndex2);
+    }
+
+    @Test
+    public void testFindLiveItemsUpperBound_SeriesWithTwoItems() {
+        DefaultXYDataset<String> d = createAscendingDataset();
+        addSeries(d, "S3", new double[]{1.0, 2.0}, new double[]{9.9, 9.9});
+        int expectedIndex1 = 0;
+        int actualIndex1 = RendererUtils.findLiveItemsUpperBound(d, 2, 0.0, 1.0);
+        assertEquals("Expected upper bound index for series with two items (range 0.0-1.0)", expectedIndex1, actualIndex1);
+
+        int expectedIndex2 = 1;
+        int actualIndex2 = RendererUtils.findLiveItemsUpperBound(d, 2, 1.0, 2.2);
+        assertEquals("Expected upper bound index for series with two items (range 1.0-2.2)", expectedIndex2, actualIndex2);
+
+        int expectedIndex3 = 1;
+        int actualIndex3 = RendererUtils.findLiveItemsUpperBound(d, 2, 2.0, 3.3);
+        assertEquals("Expected upper bound index for series with two items (range 2.0-3.3)", expectedIndex3, actualIndex3);
+
+        int expectedIndex4 = 1;
+        int actualIndex4 = RendererUtils.findLiveItemsUpperBound(d, 2, 3.0, 4.4);
+        assertEquals("Expected upper bound index for series with two items (range 3.0-4.4)", expectedIndex4, actualIndex4);
+    }
+
+    @Test
+    public void testFindLiveItemsUpperBound_SeriesWithThreeItems() {
+        DefaultXYDataset<String> d = createAscendingDataset();
+        addSeries(d, "S4", new double[]{1.0, 2.0, 3.0}, new double[]{9.9, 9.9, 9.9});
+        int expectedIndex1 = 0;
+        int actualIndex1 = RendererUtils.findLiveItemsUpperBound(d, 3, 0.0, 1.1);
+        assertEquals("Expected upper bound index for series with three items (range 0.0-1.1)", expectedIndex1, actualIndex1);
+
+        int expectedIndex2 = 1;
+        int actualIndex2 = RendererUtils.findLiveItemsUpperBound(d, 3, 1.0, 2.2);
+        assertEquals("Expected upper bound index for series with three items (range 1.0-2.2)", expectedIndex2, actualIndex2);
+
+        int expectedIndex3 = 2;
+        int actualIndex3 = RendererUtils.findLiveItemsUpperBound(d, 3, 2.0, 3.3);
+        assertEquals("Expected upper bound index for series with three items (range 2.0-3.3)", expectedIndex3, actualIndex3);
+
+        int expectedIndex4 = 2;
+        int actualIndex4 = RendererUtils.findLiveItemsUpperBound(d, 3, 3.0, 4.4);
+        assertEquals("Expected upper bound index for series with three items (range 3.0-4.4)", expectedIndex4, actualIndex4);
+    }
+
+    @Test
+    public void testFindLiveItemsUpperBound_SeriesWithFourItems() {
+        DefaultXYDataset<String> d = createAscendingDataset();
+        addSeries(d, "S5", new double[]{1.0, 2.0, 3.0, 4.0}, new double[]{9.9, 9.9, 9.9, 9.9});
+        int expectedIndex1 = 0;
+        int actualIndex1 = RendererUtils.findLiveItemsUpperBound(d, 4, 0.0, 1.1);
+        assertEquals("Expected upper bound index for series with four items (range 0.0-1.1)", expectedIndex1, actualIndex1);
+
+        int expectedIndex2 = 1;
+        int actualIndex2 = RendererUtils.findLiveItemsUpperBound(d, 4, 1.0, 2.2);
+        assertEquals("Expected upper bound index for series with four items (range 1.0-2.2)", expectedIndex2, actualIndex2);
+
+        int expectedIndex3 = 2;
+        int actualIndex3 = RendererUtils.findLiveItemsUpperBound(d, 4, 2.0, 3.3);
+        assertEquals("Expected upper bound index for series with four items (range 2.0-3.3)", expectedIndex3, actualIndex3);
+
+        int expectedIndex4 = 3;
+        int actualIndex4 = RendererUtils.findLiveItemsUpperBound(d, 4, 3.0, 4.4);
+        assertEquals("Expected upper bound index for series with four items (range 3.0-4.4)", expectedIndex4, actualIndex4);
+
+        int expectedIndex5 = 3;
+        int actualIndex5 = RendererUtils.findLiveItemsUpperBound(d, 4, 4.0, 5.5);
+        assertEquals("Expected upper bound index for series with four items (range 4.0-5.5)", expectedIndex5, actualIndex5);
+    }
+
+    @Test
+    public void testFindLiveItemsUpperBound_SeriesWithRepeatingItems() {
+        DefaultXYDataset<String> d = createAscendingDataset();
+        addSeries(d, "S6", new double[]{1.0, 2.0, 2.0, 2.0, 3.0}, new double[]{9.9, 9.9, 9.9, 9.9, 9.9});
+        int expectedIndex1 = 0;
+        int actualIndex1 = RendererUtils.findLiveItemsUpperBound(d, 5, 0.0, 1.0);
+        assertEquals("Expected upper bound index for series with repeating items (range 0.0-1.0)", expectedIndex1, actualIndex1);
+
+        int expectedIndex2 = 3;
+        int actualIndex2 = RendererUtils.findLiveItemsUpperBound(d, 5, 0.0, 2.0);
+        assertEquals("Expected upper bound index for series with repeating items (range 0.0-2.0)", expectedIndex2, actualIndex2);
+
+        int expectedIndex3 = 4;
+        int actualIndex3 = RendererUtils.findLiveItemsUpperBound(d, 5, 0.0, 3.0);
+        assertEquals("Expected upper bound index for series with repeating items (range 0.0-3.0)", expectedIndex3, actualIndex3);
+
+        int expectedIndex4 = 4;
+        int actualIndex4 = RendererUtils.findLiveItemsUpperBound(d, 5, 0.0, 4.0);
+        assertEquals("Expected upper bound index for series with repeating items (range 0.0-4.0)", expectedIndex4, actualIndex4);
+    }
+
+Input#6
+@Test
+    public void testFindLiveItemsUpperBound_Descending() {
+        var d = new DefaultXYDataset<String>() {
+            @Override
+            public DomainOrder getDomainOrder() {
+                // we're doing this for testing only, and make sure that we
+                // only add data in descending order by x-value
+                return DomainOrder.DESCENDING;
+            }
+        };
+        // check a series with no items
+        d.addSeries("S1", new double[][] {{}, {}});
+        assertEquals(0, RendererUtils.findLiveItemsUpperBound(d, 0, 10.0, 11.0));
+
+        // check a series with one item
+        d.addSeries("S2", new double[][] {{1.0}, {9.9}});
+        assertEquals(0, RendererUtils.findLiveItemsUpperBound(d, 1, 0.0, 1.0));
+        assertEquals(0, RendererUtils.findLiveItemsUpperBound(d, 1, 1.1, 2.0));
+
+        // check a series with two items
+        d.addSeries("S3", new double[][] {{2.0, 1.0}, {9.9, 9.9}});
+        assertEquals(1, RendererUtils.findLiveItemsUpperBound(d, 2, 0.1, 0.5));
+        assertEquals(1, RendererUtils.findLiveItemsUpperBound(d, 2, 0.1, 1.0));
+        assertEquals(0, RendererUtils.findLiveItemsUpperBound(d, 2, 1.1, 2.0));
+        assertEquals(0, RendererUtils.findLiveItemsUpperBound(d, 2, 2.2, 3.0));
+        assertEquals(0, RendererUtils.findLiveItemsUpperBound(d, 2, 3.3, 4.0));
+
+        // check a series with three items
+        d.addSeries("S4", new double[][] {{3.0, 2.0, 1.0}, {9.9, 9.9, 9.9}});
+        assertEquals(2, RendererUtils.findLiveItemsUpperBound(d, 3, 0.0, 1.0));
+        assertEquals(2, RendererUtils.findLiveItemsUpperBound(d, 3, 1.0, 2.0));
+        assertEquals(1, RendererUtils.findLiveItemsUpperBound(d, 3, 2.0, 3.0));
+        assertEquals(0, RendererUtils.findLiveItemsUpperBound(d, 3, 3.0, 4.0));
+
+        // check a series with four items
+        d.addSeries("S5", new double[][] {{4.0, 3.0, 2.0, 1.0}, {9.9, 9.9,
+                9.9, 9.9}});
+        assertEquals(3, RendererUtils.findLiveItemsUpperBound(d, 4, 0.1, 0.5));
+        assertEquals(3, RendererUtils.findLiveItemsUpperBound(d, 4, 0.1, 1.0));
+        assertEquals(2, RendererUtils.findLiveItemsUpperBound(d, 4, 1.1, 2.0));
+        assertEquals(1, RendererUtils.findLiveItemsUpperBound(d, 4, 2.2, 3.0));
+        assertEquals(0, RendererUtils.findLiveItemsUpperBound(d, 4, 3.3, 4.0));
+        assertEquals(0, RendererUtils.findLiveItemsUpperBound(d, 4, 4.4, 5.0));
+
+        // check a series with repeating items
+        d.addSeries("S6", new double[][] {{3.0, 2.0, 2.0, 2.0, 1.0}, {9.9, 9.9,
+                9.9, 9.9, 9.9}});
+        assertEquals(4, RendererUtils.findLiveItemsUpperBound(d, 5, 0.0, 5.0));
+        assertEquals(4, RendererUtils.findLiveItemsUpperBound(d, 5, 1.0, 5.0));
+        assertEquals(3, RendererUtils.findLiveItemsUpperBound(d, 5, 2.0, 5.0));
+        assertEquals(0, RendererUtils.findLiveItemsUpperBound(d, 5, 3.0, 5.0));
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test', 'Magic_Number_Test']
+Refactor#6
+
+
+@Test
+public void testFindLiveItemsUpperBound_Descending_NoItems() {
+    DefaultXYDataset<String> dataset = createDescendingDataset();
+    dataset.addSeries("S1", new double[][] {{}, {}});
+    int expected = 0;
+    int actual = RendererUtils.findLiveItemsUpperBound(dataset, 0, 10.0, 11.0);
+    assertEquals(expected, actual, "No items in the series");
+}
+
+@Test
+public void testFindLiveItemsUpperBound_Descending_OneItem() {
+    DefaultXYDataset<String> dataset = createDescendingDataset();
+    dataset.addSeries("S2", new double[][] {{1.0}, {9.9}});
+    int expected = 0;
+    int actual = RendererUtils.findLiveItemsUpperBound(dataset, 1, 0.0, 1.0);
+    assertEquals(expected, actual, "One item, range [0.0, 1.0]");
+    actual = RendererUtils.findLiveItemsUpperBound(dataset, 1, 1.1, 2.0);
+    assertEquals(expected, actual, "One item, range [1.1, 2.0]");
+}
+
+@Test
+public void testFindLiveItemsUpperBound_Descending_TwoItems() {
+    DefaultXYDataset<String> dataset = createDescendingDataset();
+    dataset.addSeries("S3", new double[][] {{2.0, 1.0}, {9.9, 9.9}});
+    int expected = 1;
+    int actual = RendererUtils.findLiveItemsUpperBound(dataset, 2, 0.1, 0.5);
+    assertEquals(expected, actual, "Two items, range [0.1, 0.5]");
+    actual = RendererUtils.findLiveItemsUpperBound(dataset, 2, 0.1, 1.0);
+    assertEquals(expected, actual, "Two items, range [0.1, 1.0]");
+    expected = 0;
+    actual = RendererUtils.findLiveItemsUpperBound(dataset, 2, 1.1, 2.0);
+    assertEquals(expected, actual, "Two items, range [1.1, 2.0]");
+    actual = RendererUtils.findLiveItemsUpperBound(dataset, 2, 2.2, 3.0);
+    assertEquals(expected, actual, "Two items, range [2.2, 3.0]");
+    actual = RendererUtils.findLiveItemsUpperBound(dataset, 2, 3.3, 4.0);
+    assertEquals(expected, actual, "Two items, range [3.3, 4.0]");
+}
+
+@Test
+public void testFindLiveItemsUpperBound_Descending_ThreeItems() {
+    DefaultXYDataset<String> dataset = createDescendingDataset();
+    dataset.addSeries("S4", new double[][] {{3.0, 2.0, 1.0}, {9.9, 9.9, 9.9}});
+    int expected = 2;
+    int actual = RendererUtils.findLiveItemsUpperBound(dataset, 3, 0.0, 1.0);
+    assertEquals(expected, actual, "Three items, range [0.0, 1.0]");
+    actual = RendererUtils.findLiveItemsUpperBound(dataset, 3, 1.0, 2.0);
+    assertEquals(expected, actual, "Three items, range [1.0, 2.0]");
+    expected = 1;
+    actual = RendererUtils.findLiveItemsUpperBound(dataset, 3, 2.0, 3.0);
+    assertEquals(expected, actual, "Three items, range [2.0, 3.0]");
+    expected = 0;
+    actual = RendererUtils.findLiveItemsUpperBound(dataset, 3, 3.0, 4.0);
+    assertEquals(expected, actual, "Three items, range [3.0, 4.0]");
+}
+
+@Test
+public void testFindLiveItemsUpperBound_Descending_FourItems() {
+    DefaultXYDataset<String> dataset = createDescendingDataset();
+    dataset.addSeries("S5", new double[][] {{4.0, 3.0, 2.0, 1.0}, {9.9, 9.9, 9.9, 9.9}});
+    int expected = 3;
+    int actual = RendererUtils.findLiveItemsUpperBound(dataset, 4, 0.1, 0.5);
+    assertEquals(expected, actual, "Four items, range [0.1, 0.5]");
+    actual = RendererUtils.findLiveItemsUpperBound(dataset, 4, 0.1, 1.0);
+    assertEquals(expected, actual, "Four items, range [0.1, 1.0]");
+    expected = 2;
+    actual = RendererUtils.findLiveItemsUpperBound(dataset, 4, 1.1, 2.0);
+    assertEquals(expected, actual, "Four items, range [1.1, 2.0]");
+    expected = 1;
+    actual = RendererUtils.findLiveItemsUpperBound(dataset, 4, 2.2, 3.0);
+    assertEquals(expected, actual, "Four items, range [2.2, 3.0]");
+    expected = 0;
+    actual = RendererUtils.findLiveItemsUpperBound(dataset, 4, 3.3, 4.0);
+    assertEquals(expected, actual, "Four items, range [3.3, 4.0]");
+    actual = RendererUtils.findLiveItemsUpperBound(dataset, 4, 4.4, 5.0);
+    assertEquals(expected, actual, "Four items, range [4.4, 5.0]");
+}
+
+@Test
+public void testFindLiveItemsUpperBound_Descending_RepeatingItems() {
+    DefaultXYDataset<String> dataset = createDescendingDataset();
+    dataset.addSeries("S6", new double[][] {{3.0, 2.0, 2.0, 2.0, 1.0}, {9.9, 9.9, 9.9, 9.9, 9.9}});
+    int expected = 4;
+    int actual = RendererUtils.findLiveItemsUpperBound(dataset, 5, 0.0, 5.0);
+    assertEquals(expected, actual, "Repeating items, range [0.0, 5.0]");
+    actual = RendererUtils.findLiveItemsUpperBound(dataset, 5, 1.0, 5.0);
+    assertEquals(expected, actual, "Repeating items, range [1.0, 5.0]");
+    expected = 3;
+    actual = RendererUtils.findLiveItemsUpperBound(dataset, 5, 2.0, 5.0);
+    assertEquals(expected, actual, "Repeating items, range [2.0, 5.0]");
+    expected = 0;
+    actual = RendererUtils.findLiveItemsUpperBound(dataset, 5, 3.0, 5.0);
+    assertEquals(expected, actual, "Repeating items, range [3.0, 5.0]");
+}
+
+private DefaultXYDataset<String> createDescendingDataset() {
+    return new DefaultXYDataset<String>() {
+        @Override
+        public DomainOrder getDomainOrder() {
+            return DomainOrder.DESCENDING;
+        }
+    };
+}
+Input#7
+ @Test
+    public void test3561093() {
+        XYSeries<String> s = new XYSeries<>("S1", false);
+        s.add(0.0, 0.0);
+        s.add(21.0, 0.0);
+        s.add(2.0, 0.0);
+        s.add(23.0, 0.0);
+        XYSeriesCollection<String> dataset = new XYSeriesCollection<>();
+        dataset.addSeries(s);
+
+        assertEquals(1, RendererUtils.findLiveItemsLowerBound(dataset, 0,
+                10.0, 20.0));
+        assertEquals(2, RendererUtils.findLiveItemsUpperBound(dataset, 0,
+                10.0, 20.0));
+
+        int[] bounds = RendererUtils.findLiveItems(dataset, 0, 10.0, 20.0);
+        assertEquals(1, bounds[0]);
+        assertEquals(2, bounds[1]);
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test', 'Magic_Number_Test']
+Refactor#7
+
+private XYSeries<String> createSeries() {
+    XYSeries<String> s = new XYSeries<>("S1", false);
+    s.add(0.0, 0.0);
+    s.add(21.0, 0.0);
+    s.add(2.0, 0.0);
+    s.add(23.0, 0.0);
+    return s;
+}
+
+private XYSeriesCollection<String> createDataset(XYSeries<String> series) {
+    XYSeriesCollection<String> dataset = new XYSeriesCollection<>();
+    dataset.addSeries(series);
+    return dataset;
+}
+
+@Test
+public void test3561093_LowerBound() {
+    XYSeries<String> series = createSeries();
+    XYSeriesCollection<String> dataset = createDataset(series);
+
+    int lowerBound = RendererUtils.findLiveItemsLowerBound(dataset, 0, 10.0, 20.0);
+    assertEquals(1, lowerBound, "Lower bound index should be 1");
+}
+
+@Test
+public void test3561093_UpperBound() {
+    XYSeries<String> series = createSeries();
+    XYSeriesCollection<String> dataset = createDataset(series);
+
+    int upperBound = RendererUtils.findLiveItemsUpperBound(dataset, 0, 10.0, 20.0);
+    assertEquals(2, upperBound, "Upper bound index should be 2");
+}
+
+@Test
+public void test3561093_BoundsArray() {
+    XYSeries<String> series = createSeries();
+    XYSeriesCollection<String> dataset = createDataset(series);
+
+    int expectedLowerBound = 1;
+    int expectedUpperBound = 2;
+    int[] bounds = RendererUtils.findLiveItems(dataset, 0, 10.0, 20.0);
+    assertEquals(expectedLowerBound, bounds[0], "Lower bound index should be 1");
+    assertEquals(expectedUpperBound, bounds[1], "Upper bound index should be 2");
+}
+
+Input#8
+
+Refactor#8
+
+
+Input#9
+
+Refactor#9
+
+
+Input#10
+
+Refactor#10
+
+
+Input#11
+
+Refactor#11
+
+
+Input#12
+
+Refactor#12
+
+
+Input#13
+
+Refactor#13
+
+
+Input#14
+
+Refactor#14
+
+
+Input#15
+
+Refactor#15
+
+
+Input#16
+
+Refactor#16
+
+
+Input#17
+
+Refactor#17
+
+
+Input#18
+
+Refactor#18
+
+
+
+Input#19
+
+Refactor#19
+
+
+
+Input#20
+
+Refactor#20
+
+
+
+Input#21
+
+Refactor#21
+
+
+Input#22
+
+Refactor#22
+
+
+Input#23
+
+Refactor#23
+
+
+Input#24
+
+Refactor#24
+
+
+Input#25
+
+Refactor#25
+
+
+Input#26
+
+Refactor#26
+
+
+Input#27
+
+Refactor#27
+
+
+
+Input#28
+
+Refactor#28
+
+
+
+Input#29
+
+Refactor#29
+
+
+
+Input#30
+
+Refactor#30
+
+
+Input#31
+
+Refactor#31
+
+
+
+Input#32
+
+Refactor#32
+
+
+
+Input#33
+
+Refactor#33
+
+
+
+Input#34
+
+Refactor#34
+
+
+
+Input#35
+
+Refactor#35
+

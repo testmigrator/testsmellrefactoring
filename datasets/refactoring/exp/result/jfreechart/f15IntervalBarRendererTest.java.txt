@@ -1,0 +1,332 @@
+File#1
+
+
+Input#1
+@Test
+    public void testHashcode() {
+        IntervalBarRenderer r1 = new IntervalBarRenderer();
+        IntervalBarRenderer r2 = new IntervalBarRenderer();
+        assertEquals(r1, r2);
+        int h1 = r1.hashCode();
+        int h2 = r2.hashCode();
+        assertEquals(h1, h2);
+    }
+Smell List: ['Assertion_Roulette']
+Refactor#1
+@Test
+public void testHashcode() {
+    IntervalBarRenderer r1 = new IntervalBarRenderer();
+    IntervalBarRenderer r2 = new IntervalBarRenderer();
+    assertEquals("Expected r1 and r2 to be equal", r1, r2);
+    int h1 = r1.hashCode();
+    int h2 = r2.hashCode();
+    assertEquals("Expected hash codes of r1 and r2 to be equal", h1, h2);
+}
+
+Input#2
+ @Test
+    public void testCloning() throws CloneNotSupportedException {
+        IntervalBarRenderer r1 = new IntervalBarRenderer();
+        IntervalBarRenderer r2 = CloneUtils.clone(r1);
+        assertNotSame(r1, r2);
+        assertSame(r1.getClass(), r2.getClass());
+        assertEquals(r1, r2);
+        TestUtils.checkIndependence(r1, r2);
+    }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing']
+Refactor#2
+@Test
+public void testCloning() {
+    assertDoesNotThrow(() -> {
+        IntervalBarRenderer r1 = new IntervalBarRenderer();
+        IntervalBarRenderer r2 = CloneUtils.clone(r1);
+        assertNotSame(r1, r2, "The cloned object should not be the same instance as the original");
+        assertSame(r1.getClass(), r2.getClass(), "The cloned object should be of the same class as the original");
+        assertEquals(r1, r2, "The cloned object should be equal to the original");
+        TestUtils.checkIndependence(r1, r2, "The cloned object should be independent of the original");
+    }, "Unexpected exception occurred during the test");
+}
+
+Input#3
+ @Test
+    public void testDrawWithNullInfo() {
+        try {
+            double[][] starts = new double[][] {{0.1, 0.2, 0.3},
+                    {0.3, 0.4, 0.5}};
+            double[][] ends = new double[][] {{0.5, 0.6, 0.7}, {0.7, 0.8, 0.9}};
+            DefaultIntervalCategoryDataset dataset
+                    = new DefaultIntervalCategoryDataset(starts, ends);
+            IntervalBarRenderer renderer = new IntervalBarRenderer();
+            CategoryPlot<String, String> plot = new CategoryPlot<>(dataset,
+                    new CategoryAxis("Category"), new NumberAxis("Value"),
+                    renderer);
+            JFreeChart chart = new JFreeChart(plot);
+            /* BufferedImage image = */ chart.createBufferedImage(300, 200,
+                    null);
+        }
+        catch (NullPointerException e) {
+            fail("No exception should be thrown.");
+        }
+    }
+Smell List: ['Exception_Catching_Throwing']
+
+Refactor#3
+@Test
+public void testDrawWithNullInfo() {
+    assertDoesNotThrow(() -> {
+        double[][] starts = new double[][] {{0.1, 0.2, 0.3},
+                {0.3, 0.4, 0.5}};
+        double[][] ends = new double[][] {{0.5, 0.6, 0.7}, {0.7, 0.8, 0.9}};
+        DefaultIntervalCategoryDataset dataset
+                = new DefaultIntervalCategoryDataset(starts, ends);
+        IntervalBarRenderer renderer = new IntervalBarRenderer();
+        CategoryPlot<String, String> plot = new CategoryPlot<>(dataset,
+                new CategoryAxis("Category"), new NumberAxis("Value"),
+                renderer);
+        JFreeChart chart = new JFreeChart(plot);
+        /* BufferedImage image = */ chart.createBufferedImage(300, 200,
+                null);
+    }, "No exception should be thrown.");
+}
+
+Input#4
+@Test
+    public void testFindRangeBounds() {
+        IntervalBarRenderer r = new IntervalBarRenderer();
+        assertNull(r.findRangeBounds(null));
+
+        // an empty dataset should return a null range
+        DefaultIntervalCategoryDataset dataset
+                = new DefaultIntervalCategoryDataset(new double[0][0],
+                new double[0][0]);
+        assertNull(r.findRangeBounds(dataset));
+
+        double[][] starts = new double[][] {{0.1, 0.2, 0.3}, {0.3, 0.4, 0.5}};
+        double[][] ends = new double[][] {{0.5, 0.6, 0.7}, {0.7, 0.8, 0.9}};
+        dataset = new DefaultIntervalCategoryDataset(starts, ends);
+        assertEquals(new Range(0.0, 0.9), r.findRangeBounds(dataset));
+        r.setIncludeBaseInRange(false);
+        assertEquals(new Range(0.1, 0.9), r.findRangeBounds(dataset));
+        r.setIncludeBaseInRange(true);
+
+        r.setSeriesVisible(1, Boolean.FALSE);
+        assertEquals(new Range(0.0, 0.7), r.findRangeBounds(dataset));
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test', 'Magic_Number_Test']
+
+Refactor#4
+
+private IntervalBarRenderer renderer;
+private DefaultIntervalCategoryDataset dataset;
+
+@Before
+public void setUp() {
+    renderer = new IntervalBarRenderer();
+}
+
+@Test
+public void testFindRangeBounds_NullDataset() {
+    assertNull(renderer.findRangeBounds(null), "Expected null when dataset is null");
+}
+
+@Test
+public void testFindRangeBounds_EmptyDataset() {
+    dataset = new DefaultIntervalCategoryDataset(new double[0][0], new double[0][0]);
+    assertNull(renderer.findRangeBounds(dataset), "Expected null when dataset is empty");
+}
+
+@Test
+public void testFindRangeBounds_WithBaseInRange() {
+    double[][] starts = new double[][] {{0.1, 0.2, 0.3}, {0.3, 0.4, 0.5}};
+    double[][] ends = new double[][] {{0.5, 0.6, 0.7}, {0.7, 0.8, 0.9}};
+    dataset = new DefaultIntervalCategoryDataset(starts, ends);
+    Range expectedRange = new Range(0.0, 0.9);
+    assertEquals(expectedRange, renderer.findRangeBounds(dataset), "Expected range with base included");
+}
+
+@Test
+public void testFindRangeBounds_WithoutBaseInRange() {
+    double[][] starts = new double[][] {{0.1, 0.2, 0.3}, {0.3, 0.4, 0.5}};
+    double[][] ends = new double[][] {{0.5, 0.6, 0.7}, {0.7, 0.8, 0.9}};
+    dataset = new DefaultIntervalCategoryDataset(starts, ends);
+    renderer.setIncludeBaseInRange(false);
+    Range expectedRange = new Range(0.1, 0.9);
+    assertEquals(expectedRange, renderer.findRangeBounds(dataset), "Expected range without base included");
+    renderer.setIncludeBaseInRange(true); // Reset to default
+}
+
+@Test
+public void testFindRangeBounds_SeriesNotVisible() {
+    double[][] starts = new double[][] {{0.1, 0.2, 0.3}, {0.3, 0.4, 0.5}};
+    double[][] ends = new double[][] {{0.5, 0.6, 0.7}, {0.7, 0.8, 0.9}};
+    dataset = new DefaultIntervalCategoryDataset(starts, ends);
+    renderer.setSeriesVisible(1, Boolean.FALSE);
+    Range expectedRange = new Range(0.0, 0.7);
+    assertEquals(expectedRange, renderer.findRangeBounds(dataset), "Expected range when series 1 is not visible");
+}
+
+
+Input#5
+
+Refactor#5
+
+
+Input#6
+
+Refactor#6
+
+
+Input#7
+
+Refactor#7
+
+
+Input#8
+
+Refactor#8
+
+
+Input#9
+
+Refactor#9
+
+
+Input#10
+
+Refactor#10
+
+
+Input#11
+
+Refactor#11
+
+
+Input#12
+
+Refactor#12
+
+
+Input#13
+
+Refactor#13
+
+
+Input#14
+
+Refactor#14
+
+
+Input#15
+
+Refactor#15
+
+
+Input#16
+
+Refactor#16
+
+
+Input#17
+
+Refactor#17
+
+
+Input#18
+
+Refactor#18
+
+
+
+Input#19
+
+Refactor#19
+
+
+
+Input#20
+
+Refactor#20
+
+
+
+Input#21
+
+Refactor#21
+
+
+Input#22
+
+Refactor#22
+
+
+Input#23
+
+Refactor#23
+
+
+Input#24
+
+Refactor#24
+
+
+Input#25
+
+Refactor#25
+
+
+Input#26
+
+Refactor#26
+
+
+Input#27
+
+Refactor#27
+
+
+
+Input#28
+
+Refactor#28
+
+
+
+Input#29
+
+Refactor#29
+
+
+
+Input#30
+
+Refactor#30
+
+
+Input#31
+
+Refactor#31
+
+
+
+Input#32
+
+Refactor#32
+
+
+
+Input#33
+
+Refactor#33
+
+
+
+Input#34
+
+Refactor#34
+
+
+
+Input#35
+
+Refactor#35
+

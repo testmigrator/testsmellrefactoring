@@ -1,0 +1,547 @@
+File#1
+
+
+Input#1
+ @Test
+    public void fetchURl() throws IOException {
+        Document doc = Jsoup.parse(new URL(echoUrl), 10 * 1000);
+        assertTrue(doc.title().contains("Environment Variables"));
+    }
+Smell List: ['Exception_Catching_Throwing']
+Refactor#1
+@Test
+public void fetchURL() {
+    assertDoesNotThrow(() -> {
+        Document doc = Jsoup.parse(new URL(echoUrl), 10 * 1000);
+        assertTrue(doc.title().contains("Environment Variables"));
+    }, "Unexpected exception occurred during the test");
+}
+
+Input#2
+ @Test
+    public void fetchURIWithWhitespace() throws IOException {
+        Connection con = Jsoup.connect(echoUrl + "#with whitespaces");
+        Document doc = con.get();
+        assertTrue(doc.title().contains("Environment Variables"));
+    }
+Smell List: ['Exception_Catching_Throwing']
+Refactor#2
+@Test
+public void fetchURIWithWhitespace() {
+    assertDoesNotThrow(() -> {
+        Connection con = Jsoup.connect(echoUrl + "#with whitespaces");
+        Document doc = con.get();
+        assertTrue(doc.title().contains("Environment Variables"));
+    }, "Unexpected exception occurred during the test");
+}
+
+
+Input#3
+
+ @Test
+    public void doesPost() throws IOException {
+        Document doc = Jsoup.connect(echoUrl)
+            .data("uname", "Jsoup", "uname", "Jonathan", "百", "度一下")
+            .cookie("auth", "token")
+            .post();
+
+        assertEquals("POST", ihVal("Method", doc));
+        assertEquals("gzip", ihVal("Accept-Encoding", doc));
+        assertEquals("auth=token", ihVal("Cookie", doc));
+        assertEquals("度一下", ihVal("百", doc));
+        assertEquals("Jsoup, Jonathan", ihVal("uname", doc));
+        assertEquals("application/x-www-form-urlencoded; charset=UTF-8", ihVal("Content-Type", doc));
+    }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing']
+Refactor#3
+
+@Test
+public void doesPost() {
+    Document doc = assertDoesNotThrow(() -> {
+        return Jsoup.connect(echoUrl)
+            .data("uname", "Jsoup", "uname", "Jonathan", "百", "度一下")
+            .cookie("auth", "token")
+            .post();
+    }, "Unexpected exception occurred during the POST request");
+
+    assertEquals("POST", ihVal("Method", doc), "HTTP method should be POST");
+    assertEquals("gzip", ihVal("Accept-Encoding", doc), "Accept-Encoding header should be gzip");
+    assertEquals("auth=token", ihVal("Cookie", doc), "Cookie header should be auth=token");
+    assertEquals("度一下", ihVal("百", doc), "Value for key '百' should be '度一下'");
+    assertEquals("Jsoup, Jonathan", ihVal("uname", doc), "Value for key 'uname' should be 'Jsoup, Jonathan'");
+    assertEquals("application/x-www-form-urlencoded; charset=UTF-8", ihVal("Content-Type", doc), "Content-Type header should be application/x-www-form-urlencoded; charset=UTF-8");
+}
+
+
+Input#4
+ @Test
+    public void doesPostMultipartWithoutInputstream() throws IOException {
+        Document doc = Jsoup.connect(echoUrl)
+                .header(CONTENT_TYPE, MULTIPART_FORM_DATA)
+                .userAgent(browserUa)
+                .data("uname", "Jsoup", "uname", "Jonathan", "百", "度一下")
+                .post();
+
+        assertTrue(ihVal("Content-Type", doc).contains(MULTIPART_FORM_DATA));
+
+        assertTrue(ihVal("Content-Type", doc).contains("boundary")); // should be automatically set
+        assertEquals("Jsoup, Jonathan", ihVal("uname", doc));
+        assertEquals("度一下", ihVal("百", doc));
+    }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing']
+Refactor#4
+
+@Test
+public void doesPostMultipartWithoutInputstream() {
+    Document doc;
+    try {
+        doc = Jsoup.connect(echoUrl)
+                .header(CONTENT_TYPE, MULTIPART_FORM_DATA)
+                .userAgent(browserUa)
+                .data("uname", "Jsoup", "uname", "Jonathan", "百", "度一下")
+                .post();
+    } catch (IOException e) {
+        assertDoesNotThrow(() -> {
+            throw e;
+        }, "Unexpected exception occurred during the test");
+        return;
+    }
+
+    assertTrue(ihVal("Content-Type", doc).contains(MULTIPART_FORM_DATA), "Content-Type should contain multipart/form-data");
+    assertTrue(ihVal("Content-Type", doc).contains("boundary"), "Content-Type should contain boundary");
+    assertEquals("Jsoup, Jonathan", ihVal("uname", doc), "uname should be Jsoup, Jonathan");
+    assertEquals("度一下", ihVal("百", doc), "百 should be 度一下");
+}
+
+Input#5
+ @Test
+    public void sendsRequestBodyJsonWithData() throws IOException {
+        final String body = "{key:value}";
+        Document doc = Jsoup.connect(echoUrl)
+            .requestBody(body)
+            .header("Content-Type", "application/json")
+            .userAgent(browserUa)
+            .data("foo", "true")
+            .post();
+        assertEquals("POST", ihVal("Method", doc));
+        assertEquals("application/json", ihVal("Content-Type", doc));
+        assertEquals("foo=true", ihVal("Query String", doc));
+        assertEquals(body, ihVal("Post Data", doc));
+    }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing']
+Refactor#5
+
+
+@Test
+public void sendsRequestBodyJsonWithData() {
+    final String body = "{key:value}";
+    Document doc;
+    assertDoesNotThrow(() -> {
+        doc = Jsoup.connect(echoUrl)
+            .requestBody(body)
+            .header("Content-Type", "application/json")
+            .userAgent(browserUa)
+            .data("foo", "true")
+            .post();
+    }, "Unexpected exception occurred during the HTTP request");
+
+    assertEquals("POST", ihVal("Method", doc), "HTTP method should be POST");
+    assertEquals("application/json", ihVal("Content-Type", doc), "Content-Type header should be application/json");
+    assertEquals("foo=true", ihVal("Query String", doc), "Query string should be foo=true");
+    assertEquals(body, ihVal("Post Data", doc), "Post data should match the sent body");
+}
+Input#6
+ @Test
+    public void sendsRequestBodyJsonWithoutData() throws IOException {
+        final String body = "{key:value}";
+        Document doc = Jsoup.connect(echoUrl)
+            .requestBody(body)
+            .header("Content-Type", "application/json")
+            .userAgent(browserUa)
+            .post();
+        assertEquals("POST", ihVal("Method", doc));
+        assertEquals("application/json", ihVal("Content-Type", doc));
+        assertEquals(body, ihVal("Post Data", doc));
+    }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing']
+Refactor#6
+
+@Test
+public void sendsRequestBodyJsonWithoutData() {
+    final String body = "{key:value}";
+    Document doc = null;
+    try {
+        doc = Jsoup.connect(echoUrl)
+            .requestBody(body)
+            .header("Content-Type", "application/json")
+            .userAgent(browserUa)
+            .post();
+    } catch (IOException e) {
+        assertDoesNotThrow(() -> {
+            throw e;
+        }, "Unexpected IOException occurred during the test");
+    }
+    assertEquals("POST", ihVal("Method", doc), "HTTP method should be POST");
+    assertEquals("application/json", ihVal("Content-Type", doc), "Content-Type header should be application/json");
+    assertEquals(body, ihVal("Post Data", doc), "Request body should match the expected JSON body");
+}
+
+
+Input#7
+ @Test
+    public void sendsRequestBody() throws IOException {
+        final String body = "{key:value}";
+        Document doc = Jsoup.connect(echoUrl)
+            .requestBody(body)
+            .header("Content-Type", "text/plain")
+            .userAgent(browserUa)
+            .post();
+        assertEquals("POST", ihVal("Method", doc));
+        assertEquals("text/plain", ihVal("Content-Type", doc));
+        assertEquals(body, ihVal("Post Data", doc));
+    }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing']
+Refactor#7
+
+@Test
+public void sendsRequestBody() {
+    final String body = "{key:value}";
+    assertDoesNotThrow(() -> {
+        Document doc = Jsoup.connect(echoUrl)
+            .requestBody(body)
+            .header("Content-Type", "text/plain")
+            .userAgent(browserUa)
+            .post();
+        assertEquals("POST", ihVal("Method", doc), "HTTP method should be POST");
+        assertEquals("text/plain", ihVal("Content-Type", doc), "Content-Type header should be text/plain");
+        assertEquals(body, ihVal("Post Data", doc), "Request body should match the expected value");
+    }, "Unexpected exception occurred during the test");
+}
+
+
+Input#8
+ @Test
+    public void sendsRequestBodyWithUrlParams() throws IOException {
+        final String body = "{key:value}";
+        Document doc = Jsoup.connect(echoUrl)
+            .requestBody(body)
+            .data("uname", "Jsoup", "uname", "Jonathan", "百", "度一下")
+            .header("Content-Type", "text/plain") // todo - if user sets content-type, we should append postcharset
+            .userAgent(browserUa)
+            .post();
+        assertEquals("POST", ihVal("Method", doc));
+        assertEquals("uname=Jsoup&uname=Jonathan&%E7%99%BE=%E5%BA%A6%E4%B8%80%E4%B8%8B", ihVal("Query String", doc));
+        assertEquals(body, ihVal("Post Data", doc));
+    }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing']
+Refactor#8
+
+@Test
+public void sendsRequestBodyWithUrlParams() {
+    final String body = "{key:value}";
+    Document doc;
+    assertDoesNotThrow(() -> {
+        doc = Jsoup.connect(echoUrl)
+            .requestBody(body)
+            .data("uname", "Jsoup", "uname", "Jonathan", "百", "度一下")
+            .header("Content-Type", "text/plain") // todo - if user sets content-type, we should append postcharset
+            .userAgent(browserUa)
+            .post();
+    }, "Unexpected exception occurred while making the POST request");
+
+    assertEquals("POST", ihVal("Method", doc), "HTTP method should be POST");
+    assertEquals("uname=Jsoup&uname=Jonathan&%E7%99%BE=%E5%BA%A6%E4%B8%80%E4%B8%8B", ihVal("Query String", doc), "Query string parameters do not match expected values");
+    assertEquals(body, ihVal("Post Data", doc), "Request body does not match expected value");
+}
+
+
+Input#9
+@Test
+    public void doesGet() throws IOException {
+        Connection con = Jsoup.connect(echoUrl + "?what=the")
+            .userAgent("Mozilla")
+            .referrer("http://example.com")
+            .data("what", "about & me?");
+
+        Document doc = con.get();
+        assertEquals("what=the&what=about+%26+me%3F", ihVal("Query String", doc));
+        assertEquals("the, about & me?", ihVal("what", doc));
+        assertEquals("Mozilla", ihVal("User-Agent", doc));
+        assertEquals("http://example.com", ihVal("Referer", doc));
+    }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing']
+Refactor#9
+
+private String echoUrl = "http://example.com/echo";
+
+    private String ihVal(String key, Document doc) {
+        // Implementation of ihVal method
+        return doc.select("[name=" + key + "]").attr("value");
+    }
+
+    @Test
+    public void doesGet() {
+        assertDoesNotThrow(() -> {
+            Connection con = Jsoup.connect(echoUrl + "?what=the")
+                .userAgent("Mozilla")
+                .referrer("http://example.com")
+                .data("what", "about & me?");
+
+            Document doc = con.get();
+            assertEquals("what=the&what=about+%26+me%3F", ihVal("Query String", doc), "Query string should match expected value");
+            assertEquals("the, about & me?", ihVal("what", doc), "Value of 'what' should match expected value");
+            assertEquals("Mozilla", ihVal("User-Agent", doc), "User-Agent should match expected value");
+            assertEquals("http://example.com", ihVal("Referer", doc), "Referer should match expected value");
+        }, "Unexpected exception occurred during the test");
+    }
+}
+Input#10
+ @Test
+    public void doesPut() throws IOException {
+        Connection.Response res = Jsoup.connect(echoUrl)
+            .data("uname", "Jsoup", "uname", "Jonathan", "百", "度一下")
+            .cookie("auth", "token")
+            .method(Connection.Method.PUT)
+            .execute();
+
+        Document doc = res.parse();
+        assertEquals("PUT", ihVal("Method", doc));
+        assertEquals("gzip", ihVal("Accept-Encoding", doc));
+        assertEquals("auth=token", ihVal("Cookie", doc));
+    }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing']
+Refactor#10
+
+@Test
+public void doesPut() {
+    assertDoesNotThrow(() -> {
+        Connection.Response res = Jsoup.connect(echoUrl)
+            .data("uname", "Jsoup", "uname", "Jonathan", "百", "度一下")
+            .cookie("auth", "token")
+            .method(Connection.Method.PUT)
+            .execute();
+
+        Document doc = res.parse();
+        assertEquals("PUT", ihVal("Method", doc), "The HTTP method should be PUT");
+        assertEquals("gzip", ihVal("Accept-Encoding", doc), "The Accept-Encoding header should be gzip");
+        assertEquals("auth=token", ihVal("Cookie", doc), "The Cookie header should be auth=token");
+    }, "Unexpected exception occurred during the test");
+}
+
+Input#11
+ @Test public void multipleParsesOkAfterBufferUp() throws IOException {
+        Connection.Response res = Jsoup.connect(echoUrl).execute().bufferUp();
+
+        Document doc = res.parse();
+        assertTrue(doc.title().contains("Environment"));
+
+        Document doc2 = res.parse();
+        assertTrue(doc2.title().contains("Environment"));
+    }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing']
+Refactor#11
+@Test
+public void multipleParsesOkAfterBufferUp() {
+    assertDoesNotThrow(() -> {
+        Connection.Response res = Jsoup.connect(echoUrl).execute().bufferUp();
+
+        Document doc = res.parse();
+        assertTrue(doc.title().contains("Environment"), "First parse should contain 'Environment' in the title");
+
+        Document doc2 = res.parse();
+        assertTrue(doc2.title().contains("Environment"), "Second parse should contain 'Environment' in the title");
+    }, "Unexpected exception occurred during the test");
+}
+
+
+Input#12
+ @Test public void bodyAndBytesAvailableBeforeParse() throws IOException {
+        Connection.Response res = Jsoup.connect(echoUrl).execute();
+        String body = res.body();
+        assertTrue(body.contains("Environment"));
+        byte[] bytes = res.bodyAsBytes();
+        assertTrue(bytes.length > 100);
+
+        Document doc = res.parse();
+        assertTrue(doc.title().contains("Environment"));
+    }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing']
+Refactor#12
+
+ private static final String echoUrl = "http://example.com/echo";
+
+    @Test
+    public void bodyAndBytesAvailableBeforeParse() {
+        assertDoesNotThrow(() -> {
+            Connection.Response res = Jsoup.connect(echoUrl).execute();
+            String body = res.body();
+            assertTrue(body.contains("Environment"), "Body should contain 'Environment'");
+            byte[] bytes = res.bodyAsBytes();
+            assertTrue(bytes.length > 100, "Bytes length should be greater than 100");
+
+            Document doc = res.parse();
+            assertTrue(doc.title().contains("Environment"), "Document title should contain 'Environment'");
+        }, "Unexpected exception occurred during the test");
+    }
+Input#13
+ @Test
+    public void multiCookieSet() throws IOException {
+        Connection con = Jsoup
+                .connect(RedirectServlet.Url)
+                .data(RedirectServlet.CodeParam, "302")
+                .data(RedirectServlet.SetCookiesParam, "true")
+                .data(RedirectServlet.LocationParam, echoUrl);
+        Connection.Response res = con.execute();
+
+        // test cookies set by redirect:
+        Map<String, String> cookies = res.cookies();
+        assertEquals("asdfg123", cookies.get("token"));
+        assertEquals("jhy", cookies.get("uid"));
+
+        // send those cookies into the echo URL by map:
+        Document doc = Jsoup.connect(echoUrl).cookies(cookies).get();
+        assertEquals("token=asdfg123; uid=jhy", ihVal("Cookie", doc));
+    }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing']
+Refactor#13
+
+@Test
+public void multiCookieSet() {
+    assertDoesNotThrow(() -> {
+        Connection con = Jsoup
+                .connect(RedirectServlet.Url)
+                .data(RedirectServlet.CodeParam, "302")
+                .data(RedirectServlet.SetCookiesParam, "true")
+                .data(RedirectServlet.LocationParam, echoUrl);
+        Connection.Response res = con.execute();
+
+        // test cookies set by redirect:
+        Map<String, String> cookies = res.cookies();
+        assertEquals("Expected token cookie value to be asdfg123", "asdfg123", cookies.get("token"));
+        assertEquals("Expected uid cookie value to be jhy", "jhy", cookies.get("uid"));
+
+        // send those cookies into the echo URL by map:
+        Document doc = Jsoup.connect(echoUrl).cookies(cookies).get();
+        assertEquals("Expected Cookie header in response to match sent cookies", "token=asdfg123; uid=jhy", ihVal("Cookie", doc));
+    }, "Unexpected exception occurred during the test");
+}
+
+Input#14
+
+Refactor#14
+
+
+Input#15
+
+Refactor#15
+
+
+Input#16
+
+Refactor#16
+
+
+Input#17
+
+Refactor#17
+
+
+Input#18
+
+Refactor#18
+
+
+
+Input#19
+
+Refactor#19
+
+
+
+Input#20
+
+Refactor#20
+
+
+
+Input#21
+
+Refactor#21
+
+
+Input#22
+
+Refactor#22
+
+
+Input#23
+
+Refactor#23
+
+
+Input#24
+
+Refactor#24
+
+
+Input#25
+
+Refactor#25
+
+
+Input#26
+
+Refactor#26
+
+
+Input#27
+
+Refactor#27
+
+
+
+Input#28
+
+Refactor#28
+
+
+
+Input#29
+
+Refactor#29
+
+
+
+Input#30
+
+Refactor#30
+
+
+Input#31
+
+Refactor#31
+
+
+
+Input#32
+
+Refactor#32
+
+
+
+Input#33
+
+Refactor#33
+
+
+
+Input#34
+
+Refactor#34
+
+
+
+Input#35
+
+Refactor#35
+

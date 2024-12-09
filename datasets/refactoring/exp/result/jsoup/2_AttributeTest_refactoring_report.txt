@@ -1,0 +1,320 @@
+File#1
+
+
+Input#1
+ @Test public void html() {
+        Attribute attr = new Attribute("key", "value &");
+        assertEquals("key=\"value &amp;\"", attr.html());
+        assertEquals(attr.html(), attr.toString());
+    }
+Smell List: ['Assertion_Roulette', 'Sensitive_Equality', 'Eager_Test']
+Refactor#1
+private Attribute setupHtmlTest() {
+    return new Attribute("key", "value &");
+}
+
+@Test
+public void testHtml_Rendering() {
+    Attribute attr = setupHtmlTest();
+    assertEquals("key=\"value &amp;\"", attr.html(), "HTML rendering should correctly escape special characters");
+}
+
+@Test
+public void testHtml_EqualsToString() {
+    Attribute attr = setupHtmlTest();
+    String actualValue = attr.toString();
+    assertEquals(attr.html(), actualValue, "The HTML representation should match the string representation");
+}
+
+
+Input#2
+ @Test public void testWithSupplementaryCharacterInAttributeKeyAndValue() {
+        String s = new String(Character.toChars(135361));
+        Attribute attr = new Attribute(s, "A" + s + "B");
+        assertEquals(s + "=\"A" + s + "B\"", attr.html());
+        assertEquals(attr.html(), attr.toString());
+    }
+Smell List: ['Assertion_Roulette', 'Sensitive_Equality', 'Eager_Test']
+Refactor#2
+private Attribute setupTestWithSupplementaryCharacterInAttributeKeyAndValue() {
+    String s = new String(Character.toChars(135361));
+    return new Attribute(s, "A" + s + "B");
+}
+
+@Test
+public void testWithSupplementaryCharacterInAttributeKeyAndValue_Html() {
+    Attribute attr = setupTestWithSupplementaryCharacterInAttributeKeyAndValue();
+    String expectedHtml = new String(Character.toChars(135361)) + "=\"A" + new String(Character.toChars(135361)) + "B\"";
+    assertEquals(expectedHtml, attr.html(), "HTML representation of the attribute should match the expected string");
+}
+
+@Test
+public void testWithSupplementaryCharacterInAttributeKeyAndValue_ToString() {
+    Attribute attr = setupTestWithSupplementaryCharacterInAttributeKeyAndValue();
+    String actualValue = attr.toString();
+    assertEquals(attr.html(), actualValue, "toString() should return the same value as html()");
+}
+
+Input#3
+@Test public void booleanAttributesAreEmptyStringValues() {
+        Document doc = Jsoup.parse("<div hidden>");
+        Attributes attributes = doc.body().child(0).attributes();
+        assertEquals("", attributes.get("hidden"));
+
+        Attribute first = attributes.iterator().next();
+        assertEquals("hidden", first.getKey());
+        assertEquals("", first.getValue());
+        assertFalse(first.hasDeclaredValue());
+        assertTrue(Attribute.isBooleanAttribute(first.getKey()));
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+Refactor#3
+
+private Document setupBooleanAttributesAreEmptyStringValues() {
+    return Jsoup.parse("<div hidden>");
+}
+
+@Test
+public void testBooleanAttributesAreEmptyStringValues_GetAttributeValue() {
+    Document doc = setupBooleanAttributesAreEmptyStringValues();
+    Attributes attributes = doc.body().child(0).attributes();
+    assertEquals("", attributes.get("hidden"), "The value of the 'hidden' attribute should be an empty string");
+}
+
+@Test
+public void testBooleanAttributesAreEmptyStringValues_IteratorNext() {
+    Document doc = setupBooleanAttributesAreEmptyStringValues();
+    Attributes attributes = doc.body().child(0).attributes();
+    Attribute first = attributes.iterator().next();
+    assertEquals("hidden", first.getKey(), "The key of the first attribute should be 'hidden'");
+}
+
+@Test
+public void testBooleanAttributesAreEmptyStringValues_AttributeValue() {
+    Document doc = setupBooleanAttributesAreEmptyStringValues();
+    Attributes attributes = doc.body().child(0).attributes();
+    Attribute first = attributes.iterator().next();
+    assertEquals("", first.getValue(), "The value of the first attribute should be an empty string");
+}
+
+@Test
+public void testBooleanAttributesAreEmptyStringValues_HasDeclaredValue() {
+    Document doc = setupBooleanAttributesAreEmptyStringValues();
+    Attributes attributes = doc.body().child(0).attributes();
+    Attribute first = attributes.iterator().next();
+    assertFalse(first.hasDeclaredValue(), "The 'hidden' attribute should not have a declared value");
+}
+
+@Test
+public void testBooleanAttributesAreEmptyStringValues_IsBooleanAttribute() {
+    Document doc = setupBooleanAttributesAreEmptyStringValues();
+    Attributes attributes = doc.body().child(0).attributes();
+    Attribute first = attributes.iterator().next();
+    assertTrue(Attribute.isBooleanAttribute(first.getKey()), "The 'hidden' attribute should be recognized as a boolean attribute");
+}
+
+
+Input#4
+ @Test public void hasValue() {
+        Attribute a1 = new Attribute("one", "");
+        Attribute a2 = new Attribute("two", null);
+        Attribute a3 = new Attribute("thr", "thr");
+
+        assertTrue(a1.hasDeclaredValue());
+        assertFalse(a2.hasDeclaredValue());
+        assertTrue(a3.hasDeclaredValue());
+    }
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+Refactor#4
+
+Attribute a1;
+Attribute a2;
+Attribute a3;
+private void setupHasValueTest() {
+    a1 = new Attribute("one", "");
+    a2 = new Attribute("two", null);
+    a3 = new Attribute("thr", "thr");
+}
+
+@Test
+public void testHasValue_A1() {
+    setupHasValueTest();
+    assertTrue(a1.hasDeclaredValue(), "Attribute 'one' should have a declared value even if it's empty.");
+}
+
+@Test
+public void testHasValue_A2() {
+    setupHasValueTest();
+    assertFalse(a2.hasDeclaredValue(), "Attribute 'two' should not have a declared value as it is null.");
+}
+
+@Test
+public void testHasValue_A3() {
+    setupHasValueTest();
+    assertTrue(a3.hasDeclaredValue(), "Attribute 'thr' should have a declared value as it is not null or empty.");
+}
+
+Input#5
+
+Refactor#5
+
+
+Input#6
+
+Refactor#6
+
+
+Input#7
+
+Refactor#7
+
+
+Input#8
+
+Refactor#8
+
+
+Input#9
+
+Refactor#9
+
+
+Input#10
+
+Refactor#10
+
+
+Input#11
+
+Refactor#11
+
+
+Input#12
+
+Refactor#12
+
+
+Input#13
+
+Refactor#13
+
+
+Input#14
+
+Refactor#14
+
+
+Input#15
+
+Refactor#15
+
+
+Input#16
+
+Refactor#16
+
+
+Input#17
+
+Refactor#17
+
+
+Input#18
+
+Refactor#18
+
+
+
+Input#19
+
+Refactor#19
+
+
+
+Input#20
+
+Refactor#20
+
+
+
+Input#21
+
+Refactor#21
+
+
+Input#22
+
+Refactor#22
+
+
+Input#23
+
+Refactor#23
+
+
+Input#24
+
+Refactor#24
+
+
+Input#25
+
+Refactor#25
+
+
+Input#26
+
+Refactor#26
+
+
+Input#27
+
+Refactor#27
+
+
+
+Input#28
+
+Refactor#28
+
+
+
+Input#29
+
+Refactor#29
+
+
+
+Input#30
+
+Refactor#30
+
+
+Input#31
+
+Refactor#31
+
+
+
+Input#32
+
+Refactor#32
+
+
+
+Input#33
+
+Refactor#33
+
+
+
+Input#34
+
+Refactor#34
+
+
+
+Input#35
+
+Refactor#35
+

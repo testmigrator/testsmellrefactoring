@@ -1,0 +1,284 @@
+File#1
+
+
+Input#1
+
+Refactor#1
+
+
+Input#2
+ @Test
+    public void testHashcode() {
+        XYPlot<String> plot1 = new XYPlot<>();
+        LegendTitle t1 = new LegendTitle(plot1);
+        LegendTitle t2 = new LegendTitle(plot1);
+        assertEquals(t1, t2);
+        int h1 = t1.hashCode();
+        int h2 = t2.hashCode();
+        assertEquals(h1, h2);
+    }
+Smell List: ['Assertion_Roulette']
+
+Refactor#2
+@Test
+public void testHashcode() {
+    XYPlot<String> plot1 = new XYPlot<>();
+    LegendTitle t1 = new LegendTitle(plot1);
+    LegendTitle t2 = new LegendTitle(plot1);
+    assertEquals("t1 and t2 should be equal", t1, t2);
+    int h1 = t1.hashCode();
+    int h2 = t2.hashCode();
+    assertEquals("Hash codes of t1 and t2 should be equal", h1, h2);
+}
+
+Input#3
+@Test
+    public void testCloning() throws CloneNotSupportedException {
+        XYPlot<String> plot = new XYPlot<>();
+        Rectangle2D bounds1 = new Rectangle2D.Double(10.0, 20.0, 30.0, 40.0);
+        LegendTitle t1 = new LegendTitle(plot);
+        t1.setBackgroundPaint(new GradientPaint(1.0f, 2.0f, Color.RED, 3.0f,
+                4.0f, Color.YELLOW));
+        t1.setBounds(bounds1);
+        LegendTitle t2 = CloneUtils.clone(t1);
+        assertNotSame(t1, t2);
+        assertSame(t1.getClass(), t2.getClass());
+        assertEquals(t1, t2);
+
+        // check independence
+        bounds1.setFrame(40.0, 30.0, 20.0, 10.0);
+        assertNotEquals(t1, t2);
+        t2.setBounds(new Rectangle2D.Double(40.0, 30.0, 20.0, 10.0));
+        assertEquals(t1, t2);
+    }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing', 'Eager_Test', 'Duplicate_Assert']
+
+
+Refactor#3
+private LegendTitle createLegendTitle() {
+    XYPlot<String> plot = new XYPlot<>();
+    Rectangle2D bounds1 = new Rectangle2D.Double(10.0, 20.0, 30.0, 40.0);
+    LegendTitle t1 = new LegendTitle(plot);
+    t1.setBackgroundPaint(new GradientPaint(1.0f, 2.0f, Color.RED, 3.0f, 4.0f, Color.YELLOW));
+    t1.setBounds(bounds1);
+    return t1;
+}
+
+@Test
+public void testCloning_InstancesAreDifferent() {
+    LegendTitle t1 = createLegendTitle();
+    LegendTitle t2 = CloneUtils.clone(t1);
+    assertNotSame(t1, t2, "t1 and t2 should be different instances");
+}
+
+@Test
+public void testCloning_ClassesAreEqual() {
+    LegendTitle t1 = createLegendTitle();
+    LegendTitle t2 = CloneUtils.clone(t1);
+    assertSame(t1.getClass(), t2.getClass(), "t1 and t2 should have the same class");
+}
+
+@Test
+public void testCloning_InitialEquality() {
+    LegendTitle t1 = createLegendTitle();
+    LegendTitle t2 = CloneUtils.clone(t1);
+    assertEquals(t1, t2, "t1 and t2 should be equal after cloning");
+}
+
+@Test
+public void testCloning_Independence() {
+    LegendTitle t1 = createLegendTitle();
+    LegendTitle t2 = CloneUtils.clone(t1);
+
+    t1.getBounds().setFrame(40.0, 30.0, 20.0, 10.0);
+    assertNotEquals(t1, t2, "t1 and t2 should not be equal after modifying t1's bounds");
+
+    t2.setBounds(new Rectangle2D.Double(40.0, 30.0, 20.0, 10.0));
+    assertEquals(t1, t2, "t1 and t2 should be equal again after setting t2's bounds to match t1");
+}
+
+
+Input#4
+ @Test
+    public void testSerialization() {
+        XYPlot<String> plot = new XYPlot<>();
+        LegendTitle t1 = new LegendTitle(plot);
+        LegendTitle t2 = TestUtils.serialised(t1);
+        assertEquals(t1, t2);
+        assertEquals(t2.getSources()[0], plot);
+    }
+Smell List: ['Assertion_Roulette']
+Refactor#4
+@Test
+public void testSerialization() {
+    XYPlot<String> plot = new XYPlot<>();
+    LegendTitle t1 = new LegendTitle(plot);
+    LegendTitle t2 = TestUtils.serialised(t1);
+    assertEquals(t1, t2, "Serialized and deserialized LegendTitle objects should be equal");
+    assertEquals(t2.getSources()[0], plot, "The source of the deserialized LegendTitle should be the original plot");
+}
+
+Input#5
+
+Refactor#5
+
+
+Input#6
+
+Refactor#6
+
+
+Input#7
+
+Refactor#7
+
+
+Input#8
+
+Refactor#8
+
+
+Input#9
+
+Refactor#9
+
+
+Input#10
+
+Refactor#10
+
+
+Input#11
+
+Refactor#11
+
+
+Input#12
+
+Refactor#12
+
+
+Input#13
+
+Refactor#13
+
+
+Input#14
+
+Refactor#14
+
+
+Input#15
+
+Refactor#15
+
+
+Input#16
+
+Refactor#16
+
+
+Input#17
+
+Refactor#17
+
+
+Input#18
+
+Refactor#18
+
+
+
+Input#19
+
+Refactor#19
+
+
+
+Input#20
+
+Refactor#20
+
+
+
+Input#21
+
+Refactor#21
+
+
+Input#22
+
+Refactor#22
+
+
+Input#23
+
+Refactor#23
+
+
+Input#24
+
+Refactor#24
+
+
+Input#25
+
+Refactor#25
+
+
+Input#26
+
+Refactor#26
+
+
+Input#27
+
+Refactor#27
+
+
+
+Input#28
+
+Refactor#28
+
+
+
+Input#29
+
+Refactor#29
+
+
+
+Input#30
+
+Refactor#30
+
+
+Input#31
+
+Refactor#31
+
+
+
+Input#32
+
+Refactor#32
+
+
+
+Input#33
+
+Refactor#33
+
+
+
+Input#34
+
+Refactor#34
+
+
+
+Input#35
+
+Refactor#35
+

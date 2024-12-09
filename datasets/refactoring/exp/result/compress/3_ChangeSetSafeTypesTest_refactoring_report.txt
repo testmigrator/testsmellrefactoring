@@ -1,0 +1,393 @@
+File#1
+
+
+Input#1
+@Test
+    public void testAddAlreadyExistingWithReplaceFalse() throws Exception {
+        final String archiverName = "zip";
+        final Path input = createArchive(archiverName);
+        final File result = createTempFile("test", "." + archiverName);
+        final File file1 = getFile("test.txt");
+        try (InputStream inputStream = Files.newInputStream(input);
+                ZipArchiveInputStream ais = createArchiveInputStream(archiverName, inputStream);
+                OutputStream outputStream = Files.newOutputStream(result.toPath());
+                ZipArchiveOutputStream out = createArchiveOutputStream(archiverName, outputStream);
+                InputStream csInputStream = Files.newInputStream(file1.toPath())) {
+            final ChangeSet<ZipArchiveEntry> changeSet = createChangeSet();
+            final ZipArchiveEntry entry = new ZipArchiveEntry("testdata/test1.xml");
+            changeSet.add(entry, csInputStream, false);
+            final ChangeSetResults results = new ChangeSetPerformer<>(changeSet).perform(ais, out);
+            assertTrue(results.getAddedFromStream().contains("testdata/test1.xml"));
+            assertTrue(results.getAddedFromChangeSet().isEmpty());
+            assertTrue(results.getDeleted().isEmpty());
+        }
+        checkArchiveContent(result, archiveList);
+    }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing', 'Mystery_Guest', 'Resource_Optimism']
+
+Refactor#1
+
+@Test
+public void testAddAlreadyExistingWithReplaceFalse(@TempDir File tempDir) throws Exception {
+    // Define archive format and input file paths
+    final String archiverName = "zip";
+    final Path input = createArchive(archiverName);
+
+    // Create a temporary file in the test directory
+    File result = tempDir.createTempFile("test", "." + archiverName);
+
+    // Check if the temporary file exists before using it
+    if (!result.exists() || result.isDirectory()) {
+        fail("Temporary result file does not exist or is a directory.");
+    }
+
+    final File file1 = getFile("test.txt");
+
+    // Check if the file exists before using it
+    if (!file1.exists()) {
+        fail("The required file 'test.txt' does not exist.");
+    }
+
+    try (InputStream inputStream = Files.newInputStream(input);
+         ZipArchiveInputStream ais = createArchiveInputStream(archiverName, inputStream);
+         OutputStream outputStream = Files.newOutputStream(result.toPath());
+         ZipArchiveOutputStream out = createArchiveOutputStream(archiverName, outputStream);
+         InputStream csInputStream = Files.newInputStream(file1.toPath())) {
+
+        // Create and add changes to the ChangeSet
+        final ChangeSet<ZipArchiveEntry> changeSet = createChangeSet();
+        final ZipArchiveEntry entry = new ZipArchiveEntry("testdata/test1.xml");
+        changeSet.add(entry, csInputStream, false);
+
+        // Perform the ChangeSet operation
+        final ChangeSetResults results = new ChangeSetPerformer<>(changeSet).perform(ais, out);
+
+        // Assertions with clear descriptive messages
+        assertTrue(results.getAddedFromStream().contains("testdata/test1.xml"),
+            "Expected 'testdata/test1.xml' to be added from the stream.");
+        assertTrue(results.getAddedFromChangeSet().isEmpty(),
+            "Expected no entries to be added from the ChangeSet.");
+        assertTrue(results.getDeleted().isEmpty(),
+            "Expected no entries to be deleted.");
+    }
+
+    // Check the content of the archive in the result file
+    checkArchiveContent(result, archiveList);
+}
+
+
+Input#2
+@Test
+    public void testAddAlreadyExistingWithReplaceTrue() throws Exception {
+        final String archiverName = "zip";
+        final Path input = createArchive(archiverName);
+        final File result = createTempFile("test", "." + archiverName);
+        final File file1 = getFile("test.txt");
+        try (InputStream inputStream = Files.newInputStream(input);
+                ZipArchiveInputStream ais = createArchiveInputStream(archiverName, inputStream);
+                OutputStream outputStream = Files.newOutputStream(result.toPath());
+                ZipArchiveOutputStream out = createArchiveOutputStream(archiverName, outputStream);
+                InputStream csInputStream = Files.newInputStream(file1.toPath())) {
+            final ChangeSet<ZipArchiveEntry> changeSet = createChangeSet();
+            final ZipArchiveEntry entry = new ZipArchiveEntry("testdata/test1.xml");
+            changeSet.add(entry, csInputStream, true);
+            final ChangeSetResults results = new ChangeSetPerformer<>(changeSet).perform(ais, out);
+            assertTrue(results.getAddedFromChangeSet().contains("testdata/test1.xml"));
+        }
+        checkArchiveContent(result, archiveList);
+    }
+Smell List: ['Exception_Catching_Throwing', 'Mystery_Guest', 'Resource_Optimism']
+
+Refactor#2
+@Test
+    public void testAddAlreadyExistingWithReplaceTrue() {
+        final String archiverName = "zip";
+        final Path input = createArchive(archiverName);
+        final File result = tempDir.createTempFile("test", "." + archiverName);
+        final File file1 = getFile("test.txt");
+
+        if (!input.toFile().exists() || input.toFile().isDirectory()) {
+            fail("Input file does not exist or is not of the expected type.");
+        }
+
+        if (!file1.exists() || file1.isDirectory()) {
+            fail("File1 does not exist or is not of the expected type.");
+        }
+
+        assertDoesNotThrow(() -> {
+            try (FileInputStream inputStream = new FileInputStream(input.toFile());
+                 ZipArchiveInputStream ais = createArchiveInputStream(archiverName, inputStream);
+                 FileOutputStream outputStream = new FileOutputStream(result);
+                 ZipArchiveOutputStream out = createArchiveOutputStream(archiverName, outputStream);
+                 FileInputStream csInputStream = new FileInputStream(file1)) {
+                final ChangeSet<ZipArchiveEntry> changeSet = createChangeSet();
+                final ZipArchiveEntry entry = new ZipArchiveEntry("testdata/test1.xml");
+                changeSet.add(entry, csInputStream, true);
+                final ChangeSetResults results = new ChangeSetPerformer<>(changeSet).perform(ais, out);
+                assertTrue(results.getAddedFromChangeSet().contains("testdata/test1.xml"));
+            }
+        }, "Unexpected exception occurred during the test");
+
+        checkArchiveContent(result, archiveList);
+    }
+
+Input#3
+ @Test
+    public void testAddChangeTwice() throws Exception {
+        try (InputStream in = newInputStream("test.txt");
+                InputStream in2 = newInputStream("test2.xml")) {
+            final ZipArchiveEntry e = new ZipArchiveEntry("test.txt");
+            final ZipArchiveEntry e2 = new ZipArchiveEntry("test.txt");
+            final ChangeSet<ZipArchiveEntry> changeSet = createChangeSet();
+            changeSet.add(e, in);
+            changeSet.add(e2, in2);
+            assertEquals(1, changeSet.getChanges().size());
+            final Change<ZipArchiveEntry> change = changeSet.getChanges().iterator().next();
+            @SuppressWarnings("resource")
+            final InputStream cInputStream = change.getInputStream();
+            assertEquals(in2, cInputStream);
+        }
+    }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing', 'Magic_Number_Test']
+
+Refactor#3
+
+@Test
+public void testAddChangeTwice() throws Exception {
+    final int EXPECTED_CHANGE_SIZE = 1;
+
+    try (InputStream in = newInputStream("test.txt");
+         InputStream in2 = newInputStream("test2.xml")) {
+
+        final ZipArchiveEntry e = new ZipArchiveEntry("test.txt");
+        final ZipArchiveEntry e2 = new ZipArchiveEntry("test.txt");
+
+        final ChangeSet<ZipArchiveEntry> changeSet = createChangeSet();
+        changeSet.add(e, in);
+        changeSet.add(e2, in2);
+
+        assertEquals(EXPECTED_CHANGE_SIZE, changeSet.getChanges().size(),
+                "The size of the change set should be 1 after adding two entries with the same name.");
+
+        final Change<ZipArchiveEntry> change = changeSet.getChanges().iterator().next();
+        @SuppressWarnings("resource")
+        final InputStream cInputStream = change.getInputStream();
+
+        assertEquals(in2, cInputStream,
+                "The input stream associated with the change should be the second input stream (test2.xml), " +
+                        "as it replaces the first one (test.txt).");
+    }
+}
+
+
+Input#4
+ @Test
+    public void testAddChangeTwiceWithoutReplace() throws Exception {
+        try (InputStream in = newInputStream("test.txt");
+                InputStream in2 = newInputStream("test2.xml")) {
+            final ZipArchiveEntry e = new ZipArchiveEntry("test.txt");
+            final ZipArchiveEntry e2 = new ZipArchiveEntry("test.txt");
+            final ChangeSet<ZipArchiveEntry> changeSet = createChangeSet();
+            changeSet.add(e, in, true);
+            changeSet.add(e2, in2, false);
+            assertEquals(1, changeSet.getChanges().size());
+            final Change<ZipArchiveEntry> change = changeSet.getChanges().iterator().next();
+            @SuppressWarnings("resource")
+            final InputStream cInputStream = change.getInputStream();
+            assertEquals(in, cInputStream);
+        }
+    }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing', 'Magic_Number_Test']
+
+Refactor#4
+@Test
+public void testAddChangeTwiceWithoutReplace() throws Exception {
+    final int EXPECTED_CHANGE_SIZE = 1;
+
+    try (InputStream in = newInputStream("test.txt");
+         InputStream in2 = newInputStream("test2.xml")) {
+
+        final ZipArchiveEntry e = new ZipArchiveEntry("test.txt");
+        final ZipArchiveEntry e2 = new ZipArchiveEntry("test.txt");
+
+        final ChangeSet<ZipArchiveEntry> changeSet = createChangeSet();
+        changeSet.add(e, in, true);
+        changeSet.add(e2, in2, false);
+
+        assertEquals(EXPECTED_CHANGE_SIZE, changeSet.getChanges().size(),
+                "The size of the change set should be 1 after adding two entries with the same name.");
+
+        final Change<ZipArchiveEntry> change = changeSet.getChanges().iterator().next();
+        @SuppressWarnings("resource")
+        final InputStream cInputStream = change.getInputStream();
+
+        assertEquals(in, cInputStream,
+                "The input stream associated with the change should be the first input stream (test.txt)");
+    }
+}
+
+
+Input#5
+
+Refactor#5
+
+
+Input#6
+
+Refactor#6
+
+
+Input#7
+
+Refactor#7
+
+
+Input#8
+
+Refactor#8
+
+
+Input#9
+
+Refactor#9
+
+
+Input#10
+
+Refactor#10
+
+
+Input#11
+
+Refactor#11
+
+
+Input#12
+
+Refactor#12
+
+
+Input#13
+
+Refactor#13
+
+
+Input#14
+
+Refactor#14
+
+
+Input#15
+
+Refactor#15
+
+
+Input#16
+
+Refactor#16
+
+
+Input#17
+
+Refactor#17
+
+
+Input#18
+
+Refactor#18
+
+
+
+Input#19
+
+Refactor#19
+
+
+
+Input#20
+
+Refactor#20
+
+
+
+Input#21
+
+Refactor#21
+
+
+Input#22
+
+Refactor#22
+
+
+Input#23
+
+Refactor#23
+
+
+Input#24
+
+Refactor#24
+
+
+Input#25
+
+Refactor#25
+
+
+Input#26
+
+Refactor#26
+
+
+Input#27
+
+Refactor#27
+
+
+
+Input#28
+
+Refactor#28
+
+
+
+Input#29
+
+Refactor#29
+
+
+
+Input#30
+
+Refactor#30
+
+
+Input#31
+
+Refactor#31
+
+
+
+Input#32
+
+Refactor#32
+
+
+
+Input#33
+
+Refactor#33
+
+
+
+Input#34
+
+Refactor#34
+
+
+
+Input#35
+
+Refactor#35
+

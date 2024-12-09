@@ -1,0 +1,237 @@
+File#1
+
+
+Input#1
+@Test
+    public void testFit() {
+        final ContinuousDistribution.Sampler rng
+            = UniformContinuousDistribution.of(-100, 100).createSampler(RandomSource.WELL_512_A.create(64925784252L));
+        final double[] coeff = { 12.9, -3.4, 2.1 }; // 12.9 - 3.4 x + 2.1 x^2
+        final PolynomialFunction f = new PolynomialFunction(coeff);
+
+        // Collect data from a known polynomial.
+        final WeightedObservedPoints obs = new WeightedObservedPoints();
+        for (int i = 0; i < 100; i++) {
+            final double x = rng.sample();
+            obs.add(x, f.value(x));
+        }
+
+        // Start fit from initial guesses that are far from the optimal values.
+        final SimpleCurveFitter fitter
+            = PolynomialCurveFitter.create(0).withStartPoint(new double[] { -1e-20, 3e15, -5e25 });
+        final double[] best = fitter.fit(obs.toList());
+
+        TestUtils.assertEquals("best != coeff", coeff, best, 1e-12);
+    }
+Smell List: ['Conditional_Test_Logic', 'Eager_Test', 'Magic_Number_Test']
+
+Refactor#1
+private ContinuousDistribution.Sampler rng;
+    private double[] coeff;
+    private PolynomialFunction f;
+    private WeightedObservedPoints obs;
+
+    @BeforeEach
+    public void setUp() {
+        rng = UniformContinuousDistribution.of(-100, 100).createSampler(RandomSource.WELL_512_A.create(64925784252L));
+        coeff = new double[]{12.9, -3.4, 2.1}; // 12.9 - 3.4 x + 2.1 x^2
+        f = new PolynomialFunction(coeff);
+        obs = new WeightedObservedPoints();
+        collectDataFromPolynomial();
+    }
+
+    private void collectDataFromPolynomial() {
+        for (int i = 0; i < 100; i++) {
+            final double x = rng.sample();
+            obs.add(x, f.value(x));
+        }
+    }
+
+    @Test
+    public void testFitCoefficients() {
+        SimpleCurveFitter fitter = PolynomialCurveFitter.create(0).withStartPoint(new double[]{-1e-20, 3e15, -5e25});
+        double[] best = fitter.fit(obs.toList());
+        double tolerance = 1e-12;
+        assertArrayEquals(coeff, best, tolerance, "best != coeff");
+    }
+
+
+Input#2
+
+Refactor#2
+
+
+Input#3
+
+Refactor#3
+
+
+Input#4
+
+Refactor#4
+
+
+Input#5
+
+Refactor#5
+
+
+Input#6
+
+Refactor#6
+
+
+Input#7
+
+Refactor#7
+
+
+Input#8
+
+Refactor#8
+
+
+Input#9
+
+Refactor#9
+
+
+Input#10
+
+Refactor#10
+
+
+Input#11
+
+Refactor#11
+
+
+Input#12
+
+Refactor#12
+
+
+Input#13
+
+Refactor#13
+
+
+Input#14
+
+Refactor#14
+
+
+Input#15
+
+Refactor#15
+
+
+Input#16
+
+Refactor#16
+
+
+Input#17
+
+Refactor#17
+
+
+Input#18
+
+Refactor#18
+
+
+
+Input#19
+
+Refactor#19
+
+
+
+Input#20
+
+Refactor#20
+
+
+
+Input#21
+
+Refactor#21
+
+
+Input#22
+
+Refactor#22
+
+
+Input#23
+
+Refactor#23
+
+
+Input#24
+
+Refactor#24
+
+
+Input#25
+
+Refactor#25
+
+
+Input#26
+
+Refactor#26
+
+
+Input#27
+
+Refactor#27
+
+
+
+Input#28
+
+Refactor#28
+
+
+
+Input#29
+
+Refactor#29
+
+
+
+Input#30
+
+Refactor#30
+
+
+Input#31
+
+Refactor#31
+
+
+
+Input#32
+
+Refactor#32
+
+
+
+Input#33
+
+Refactor#33
+
+
+
+Input#34
+
+Refactor#34
+
+
+
+Input#35
+
+Refactor#35
+

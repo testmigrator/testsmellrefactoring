@@ -1,0 +1,378 @@
+File#1
+
+
+Input#1
+@Test
+    public void testSinFunction() {
+        UnivariateFunction f = new Sin();
+        BaseAbstractUnivariateIntegrator integrator
+            = new IterativeLegendreGaussIntegrator(5, 1.0e-14, 1.0e-10, 2, 15);
+        double min;
+        double max;
+        double expected;
+        double result;
+        double tolerance;
+
+        min = 0; max = JdkMath.PI; expected = 2;
+        tolerance = JdkMath.max(integrator.getAbsoluteAccuracy(),
+                             JdkMath.abs(expected * integrator.getRelativeAccuracy()));
+        result = integrator.integrate(10000, f, min, max);
+        Assert.assertEquals(expected, result, tolerance);
+
+        min = -JdkMath.PI/3; max = 0; expected = -0.5;
+        tolerance = JdkMath.max(integrator.getAbsoluteAccuracy(),
+                JdkMath.abs(expected * integrator.getRelativeAccuracy()));
+        result = integrator.integrate(10000, f, min, max);
+        Assert.assertEquals(expected, result, tolerance);
+    }
+Smell List: ['Duplicate_Assert']
+Refactor#1
+
+    @ParameterizedTest
+    @CsvSource({
+            "0, 3.14159, 2.0",
+            "-1.0471975511965976, 0, -0.5"
+    })
+    public void testSinFunction(double min, double max, double expected) {
+        UnivariateFunction f = new Sin();
+        IterativeLegendreGaussIntegrator integrator = new IterativeLegendreGaussIntegrator(5, 1.0e-14, 1.0e-10, 2, 15);
+
+        double tolerance = Math.max(integrator.getAbsoluteAccuracy(),
+                Math.abs(expected * integrator.getRelativeAccuracy()));
+        double result = integrator.integrate(10000, f, min, max);
+
+        Assert.assertEquals(expected, result, tolerance);
+    }
+
+Input#2
+@Test
+    public void testQuinticFunction() {
+        UnivariateFunction f = new QuinticFunction();
+        UnivariateIntegrator integrator =
+                new IterativeLegendreGaussIntegrator(3,
+                                                     BaseAbstractUnivariateIntegrator.DEFAULT_RELATIVE_ACCURACY,
+                                                     BaseAbstractUnivariateIntegrator.DEFAULT_ABSOLUTE_ACCURACY,
+                                                     BaseAbstractUnivariateIntegrator.DEFAULT_MIN_ITERATIONS_COUNT,
+                                                     64);
+        double min;
+        double max;
+        double expected;
+        double result;
+
+        min = 0; max = 1; expected = -1.0/48;
+        result = integrator.integrate(10000, f, min, max);
+        Assert.assertEquals(expected, result, 1.0e-16);
+
+        min = 0; max = 0.5; expected = 11.0/768;
+        result = integrator.integrate(10000, f, min, max);
+        Assert.assertEquals(expected, result, 1.0e-16);
+
+        min = -1; max = 4; expected = 2048/3.0 - 78 + 1.0/48;
+        result = integrator.integrate(10000, f, min, max);
+        Assert.assertEquals(expected, result, 1.0e-16);
+    }
+Smell List: ['Duplicate_Assert', 'Magic_Number_Test']
+Refactor#2
+
+    private static final int INTEGRATION_STEPS = 10000;
+    private static final double RELATIVE_ACCURACY = BaseAbstractUnivariateIntegrator.DEFAULT_RELATIVE_ACCURACY;
+    private static final double ABSOLUTE_ACCURACY = BaseAbstractUnivariateIntegrator.DEFAULT_ABSOLUTE_ACCURACY;
+    private static final int MIN_ITERATIONS_COUNT = BaseAbstractUnivariateIntegrator.DEFAULT_MIN_ITERATIONS_COUNT;
+    private static final int MAX_ITERATIONS_COUNT = 64;
+
+    private UnivariateIntegrator integrator = new IterativeLegendreGaussIntegrator(
+            3, RELATIVE_ACCURACY, ABSOLUTE_ACCURACY, MIN_ITERATIONS_COUNT, MAX_ITERATIONS_COUNT);
+
+    private UnivariateFunction function = new QuinticFunction();
+
+    @ParameterizedTest
+    @CsvSource({
+            "0, 1, -1.0/48",
+            "0, 0.5, 11.0/768",
+            "-1, 4, 2048/3.0 - 78 + 1.0/48"
+    })
+    public void testQuinticFunction(double min, double max, double expected) {
+        double result = integrator.integrate(INTEGRATION_STEPS, function, min, max);
+        assertEquals(expected, result, 1.0e-16);
+    }
+
+Input#3
+
+Refactor#3
+
+
+Input#4
+ @Test
+    public void testNormalDistributionWithLargeSigma() {
+        final double sigma = 1000;
+        final double mean = 0;
+        final double factor = 1 / (sigma * JdkMath.sqrt(2 * JdkMath.PI));
+        final UnivariateFunction normal = new Gaussian(factor, mean, sigma);
+
+        final double tol = 1e-2;
+        final IterativeLegendreGaussIntegrator integrator =
+            new IterativeLegendreGaussIntegrator(5, tol, tol);
+
+        final double a = -5000;
+        final double b = 5000;
+        final double s = integrator.integrate(60, normal, a, b);
+        Assert.assertEquals(1, s, 1e-5);
+    }
+Smell List: ['Magic_Number_Test']
+
+Refactor#4
+
+@Test
+public void testNormalDistributionWithLargeSigma() {
+    final double sigma = 1000;
+    final double mean = 0;
+    final double factor = 1 / (sigma * JdkMath.sqrt(2 * JdkMath.PI));
+    final UnivariateFunction normal = new Gaussian(factor, mean, sigma);
+
+    final double tolerance = 1e-2;
+    final IterativeLegendreGaussIntegrator integrator =
+        new IterativeLegendreGaussIntegrator(5, tolerance, tolerance);
+
+    final double lowerBound = -5000;
+    final double upperBound = 5000;
+    final double expectedIntegralValue = 1;
+    final double epsilon = 1e-5;
+
+    final double s = integrator.integrate(60, normal, lowerBound, upperBound);
+    Assert.assertEquals(expectedIntegralValue, s, epsilon);
+}
+
+
+Input#5
+@Test
+    public void testIssue464() {
+        final double value = 0.2;
+        UnivariateFunction f = new UnivariateFunction() {
+            @Override
+            public double value(double x) {
+                return (x >= 0 && x <= 5) ? value : 0.0;
+            }
+        };
+        IterativeLegendreGaussIntegrator gauss
+            = new IterativeLegendreGaussIntegrator(5, 3, 100);
+
+        // due to the discontinuity, integration implies *many* calls
+        double maxX = 0.32462367623786328;
+        Assert.assertEquals(maxX * value, gauss.integrate(Integer.MAX_VALUE, f, -10, maxX), 1.0e-7);
+        Assert.assertTrue(gauss.getEvaluations() > 37000000);
+        Assert.assertTrue(gauss.getIterations() < 30);
+
+        // setting up limits prevents such large number of calls
+        try {
+            gauss.integrate(1000, f, -10, maxX);
+            Assert.fail("expected TooManyEvaluationsException");
+        } catch (TooManyEvaluationsException tmee) {
+            // expected
+            Assert.assertEquals(1000, tmee.getMax());
+        }
+
+        // integrating on the two sides should be simpler
+        double sum1 = gauss.integrate(1000, f, -10, 0);
+        int eval1   = gauss.getEvaluations();
+        double sum2 = gauss.integrate(1000, f, 0, maxX);
+        int eval2   = gauss.getEvaluations();
+        Assert.assertEquals(maxX * value, sum1 + sum2, 1.0e-7);
+        Assert.assertTrue(eval1 + eval2 < 200);
+    }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing', 'Eager_Test', 'Duplicate_Assert', 'Magic_Number_Test']
+
+
+Refactor#5
+
+    private static final double VALUE = 0.2;
+    private static final double MAX_X = 0.32462367623786328;
+    private static final int MAX_EVALUATIONS = 37000000;
+    private static final int ALLOWED_EVALUATIONS = 200;
+
+    @Test
+    public void testIntegrationWithDiscontinuity() {
+        UnivariateFunction f = x -> (x >= 0 && x <= 5) ? VALUE : 0.0;
+        IterativeLegendreGaussIntegrator integrator = new IterativeLegendreGaussIntegrator(5, 3, 100);
+
+        double delta = 1.0e-7;
+        Assert.assertEquals("Integration with discontinuity should require many evaluations",MAX_X * VALUE, integrator.integrate(Integer.MAX_VALUE, f, -10, MAX_X), delta);
+        Assert.assertTrue("Integration with discontinuity should require many evaluations",  integrator.getEvaluations() > MAX_EVALUATIONS);
+
+        assertThrows(TooManyEvaluationsException.class, () -> integrator.integrate(1000, f, -10, MAX_X),
+                "Expected TooManyEvaluationsException for exceeding allowed evaluations");
+    }
+
+    @Test
+    public void testSplitIntegration() {
+        UnivariateFunction f = x -> (x >= 0 && x <= 5) ? VALUE : 0.0;
+        IterativeLegendreGaussIntegrator integrator = new IterativeLegendreGaussIntegrator(5, 3, 100);
+
+        double sum1 = integrator.integrate(1000, f, -10, 0);
+        int eval1 = integrator.getEvaluations();
+        double sum2 = integrator.integrate(1000, f, 0, MAX_X);
+        int eval2 = integrator.getEvaluations();
+
+        double delta = 1.0e-7;
+        Assert.assertEquals("Splitting integration should provide accurate result",  MAX_X * VALUE, sum1 + sum2, delta);
+        Assert.assertTrue("Splitting integration should be more efficient",  eval1 + eval2 < ALLOWED_EVALUATIONS);
+    }
+
+Input#6
+
+Refactor#6
+
+
+Input#7
+
+Refactor#7
+
+
+Input#8
+
+Refactor#8
+
+
+Input#9
+
+Refactor#9
+
+
+Input#10
+
+Refactor#10
+
+
+Input#11
+
+Refactor#11
+
+
+Input#12
+
+Refactor#12
+
+
+Input#13
+
+Refactor#13
+
+
+Input#14
+
+Refactor#14
+
+
+Input#15
+
+Refactor#15
+
+
+Input#16
+
+Refactor#16
+
+
+Input#17
+
+Refactor#17
+
+
+Input#18
+
+Refactor#18
+
+
+
+Input#19
+
+Refactor#19
+
+
+
+Input#20
+
+Refactor#20
+
+
+
+Input#21
+
+Refactor#21
+
+
+Input#22
+
+Refactor#22
+
+
+Input#23
+
+Refactor#23
+
+
+Input#24
+
+Refactor#24
+
+
+Input#25
+
+Refactor#25
+
+
+Input#26
+
+Refactor#26
+
+
+Input#27
+
+Refactor#27
+
+
+
+Input#28
+
+Refactor#28
+
+
+
+Input#29
+
+Refactor#29
+
+
+
+Input#30
+
+Refactor#30
+
+
+Input#31
+
+Refactor#31
+
+
+
+Input#32
+
+Refactor#32
+
+
+
+Input#33
+
+Refactor#33
+
+
+
+Input#34
+
+Refactor#34
+
+
+
+Input#35
+
+Refactor#35
+

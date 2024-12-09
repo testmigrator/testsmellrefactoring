@@ -1,0 +1,274 @@
+File#1
+
+
+Input#1
+ @Test
+  public void testSameVersion() throws Exception {
+    Excluder excluder = Excluder.DEFAULT.withVersion(VERSION);
+    assertIncludesClass(excluder, MockClassSince.class);
+    assertIncludesField(excluder, MockClassSince.class.getField("someField"));
+
+    // Until version is exclusive
+    assertExcludesClass(excluder, MockClassUntil.class);
+    assertExcludesField(excluder, MockClassUntil.class.getField("someField"));
+
+    assertIncludesClass(excluder, MockClassBoth.class);
+    assertIncludesField(excluder, MockClassBoth.class.getField("someField"));
+  }
+Smell List: ['Exception_Catching_Throwing']
+Refactor#1
+
+@Test
+public void testSameVersion() {
+    Excluder excluder = Excluder.DEFAULT.withVersion(VERSION);
+    assertDoesNotThrow(() -> {
+        assertIncludesClass(excluder, MockClassSince.class);
+        assertIncludesField(excluder, MockClassSince.class.getField("someField"));
+    }, "Unexpected exception occurred during the test");
+
+    assertDoesNotThrow(() -> {
+        assertExcludesClass(excluder, MockClassUntil.class);
+        assertExcludesField(excluder, MockClassUntil.class.getField("someField"));
+    }, "Unexpected exception occurred during the test");
+
+    assertDoesNotThrow(() -> {
+        assertIncludesClass(excluder, MockClassBoth.class);
+        assertIncludesField(excluder, MockClassBoth.class.getField("someField"));
+    }, "Unexpected exception occurred during the test");
+}
+
+
+
+Input#2
+ @Test
+  public void testNewerVersion() throws Exception {
+    Excluder excluder = Excluder.DEFAULT.withVersion(VERSION + 5);
+    assertIncludesClass(excluder, MockClassSince.class);
+    assertIncludesField(excluder, MockClassSince.class.getField("someField"));
+
+    assertExcludesClass(excluder, MockClassUntil.class);
+    assertExcludesField(excluder, MockClassUntil.class.getField("someField"));
+
+    assertExcludesClass(excluder, MockClassBoth.class);
+    assertExcludesField(excluder, MockClassBoth.class.getField("someField"));
+  }
+Smell List: ['Exception_Catching_Throwing']
+
+Refactor#2
+
+@Test
+public void testNewerVersion() {
+    Excluder excluder = Excluder.DEFAULT.withVersion(VERSION + 5);
+    assertDoesNotThrow(() -> assertIncludesClass(excluder, MockClassSince.class), "Unexpected exception occurred during the test");
+    assertDoesNotThrow(() -> assertIncludesField(excluder, MockClassSince.class.getField("someField")), "Unexpected exception occurred during the test");
+
+    assertDoesNotThrow(() -> assertExcludesClass(excluder, MockClassUntil.class), "Unexpected exception occurred during the test");
+    assertDoesNotThrow(() -> assertExcludesField(excluder, MockClassUntil.class.getField("someField")), "Unexpected exception occurred during the test");
+
+    assertDoesNotThrow(() -> assertExcludesClass(excluder, MockClassBoth.class), "Unexpected exception occurred during the test");
+    assertDoesNotThrow(() -> assertExcludesField(excluder, MockClassBoth.class.getField("someField")), "Unexpected exception occurred during the test");
+}
+
+
+
+
+Input#3
+ @Test
+  public void testOlderVersion() throws Exception {
+    Excluder excluder = Excluder.DEFAULT.withVersion(VERSION - 5);
+    assertExcludesClass(excluder, MockClassSince.class);
+    assertExcludesField(excluder, MockClassSince.class.getField("someField"));
+
+    assertIncludesClass(excluder, MockClassUntil.class);
+    assertIncludesField(excluder, MockClassUntil.class.getField("someField"));
+
+    assertExcludesClass(excluder, MockClassBoth.class);
+    assertExcludesField(excluder, MockClassBoth.class.getField("someField"));
+  }
+Smell List: ['Exception_Catching_Throwing']
+
+Refactor#3
+@Test
+public void testOlderVersion() {
+    assertDoesNotThrow(() -> {
+        Excluder excluder = Excluder.DEFAULT.withVersion(VERSION - 5);
+        assertExcludesClass(excluder, MockClassSince.class);
+        assertExcludesField(excluder, MockClassSince.class.getField("someField"));
+
+        assertIncludesClass(excluder, MockClassUntil.class);
+        assertIncludesField(excluder, MockClassUntil.class.getField("someField"));
+
+        assertExcludesClass(excluder, MockClassBoth.class);
+        assertExcludesField(excluder, MockClassBoth.class.getField("someField"));
+    }, "Unexpected exception occurred during the test");
+}
+
+Input#4
+
+Refactor#4
+
+
+Input#5
+
+Refactor#5
+
+
+Input#6
+
+Refactor#6
+
+
+Input#7
+
+Refactor#7
+
+
+Input#8
+
+Refactor#8
+
+
+Input#9
+
+Refactor#9
+
+
+Input#10
+
+Refactor#10
+
+
+Input#11
+
+Refactor#11
+
+
+Input#12
+
+Refactor#12
+
+
+Input#13
+
+Refactor#13
+
+
+Input#14
+
+Refactor#14
+
+
+Input#15
+
+Refactor#15
+
+
+Input#16
+
+Refactor#16
+
+
+Input#17
+
+Refactor#17
+
+
+Input#18
+
+Refactor#18
+
+
+
+Input#19
+
+Refactor#19
+
+
+
+Input#20
+
+Refactor#20
+
+
+
+Input#21
+
+Refactor#21
+
+
+Input#22
+
+Refactor#22
+
+
+Input#23
+
+Refactor#23
+
+
+Input#24
+
+Refactor#24
+
+
+Input#25
+
+Refactor#25
+
+
+Input#26
+
+Refactor#26
+
+
+Input#27
+
+Refactor#27
+
+
+
+Input#28
+
+Refactor#28
+
+
+
+Input#29
+
+Refactor#29
+
+
+
+Input#30
+
+Refactor#30
+
+
+Input#31
+
+Refactor#31
+
+
+
+Input#32
+
+Refactor#32
+
+
+
+Input#33
+
+Refactor#33
+
+
+
+Input#34
+
+Refactor#34
+
+
+
+Input#35
+
+Refactor#35
+

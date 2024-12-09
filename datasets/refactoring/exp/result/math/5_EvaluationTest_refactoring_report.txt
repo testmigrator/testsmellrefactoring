@@ -1,0 +1,584 @@
+File#1
+
+
+Input#1
+@Test
+    public void testComputeCovariance() throws IOException {
+        //setup
+        RealVector point = new ArrayRealVector(2);
+        Evaluation evaluation = new LeastSquaresBuilder()
+                .model(new MultivariateJacobianFunction() {
+                    @Override
+                    public Pair<RealVector, RealMatrix> value(RealVector point) {
+                        return new Pair<>(
+                                new ArrayRealVector(2),
+                                MatrixUtils.createRealDiagonalMatrix(new double[]{1, 1e-2})
+                        );
+                    }
+                })
+                .weight(MatrixUtils.createRealDiagonalMatrix(new double[]{1, 1}))
+                .target(new ArrayRealVector(2))
+                .build()
+                .evaluate(point);
+
+        //action
+        TestUtils.assertEquals(
+                "covariance",
+                evaluation.getCovariances(JdkMath.nextAfter(1e-4, 0.0)),
+                MatrixUtils.createRealMatrix(new double[][]{{1, 0}, {0, 1e4}}),
+                Precision.EPSILON
+        );
+
+        //singularity fail
+        try {
+            evaluation.getCovariances(JdkMath.nextAfter(1e-4, 1.0));
+            Assert.fail("Expected Exception");
+        } catch (SingularMatrixException e) {
+            //expected
+        }
+    }
+Smell List: ['Exception_Catching_Throwing']
+Refactor#1
+
+@Test
+public void testComputeCovariance() {
+    //setup
+    RealVector point = new ArrayRealVector(2);
+    Evaluation evaluation = new LeastSquaresBuilder()
+            .model(new MultivariateJacobianFunction() {
+                @Override
+                public Pair<RealVector, RealMatrix> value(RealVector point) {
+                    return new Pair<>(
+                            new ArrayRealVector(2),
+                            MatrixUtils.createRealDiagonalMatrix(new double[]{1, 1e-2})
+                    );
+                }
+            })
+            .weight(MatrixUtils.createRealDiagonalMatrix(new double[]{1, 1}))
+            .target(new ArrayRealVector(2))
+            .build()
+            .evaluate(point);
+
+    //action
+    TestUtils.assertEquals(
+            "covariance",
+            evaluation.getCovariances(JdkMath.nextAfter(1e-4, 0.0)),
+            MatrixUtils.createRealMatrix(new double[][]{{1, 0}, {0, 1e4}}),
+            Precision.EPSILON
+    );
+
+    //singularity fail
+    SingularMatrixException exception = assertThrows(SingularMatrixException.class, () -> {
+        evaluation.getCovariances(JdkMath.nextAfter(1e-4, 1.0));
+    });
+}
+
+
+Input#2
+ @Test
+    public void testComputeValueAndJacobian() {
+        //setup
+        final RealVector point = new ArrayRealVector(new double[]{1, 2});
+        Evaluation evaluation = new LeastSquaresBuilder()
+                .weight(new DiagonalMatrix(new double[]{16, 4}))
+                .model(new MultivariateJacobianFunction() {
+                    @Override
+                    public Pair<RealVector, RealMatrix> value(RealVector actualPoint) {
+                        //verify correct values passed in
+                        Assert.assertArrayEquals(
+                                point.toArray(), actualPoint.toArray(), Precision.EPSILON);
+                        //return values
+                        return new Pair<>(
+                                new ArrayRealVector(new double[]{3, 4}),
+                                MatrixUtils.createRealMatrix(new double[][]{{5, 6}, {7, 8}})
+                        );
+                    }
+                })
+                .target(new double[2])
+                .build()
+                .evaluate(point);
+
+        //action
+        RealVector residuals = evaluation.getResiduals();
+        RealMatrix jacobian = evaluation.getJacobian();
+
+        //verify
+        Assert.assertArrayEquals(evaluation.getPoint().toArray(), point.toArray(), 0);
+        Assert.assertArrayEquals(new double[]{-12, -8}, residuals.toArray(), Precision.EPSILON);
+        TestUtils.assertEquals(
+                "jacobian",
+                jacobian,
+                MatrixUtils.createRealMatrix(new double[][]{{20, 24},{14, 16}}),
+                Precision.EPSILON);
+    }
+Smell List: ['Magic_Number_Test']
+
+Refactor#2
+
+@Test
+public void testComputeValueAndJacobian() {
+    //setup
+    final RealVector point = new ArrayRealVector(new double[]{1, 2});
+    double[] expectedResiduals = {-12, -8};
+    double[][] expectedJacobian = {{20, 24}, {14, 16}};
+    double epsilon = Precision.EPSILON;
+
+    Evaluation evaluation = new LeastSquaresBuilder()
+            .weight(new DiagonalMatrix(new double[]{16, 4}))
+            .model(new MultivariateJacobianFunction() {
+                @Override
+                public Pair<RealVector, RealMatrix> value(RealVector actualPoint) {
+                    //verify correct values passed in
+                    Assert.assertArrayEquals(
+                            point.toArray(), actualPoint.toArray(), epsilon);
+                    //return values
+                    return new Pair<>(
+                            new ArrayRealVector(new double[]{3, 4}),
+                            MatrixUtils.createRealMatrix(new double[][]{{5, 6}, {7, 8}})
+                    );
+                }
+            })
+            .target(new double[2])
+            .build()
+            .evaluate(point);
+
+    //action
+    RealVector residuals = evaluation.getResiduals();
+    RealMatrix jacobian = evaluation.getJacobian();
+
+    //verify
+    int delta = 0;
+    Assert.assertArrayEquals(evaluation.getPoint().toArray(), point.toArray(), delta);
+    Assert.assertArrayEquals(expectedResiduals, residuals.toArray(), epsilon);
+    TestUtils.assertEquals(
+            "jacobian",
+            jacobian,
+            MatrixUtils.createRealMatrix(expectedJacobian),
+            epsilon);
+}
+
+
+Input#3
+@Test
+    public void testComputeCost() throws IOException {
+        final StatisticalReferenceDataset dataset
+            = StatisticalReferenceDatasetFactory.createKirby2();
+
+        final LeastSquaresProblem lsp = builder(dataset).build();
+
+        final double expected = dataset.getResidualSumOfSquares();
+        final double cost = lsp.evaluate(lsp.getStart()).getCost();
+        final double actual = cost * cost;
+        Assert.assertEquals(dataset.getName(), expected, actual, 1e-11 * expected);
+    }
+Smell List: ['Exception_Catching_Throwing']
+
+Refactor#3
+
+@Test
+public void testComputeCost() {
+    assertDoesNotThrow(() -> {
+        final StatisticalReferenceDataset dataset
+            = StatisticalReferenceDatasetFactory.createKirby2();
+
+        final LeastSquaresProblem lsp = builder(dataset).build();
+
+        final double expected = dataset.getResidualSumOfSquares();
+        final double cost = lsp.evaluate(lsp.getStart()).getCost();
+        final double actual = cost * cost;
+        Assert.assertEquals(dataset.getName(), expected, actual, 1e-11 * expected);
+    }, "Unexpected exception occurred during the test");
+}
+
+
+
+Input#4
+@Test
+    public void testComputeRMS() throws IOException {
+        final StatisticalReferenceDataset dataset
+            = StatisticalReferenceDatasetFactory.createKirby2();
+
+        final LeastSquaresProblem lsp = builder(dataset).build();
+
+        final double expected = JdkMath.sqrt(dataset.getResidualSumOfSquares() /
+                                              dataset.getNumObservations());
+        final double actual = lsp.evaluate(lsp.getStart()).getRMS();
+        Assert.assertEquals(dataset.getName(), expected, actual, 1e-11 * expected);
+    }
+Smell List: ['Exception_Catching_Throwing']
+
+Refactor#4
+
+@Test
+public void testComputeRMS() {
+    assertDoesNotThrow(() -> {
+        final StatisticalReferenceDataset dataset
+            = StatisticalReferenceDatasetFactory.createKirby2();
+
+        final LeastSquaresProblem lsp = builder(dataset).build();
+
+        final double expected = JdkMath.sqrt(dataset.getResidualSumOfSquares() /
+                                              dataset.getNumObservations());
+        final double actual = lsp.evaluate(lsp.getStart()).getRMS();
+        Assert.assertEquals(dataset.getName(), expected, actual, 1e-11 * expected);
+    }, "Unexpected exception occurred during the test");
+}
+
+
+Input#5
+@Test
+    public void testComputeSigma() throws IOException {
+        final StatisticalReferenceDataset dataset
+            = StatisticalReferenceDatasetFactory.createKirby2();
+
+        final LeastSquaresProblem lsp = builder(dataset).build();
+
+        final double[] expected = dataset.getParametersStandardDeviations();
+
+        final Evaluation evaluation = lsp.evaluate(lsp.getStart());
+        final double cost = evaluation.getCost();
+        final RealVector sig = evaluation.getSigma(1e-14);
+        final int dof = lsp.getObservationSize() - lsp.getParameterSize();
+        for (int i = 0; i < sig.getDimension(); i++) {
+            final double actual = JdkMath.sqrt(cost * cost / dof) * sig.getEntry(i);
+            Assert.assertEquals(dataset.getName() + ", parameter #" + i,
+                                expected[i], actual, 1e-6 * expected[i]);
+        }
+    }
+Smell List: ['Conditional_Test_Logic', 'Exception_Catching_Throwing']
+
+Refactor#5
+
+    @Test
+    public void testComputeSigma() {
+        assertDoesNotThrow(() -> {
+            final StatisticalReferenceDataset dataset
+                    = StatisticalReferenceDatasetFactory.createKirby2();
+
+            final LeastSquaresProblem lsp = builder(dataset).build();
+
+            final double[] expected = dataset.getParametersStandardDeviations();
+
+            final Evaluation evaluation = lsp.evaluate(lsp.getStart());
+            final double cost = evaluation.getCost();
+            final RealVector sig = evaluation.getSigma(1e-14);
+            final int dof = lsp.getObservationSize() - lsp.getParameterSize();
+            computeActualValue(dataset, expected, cost, sig, dof);
+        }, "Unexpected exception occurred during the test");
+    }
+
+    private static void computeActualValue(StatisticalReferenceDataset dataset, double[] expected, double cost, RealVector sig, int dof) {
+        for (int i = 0; i < sig.getDimension(); i++) {
+            final double actual = JdkMath.sqrt(cost * cost / dof) * sig.getEntry(i);
+            Assert.assertEquals(dataset.getName() + ", parameter #" + i,
+                    expected[i], actual, 1e-6 * expected[i]);
+        }
+    }
+
+Input#6
+@Test
+    public void testEvaluateCopiesPoint() throws IOException {
+        //setup
+        StatisticalReferenceDataset dataset
+                = StatisticalReferenceDatasetFactory.createKirby2();
+        LeastSquaresProblem lsp = builder(dataset).build();
+        RealVector point = new ArrayRealVector(lsp.getParameterSize());
+
+        //action
+        Evaluation evaluation = lsp.evaluate(point);
+
+        //verify
+        Assert.assertNotSame(point, evaluation.getPoint());
+        point.setEntry(0, 1);
+        Assert.assertEquals(evaluation.getPoint().getEntry(0), 0, 0);
+    }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing', 'Redundant_Assertion', 'Magic_Number_Test']
+
+Refactor#6
+
+@Test
+public void testEvaluateCopiesPoint() {
+    // Setup
+    assertDoesNotThrow(() -> {
+        StatisticalReferenceDataset dataset = StatisticalReferenceDatasetFactory.createKirby2();
+        LeastSquaresProblem lsp = builder(dataset).build();
+        RealVector point = new ArrayRealVector(lsp.getParameterSize());
+
+        // Action
+        Evaluation evaluation = lsp.evaluate(point);
+
+        // Verify
+        Assert.assertNotSame("The point should be copied and not the same instance", point, evaluation.getPoint());
+        double originalValue = 0;
+        int delta = 0;
+        point.setEntry(0, 1);
+        Assert.assertEquals("The value at index 0 should remain unchanged after modifying the original point", originalValue, evaluation.getPoint().getEntry(0), delta);
+    }, "Unexpected exception occurred during the test");
+}
+
+Input#7
+
+Refactor#7
+
+
+Input#8
+@Test
+    public void testLazyEvaluationPrecondition() {
+        final RealVector dummy = new ArrayRealVector(new double[] { 0 });
+
+        // "ValueAndJacobianFunction" is required but we implement only
+        // "MultivariateJacobianFunction".
+        final MultivariateJacobianFunction m1 = new MultivariateJacobianFunction() {
+                @Override
+                public Pair<RealVector, RealMatrix> value(RealVector notUsed) {
+                    return new Pair<>(null, null);
+                }
+            };
+
+        try {
+            // Should throw.
+            LeastSquaresFactory.create(m1, dummy, dummy, null, null, 0, 0, true, null);
+            Assert.fail("Expecting MathIllegalStateException");
+        } catch (MathIllegalStateException e) {
+            // Expected.
+        }
+
+        final MultivariateJacobianFunction m2 = new ValueAndJacobianFunction() {
+                @Override
+                public Pair<RealVector, RealMatrix> value(RealVector notUsed) {
+                    return new Pair<>(null, null);
+                }
+                @Override
+                public RealVector computeValue(final double[] params) {
+                    return null;
+                }
+                @Override
+                public RealMatrix computeJacobian(final double[] params) {
+                    return null;
+                }
+            };
+
+        // Should pass.
+        LeastSquaresFactory.create(m2, dummy, dummy, null, null, 0, 0, true, null);
+    }
+Smell List: ['Exception_Catching_Throwing']
+
+Refactor#8
+
+@Test
+public void testLazyEvaluationPrecondition() {
+    final RealVector dummy = new ArrayRealVector(new double[] { 0 });
+
+    final MultivariateJacobianFunction m1 = new MultivariateJacobianFunction() {
+        @Override
+        public Pair<RealVector, RealMatrix> value(RealVector notUsed) {
+            return new Pair<>(null, null);
+        }
+    };
+
+    MathIllegalStateException exception = assertThrows(MathIllegalStateException.class, () -> {
+        LeastSquaresFactory.create(m1, dummy, dummy, null, null, 0, 0, true, null);
+    });
+
+    final MultivariateJacobianFunction m2 = new ValueAndJacobianFunction() {
+        @Override
+        public Pair<RealVector, RealMatrix> value(RealVector notUsed) {
+            return new Pair<>(null, null);
+        }
+
+        @Override
+        public RealVector computeValue(final double[] params) {
+            return null;
+        }
+
+        @Override
+        public RealMatrix computeJacobian(final double[] params) {
+            return null;
+        }
+    };
+
+    assertDoesNotThrow(() -> {
+        LeastSquaresFactory.create(m2, dummy, dummy, null, null, 0, 0, true, null);
+    }, "Unexpected exception occurred during the test");
+}
+
+
+Input#9
+@Test
+    public void testDirectEvaluation() {
+        final RealVector dummy = new ArrayRealVector(new double[] { 0 });
+
+        final LeastSquaresProblem p
+            = LeastSquaresFactory.create(LeastSquaresFactory.model(dummyModel(), dummyJacobian()),
+                                         dummy, dummy, null, null, 0, 0, false, null);
+
+        try {
+            // Should throw.
+            p.evaluate(dummy);
+            Assert.fail("Exception expected");
+        } catch (RuntimeException e) {
+            // Expecting exception.
+            // Whether it is model or Jacobian that caused it is not significant.
+            final String msg = e.getMessage();
+            Assert.assertTrue(msg.equals("dummyModel") ||
+                              msg.equals("dummyJacobian"));
+        }
+    }
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing']
+Refactor#9
+
+@Test
+public void testDirectEvaluation() {
+    final RealVector dummy = new ArrayRealVector(new double[] { 0 });
+
+    final LeastSquaresProblem p
+        = LeastSquaresFactory.create(LeastSquaresFactory.model(dummyModel(), dummyJacobian()),
+                                     dummy, dummy, null, null, 0, 0, false, null);
+
+    RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+        p.evaluate(dummy);
+    });
+    Assert.assertTrue("Expected exception message to be either 'dummyModel' or 'dummyJacobian'", exception.getMessage().equals("dummyModel") || exception.getMessage().equals("dummyJacobian"));
+}
+
+
+
+Input#10
+
+Refactor#10
+
+
+Input#11
+
+Refactor#11
+
+
+Input#12
+
+Refactor#12
+
+
+Input#13
+
+Refactor#13
+
+
+Input#14
+
+Refactor#14
+
+
+Input#15
+
+Refactor#15
+
+
+Input#16
+
+Refactor#16
+
+
+Input#17
+
+Refactor#17
+
+
+Input#18
+
+Refactor#18
+
+
+
+Input#19
+
+Refactor#19
+
+
+
+Input#20
+
+Refactor#20
+
+
+
+Input#21
+
+Refactor#21
+
+
+Input#22
+
+Refactor#22
+
+
+Input#23
+
+Refactor#23
+
+
+Input#24
+
+Refactor#24
+
+
+Input#25
+
+Refactor#25
+
+
+Input#26
+
+Refactor#26
+
+
+Input#27
+
+Refactor#27
+
+
+
+Input#28
+
+Refactor#28
+
+
+
+Input#29
+
+Refactor#29
+
+
+
+Input#30
+
+Refactor#30
+
+
+Input#31
+
+Refactor#31
+
+
+
+Input#32
+
+Refactor#32
+
+
+
+Input#33
+
+Refactor#33
+
+
+
+Input#34
+
+Refactor#34
+
+
+
+Input#35
+
+Refactor#35
+

@@ -1,0 +1,350 @@
+File#1
+
+
+Input#1
+@Test
+public void testBuilder() {
+    // @formatter:off
+    parser = DefaultParser.builder()
+            .setStripLeadingAndTrailingQuotes(false)
+            .setAllowPartialMatching(false)
+            .setDeprecatedHandler(null)
+            .build();
+    // @formatter:on
+    assertEquals(DefaultParser.class, parser.getClass());
+}
+The test has the following code smells:
+Smell List: ['Eager_Test']
+
+Refactor#1
+private void setupTestBuilder() {
+    parser = DefaultParser.builder()
+            .setStripLeadingAndTrailingQuotes(false)
+            .setAllowPartialMatching(false)
+            .setDeprecatedHandler(null)
+            .build();
+}
+
+@Test
+public void testBuilder_ClassType() {
+    setupTestBuilder();
+    assertEquals(DefaultParser.class, parser.getClass());
+}
+
+Input#2
+@Test
+public void testDeprecated() throws ParseException {
+    final Set<Option> handler = new HashSet<>();
+    parser = DefaultParser.builder().setDeprecatedHandler(handler::add).build();
+    final Option opt1 = Option.builder().option("d1").deprecated().build();
+    // @formatter:off
+    final Option opt2 = Option.builder().option("d2").deprecated(DeprecatedAttributes.builder()
+            .setForRemoval(true)
+            .setSince("1.0")
+            .setDescription("Do this instead.").get()).build();
+    // @formatter:on
+    final Option opt3 = Option.builder().option("a").build();
+    // @formatter:off
+    final CommandLine cl = parser.parse(new Options()
+            .addOption(opt1)
+            .addOption(opt2)
+            .addOption(opt3),
+            new String[] {"-d1", "-d2", "-a"});
+    // @formatter:on
+    // Trigger handler:
+    assertTrue(cl.hasOption(opt1.getOpt()));
+    assertTrue(cl.hasOption(opt2.getOpt()));
+    assertTrue(cl.hasOption(opt3.getOpt()));
+    // Assert handler was triggered
+    assertTrue(handler.contains(opt1));
+    assertTrue(handler.contains(opt2));
+    assertFalse(handler.contains(opt3));
+}
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing', 'Eager_Test']
+
+Refactor#2
+private Set<Option> setupTestDeprecated() {
+    final Set<Option> handler = new HashSet<>();
+    parser = DefaultParser.builder().setDeprecatedHandler(handler::add).build();
+    final Option opt1 = Option.builder().option("d1").deprecated().build();
+    final Option opt2 = Option.builder().option("d2").deprecated(DeprecatedAttributes.builder()
+            .setForRemoval(true)
+            .setSince("1.0")
+            .setDescription("Do this instead.").get()).build();
+    final Option opt3 = Option.builder().option("a").build();
+    return handler;
+}
+
+@Test
+public void testDeprecated_OptionD1() {
+    final Set<Option> handler = setupTestDeprecated();
+    assertDoesNotThrow(() -> {
+        final CommandLine cl = parser.parse(new Options()
+                        .addOption(Option.builder().option("d1").deprecated().build())
+                        .addOption(Option.builder().option("d2").deprecated(DeprecatedAttributes.builder()
+                                .setForRemoval(true)
+                                .setSince("1.0")
+                                .setDescription("Do this instead.").get()).build())
+                        .addOption(Option.builder().option("a").build()),
+                new String[]{"-d1", "-d2", "-a"});
+
+        assertTrue(cl.hasOption("d1"), "Option d1 should be present");
+        assertTrue(handler.contains(Option.builder().option("d1").deprecated().build()), "Handler should contain option d1");
+
+    }, "Unexpected exception occurred during the test");
+}
+
+@Test
+public void testDeprecated_OptionD2() {
+    final Set<Option> handler = setupTestDeprecated();
+    assertDoesNotThrow(() -> {
+        final CommandLine cl = parser.parse(new Options()
+                        .addOption(Option.builder().option("d1").deprecated().build())
+                        .addOption(Option.builder().option("d2").deprecated(DeprecatedAttributes.builder()
+                                .setForRemoval(true)
+                                .setSince("1.0")
+                                .setDescription("Do this instead.").get()).build())
+                        .addOption(Option.builder().option("a").build()),
+                new String[]{"-d1", "-d2", "-a"});
+
+        assertTrue(cl.hasOption("d2"), "Option d2 should be present");
+        assertTrue(handler.contains(Option.builder().option("d2").deprecated(DeprecatedAttributes.builder()
+                .setForRemoval(true)
+                .setSince("1.0")
+                .setDescription("Do this instead.").get()).build()), "Handler should contain option d2");
+    }, "Unexpected exception occurred during the test");
+}
+
+@Test
+public void testDeprecated_OptionA() {
+    final Set<Option> handler = setupTestDeprecated();
+    assertDoesNotThrow(() -> {
+        final CommandLine cl = parser.parse(new Options()
+                        .addOption(Option.builder().option("d1").deprecated().build())
+                        .addOption(Option.builder().option("d2").deprecated(DeprecatedAttributes.builder()
+                                .setForRemoval(true)
+                                .setSince("1.0")
+                                .setDescription("Do this instead.").get()).build())
+                        .addOption(Option.builder().option("a").build()),
+                new String[]{"-d1", "-d2", "-a"});
+
+        assertTrue(cl.hasOption("a"), "Option a should be present");
+        assertFalse(handler.contains(Option.builder().option("a").build()), "Handler should not contain option a");
+    }, "Unexpected exception occurred during the test");
+}
+
+
+
+Input#3
+@Test
+public void testLongOptionQuoteHandlingWithoutStrip() throws Exception {
+    parser = DefaultParser.builder().setStripLeadingAndTrailingQuotes(false).build();
+    final String[] args = {"--bfile", "\"quoted string\""};
+
+    final CommandLine cl = parser.parse(options, args);
+
+    assertEquals("\"quoted string\"", cl.getOptionValue("b"), "Confirm --bfile \"arg\" keeps quotes");
+}
+Smell List: ['Exception_Catching_Throwing', 'Eager_Test']
+
+Refactor#3
+private void setupTestLongOptionQuoteHandlingWithoutStrip() {
+    parser = DefaultParser.builder().setStripLeadingAndTrailingQuotes(false).build();
+}
+
+@Test
+public void testLongOptionQuoteHandlingWithoutStrip() {
+    setupTestLongOptionQuoteHandlingWithoutStrip();
+    final String[] args = {"--bfile", "\"quoted string\""};
+    CommandLine cl = assertDoesNotThrow(() -> {
+        return parser.parse(options, args);
+        assertEquals("\"quoted string\"", cl.getOptionValue("b"), "Confirm --bfile \"arg\" keeps quotes");
+    }, "Unexpected exception occurred during parsing");
+}
+
+Input#4
+@Test
+public void testLongOptionQuoteHandlingWithStrip() throws Exception {
+    parser = DefaultParser.builder().setStripLeadingAndTrailingQuotes(true).build();
+    final String[] args = {"--bfile", "\"quoted string\""};
+
+    final CommandLine cl = parser.parse(options, args);
+
+    assertEquals("quoted string", cl.getOptionValue("b"), "Confirm --bfile \"arg\" strips quotes");
+}
+Smell List: ['Exception_Catching_Throwing', 'Eager_Test']
+
+Refactor#4
+private void setUpTestLongOptionQuoteHandlingWithStrip() {
+    parser = DefaultParser.builder().setStripLeadingAndTrailingQuotes(true).build();
+}
+
+@Test
+public void testLongOptionQuoteHandlingWithStrip() {
+    setUpTestLongOptionQuoteHandlingWithStrip();
+    assertDoesNotThrow(() -> {
+        final String[] args = {"--bfile", "\"quoted string\""};
+        final CommandLine cl = parser.parse(options, args);
+        assertEquals("quoted string", cl.getOptionValue("b"), "Confirm --bfile \"arg\" strips quotes");
+    }, "Unexpected exception occurred during the test");
+}
+
+Input#5
+@Test
+public void testLongOptionWithEqualsQuoteHandling() throws Exception {
+    final String[] args = {"--bfile=\"quoted string\""};
+
+    final CommandLine cl = parser.parse(options, args);
+
+    assertEquals("\"quoted string\"", cl.getOptionValue("b"), "Confirm --bfile=\"arg\" strips quotes");
+}
+Smell List: ['Exception_Catching_Throwing']
+
+Refactor#5
+@Test
+public void testLongOptionWithEqualsQuoteHandling() {
+    final String[] args = {"--bfile=\"quoted string\""};
+
+    assertDoesNotThrow(() -> {
+        final CommandLine cl = parser.parse(options, args);
+        assertEquals("\"quoted string\"", cl.getOptionValue("b"), "Confirm --bfile=\"arg\" strips quotes");
+    }, "Unexpected exception occurred during the test");
+}
+
+Input#6
+@Test
+public void testLongOptionWithEqualsQuoteHandlingWithoutStrip() throws Exception {
+    parser = DefaultParser.builder().setStripLeadingAndTrailingQuotes(false).build();
+    final String[] args = {"--bfile=\"quoted string\""};
+
+    final CommandLine cl = parser.parse(options, args);
+
+    assertEquals("\"quoted string\"", cl.getOptionValue("b"), "Confirm --bfile=\"arg\" keeps quotes");
+}
+Smell List: ['Exception_Catching_Throwing', 'Eager_Test']
+
+Refactor#6
+private void setUpTestLongOptionWithEqualsQuoteHandlingWithoutStrip() {
+    parser = DefaultParser.builder().setStripLeadingAndTrailingQuotes(false).build();
+}
+
+@Test
+public void testLongOptionWithEqualsQuoteHandlingWithoutStrip() {
+    setUpTestLongOptionWithEqualsQuoteHandlingWithoutStrip();
+    assertDoesNotThrow(() -> {
+        final String[] args = {"--bfile=\"quoted string\""};
+
+        final CommandLine cl = parser.parse(options, args);
+
+        assertEquals("\"quoted string\"", cl.getOptionValue("b"), "Confirm --bfile=\"arg\" keeps quotes");
+    }, "Unexpected exception occurred during the test");
+}
+
+Input#7
+@Test
+public void testLongOptionWithEqualsQuoteHandlingWithStrip() throws Exception {
+    parser = DefaultParser.builder().setStripLeadingAndTrailingQuotes(true).build();
+    final String[] args = {"--bfile=\"quoted string\""};
+
+    final CommandLine cl = parser.parse(options, args);
+
+    assertEquals("quoted string", cl.getOptionValue("b"), "Confirm --bfile=\"arg\" strips quotes");
+}
+Smell List: ['Exception_Catching_Throwing', 'Eager_Test']
+
+Refactor#7
+private void setUpTestLongOptionWithEqualsQuoteHandlingWithStrip() {
+    parser = DefaultParser.builder().setStripLeadingAndTrailingQuotes(true).build();
+}
+
+@Test
+public void testLongOptionWithEqualsQuoteHandlingWithStrip() {
+    setUpTestLongOptionWithEqualsQuoteHandlingWithStrip();
+    final String[] args = {"--bfile=\"quoted string\""};
+
+    assertDoesNotThrow(() -> {
+        CommandLine cl = parser.parse(options, args);
+        assertEquals("quoted string", cl.getOptionValue("b"), "Confirm --bfile=\"arg\" strips quotes");
+    }, "Unexpected exception occurred during the test");
+}
+
+Input#8
+@Test
+public void testShortOptionConcatenatedQuoteHandling() throws Exception {
+    final String[] args = {"-b\"quoted string\""};
+
+    final CommandLine cl = parser.parse(options, args);
+
+    //This is behavior is not consistent with the other parsers, but is required for backwards compatibility
+    assertEquals("\"quoted string\"", cl.getOptionValue("b"), "Confirm -b\"arg\" keeps quotes");
+}
+Smell List: ['Exception_Catching_Throwing']
+
+Refactor#8
+@Test
+public void testShortOptionConcatenatedQuoteHandling() {
+    assertDoesNotThrow(() -> {
+        final String[] args = {"-b\"quoted string\""};
+
+        final CommandLine cl = parser.parse(options, args);
+
+        //This is behavior is not consistent with the other parsers, but is required for backwards compatibility
+        assertEquals("\"quoted string\"", cl.getOptionValue("b"), "Confirm -b\"arg\" keeps quotes");
+    }, "Unexpected exception occurred during the test");
+}
+
+Input#9
+@Test
+public void testShortOptionQuoteHandlingWithoutStrip() throws Exception {
+    parser = DefaultParser.builder().setStripLeadingAndTrailingQuotes(false).build();
+    final String[] args = {"-b", "\"quoted string\""};
+
+    final CommandLine cl = parser.parse(options, args);
+
+    assertEquals("\"quoted string\"", cl.getOptionValue("b"), "Confirm -b \"arg\" keeps quotes");
+}
+Smell List: ['Exception_Catching_Throwing', 'Eager_Test']
+
+Refactor#9
+private void setupTestShortOptionQuoteHandlingWithoutStrip() {
+    parser = DefaultParser.builder().setStripLeadingAndTrailingQuotes(false).build();
+    options = new Options(); // Assuming options are initialized here
+}
+
+@Test
+public void testShortOptionQuoteHandlingWithoutStrip() {
+    setupTestShortOptionQuoteHandlingWithoutStrip();
+    assertDoesNotThrow(() -> {
+        final String[] args = {"-b", "\"quoted string\""};
+        final CommandLine cl = parser.parse(options, args);
+        assertEquals("\"quoted string\"", cl.getOptionValue("b"), "Confirm -b \"arg\" keeps quotes");
+    }, "Unexpected exception occurred during the test");
+}
+
+Input#10
+@Test
+public void testShortOptionQuoteHandlingWithStrip() throws Exception {
+    parser = DefaultParser.builder().setStripLeadingAndTrailingQuotes(true).build();
+    final String[] args = {"-b", "\"quoted string\""};
+
+    final CommandLine cl = parser.parse(options, args);
+
+    assertEquals("quoted string", cl.getOptionValue("b"), "Confirm -b \"arg\" strips quotes");
+}
+Smell List: ['Exception_Catching_Throwing', 'Eager_Test']
+
+Refactor#10
+private void setupTestShortOptionQuoteHandlingWithStrip() {
+    parser = DefaultParser.builder().setStripLeadingAndTrailingQuotes(true).build();
+}
+
+@Test
+public void testShortOptionQuoteHandlingWithStrip_ParseOptionB() {
+    setupTestShortOptionQuoteHandlingWithStrip();
+
+    String[] args = {"-b", "\"quoted string\""};
+    assertDoesNotThrow(() -> {
+        CommandLine cl = parser.parse(options, args);
+        assertEquals("quoted string", cl.getOptionValue("b"), "Confirm -b \"arg\" strips quotes");
+    }, "Unexpected exception occurred during the test");
+}

@@ -1,0 +1,442 @@
+File#1
+
+
+Input#1
+@Test
+    public void testNoError() {
+        final double a = 0.2;
+        final double w = 3.4;
+        final double p = 4.1;
+        final HarmonicOscillator f = new HarmonicOscillator(a, w, p);
+
+        final WeightedObservedPoints points = new WeightedObservedPoints();
+        for (double x = 0.0; x < 1.3; x += 0.01) {
+            points.add(1, x, f.value(x));
+        }
+
+        final SimpleCurveFitter fitter = HarmonicCurveFitter.create();
+        final double[] fitted = fitter.fit(points.toList());
+        Assert.assertEquals(a, fitted[0], 1.0e-13);
+        Assert.assertEquals(w, fitted[1], 1.0e-13);
+        Assert.assertEquals(p, Angle.Rad.WITHIN_0_AND_2PI.applyAsDouble(fitted[2]), 1e-13);
+
+        final HarmonicOscillator ff = new HarmonicOscillator(fitted[0], fitted[1], fitted[2]);
+        for (double x = -1.0; x < 1.0; x += 0.01) {
+            Assert.assertTrue(JdkMath.abs(f.value(x) - ff.value(x)) < 1e-13);
+        }
+    }
+Smell List: ['Assertion_Roulette', 'Conditional_Test_Logic', 'Magic_Number_Test']
+
+Refactor#1
+
+    private static final double AMPLITUDE = 0.2;
+    private static final double ANGULAR_FREQUENCY = 3.4;
+    private static final double PHASE = 4.1;
+    private static final double TOLERANCE = 1.0e-13;
+
+    @Test
+    public void testNoError() {
+        final HarmonicOscillator f = new HarmonicOscillator(AMPLITUDE, ANGULAR_FREQUENCY, PHASE);
+
+        final WeightedObservedPoints points = new WeightedObservedPoints();
+        for (double x = 0.0; x < 1.3; x += 0.01) {
+            points.add(1, x, f.value(x));
+        }
+
+        final SimpleCurveFitter fitter = HarmonicCurveFitter.create();
+        final double[] fitted = fitter.fit(points.toList());
+        Assert.assertEquals("Amplitude should match", AMPLITUDE, fitted[0], TOLERANCE);
+        Assert.assertEquals("Angular frequency should match", ANGULAR_FREQUENCY, fitted[1], TOLERANCE);
+        Assert.assertEquals("Phase should match", PHASE, Angle.Rad.WITHIN_0_AND_2PI.applyAsDouble(fitted[2]), TOLERANCE);
+
+        final HarmonicOscillator ff = new HarmonicOscillator(fitted[0], fitted[1], fitted[2]);
+        for (double x = -1.0; x < 1.0; x += 0.01) {
+            Assert.assertTrue("Values should be close enough", JdkMath.abs(f.value(x) - ff.value(x)) < TOLERANCE);
+        }
+    }
+
+Input#2
+@Test
+    public void test1PercentError() {
+        final Random randomizer = new Random(64925784252L);
+        final double a = 0.2;
+        final double w = 3.4;
+        final double p = 4.1;
+        final HarmonicOscillator f = new HarmonicOscillator(a, w, p);
+
+        final WeightedObservedPoints points = new WeightedObservedPoints();
+        for (double x = 0.0; x < 10.0; x += 0.1) {
+            points.add(1, x, f.value(x) + 0.01 * randomizer.nextGaussian());
+        }
+
+        final SimpleCurveFitter fitter = HarmonicCurveFitter.create();
+        final double[] fitted = fitter.fit(points.toList());
+        Assert.assertEquals(a, fitted[0], 7.6e-4);
+        Assert.assertEquals(w, fitted[1], 2.7e-3);
+        Assert.assertEquals(p, Angle.Rad.WITHIN_0_AND_2PI.applyAsDouble(fitted[2]), 1.3e-2);
+    }
+Smell List: ['Conditional_Test_Logic', 'Magic_Number_Test']
+
+Refactor#2
+
+    private static final long SEED = 64925784252L;
+    private static final double AMPLITUDE = 0.2;
+    private static final double ANGULAR_FREQUENCY = 3.4;
+    private static final double PHASE = 4.1;
+    private static final double MAX_AMPLITUDE_ERROR = 7.6e-4;
+    private static final double MAX_ANGULAR_FREQUENCY_ERROR = 2.7e-3;
+    private static final double MAX_PHASE_ERROR = 1.3e-2;
+
+    @Test
+    public void test1PercentError() {
+        final Random randomizer = new Random(SEED);
+        final HarmonicOscillator f = new HarmonicOscillator(AMPLITUDE, ANGULAR_FREQUENCY, PHASE);
+
+        final WeightedObservedPoints points = new WeightedObservedPoints();
+        for (double x = 0.0; x < 10.0; x += 0.1) {
+            points.add(1, x, f.value(x) + 0.01 * randomizer.nextGaussian());
+        }
+
+        final SimpleCurveFitter fitter = HarmonicCurveFitter.create();
+        final double[] fitted = fitter.fit(points.toList());
+        Assert.assertEquals(AMPLITUDE, fitted[0], MAX_AMPLITUDE_ERROR);
+        Assert.assertEquals(ANGULAR_FREQUENCY, fitted[1], MAX_ANGULAR_FREQUENCY_ERROR);
+        Assert.assertEquals(PHASE, Angle.Rad.WITHIN_0_AND_2PI.applyAsDouble(fitted[2]), MAX_PHASE_ERROR);
+    }
+
+Input#3
+@Test
+    public void testInitialGuess() {
+        final Random randomizer = new Random(45314242L);
+        final double a = 0.2;
+        final double w = 3.4;
+        final double p = 4.1;
+        final HarmonicOscillator f = new HarmonicOscillator(a, w, p);
+
+        final WeightedObservedPoints points = new WeightedObservedPoints();
+        for (double x = 0.0; x < 10.0; x += 0.1) {
+            points.add(1, x, f.value(x) + 0.01 * randomizer.nextGaussian());
+        }
+
+        final SimpleCurveFitter fitter = HarmonicCurveFitter.create()
+            .withStartPoint(new double[] { 0.15, 3.6, 4.5 });
+        final double[] fitted = fitter.fit(points.toList());
+        Assert.assertEquals(a, fitted[0], 1.2e-3);
+        Assert.assertEquals(w, fitted[1], 3.3e-3);
+        Assert.assertEquals(p, Angle.Rad.WITHIN_0_AND_2PI.applyAsDouble(fitted[2]), 1.7e-2);
+    }
+Smell List: ['Conditional_Test_Logic', 'Magic_Number_Test']
+
+Refactor#3
+
+    private static final long SEED = 45314242L;
+    private static final double AMPLITUDE = 0.2;
+    private static final double ANGULAR_FREQUENCY = 3.4;
+    private static final double PHASE = 4.1;
+    private static final double NOISE_SCALE = 0.01;
+    private static final double START_AMPLITUDE = 0.15;
+    private static final double START_ANGULAR_FREQUENCY = 3.6;
+    private static final double START_PHASE = 4.5;
+    private static final double AMPLITUDE_TOLERANCE = 1.2e-3;
+    private static final double ANGULAR_FREQUENCY_TOLERANCE = 3.3e-3;
+    private static final double PHASE_TOLERANCE = 1.7e-2;
+
+    @Test
+    public void testInitialGuess() {
+        final Random randomizer = new Random(SEED);
+        final HarmonicOscillator f = new HarmonicOscillator(AMPLITUDE, ANGULAR_FREQUENCY, PHASE);
+
+        final WeightedObservedPoints points = new WeightedObservedPoints();
+        for (double x = 0.0; x < 10.0; x += 0.1) {
+            points.add(1, x, f.value(x) + NOISE_SCALE * randomizer.nextGaussian());
+        }
+
+        final SimpleCurveFitter fitter = HarmonicCurveFitter.create()
+                .withStartPoint(new double[] { START_AMPLITUDE, START_ANGULAR_FREQUENCY, START_PHASE });
+        final double[] fitted = fitter.fit(points.toList());
+        Assert.assertEquals(AMPLITUDE, fitted[0], AMPLITUDE_TOLERANCE);
+        Assert.assertEquals(ANGULAR_FREQUENCY, fitted[1], ANGULAR_FREQUENCY_TOLERANCE);
+        Assert.assertEquals(PHASE, Angle.Rad.WITHIN_0_AND_2PI.applyAsDouble(fitted[2]), PHASE_TOLERANCE);
+    }
+
+
+Input#4
+@Test
+    public void testUnsorted() {
+        Random randomizer = new Random(64925784252L);
+        final double a = 0.2;
+        final double w = 3.4;
+        final double p = 4.1;
+        final HarmonicOscillator f = new HarmonicOscillator(a, w, p);
+
+        // Build a regularly spaced array of measurements.
+        final int size = 100;
+        final double[] xTab = new double[size];
+        final double[] yTab = new double[size];
+        for (int i = 0; i < size; i++) {
+            xTab[i] = 0.1 * i;
+            yTab[i] = f.value(xTab[i]) + 0.01 * randomizer.nextGaussian();
+        }
+
+        // shake it
+        for (int i = 0; i < size; i++) {
+            int i1 = randomizer.nextInt(size);
+            int i2 = randomizer.nextInt(size);
+            double xTmp = xTab[i1];
+            double yTmp = yTab[i1];
+            xTab[i1] = xTab[i2];
+            yTab[i1] = yTab[i2];
+            xTab[i2] = xTmp;
+            yTab[i2] = yTmp;
+        }
+
+        // Pass it to the fitter.
+        final WeightedObservedPoints points = new WeightedObservedPoints();
+        for (int i = 0; i < size; ++i) {
+            points.add(1, xTab[i], yTab[i]);
+        }
+
+        final SimpleCurveFitter fitter = HarmonicCurveFitter.create();
+        final double[] fitted = fitter.fit(points.toList());
+        Assert.assertEquals(a, fitted[0], 7.6e-4);
+        Assert.assertEquals(w, fitted[1], 3.5e-3);
+        Assert.assertEquals(p, Angle.Rad.WITHIN_0_AND_2PI.applyAsDouble(fitted[2]), 1.5e-2);
+    }
+Smell List: ['Conditional_Test_Logic', 'Magic_Number_Test']
+
+Refactor#4
+    private static final long RANDOM_SEED = 64925784252L;
+    private static final double A = 0.2;
+    private static final double W = 3.4;
+    private static final double P = 4.1;
+    private static final double EPSILON_A = 7.6e-4;
+    private static final double EPSILON_W = 3.5e-3;
+    private static final double EPSILON_P = 1.5e-2;
+    private static final int SIZE = 100;
+
+    private HarmonicOscillator createHarmonicOscillator() {
+        return new HarmonicOscillator(A, W, P);
+    }
+
+    private double[] generateShuffledData() {
+        Random randomizer = new Random(RANDOM_SEED);
+        double[] xTab = new double[SIZE];
+        double[] yTab = new double[SIZE];
+
+        // Generate regularly spaced measurements
+        for (int i = 0; i < SIZE; i++) {
+            xTab[i] = 0.1 * i;
+            yTab[i] = createHarmonicOscillator().value(xTab[i]) + 0.01 * randomizer.nextGaussian();
+        }
+
+        // Shuffle the data
+        for (int i = 0; i < SIZE; i++) {
+            int i1 = randomizer.nextInt(SIZE);
+            int i2 = randomizer.nextInt(SIZE);
+            double xTmp = xTab[i1];
+            double yTmp = yTab[i1];
+            xTab[i1] = xTab[i2];
+            yTab[i1] = yTab[i2];
+            xTab[i2] = xTmp;
+            yTab[i2] = yTmp;
+        }
+
+        // Add to points for fitting
+        WeightedObservedPoints points = new WeightedObservedPoints();
+        for (int i = 0; i < SIZE; i++) {
+            points.add(1, xTab[i], yTab[i]);
+        }
+
+        return points.toList().stream()
+                      .flatMapToDouble(p -> p.stream().mapToDouble(d -> d))
+                      .toArray();
+    }
+
+    private void assertFittedValues(double[] fitted) {
+        Assertions.assertEquals(A, fitted[0], EPSILON_A);
+        Assertions.assertEquals(W, fitted[1], EPSILON_W);
+        Assertions.assertEquals(P, Angle.Rad.WITHIN_0_AND_2PI.applyAsDouble(fitted[2]), EPSILON_P);
+    }
+
+    @Test
+    public void testFitWithShuffledData() {
+        double[] fitted = performFit();
+        assertFittedValues(fitted);
+    }
+
+    @Test
+    public void testFitWithShuffledData_Alternative() {
+        double[] fitted = performFit();
+        assertFittedValues(fitted);
+    }
+
+    private double[] performFit() {
+        HarmonicCurveFitter fitter = HarmonicCurveFitter.create();
+        double[] shuffledData = generateShuffledData();
+        return fitter.fit(shuffledData);
+    }
+
+Input#5
+
+Refactor#5
+
+
+Input#6
+
+Refactor#6
+
+
+Input#7
+
+Refactor#7
+
+
+Input#8
+
+Refactor#8
+
+
+Input#9
+
+Refactor#9
+
+
+Input#10
+
+Refactor#10
+
+
+Input#11
+
+Refactor#11
+
+
+Input#12
+
+Refactor#12
+
+
+Input#13
+
+Refactor#13
+
+
+Input#14
+
+Refactor#14
+
+
+Input#15
+
+Refactor#15
+
+
+Input#16
+
+Refactor#16
+
+
+Input#17
+
+Refactor#17
+
+
+Input#18
+
+Refactor#18
+
+
+
+Input#19
+
+Refactor#19
+
+
+
+Input#20
+
+Refactor#20
+
+
+
+Input#21
+
+Refactor#21
+
+
+Input#22
+
+Refactor#22
+
+
+Input#23
+
+Refactor#23
+
+
+Input#24
+
+Refactor#24
+
+
+Input#25
+
+Refactor#25
+
+
+Input#26
+
+Refactor#26
+
+
+Input#27
+
+Refactor#27
+
+
+
+Input#28
+
+Refactor#28
+
+
+
+Input#29
+
+Refactor#29
+
+
+
+Input#30
+
+Refactor#30
+
+
+Input#31
+
+Refactor#31
+
+
+
+Input#32
+
+Refactor#32
+
+
+
+Input#33
+
+Refactor#33
+
+
+
+Input#34
+
+Refactor#34
+
+
+
+Input#35
+
+Refactor#35
+
