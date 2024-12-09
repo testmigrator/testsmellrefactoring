@@ -1,0 +1,45 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Attribute;
+import org.jsoup.nodes.Attributes;
+import org.jsoup.nodes.Document;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+public class AttributeTest {
+
+    @Test
+    public void testBooleanAttributeKeyIsHidden() {
+        Document doc = Jsoup.parse("<div hidden>");
+        Attributes attributes = doc.body().child(0).attributes();
+        Attribute first = attributes.iterator().next();
+        assertEquals("Attribute key should be 'hidden'", "hidden", first.getKey());
+    }
+
+    @Test
+    public void testBooleanAttributeValueIsEmptyString() {
+        Document doc = Jsoup.parse("<div hidden>");
+        Attributes attributes = doc.body().child(0).attributes();
+        assertEquals("Attribute value should be an empty string", "", attributes.get("hidden"));
+    }
+
+    @Test
+    public void testBooleanAttributeHasNoDeclaredValue() {
+        Document doc = Jsoup.parse("<div hidden>");
+        Attributes attributes = doc.body().child(0).attributes();
+        Attribute first = attributes.iterator().next();
+        assertFalse("Boolean attribute should not have a declared value", first.hasDeclaredValue());
+    }
+
+    @Test
+    public void testBooleanAttributeIsRecognizedAsBoolean() {
+        Document doc = Jsoup.parse("<div hidden>");
+        Attributes attributes = doc.body().child(0).attributes();
+        Attribute first = attributes.iterator().next();
+        assertTrue("Attribute 'hidden' should be recognized as a boolean attribute", Attribute.isBooleanAttribute(first.getKey()));
+    }
+}
+```
+

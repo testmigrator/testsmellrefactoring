@@ -1,0 +1,5 @@
+asserts result: 
+ Yes
+
+The refactored tests maintain the same functionality as the original test. Each refactored test method checks the `elementSiblingIndex` for a specific `<p>` element, ensuring that the first `<p>` has an index of 0, the second has an index of 1, and the third has an index of 2. The only differences are in the structure and readability improvements, but the core assertions remain consistent.
+

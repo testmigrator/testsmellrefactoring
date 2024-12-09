@@ -1,0 +1,77 @@
+Input Parameters:
+Test Code:
+ @Test
+    public void testMetaCharsetUpdateDisabledNoChanges() {
+        final Document doc = createHtmlDocument("dontTouch");
+        
+        final String htmlCharset = "<html>\n" +
+                                    " <head>\n" +
+                                    "  <meta charset=\"dontTouch\">\n" +
+                                    "  <meta name=\"charset\" content=\"dontTouch\">\n" +
+                                    " </head>\n" +
+                                    " <body></body>\n" +
+                                    "</html>";
+        assertEquals(htmlCharset, doc.toString());
+        
+        Element selectedElement = doc.select("meta[charset]").first();
+        assertNotNull(selectedElement);
+        assertEquals("dontTouch", selectedElement.attr("charset"));
+        
+        selectedElement = doc.select("meta[name=charset]").first();
+        assertNotNull(selectedElement);
+        assertEquals("dontTouch", selectedElement.attr("content"));
+    }
+Context: /org/jsoup/nodes/Document
+Smell List: ['Assertion_Roulette', 'Sensitive_Equality', 'Duplicate_Assert']
+Smell Description List: ['Test Smell Type：Assertion Roulette\n\nFeature:\nA test method contains more than one assertion statement without an explanation/message (parameter in the assertion method).\n', 'Test Smell Type：Sensitive Equality\n\nFeature:\nA test method invokes the toString() method of an object.\n', 'Test Smell Type：Duplicate Assert\n\nFeature:\nA test method that contains more than one assertion statement with the same parameters.\n']
+Refactoring DSL: ['RefactorRule:\n  SmellType: Assertion Roulette\n  Description: Add descriptive messages to assert statements to improve readability and maintainability.\n  Steps:\n    - Step:\n        Description: "Add descriptive message to each assert statement(except assertThat, assertThrows)."\n        Action: AddMessageToAssert\n        Parameters:\n          MessagePattern: "{assertionMessage}"\n  Example:\n    Before: |\n      @Test\n      public void T() {\n        stmt\n        assert_1\n        ...\n        assert_n\n        stmt\'\n      }\n    After: |\n      @Test\n      public void T() {\n        stmt\n        assert_1(..., "Descriptive message for assert statement")\n        ...\n        assert_n(..., "Descriptive message for assert statement")\n        stmt\'\n      }\n    Variables:\n      assertionMessage: "Descriptive message for assert statement"\n', 'RefactorRule:\n  SmellType: Sensitive Equality\n  Description: "Avoid using the toString() method for comparing objects in assertions."\n  Steps:\n    - Step:\n        Description: "Extract the value returned by toString() into a separate variable for comparison. Ensure toString() does not directly appear in assertions."\n        Action: ReplaceMethodCall\n        Parameters:\n          TargetPattern: |\n            assertEquals({object1}.toString(), {expectedString});\n          ReplacementPattern: |\n            String actualValue = {object1}.toString();\n            assertEquals({expectedString}, actualValue);\n  Example:\n    Before: |\n      @Test\n      public void T() {\n        Object object1 = new Object();\n        assertEquals(object1.toString(), "expectedString");\n      }\n    After: |\n      @Test\n      public void T() {\n        Object object1 = new Object();\n        String actualValue = object1.toString();\n        assertEquals("expectedString", actualValue);\n      }\n', 'RefactorRule:\n  SmellType: Duplicate Assert\n  Description: "If the assertion logic is the same but tested with different inputs, prioritize splitting the test into multiple separate methods with a single assertion each."\n  Steps:\n    - Step:\n        Description: "Identify duplicate assertions that test the same condition with different inputs."\n        Action: IdentifySameAssertions\n        Parameters:\n          SourcePattern: |\n            assert(expectedA, ...)\n            assert(expectedB, ...)\n    - Step:\n        Description: "If the assertions are simple and few, split the test into multiple methods, each with a single assertion."\n        Action: SplitMethod\n        Parameters:\n          TargetType: Method\n          Conditions: |\n            - The assertions are simple and do not involve complex variations.\n    - Step:\n        Description: "If there are many similar assertions with significant variations, convert the test to a parameterized test."\n        Action: ConvertToParameterizedTest\n        Parameters:\n          TargetType: Method\n          Conditions: |\n            - There are many test cases with similar logic that would benefit from parameterization.\n            - The variations are extensive, with a large number of inputs or expected outputs.\n    - Step:\n        Description: "Add @CsvSource annotation to declare parameterized values."\n        Action: AddAnnotation\n        Parameters:\n          TargetType: Method\n          Annotation: |\n            @CsvSource({\n              "{paramValues}"\n            })\n    - Step:\n        Description: "Refactor the test method to use parameterized values."\n        Action: RefactorMethod\n        Parameters:\n          SourcePattern: |\n            public void T() {\n              {originalStatements}\n            }\n          ReplacementPattern: |\n            public void T({parameterNames}) {\n              {refactoredStatements}\n            }\n  Example:\n    Before: |\n      @Test\n      public void testDuplicateAssertions() {\n        assertEquals(expectedA, methodUnderTest(a));\n        assertEquals(expectedB, methodUnderTest(b));\n      }\n    After: |\n      @Test\n      public void testWithInputA() {\n        assertEquals(expectedA, methodUnderTest(a));\n      }\n      @Test\n      public void testWithInputB() {\n        assertEquals(expectedB, methodUnderTest(b));\n      }\n']
+Checkpoints: ['[ ] All assert statements have been added with clear explanatory messages.\n', '[ ] All instances of the ‘Sensitive Equality’ code smell have been refactored by directly comparing objects instead of using the toString() method for comparisons in tests, to enhance stability and avoid future failures due to changes in the toString() method’s implementation.\n', '[ ] All duplicate assertions have been refactored using JUnit 5 Parameterized Tests, where the lists of parameterizable values are declared in a specific annotation, and the test method is executed independently m times.\n']
+
+Refactored Code: 
+ 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+
+public class DocumentTest {
+
+    private Document createHtmlDocument(String charset) {
+        // Implementation of createHtmlDocument method
+        return new Document("");
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "dontTouch, dontTouch, dontTouch",
+        "utf-8, utf-8, utf-8"
+    })
+    public void testMetaCharsetUpdateDisabledNoChanges(String charset, String expectedCharset, String expectedContent) {
+        final Document doc = createHtmlDocument(charset);
+
+        final String htmlCharset = "<html>\n" +
+                                    " <head>\n" +
+                                    "  <meta charset=\"" + charset + "\">\n" +
+                                    "  <meta name=\"charset\" content=\"" + charset + "\">\n" +
+                                    " </head>\n" +
+                                    " <body></body>\n" +
+                                    "</html>";
+
+        String actualValue = doc.toString();
+        assertEquals(htmlCharset, actualValue, "The HTML document should match the expected structure");
+
+        Element selectedElement = doc.select("meta[charset]").first();
+        assertNotNull(selectedElement, "The meta element with charset attribute should exist");
+        assertEquals(expectedCharset, selectedElement.attr("charset"), "The charset attribute should match the expected value");
+
+        selectedElement = doc.select("meta[name=charset]").first();
+        assertNotNull(selectedElement, "The meta element with name='charset' should exist");
+        assertEquals(expectedContent, selectedElement.attr("content"), "The content attribute should match the expected value");
+    }
+}
+
+

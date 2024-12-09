@@ -1,0 +1,4 @@
+total tests: 1
+total asserts: 2
+Assert.assertEquals( "Expected dimension mismatch", expectedDimension, exception.getDimension());
+Assert.assertEquals("Expected argument mismatch", expectedArgument, exception.getArgument());

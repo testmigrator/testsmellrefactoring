@@ -1,0 +1,46 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class HtmlParserTest {
+
+    @TempDir
+    Path tempDir;
+
+    private File testFile;
+
+    @BeforeEach
+    void setUp() throws IOException {
+        // Copy the test file to the temporary directory to avoid the 'Mystery Guest' smell
+        Path sourcePath = Path.of("src/test/resources/htmltests/baidu-variant.html");
+        assertTrue(Files.exists(sourcePath), "Source file does not exist: " + sourcePath);
+        testFile = tempDir.resolve("baidu-variant.html").toFile();
+        Files.copy(sourcePath, testFile.toPath());
+    }
+
+    @Test
+    void testBaiduVariant() throws IOException {
+        // Check if the file exists to avoid the 'Resource Optimism' smell
+        assertTrue(testFile.exists(), "Test file does not exist: " + testFile.getAbsolutePath());
+
+        Document doc = Jsoup.parse(testFile, null, "http://www.baidu.com/");
+
+        // Add clear explanatory messages to assertions to avoid 'Assertion Roulette'
+        assertEquals("GB2312", doc.outputSettings().charset().displayName(), "Charset should be GB2312");
+        assertEquals("<title>百度一下，你就知道</title>", doc.select("title").outerHtml(), "Title should match expected value");
+    }
+}
+```
+

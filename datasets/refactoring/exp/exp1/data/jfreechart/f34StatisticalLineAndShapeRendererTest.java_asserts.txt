@@ -1,0 +1,15 @@
+total tests: 4
+total asserts: 13
+assertEquals(r1, r2, "Default instances should be equal");
+assertEquals(r2, r1, "Equality should be symmetric");
+assertNotEquals(r1, r2, "Instances with different errorIndicatorPaint should not be equal");
+assertEquals(r1, r2, "Instances with the same errorIndicatorPaint should be equal");
+assertEquals(r1, r2, "r1 and r2 should be equal");
+assertEquals(h1, h2, "Hash codes of r1 and r2 should be equal");
+assertNotSame(r1, r2, "The cloned object should not be the same instance as the original object");
+assertSame(r1.getClass(), r2.getClass(), "The cloned object should be of the same class as the original object");
+assertEquals(r1, r2, "The cloned object should be equal to the original object");
+assertTrue(r.getDefaultLinesVisible(), "Default lines should be visible when linesVisible is set to true");
+assertFalse(r.getDefaultShapesVisible(), "Default shapes should not be visible when shapesVisible is set to false");
+assertFalse(r.getDefaultLinesVisible(), "Default lines should not be visible when linesVisible is set to false");
+assertTrue(r.getDefaultShapesVisible(), "Default shapes should be visible when shapesVisible is set to true");

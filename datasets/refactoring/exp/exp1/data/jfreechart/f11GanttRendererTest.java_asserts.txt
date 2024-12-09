@@ -1,0 +1,7 @@
+total tests: 2
+total asserts: 5
+assertEquals("GanttRenderer instances should be equal", r1, r2);
+assertEquals("Hash codes of equal GanttRenderer instances should be equal", h1, h2);
+assertNotSame(r1, r2, "The cloned instance should be a different object from the original.");
+assertSame(r1.getClass(), r2.getClass(), "The cloned instance should have the same class as the original.");
+assertEquals(r1, r2, "The cloned instance should have the same content as the original.");

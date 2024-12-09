@@ -1,0 +1,24 @@
+asserts result: 
+ ```java
+public class ElementTest {
+
+    private static final String HTML = "<table><tbody>\n<tr>\n<td>15:00</td>\n<td>sport</td>\n</tr>\n</tbody></table>";
+    private static final int EXPECTED_CHILD_SIZE = 2;
+    private static final int EXPECTED_CHILD_NODE_SIZE = 5;
+
+    @Test
+    public void testChildSize() {
+        Document doc = Jsoup.parse(HTML);
+        Element row = doc.selectFirst("table tbody tr");
+        assertEquals(EXPECTED_CHILD_SIZE, row.childrenSize(), "The number of child elements should be 2");
+    }
+
+    @Test
+    public void testChildNodeSize() {
+        Document doc = Jsoup.parse(HTML);
+        Element row = doc.selectFirst("table tbody tr");
+        assertEquals(EXPECTED_CHILD_NODE_SIZE, row.childNodeSize(), "The number of child nodes should be 5");
+    }
+}
+```
+

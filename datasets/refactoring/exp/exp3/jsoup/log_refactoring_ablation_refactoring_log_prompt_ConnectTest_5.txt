@@ -1,0 +1,44 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.junit.jupiter.api.Test;
+
+public class DocumentServiceTest {
+
+    private final String echoUrl = "http://example.com/echo";
+    private final String browserUa = "Mozilla/5.0";
+
+    @Test
+    public void sendsRequestBodyJsonWithData() {
+        final String body = "{\"key\":\"value\"}";
+
+        Document doc = null;
+        try {
+            doc = Jsoup.connect(echoUrl)
+                    .requestBody(body)
+                    .header("Content-Type", "application/json")
+                    .userAgent(browserUa)
+                    .data("foo", "true")
+                    .post();
+        } catch (IOException e) {
+            assertThrows(IOException.class, () -> {
+                throw new IOException("Failed to connect to the server", e);
+            });
+        }
+
+        assertEquals("POST", ihVal("Method", doc), "HTTP method should be POST");
+        assertEquals("application/json", ihVal("Content-Type", doc), "Content-Type header should be application/json");
+        assertEquals("foo=true", ihVal("Query String", doc), "Query string should be foo=true");
+        assertEquals(body, ihVal("Post Data", doc), "Post data should match the expected JSON body");
+    }
+
+    private String ihVal(String key, Document doc) {
+        return doc.select(String.format("pre:contains(%s)", key)).text().split(":")[1].trim();
+    }
+}
+```
+

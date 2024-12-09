@@ -1,0 +1,56 @@
+asserts result: 
+ ```java
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
+
+import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.io.StringReader;
+
+class JsonReaderTest {
+
+    @Test
+    public void testReadEmptyObject_BeginsObject() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("{}"));
+        reader.beginObject();
+        assertThat(reader.hasNext()).as("Should not have next token after beginning empty object").isFalse();
+    }
+
+    @Test
+    public void testReadEmptyObject_EndsObject() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("{}"));
+        reader.beginObject();
+        reader.endObject();
+        assertThat(reader.peek()).as("Peek should return END_DOCUMENT after ending object").isEqualTo(JsonToken.END_DOCUMENT);
+    }
+
+    @Test
+    public void testReadEmptyObject_ThrowsIOExceptionOnBeginObject() {
+        JsonReader reader = new JsonReader(new FailingStringReader("{}"));
+        assertThrows(IOException.class, () -> reader.beginObject(), "beginObject should throw IOException");
+    }
+
+    @Test
+    public void testReadEmptyObject_ThrowsIOExceptionOnEndObject() throws IOException {
+        JsonReader reader = new JsonReader(new FailingStringReader("{}"));
+        reader.beginObject();
+        assertThrows(IOException.class, () -> reader.endObject(), "endObject should throw IOException");
+    }
+
+    private static class FailingStringReader extends StringReader {
+        public FailingStringReader(String s) {
+            super(s);
+        }
+
+        @Override
+        public int read(char[] cbuf, int off, int len) throws IOException {
+            throw new IOException("Simulated IO error");
+        }
+    }
+}
+```
+

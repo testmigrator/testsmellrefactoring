@@ -1,0 +1,26 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class NodeTest {
+
+    @Test
+    public void handleAbsOnFileUrisForFirstLink() {
+        Document doc = Jsoup.parse("<a href='password'>One</a><a href='/var/log/messages'>Two</a>", "file:/etc/");
+        Element one = doc.select("a").first();
+        assertEquals("First link should resolve to file:/etc/password", "file:/etc/password", one.absUrl("href"));
+    }
+
+    @Test
+    public void handleAbsOnFileUrisForSecondLink() {
+        Document doc = Jsoup.parse("<a href='password'>One</a><a href='/var/log/messages'>Two</a>", "file:/etc/");
+        Element two = doc.select("a").get(1);
+        assertEquals("Second link should resolve to file:/var/log/messages", "file:/var/log/messages", two.absUrl("href"));
+    }
+}
+```
+

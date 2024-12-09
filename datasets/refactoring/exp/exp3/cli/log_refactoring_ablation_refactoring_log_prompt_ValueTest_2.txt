@@ -1,0 +1,21 @@
+asserts result: 
+ ```java
+import org.junit.Test;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNull;
+
+public class CommandLineOptionsTest {
+
+    private CommandLine cl; // Assume CommandLine is a class that represents command line options
+    private Options opts; // Assume Options is a class that holds the available options
+
+    @Test
+    public void testLongNoArgWithOption() {
+        Option cOption = opts.getOption("c");
+        
+        assertTrue("Expected option 'c' to be present", cl.hasOption(cOption));
+        assertNull("Expected option 'c' to have no value", cl.getOptionValue(cOption));
+    }
+}
+```
+

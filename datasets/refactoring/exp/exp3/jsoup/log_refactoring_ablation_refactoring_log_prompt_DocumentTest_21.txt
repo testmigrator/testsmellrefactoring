@@ -1,0 +1,49 @@
+asserts result: 
+ ```java
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.XmlDeclaration;
+import org.junit.Test;
+import java.nio.charset.Charset;
+import static org.junit.Assert.assertEquals;
+
+public class DocumentTest {
+
+    private static final String CHARSET_ISO_8859 = "ISO-8859-1";
+
+    @Test
+    public void testMetaCharsetUpdateXmlIso8859Charset() {
+        final Document doc = createXmlDocument("1.0", "changeThis", true);
+        doc.updateMetaCharsetElement(true);
+        doc.charset(Charset.forName(CHARSET_ISO_8859));
+
+        assertEquals("XML declaration should contain the correct encoding attribute",
+                CHARSET_ISO_8859, ((XmlDeclaration) doc.childNode(0)).attr("encoding"));
+    }
+
+    @Test
+    public void testMetaCharsetUpdateXmlIso8859DocumentCharset() {
+        final Document doc = createXmlDocument("1.0", "changeThis", true);
+        doc.updateMetaCharsetElement(true);
+        doc.charset(Charset.forName(CHARSET_ISO_8859));
+
+        assertEquals("Document charset should be updated correctly",
+                Charset.forName(CHARSET_ISO_8859), doc.charset());
+    }
+
+    @Test
+    public void testMetaCharsetUpdateXmlIso8859OutputSettingsCharset() {
+        final Document doc = createXmlDocument("1.0", "changeThis", true);
+        doc.updateMetaCharsetElement(true);
+        doc.charset(Charset.forName(CHARSET_ISO_8859));
+
+        assertEquals("Output settings charset should be updated correctly",
+                Charset.forName(CHARSET_ISO_8859), doc.outputSettings().charset());
+    }
+
+    private Document createXmlDocument(String version, String rootTag, boolean standalone) {
+        // Implementation of createXmlDocument method
+        return new Document("");
+    }
+}
+```
+

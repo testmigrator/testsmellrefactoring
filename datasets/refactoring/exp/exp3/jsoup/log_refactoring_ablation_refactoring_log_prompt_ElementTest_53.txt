@@ -1,0 +1,46 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.DataNode;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class ElementTest {
+
+    private static final String SCRIPT_CONTENT = "One Two";
+    private static final String STYLE_CONTENT = "Three Four";
+    private static final String P_CONTENT = "Fix Six";
+
+    @Test
+    public void testScriptDataNodes() {
+        Document doc = Jsoup.parse("<script>" + SCRIPT_CONTENT + "</script>");
+        Element script = doc.select("script").first();
+
+        List<DataNode> scriptData = script.dataNodes();
+        assertEquals("Expected 1 data node in script element", 1, scriptData.size());
+        assertEquals("Expected script content to match", SCRIPT_CONTENT, scriptData.get(0).getWholeData());
+    }
+
+    @Test
+    public void testStyleDataNodes() {
+        Document doc = Jsoup.parse("<style>" + STYLE_CONTENT + "</style>");
+        Element style = doc.select("style").first();
+
+        List<DataNode> styleData = style.dataNodes();
+        assertEquals("Expected 1 data node in style element", 1, styleData.size());
+        assertEquals("Expected style content to match", STYLE_CONTENT, styleData.get(0).getWholeData());
+    }
+
+    @Test
+    public void testPDataNodes() {
+        Document doc = Jsoup.parse("<p>" + P_CONTENT + "</p>");
+        Element p = doc.select("p").first();
+
+        List<DataNode> pData = p.dataNodes();
+        assertEquals("Expected 0 data nodes in p element", 0, pData.size());
+    }
+}
+```
+

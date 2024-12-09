@@ -1,0 +1,31 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.MalformedJsonException;
+import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.io.StringReader;
+
+class JsonReaderTest {
+
+    @Test
+    public void testUnescapingTruncatedSequence_ExceptionThrown() {
+        String json = "[\"\\";
+        JsonReader reader = new JsonReader(new StringReader(json));
+
+        MalformedJsonException exception = assertThrows(MalformedJsonException.class, () -> {
+            reader.beginArray();
+            reader.nextString();
+        });
+
+        assertEquals("Unterminated escape sequence at line 1 column 4 path $[0]\n" +
+                "See https://github.com/google/gson/blob/main/Troubleshooting.md#malformed-json", exception.getMessage(),
+                "The expected error message should match exactly");
+    }
+}
+```
+

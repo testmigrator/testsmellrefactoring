@@ -1,0 +1,27 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.io.StringWriter;
+
+public class JsonWriterTest {
+
+    @Test
+    public void testNonFiniteNumbersWhenStrict() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.setStrictness(Strictness.STRICT);
+
+        assertThrows(IllegalArgumentException.class, () -> assertNonFiniteNumbersExceptions(jsonWriter));
+    }
+
+    private void assertNonFiniteNumbersExceptions(JsonWriter jsonWriter) throws IOException {
+        // Simulate non-finite number writing and expect an exception
+        jsonWriter.value(Double.NaN); // This should throw an exception
+    }
+}
+```
+

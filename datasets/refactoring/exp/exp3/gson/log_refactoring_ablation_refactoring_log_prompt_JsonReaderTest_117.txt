@@ -1,0 +1,30 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.Arrays;
+
+class JsonReaderTest {
+
+    @Test
+    public void testVeryLongQuotedString() {
+        char[] stringChars = new char[1024 * 16];
+        Arrays.fill(stringChars, 'x');
+        String string = new String(stringChars);
+        String json = "[\"" + string + "\"]";
+
+        assertDoesNotThrow(() -> {
+            JsonReader reader = new JsonReader(new StringReader(json));
+            reader.beginArray();
+            assertEquals(string, reader.nextString());
+            reader.endArray();
+        });
+    }
+}
+```
+

@@ -1,0 +1,58 @@
+asserts result: 
+ ```java
+import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Node;
+import org.jsoup.nodes.Tag;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
+public class NodeTest {
+
+    private static final int NO_SIBLINGS = 0;
+
+    @Test
+    public void testOrphanNodeSiblingIndex() {
+        Node node = new Element(Tag.valueOf("p"), "");
+        assertEquals("Orphan node should have sibling index 0", NO_SIBLINGS, node.siblingIndex());
+    }
+
+    @Test
+    public void testOrphanNodeSiblingNodesSize() {
+        Node node = new Element(Tag.valueOf("p"), "");
+        assertEquals("Orphan node should have no sibling nodes", NO_SIBLINGS, node.siblingNodes().size());
+    }
+
+    @Test
+    public void testOrphanNodePreviousSibling() {
+        Node node = new Element(Tag.valueOf("p"), "");
+        assertNull("Orphan node should have no previous sibling", node.previousSibling());
+    }
+
+    @Test
+    public void testOrphanNodeNextSibling() {
+        Node node = new Element(Tag.valueOf("p"), "");
+        assertNull("Orphan node should have no next sibling", node.nextSibling());
+    }
+
+    @Test
+    public void testOrphanElementSiblingElementsSize() {
+        Element el = new Element(Tag.valueOf("p"), "");
+        assertEquals("Orphan element should have no sibling elements", NO_SIBLINGS, el.siblingElements().size());
+    }
+
+    @Test
+    public void testOrphanElementPreviousElementSibling() {
+        Element el = new Element(Tag.valueOf("p"), "");
+        assertNull("Orphan element should have no previous element sibling", el.previousElementSibling());
+    }
+
+    @Test
+    public void testOrphanElementNextElementSibling() {
+        Element el = new Element(Tag.valueOf("p"), "");
+        assertNull("Orphan element should have no next element sibling", el.nextElementSibling());
+    }
+}
+```
+

@@ -1,0 +1,32 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import static org.junit.Assert.assertEquals;
+import org.junit.Test;
+
+public class ElementTest {
+
+    @Test
+    public void testAfterWithMultipleElements() {
+        Document doc = Jsoup.parse("<div><p>Hello</p><p>There</p></div>");
+        Element p1 = doc.select("p").first();
+        p1.after("<div>one</div><div>two</div>");
+        String expectedHtml = "<div><p>Hello</p><div>one</div><div>two</div><p>There</p></div>";
+        assertEquals("After adding multiple elements, the HTML should match the expected output", 
+                     expectedHtml, TextUtil.stripNewlines(doc.body().html()));
+    }
+
+    @Test
+    public void testAfterWithSingleElementAndComment() {
+        Document doc = Jsoup.parse("<div><p>Hello</p><p>There</p></div>");
+        Element p2 = doc.select("p").last();
+        p2.after("<p>Three</p><!-- four -->");
+        String expectedHtml = "<div><p>Hello</p><p>There</p><p>Three</p><!-- four --></div>";
+        assertEquals("After adding a single element and a comment, the HTML should match the expected output", 
+                     expectedHtml, TextUtil.stripNewlines(doc.body().html()));
+    }
+}
+```
+

@@ -1,0 +1,5 @@
+asserts result: 
+ Yes
+
+The refactored test maintains the same functionality as the original test. Both versions test the integration of the sine function over specified intervals and compare the results against expected values within a calculated tolerance. The refactoring primarily involves converting the single `@Test` method into a parameterized test using `@ParameterizedTest` and `@CsvSource`, which allows the same test logic to be applied to multiple sets of input data. This change does not alter the core functionality or the assertions being made.
+

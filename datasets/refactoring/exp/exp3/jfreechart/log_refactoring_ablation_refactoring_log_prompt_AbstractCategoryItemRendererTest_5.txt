@@ -1,0 +1,54 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import static org.junit.jupiter.api.Assertions.*;
+
+class AbstractCategoryItemRendererTest {
+
+    @Test
+    @DisplayName("Test cloning basic properties")
+    public void testCloningBasicProperties() throws CloneNotSupportedException {
+        AbstractCategoryItemRenderer r1 = new BarRenderer();
+        AbstractCategoryItemRenderer r2 = (BarRenderer) r1.clone();
+
+        assertNotSame(r1, r2, "Cloned objects should not be the same instance");
+        assertSame(r1.getClass(), r2.getClass(), "Cloned object should be of the same class");
+        assertEquals(r1, r2, "Cloned object should be equal to the original object");
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "0, true",
+        "-1, false",
+        "1, false"
+    })
+    @DisplayName("Test cloning with series item label generator set")
+    public void testCloningWithSeriesItemLabelGenerator(int seriesIndex, boolean shouldSet) throws CloneNotSupportedException {
+        AbstractCategoryItemRenderer r1 = new BarRenderer();
+        if (shouldSet) {
+            r1.setSeriesItemLabelGenerator(seriesIndex, new StandardCategoryItemLabelGenerator());
+        }
+        AbstractCategoryItemRenderer r2 = (BarRenderer) r1.clone();
+
+        assertNotSame(r1, r2, "Cloned objects should not be the same instance");
+        assertSame(r1.getClass(), r2.getClass(), "Cloned object should be of the same class");
+        assertEquals(r1, r2, "Cloned object should be equal to the original object");
+    }
+
+    @Test
+    @DisplayName("Test cloning with default item label generator set")
+    public void testCloningWithDefaultItemLabelGenerator() throws CloneNotSupportedException {
+        AbstractCategoryItemRenderer r1 = new BarRenderer();
+        r1.setDefaultItemLabelGenerator(new StandardCategoryItemLabelGenerator());
+        AbstractCategoryItemRenderer r2 = (BarRenderer) r1.clone();
+
+        assertNotSame(r1, r2, "Cloned objects should not be the same instance");
+        assertSame(r1.getClass(), r2.getClass(), "Cloned object should be of the same class");
+        assertEquals(r1, r2, "Cloned object should be equal to the original object");
+    }
+}
+```
+

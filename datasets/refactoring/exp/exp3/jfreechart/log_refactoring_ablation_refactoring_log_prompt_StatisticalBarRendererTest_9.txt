@@ -1,0 +1,65 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+
+public class StatisticalBarRendererTest {
+
+    private static final double BASE_VALUE = 0.0;
+    private static final double UPPER_BOUND = 1.5;
+    private static final double LOWER_BOUND = -2.2;
+
+    @Test
+    public void testFindRangeBoundsNullDataset() {
+        StatisticalBarRenderer renderer = new StatisticalBarRenderer();
+        assertNull(renderer.findRangeBounds(null), "Expected null for null dataset");
+    }
+
+    @Test
+    public void testFindRangeBoundsEmptyDataset() {
+        StatisticalBarRenderer renderer = new StatisticalBarRenderer();
+        DefaultStatisticalCategoryDataset<String, String> dataset = new DefaultStatisticalCategoryDataset<>();
+        assertNull(renderer.findRangeBounds(dataset), "Expected null for empty dataset");
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "1.0, 0.5, R1, C1, true, 0.0, 1.5",
+        "1.0, 0.5, R1, C1, false, 0.5, 1.5",
+        "-2.0, 0.2, R1, C2, true, -2.2, 1.5",
+        "null, null, R1, C3, true, -2.2, 1.5",
+        "5.0, 1.0, R2, C3, true, -2.2, 6.0"
+    })
+    public void testFindRangeBoundsWithValues(Double value, Double stdDev, String rowKey, String columnKey, boolean includeBase, double expectedLowerBound, double expectedUpperBound) {
+        StatisticalBarRenderer renderer = new StatisticalBarRenderer();
+        DefaultStatisticalCategoryDataset<String, String> dataset = new DefaultStatisticalCategoryDataset<>();
+
+        if (value != null && stdDev != null) {
+            dataset.add(value, stdDev, rowKey, columnKey);
+        } else {
+            dataset.add(null, null, rowKey, columnKey);
+        }
+
+        renderer.setIncludeBaseInRange(includeBase);
+        Range actualRange = renderer.findRangeBounds(dataset);
+        assertEquals(new Range(expectedLowerBound, expectedUpperBound), actualRange, "Range bounds do not match for value: " + value + ", stdDev: " + stdDev + ", rowKey: " + rowKey + ", columnKey: " + columnKey + ", includeBase: " + includeBase);
+    }
+
+    @Test
+    public void testFindRangeBoundsWithSeriesVisibility() {
+        StatisticalBarRenderer renderer = new StatisticalBarRenderer();
+        DefaultStatisticalCategoryDataset<String, String> dataset = new DefaultStatisticalCategoryDataset<>();
+
+        dataset.add(1.0, 0.5, "R1", "C1");
+        dataset.add(-2.0, 0.2, "R1", "C2");
+        dataset.add(5.0, 1.0, "R2", "C3");
+
+        renderer.setSeriesVisible(1, Boolean.FALSE);
+        Range actualRange = renderer.findRangeBounds(dataset);
+        assertEquals(new Range(LOWER_BOUND, UPPER_BOUND), actualRange, "Range bounds do not match when series visibility is set to false");
+    }
+}
+```
+

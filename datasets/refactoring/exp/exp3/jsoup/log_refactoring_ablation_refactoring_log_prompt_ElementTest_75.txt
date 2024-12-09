@@ -1,0 +1,64 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+public class ElementTest {
+
+    private static final String ESCAPED_TEXT = "You can't always get what you&nbsp;want.";
+    private static final String NORMALIZED_TEXT = "You can't always get what you want.";
+    private static final String WITH_NBSP = "You can't always get what you\u00a0want.";
+
+    @Test
+    public void testNormalizesNbspInTextContent() {
+        Document doc = Jsoup.parse("<p>" + ESCAPED_TEXT);
+        Element p = doc.select("p").first();
+
+        assertEquals("Text should be normalized", NORMALIZED_TEXT, p.text());
+    }
+
+    @Test
+    public void testPreservesNbspInHtml() {
+        Document doc = Jsoup.parse("<p>" + ESCAPED_TEXT);
+        Element p = doc.select("p").first();
+
+        assertEquals("HTML should preserve &nbsp;", "<p>" + ESCAPED_TEXT + "</p>", p.outerHtml());
+    }
+
+    @Test
+    public void testPreservesNbspInTextNode() {
+        Document doc = Jsoup.parse("<p>" + ESCAPED_TEXT);
+        Element p = doc.select("p").first();
+
+        assertEquals("Text node should contain the nbsp character", WITH_NBSP, p.textNodes().get(0).getWholeText());
+    }
+
+    @Test
+    public void testNbspCharacterCode() {
+        assertEquals("Nbsp character should have the correct Unicode value", 160, WITH_NBSP.charAt(29));
+    }
+
+    @Test
+    public void testContainsNormalizedText() {
+        Document doc = Jsoup.parse("<p>" + ESCAPED_TEXT);
+        Element p = doc.select("p").first();
+
+        Element matched = doc.select("p:contains(get what you want)").first();
+        assertEquals("Element should match by normalized text content", "p", matched.nodeName());
+    }
+
+    @Test
+    public void testContainsOwnNormalizedText() {
+        Document doc = Jsoup.parse("<p>" + ESCAPED_TEXT);
+        Element p = doc.select("p").first();
+
+        Element matched = doc.select("p:contains(get what you want)").first();
+        assertTrue("Element should match by own normalized text content", matched.is(":containsOwn(get what you want)"));
+    }
+}
+```
+

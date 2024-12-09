@@ -1,0 +1,67 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.nodes.TextNode;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class ElementTest {
+
+    private static final String ORIGINAL_HTML = "<p>One <span>Two</span> Three <br> Four</p>";
+    private static final String EXPECTED_TEXT_AFTER_MANIPULATION = "One Two three-more Fo-ur";
+    private static final String EXPECTED_OWN_TEXT_AFTER_MANIPULATION = "One three-more Fo-ur";
+    private static final int EXPECTED_TEXT_NODES_SIZE_AFTER_SPLIT = 4;
+
+    @Test
+    public void testManipulateTextNodesSetText() {
+        Document doc = Jsoup.parse(ORIGINAL_HTML);
+        Element p = doc.select("p").first();
+        List<TextNode> textNodes = p.textNodes();
+
+        textNodes.get(1).text(" three-more ");
+
+        assertEquals("Text content should be updated correctly after setting text",
+                EXPECTED_TEXT_AFTER_MANIPULATION, p.text());
+    }
+
+    @Test
+    public void testManipulateTextNodesSplitText() {
+        Document doc = Jsoup.parse(ORIGINAL_HTML);
+        Element p = doc.select("p").first();
+        List<TextNode> textNodes = p.textNodes();
+
+        textNodes.get(2).splitText(3).text("-ur");
+
+        assertEquals("Text content should be updated correctly after splitting text",
+                EXPECTED_TEXT_AFTER_MANIPULATION, p.text());
+    }
+
+    @Test
+    public void testManipulateTextNodesOwnText() {
+        Document doc = Jsoup.parse(ORIGINAL_HTML);
+        Element p = doc.select("p").first();
+        List<TextNode> textNodes = p.textNodes();
+
+        textNodes.get(1).text(" three-more ");
+        textNodes.get(2).splitText(3).text("-ur");
+
+        assertEquals("Own text should be updated correctly after manipulation",
+                EXPECTED_OWN_TEXT_AFTER_MANIPULATION, p.ownText());
+    }
+
+    @Test
+    public void testManipulateTextNodesSizeAfterSplit() {
+        Document doc = Jsoup.parse(ORIGINAL_HTML);
+        Element p = doc.select("p").first();
+        List<TextNode> textNodes = p.textNodes();
+
+        textNodes.get(2).splitText(3);
+
+        assertEquals("Number of text nodes should increase after splitting text",
+                EXPECTED_TEXT_NODES_SIZE_AFTER_SPLIT, p.textNodes().size());
+    }
+}
+```
+

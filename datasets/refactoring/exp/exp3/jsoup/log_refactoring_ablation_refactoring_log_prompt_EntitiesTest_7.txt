@@ -1,0 +1,23 @@
+asserts result: 
+ ```java
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class EntitiesTest {
+
+    @Test
+    public void testUnescapeWithCommonEntities() {
+        String text = "Hello &AElig; &amp;&LT&gt; &reg &angst; &angst &#960; &#960 &#x65B0; there &! &frac34; &copy; &COPY;";
+        String expected = "Hello Æ &<> ® Å Å π π 新 there &! ¾ © ©";
+        assertEquals("Unescaped common entities should match expected output", expected, Entities.unescape(text));
+    }
+
+    @Test
+    public void testUnescapeWithUnknownEntities() {
+        String text = "&0987654321; &unknown";
+        String expected = "&0987654321; &unknown";
+        assertEquals("Unescaped unknown entities should remain unchanged", expected, Entities.unescape(text));
+    }
+}
+```
+

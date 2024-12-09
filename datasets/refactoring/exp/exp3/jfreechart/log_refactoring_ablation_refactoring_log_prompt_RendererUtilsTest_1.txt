@@ -1,0 +1,85 @@
+asserts result: 
+ ```java
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class RendererUtilsTest {
+
+    private static final double DELTA = 0.001;
+
+    @Test
+    public void testFindLiveItemsLowerBound_NoItems() {
+        DefaultXYDataset<String> dataset = createDataset("S1", new double[][] {{}, {}});
+        int result = RendererUtils.findLiveItemsLowerBound(dataset, 0, 10.0, 11.0);
+        assertEquals("Expected lower bound index for no items", 0, result);
+    }
+
+    @Test
+    public void testFindLiveItemsLowerBound_OneItem() {
+        DefaultXYDataset<String> dataset = createDataset("S2", new double[][] {{0.0}, {9.9}});
+        int result1 = RendererUtils.findLiveItemsLowerBound(dataset, 1, 0.0, 1.1);
+        assertEquals("Expected lower bound index for one item at 0.0", 0, result1);
+
+        int result2 = RendererUtils.findLiveItemsLowerBound(dataset, 1, 2.0, 3.3);
+        assertEquals("Expected lower bound index for one item at 2.0", 0, result2);
+    }
+
+    @Test
+    public void testFindLiveItemsLowerBound_TwoItems() {
+        DefaultXYDataset<String> dataset = createDataset("S3", new double[][] {{0.0, 1.0}, {9.9, 9.9}});
+        int result1 = RendererUtils.findLiveItemsLowerBound(dataset, 2, 0.0, 1.1);
+        assertEquals("Expected lower bound index for two items at 0.0", 0, result1);
+
+        int result2 = RendererUtils.findLiveItemsLowerBound(dataset, 2, 1.0, 2.2);
+        assertEquals("Expected lower bound index for two items at 1.0", 1, result2);
+
+        int result3 = RendererUtils.findLiveItemsLowerBound(dataset, 2, 2.0, 3.3);
+        assertEquals("Expected lower bound index for two items at 2.0", 1, result3);
+
+        int result4 = RendererUtils.findLiveItemsLowerBound(dataset, 2, 3.0, 4.4);
+        assertEquals("Expected lower bound index for two items at 3.0", 1, result4);
+    }
+
+    @Test
+    public void testFindLiveItemsLowerBound_ThreeItems() {
+        DefaultXYDataset<String> dataset = createDataset("S4", new double[][] {{1.0, 2.0, 1.5}, {9.9, 9.9, 9.9}});
+        int result1 = RendererUtils.findLiveItemsLowerBound(dataset, 3, 0.0, 1.1);
+        assertEquals("Expected lower bound index for three items at 0.0", 0, result1);
+
+        int result2 = RendererUtils.findLiveItemsLowerBound(dataset, 3, 1.0, 2.2);
+        assertEquals("Expected lower bound index for three items at 1.0", 0, result2);
+
+        int result3 = RendererUtils.findLiveItemsLowerBound(dataset, 3, 2.0, 3.3);
+        assertEquals("Expected lower bound index for three items at 2.0", 1, result3);
+
+        int result4 = RendererUtils.findLiveItemsLowerBound(dataset, 3, 3.0, 4.4);
+        assertEquals("Expected lower bound index for three items at 3.0", 2, result4);
+    }
+
+    @Test
+    public void testFindLiveItemsLowerBound_FourItems() {
+        DefaultXYDataset<String> dataset = createDataset("S5", new double[][] {{1.0, 2.0, 1.5, 1.8}, {9.9, 9.9, 9.9, 9.9}});
+        int result1 = RendererUtils.findLiveItemsLowerBound(dataset, 4, 0.0, 1.1);
+        assertEquals("Expected lower bound index for four items at 0.0", 0, result1);
+
+        int result2 = RendererUtils.findLiveItemsLowerBound(dataset, 4, 1.0, 2.2);
+        assertEquals("Expected lower bound index for four items at 1.0", 0, result2);
+
+        int result3 = RendererUtils.findLiveItemsLowerBound(dataset, 4, 2.0, 3.3);
+        assertEquals("Expected lower bound index for four items at 2.0", 1, result3);
+
+        int result4 = RendererUtils.findLiveItemsLowerBound(dataset, 4, 3.0, 4.4);
+        assertEquals("Expected lower bound index for four items at 3.0", 3, result4);
+
+        int result5 = RendererUtils.findLiveItemsLowerBound(dataset, 4, 4.0, 5.5);
+        assertEquals("Expected lower bound index for four items at 4.0", 3, result5);
+    }
+
+    private DefaultXYDataset<String> createDataset(String seriesName, double[][] data) {
+        DefaultXYDataset<String> dataset = new DefaultXYDataset<>();
+        dataset.addSeries(seriesName, data);
+        return dataset;
+    }
+}
+```
+

@@ -1,0 +1,18 @@
+total tests: 3
+total asserts: 16
+assertEquals(i1, i2, "Expected i1 and i2 to be equal when both are initialized with default values.");
+assertNotEquals(i1, i2, "Expected i1 and i2 to not be equal when chart areas are different.");
+assertEquals(i1, i2, "Expected i1 and i2 to be equal when chart areas are the same.");
+assertNotEquals(i1, i2, "Expected i1 and i2 to not be equal when data areas are different.");
+assertEquals(i1, i2, "Expected i1 and i2 to be equal when data areas are the same.");
+assertNotEquals(i1, i2, "Expected i1 and i2 to not be equal when entity collections are different.");
+assertEquals(i1, i2, "Expected i1 and i2 to be equal when entity collections are the same.");
+assertNotSame(i1, i2, "Expected i1 and i2 to be different objects after cloning.");
+assertSame(i1.getClass(), i2.getClass(), "Expected i1 and i2 to be of the same class after cloning.");
+assertEquals(i1, i2, "Expected i1 and i2 to be equal when cloned.");
+assertNotEquals(i1, i2, "Expected i1 and i2 to not be equal when chart areas are modified independently.");
+assertEquals(i1, i2, "Expected i1 and i2 to be equal when chart areas are the same after modification.");
+assertNotEquals(i1, i2, "Expected i1 and i2 to not be equal when entity collections are modified independently.");
+assertEquals(i1, i2, "Expected i1 and i2 to be equal when entity collections are the same after modification.");
+assertEquals(i1, i2, "Serialized and deserialized objects should be equal");
+assertEquals(i2, i2.getPlotInfo().getOwner(), "The owner of the plot info should be the deserialized object");

@@ -1,0 +1,5 @@
+total tests: 2
+total asserts: 3
+Assert.assertNotSame("The point should be copied and not the same instance", point, evaluation.getPoint());
+Assert.assertEquals("The value at index 0 should remain unchanged after modifying the original point", originalValue, evaluation.getPoint().getEntry(0), delta);
+Assert.assertTrue("Expected exception message to be either 'dummyModel' or 'dummyJacobian'", exception.getMessage().equals("dummyModel") || exception.getMessage().equals("dummyJacobian"));

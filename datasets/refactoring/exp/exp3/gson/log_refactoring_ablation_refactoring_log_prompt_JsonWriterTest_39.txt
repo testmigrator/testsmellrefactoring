@@ -1,0 +1,64 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+
+import com.google.gson.stream.JsonWriter;
+import org.junit.jupiter.api.Test;
+import java.io.IOException;
+import java.io.StringWriter;
+
+class JsonWriterTest {
+
+    @Test
+    public void testUnicodeLineBreaksEscapedBeginArray() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.beginArray();
+        assertThat(stringWriter.toString()).isEqualTo("[");
+    }
+
+    @Test
+    public void testUnicodeLineBreaksEscapedValue() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.value("\u2028 \u2029");
+        assertThat(stringWriter.toString()).isEqualTo("\"\\u2028 \\u2029\"");
+    }
+
+    @Test
+    public void testUnicodeLineBreaksEscapedEndArray() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.endArray();
+        assertThat(stringWriter.toString()).isEqualTo("]");
+    }
+
+    @Test
+    public void testUnicodeLineBreaksEscapedComplete() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.beginArray();
+        jsonWriter.value("\u2028 \u2029");
+        jsonWriter.endArray();
+        assertThat(stringWriter.toString()).isEqualTo("[\"\\u2028 \\u2029\"]");
+    }
+
+    @Test
+    public void testUnicodeLineBreaksEscapedIOException() {
+        assertThrows(IOException.class, () -> {
+            StringWriter stringWriter = new StringWriter();
+            JsonWriter jsonWriter = new JsonWriter(stringWriter) {
+                @Override
+                public JsonWriter value(String value) throws IOException {
+                    throw new IOException("Simulated IO Exception");
+                }
+            };
+            jsonWriter.beginArray();
+            jsonWriter.value("\u2028 \u2029");
+            jsonWriter.endArray();
+        });
+    }
+}
+```
+

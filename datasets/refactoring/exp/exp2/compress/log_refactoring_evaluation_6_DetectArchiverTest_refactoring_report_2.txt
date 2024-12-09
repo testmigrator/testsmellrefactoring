@@ -1,0 +1,5 @@
+asserts result: 
+ Yes
+
+The refactored test maintains the same functionality as the original test. Both tests check that the `createArchiveInputStream` method does not return `null` and that the returned object is an instance of `TarArchiveInputStream`. The only difference is the use of `assertDoesNotThrow` to wrap the entire try-with-resources block, which ensures that any unexpected exceptions are caught and reported. This change does not alter the core functionality of the test.
+

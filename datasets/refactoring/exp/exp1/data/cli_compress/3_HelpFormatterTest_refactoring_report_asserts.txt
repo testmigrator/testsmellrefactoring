@@ -1,0 +1,11 @@
+total tests: 4
+total asserts: 9
+assertEquals(HelpFormatter.DEFAULT_LONG_OPT_SEPARATOR, defaultSeparator, "Default long option separator should be '--'");
+assertEquals("=", separator, "Long option separator should be set to '='");
+assertArrayEquals(expected, actual, "Rendered options do not match expected output");
+assertThrows(UncheckedIOException.class, () -> spy.renderOptions(sb, 50, options, 2, 5), "Expected UncheckedIOException to be thrown");
+assertEquals(expected, sb.toString(), "Single line text rendering should match expected output");
+assertThrows(UncheckedIOException.class, () -> spy.renderWrappedText(sb, width, padding, text), "Should throw UncheckedIOException when appendWrappedText throws IOException");
+assertNull(formatter.rtrim(null), "rtrim should return null when input is null");
+assertEquals("", formatter.rtrim(""), "rtrim should return an empty string when input is an empty string");
+assertEquals("  foo", formatter.rtrim("  foo  "), "rtrim should remove trailing whitespace but preserve leading whitespace");

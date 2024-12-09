@@ -1,0 +1,86 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
+
+import java.io.IOException;
+import java.io.StringReader;
+
+class JsonReaderTest {
+
+    private JsonReader reader;
+
+    @BeforeEach
+    void setUp() throws IOException {
+        String json = "{\"a\": { \"c\": [], \"d\": [true, true, {}] }, \"b\": \"banana\"}";
+        reader = new JsonReader(new StringReader(json));
+    }
+
+    @Test
+    void testBeginObject() throws IOException {
+        reader.beginObject();
+        assertEquals(JsonToken.NAME, reader.peek(), "Expected next token to be NAME after beginObject");
+    }
+
+    @Test
+    void testNextNameA() throws IOException {
+        reader.beginObject();
+        assertEquals("a", reader.nextName(), "Expected next name to be 'a'");
+    }
+
+    @Test
+    void testSkipValueA() throws IOException {
+        reader.beginObject();
+        reader.nextName();
+        reader.skipValue();
+        assertEquals(JsonToken.NAME, reader.peek(), "Expected next token to be NAME after skipping value 'a'");
+    }
+
+    @Test
+    void testNextNameB() throws IOException {
+        reader.beginObject();
+        reader.nextName();
+        reader.skipValue();
+        assertEquals("b", reader.nextName(), "Expected next name to be 'b'");
+    }
+
+    @Test
+    void testSkipValueB() throws IOException {
+        reader.beginObject();
+        reader.nextName();
+        reader.skipValue();
+        reader.nextName();
+        reader.skipValue();
+        assertEquals(JsonToken.END_OBJECT, reader.peek(), "Expected next token to be END_OBJECT after skipping value 'b'");
+    }
+
+    @Test
+    void testEndObject() throws IOException {
+        reader.beginObject();
+        reader.nextName();
+        reader.skipValue();
+        reader.nextName();
+        reader.skipValue();
+        reader.endObject();
+        assertEquals(JsonToken.END_DOCUMENT, reader.peek(), "Expected next token to be END_DOCUMENT after endObject");
+    }
+
+    @Test
+    void testIOException() {
+        Executable executable = () -> {
+            reader = mock(JsonReader.class);
+            when(reader.beginObject()).thenThrow(new IOException("Simulated IO Exception"));
+            reader.beginObject();
+        };
+        assertThrows(IOException.class, executable, "Expected IOException to be thrown");
+    }
+}
+```
+

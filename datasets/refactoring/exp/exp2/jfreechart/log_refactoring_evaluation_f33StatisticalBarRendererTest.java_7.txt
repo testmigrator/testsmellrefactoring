@@ -1,0 +1,5 @@
+asserts result: 
+ Yes
+
+The refactored test code maintains the same functionality as the original test code. Both versions aim to ensure that no `NullPointerException` is thrown when attempting to draw a chart with a dataset that includes a `null` deviation value. The refactored version uses `assertDoesNotThrow` from JUnit 5, which is a more modern and concise way to assert that no exception is thrown, compared to the try-catch block used in the original code. This change does not alter the behavior or the purpose of the test.
+

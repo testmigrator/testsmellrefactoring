@@ -1,0 +1,29 @@
+asserts result: 
+ ```java
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class DocumentTest {
+
+    @Test
+    public void testMetaCharsetUpdateXmlDisabled() {
+        final Document doc = createXmlDocument("none", "none", false);
+
+        final Element expectedRoot = new Element("root").text(" node");
+        assertEquals(expectedRoot, doc.child(0));
+    }
+
+    private Document createXmlDocument(String charset, String contentType, boolean isXml) {
+        // Mock implementation or actual implementation based on the context
+        Document doc = new Document("");
+        if (isXml) {
+            doc.outputSettings().syntax(Document.OutputSettings.Syntax.xml);
+        }
+        doc.appendElement("root").text(" node");
+        return doc;
+    }
+}
+```
+

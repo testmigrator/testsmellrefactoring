@@ -1,0 +1,59 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+
+public class LineAndShapeRendererTest {
+
+    private LineAndShapeRenderer r1;
+    private LineAndShapeRenderer r2;
+
+    @BeforeEach
+    public void setUp() {
+        r1 = new LineAndShapeRenderer();
+        r2 = new LineAndShapeRenderer();
+    }
+
+    @Test
+    public void testInitialEquality() {
+        assertEquals(r1, r2, "Initially, two LineAndShapeRenderers should be equal");
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "setDefaultLinesVisible, false, true",
+        "setSeriesLinesVisible, 1, true",
+        "setDefaultShapesVisible, false, true",
+        "setSeriesShapesVisible, 1, true",
+        "setSeriesShapesFilled, 1, true",
+        "setDefaultShapesFilled, false, true",
+        "setUseOutlinePaint, true, true",
+        "setUseSeriesOffset, true, true",
+        "setItemMargin, 0.14, 0.14"
+    })
+    public void testPropertyChanges(String methodName, Object value1, Object value2) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        Method method1 = LineAndShapeRenderer.class.getMethod(methodName, value1.getClass());
+        Method method2 = LineAndShapeRenderer.class.getMethod(methodName, value2.getClass());
+
+        method1.invoke(r1, value1);
+        assertNotEquals(r1, r2, "After changing " + methodName + " in r1, r1 and r2 should not be equal");
+
+        method2.invoke(r2, value2);
+        assertEquals(r1, r2, "After changing " + methodName + " in r2, r1 and r2 should be equal again");
+    }
+}
+```
+
+### Explanation:
+1. **Test Initial Equality**: The `testInitialEquality` method checks if two newly created `LineAndShapeRenderer` instances are equal initially.
+2. **Parameterized Test for Property Changes**: The `testPropertyChanges` method uses JUnit 5's `@ParameterizedTest` and `@CsvSource` to test changes in different properties. Each row in the CSV source represents a property change, and the test ensures that after changing a property in `r1`, the instances are no longer equal, and then they become equal again after making the same change in `r2`.
+3. **Method Invocation**: The `Method` class from Java Reflection API is used to dynamically invoke the setter methods on `r1` and `r2`.
+
+This refactored code addresses all the identified code smells:
+- **Assertion Roulette**: Each assertion now includes a clear message.
+- **Eager Test**: The test is split into smaller, focused tests.
+- **Duplicate Assert**: Parameterized tests are used to avoid duplicate assertions.
+

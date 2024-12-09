@@ -1,0 +1,43 @@
+asserts result: 
+ ```java
+import org.apache.commons.math3.linear.RealVector;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class LinearProblemTest {
+
+    private static final double TOLERANCE = 1e-6;
+    private static final double EXPECTED_RMS = 0;
+    private static final double EXPECTED_SUM_FIRST_TWO_ELEMENTS = 3;
+    private static final int SUB_VECTOR_START_INDEX = 2;
+    private static final int SUB_VECTOR_LENGTH = 4;
+
+    @Test
+    public void testMoreEstimatedParametersUnsorted() {
+        double[][] matrix = {
+            {1, 1, 0, 0, 0, 0},
+            {0, 0, 1, 1, 1, 0},
+            {0, 0, 0, 0, 1, -1},
+            {0, 0, -1, 1, 0, 1},
+            {0, 0, 0, -1, 1, 0}
+        };
+        double[] target = {3, 12, -1, 7, 1};
+
+        LinearProblem problem = new LinearProblem(matrix, target);
+
+        Optimum optimum = optimizer.optimize(
+            problem.getBuilder().start(new double[]{2, 2, 2, 2, 2, 2}).build()
+        );
+
+        assertEquals(EXPECTED_RMS, optimum.getRMS(), TOLERANCE);
+        RealVector point = optimum.getPoint();
+
+        // Check first two elements obey the constraint: sum to 3
+        assertEquals(EXPECTED_SUM_FIRST_TWO_ELEMENTS, point.getEntry(0) + point.getEntry(1), TOLERANCE);
+
+        // Check the last 4 elements
+        assertEquals(TOLERANCE, point.getSubVector(SUB_VECTOR_START_INDEX, SUB_VECTOR_LENGTH), 3, 4, 5, 6);
+    }
+}
+```
+

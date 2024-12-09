@@ -1,0 +1,36 @@
+asserts result: 
+ ```java
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.junit.Test;
+
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
+import static org.junit.Assert.assertEquals;
+
+public class HelpFormatterTest {
+
+    @Test
+    public void testPrintOptionWithEmptyArgNameUsage() {
+        final Option option = new Option("f", true, null);
+        option.setArgName("");
+        option.setRequired(true);
+
+        final Options options = new Options();
+        options.addOption(option);
+
+        final StringWriter out = new StringWriter();
+        final HelpFormatter formatter = new HelpFormatter();
+        formatter.printUsage(new PrintWriter(out), 80, "app", options);
+
+        assertUsageOutput(out, "app -f");
+    }
+
+    private void assertUsageOutput(StringWriter out, String expectedUsage) {
+        assertEquals(expectedUsage + System.lineSeparator(), out.toString());
+    }
+}
+```
+

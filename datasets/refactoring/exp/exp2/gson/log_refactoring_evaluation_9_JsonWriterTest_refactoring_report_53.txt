@@ -1,0 +1,13 @@
+asserts result: 
+ Yes
+
+The refactored tests maintain the same functionality as the original test. The original single test has been broken down into three separate tests, each focusing on a specific aspect of the `testSetGetFormattingStyle` method:
+
+1. **`testSetGetFormattingStyle_DefaultFormattingStyle`**: This test checks that the default formatting style is `FormattingStyle.COMPACT`, which is consistent with the original test.
+
+2. **`testSetGetFormattingStyle_SetFormattingStyle`**: This test verifies that the newline character in the formatting style is correctly set to the provided line separator, which is also consistent with the original test.
+
+3. **`testSetGetFormattingStyle_WriteFormattedJson`**: This test ensures that the JSON array is written correctly with the specified formatting style, and it matches the expected output, which is consistent with the original test.
+
+Each of these tests covers a part of the original test, ensuring that all the functionality is preserved.
+

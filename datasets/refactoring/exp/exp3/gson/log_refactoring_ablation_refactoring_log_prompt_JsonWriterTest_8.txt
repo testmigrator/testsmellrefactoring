@@ -1,0 +1,53 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import com.google.gson.stream.JsonWriter;
+import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.io.StringWriter;
+
+class JsonWriterTest {
+
+    @Test
+    public void testBeginArrayNameThrowsException() {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+
+        IllegalStateException e = assertThrows(IllegalStateException.class, () -> {
+            jsonWriter.beginArray();
+            jsonWriter.name("hello");
+        });
+        assertEquals("Please begin an object before writing a name.", e.getMessage(), "Exception message should match expected message when calling name() after beginArray()");
+    }
+
+    @Test
+    public void testValueNameThrowsException() {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+
+        jsonWriter.beginArray();
+        jsonWriter.value(12);
+
+        IllegalStateException e = assertThrows(IllegalStateException.class, () -> jsonWriter.name("hello"));
+        assertEquals("Please begin an object before writing a name.", e.getMessage(), "Exception message should match expected message when calling name() after value()");
+    }
+
+    @Test
+    public void testEndArrayAndClose() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+
+        jsonWriter.beginArray();
+        jsonWriter.value(12);
+        jsonWriter.endArray();
+        jsonWriter.close();
+
+        assertEquals("[12]", stringWriter.toString(), "Output should match expected JSON array with a single value");
+    }
+}
+```
+

@@ -1,0 +1,30 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class LinearProblemTest {
+
+    private static final double TOLERANCE = 1e-6;
+    private static final double EXPECTED_RMS = 0;
+    private static final double EXPECTED_X = -1;
+    private static final double EXPECTED_Y = 1;
+
+    @Test
+    public void testInconsistentSizes1() {
+        LinearProblem problem = new LinearProblem(new double[][]{{1, 0}, {0, 1}}, new double[]{EXPECTED_X, EXPECTED_Y});
+        
+        Optimum optimum = optimizer.optimize(problem.getBuilder().build());
+        
+        assertEquals(EXPECTED_RMS, optimum.getRMS(), TOLERANCE);
+        assertEquals(EXPECTED_X, optimum.getPoint()[0], TOLERANCE);
+        assertEquals(EXPECTED_Y, optimum.getPoint()[1], TOLERANCE);
+
+        assertThrows(DimensionMismatchException.class, () -> {
+            optimizer.optimize(problem.getBuilder().weight(new DiagonalMatrix(new double[]{1})).build());
+        });
+    }
+}
+```
+

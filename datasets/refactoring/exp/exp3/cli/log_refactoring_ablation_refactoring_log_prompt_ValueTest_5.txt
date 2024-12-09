@@ -1,0 +1,18 @@
+asserts result: 
+ ```java
+import org.junit.Test;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNull;
+
+public class CommandLineParserTest {
+
+    private CommandLine cl = new CommandLine(); // Assuming CommandLine is a class that needs to be tested
+
+    @Test
+    public void testShortNoArg() {
+        assertTrue("Expected option 'a' to be present", cl.hasOption("a"));
+        assertNull("Expected option value for 'a' to be null", cl.getOptionValue("a"));
+    }
+}
+```
+

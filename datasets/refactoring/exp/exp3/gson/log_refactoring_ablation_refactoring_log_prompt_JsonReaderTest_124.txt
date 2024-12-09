@@ -1,0 +1,57 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.*;
+import static com.google.common.truth.Truth.assertThat;
+
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
+import com.google.gson.stream.Strictness;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
+
+import java.io.IOException;
+import java.io.StringReader;
+
+class JsonReaderTest {
+
+    @Test
+    public void testStringAsNumberWithNonDigitExponent() {
+        JsonReader reader = new JsonReader(new StringReader("[123eb]"));
+        reader.setStrictness(Strictness.LENIENT);
+
+        assertDoesNotThrow(new Executable() {
+            @Override
+            public void execute() throws Throwable {
+                reader.beginArray();
+            }
+        });
+
+        JsonToken peekedToken = reader.peek();
+        assertThat(peekedToken).isEqualTo(JsonToken.STRING);
+    }
+
+    @Test
+    public void testBeginArrayWithNonDigitExponent() {
+        JsonReader reader = new JsonReader(new StringReader("[123eb]"));
+        reader.setStrictness(Strictness.LENIENT);
+
+        assertDoesNotThrow(new Executable() {
+            @Override
+            public void execute() throws Throwable {
+                reader.beginArray();
+            }
+        });
+    }
+
+    @Test
+    public void testPeekAfterBeginArrayWithNonDigitExponent() {
+        JsonReader reader = new JsonReader(new StringReader("[123eb]"));
+        reader.setStrictness(Strictness.LENIENT);
+
+        reader.beginArray();
+        JsonToken peekedToken = reader.peek();
+        assertThat(peekedToken).isEqualTo(JsonToken.STRING);
+    }
+}
+```
+

@@ -1,0 +1,37 @@
+asserts result: 
+ ```java
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Options;
+import org.junit.jupiter.api.Test;
+
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class HelpFormatterTest {
+
+    private static final String EOL = System.lineSeparator();
+
+    @Test
+    public void testIndentedHeaderAndFooter() {
+        // related to CLI-207
+        final Options options = new Options();
+        final HelpFormatter formatter = new HelpFormatter();
+        final String header = "  Header1" + EOL + "  Header2";
+        final String footer = "  Footer1" + EOL + "  Footer2";
+        final StringWriter out = new StringWriter();
+        formatter.printHelp(new PrintWriter(out), 80, "foobar", header, options, 2, 2, footer, true);
+
+        final String expectedOutput = "usage: foobar" + EOL +
+                                      "  Header1" + EOL +
+                                      "  Header2" + EOL +
+                                      "" + EOL +
+                                      "  Footer1" + EOL +
+                                      "  Footer2" + EOL;
+
+        assertEquals(expectedOutput, out.toString());
+    }
+}
+```
+

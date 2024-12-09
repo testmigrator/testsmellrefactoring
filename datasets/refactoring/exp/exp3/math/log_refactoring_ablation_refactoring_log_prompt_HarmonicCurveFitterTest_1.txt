@@ -1,0 +1,56 @@
+asserts result: 
+ ```java
+import org.apache.commons.math4.legacy.fitting.HarmonicCurveFitter;
+import org.apache.commons.math4.legacy.fitting.HarmonicOscillator;
+import org.apache.commons.math4.legacy.fitting.SimpleCurveFitter;
+import org.apache.commons.math4.legacy.fitting.WeightedObservedPoints;
+import org.apache.commons.math4.legacy.util.FastMath;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIf;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+public class HarmonicOscillatorTest {
+
+    private static final double AMPLITUDE = 0.2;
+    private static final double ANGULAR_FREQUENCY = 3.4;
+    private static final double PHASE = 4.1;
+    private static final double TOLERANCE = 1.0e-13;
+    private static final double X_START = 0.0;
+    private static final double X_END = 1.3;
+    private static final double X_INCREMENT = 0.01;
+    private static final double FIT_X_START = -1.0;
+    private static final double FIT_X_END = 1.0;
+    private static final double FIT_X_INCREMENT = 0.01;
+
+    @Test
+    @EnabledIf("isFittingPossible")
+    public void testNoError() {
+        HarmonicOscillator originalFunction = new HarmonicOscillator(AMPLITUDE, ANGULAR_FREQUENCY, PHASE);
+
+        WeightedObservedPoints observedPoints = new WeightedObservedPoints();
+        for (double x = X_START; x < X_END; x += X_INCREMENT) {
+            observedPoints.add(1, x, originalFunction.value(x));
+        }
+
+        SimpleCurveFitter fitter = HarmonicCurveFitter.create();
+        double[] fittedParameters = fitter.fit(observedPoints.toList());
+
+        assertEquals(AMPLITUDE, fittedParameters[0], TOLERANCE, "Amplitude should match within tolerance");
+        assertEquals(ANGULAR_FREQUENCY, fittedParameters[1], TOLERANCE, "Angular frequency should match within tolerance");
+        assertEquals(FastMath.toDegrees(PHASE), FastMath.toDegrees(Angle.Rad.WITHIN_0_AND_2PI.applyAsDouble(fittedParameters[2])), FastMath.toDegrees(TOLERANCE), "Phase should match within tolerance");
+
+        HarmonicOscillator fittedFunction = new HarmonicOscillator(fittedParameters[0], fittedParameters[1], fittedParameters[2]);
+        for (double x = FIT_X_START; x < FIT_X_END; x += FIT_X_INCREMENT) {
+            assertTrue(FastMath.abs(originalFunction.value(x) - fittedFunction.value(x)) < TOLERANCE, "Values should match within tolerance for x = " + x);
+        }
+    }
+
+    private boolean isFittingPossible() {
+        // This method can be used to conditionally enable the test based on some criteria
+        return true; // For simplicity, always return true
+    }
+}
+```
+

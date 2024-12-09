@@ -1,0 +1,76 @@
+asserts result: 
+ ```java
+import org.apache.commons.math4.analysis.integration.IterativeLegendreGaussIntegrator;
+import org.apache.commons.math4.analysis.integration.BaseAbstractUnivariateIntegrator;
+import org.apache.commons.math4.analysis.polynomials.PolynomialFunction;
+import org.apache.commons.math4.util.JdkMath;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIf;
+
+import java.util.Random;
+
+@EnabledIf("isTestConditionMet")
+public class IntegrationTest {
+
+    private static final long SEED = 86343623467878363L;
+    private static final int MIN_N = 2;
+    private static final int MAX_N = 6;
+    private static final int DEGREE_MULTIPLIER = 2;
+    private static final int ITERATIONS = 10;
+    private static final int INTEGRATION_POINTS = 10000;
+    private static final double LOWER_BOUND = -5.0;
+    private static final double UPPER_BOUND = 15.0;
+    private static final double TOLERANCE_MULTIPLIER = 1.0e-12;
+
+    private Random random = new Random(SEED);
+
+    public boolean isTestConditionMet() {
+        // This method should return true if the test should be executed
+        // For example, you can check system properties or environment variables
+        return true;
+    }
+
+    @Test
+    public void testExactIntegration() {
+        for (int n = MIN_N; n < MAX_N; ++n) {
+            IterativeLegendreGaussIntegrator integrator =
+                new IterativeLegendreGaussIntegrator(n,
+                    BaseAbstractUnivariateIntegrator.DEFAULT_RELATIVE_ACCURACY,
+                    BaseAbstractUnivariateIntegrator.DEFAULT_ABSOLUTE_ACCURACY,
+                    BaseAbstractUnivariateIntegrator.DEFAULT_MIN_ITERATIONS_COUNT,
+                    64);
+
+            for (int degree = 0; degree <= DEGREE_MULTIPLIER * n - 1; ++degree) {
+                for (int i = 0; i < ITERATIONS; ++i) {
+                    double[] coeff = generateCoefficients(degree);
+                    PolynomialFunction p = new PolynomialFunction(coeff);
+                    double result = integrator.integrate(INTEGRATION_POINTS, p, LOWER_BOUND, UPPER_BOUND);
+                    double reference = exactIntegration(p, LOWER_BOUND, UPPER_BOUND);
+                    assertResultEquality(n, degree, i, reference, result);
+                }
+            }
+        }
+    }
+
+    private double[] generateCoefficients(int degree) {
+        double[] coeff = new double[degree + 1];
+        for (int k = 0; k < coeff.length; ++k) {
+            coeff[k] = 2 * random.nextDouble() - 1;
+        }
+        return coeff;
+    }
+
+    private void assertResultEquality(int n, int degree, int iteration, double reference, double result) {
+        double tolerance = TOLERANCE_MULTIPLIER * (1.0 + JdkMath.abs(reference));
+        org.junit.jupiter.api.Assertions.assertEquals(reference, result, tolerance,
+            () -> String.format("n: %d, degree: %d, iteration: %d", n, degree, iteration));
+    }
+
+    private double exactIntegration(PolynomialFunction p, double lowerBound, double upperBound) {
+        // Implementation of exact integration
+        // This is a placeholder for the actual implementation
+        return 0.0;
+    }
+}
+```
+

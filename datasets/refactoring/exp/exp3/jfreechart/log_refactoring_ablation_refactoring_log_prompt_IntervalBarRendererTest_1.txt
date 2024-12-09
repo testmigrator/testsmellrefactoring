@@ -1,0 +1,24 @@
+asserts result: 
+ ```java
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class IntervalBarRendererTest {
+
+    @Test
+    public void testHashCodeEquality() {
+        // Create two instances of IntervalBarRenderer
+        IntervalBarRenderer r1 = new IntervalBarRenderer();
+        IntervalBarRenderer r2 = new IntervalBarRenderer();
+
+        // Verify that the two instances are equal
+        assertEquals("r1 and r2 should be equal", r1, r2);
+
+        // Verify that the hash codes of the two instances are equal
+        int h1 = r1.hashCode();
+        int h2 = r2.hashCode();
+        assertEquals("Hash codes of r1 and r2 should be equal", h1, h2);
+    }
+}
+```
+

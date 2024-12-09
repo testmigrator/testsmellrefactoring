@@ -1,0 +1,66 @@
+asserts result: 
+ ```java
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.helper.Validate;
+import org.jsoup.nodes.Entities;
+import org.jsoup.parser.Parser;
+import org.junit.Test;
+import java.nio.charset.Charset;
+
+import static org.junit.Assert.assertEquals;
+
+public class DocumentTest {
+
+    private static final String charsetUtf8 = "UTF-8";
+
+    @Test
+    public void testMetaCharsetUpdateUtf8HtmlContent() {
+        final Document doc = createHtmlDocument("changeThis");
+        doc.updateMetaCharsetElement(true);
+        doc.charset(Charset.forName(charsetUtf8));
+
+        final String expectedHtml = "<html>\n" +
+                " <head>\n" +
+                "  <meta charset=\"" + charsetUtf8 + "\">\n" +
+                " </head>\n" +
+                " <body></body>\n" +
+                "</html>";
+
+        assertEquals("HTML content should match the expected UTF-8 charset", expectedHtml, doc.outerHtml());
+    }
+
+    @Test
+    public void testMetaCharsetUpdateUtf8DocumentCharset() {
+        final Document doc = createHtmlDocument("changeThis");
+        doc.updateMetaCharsetElement(true);
+        doc.charset(Charset.forName(charsetUtf8));
+
+        assertEquals("Document charset should be set to UTF-8", charsetUtf8, doc.charset().name());
+    }
+
+    @Test
+    public void testMetaCharsetUpdateUtf8MetaElementCharset() {
+        final Document doc = createHtmlDocument("changeThis");
+        doc.updateMetaCharsetElement(true);
+        doc.charset(Charset.forName(charsetUtf8));
+
+        Element selectedElement = doc.select("meta[charset]").first();
+        assertEquals("Meta element charset attribute should be set to UTF-8", charsetUtf8, selectedElement.attr("charset"));
+    }
+
+    @Test
+    public void testMetaCharsetUpdateUtf8OutputSettingsCharset() {
+        final Document doc = createHtmlDocument("changeThis");
+        doc.updateMetaCharsetElement(true);
+        doc.charset(Charset.forName(charsetUtf8));
+
+        assertEquals("Output settings charset should match the document charset", doc.charset(), doc.outputSettings().charset());
+    }
+
+    private Document createHtmlDocument(String title) {
+        return Parser.parse("<html><head><title>" + title + "</title></head><body></body></html>", "");
+    }
+}
+```
+

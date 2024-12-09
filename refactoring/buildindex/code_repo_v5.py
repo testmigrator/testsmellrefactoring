@@ -3,7 +3,6 @@ from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain.chains.history_aware_retriever import create_history_aware_retriever
 from langchain.chains.retrieval import create_retrieval_chain
 from langchain_community.document_loaders import DirectoryLoader, TextLoader
-from langchain_community.llms.tongyi import Tongyi
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_text_splitters import RecursiveCharacterTextSplitter, Language
 from langchain_chroma import Chroma
@@ -23,7 +22,6 @@ RULE_DOC_PATH = REPO_PATH + "/docs/rules"
 CHUNK_SIZE = 2000
 CHUNK_OVERLAP = 200
 # EMBEDDINGS_MODEL = HuggingFaceEmbeddings()
-LLM_MODEL = Tongyi(model_name="llama3-70b-instruct", temperature=0)
 
 RETRIEVER_SEARCH_TYPE = "mmr"
 RETRIEVER_K = 8
@@ -35,7 +33,7 @@ db_cache = None
 llm_model = ChatOpenAI(
     api_key=os.getenv("DASHSCOPE_API_KEY"),
     base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
-    model="llama3-70b-instruct"
+    model="llama3.1-70b-instruct"
     )
 
 system_role = """

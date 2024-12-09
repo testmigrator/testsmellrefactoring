@@ -1,0 +1,34 @@
+asserts result: 
+ ```java
+import org.apache.commons.math4.legacy.analysis.UnivariateFunction;
+import org.apache.commons.math4.legacy.analysis.function.Sin;
+import org.apache.commons.math4.legacy.analysis.integration.TrapezoidIntegrator;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+class TrapezoidIntegratorTest {
+
+    @Test
+    public void testBadInterval() {
+        UnivariateFunction f = new Sin();
+        assertThrows(NumberIsTooLargeException.class, () -> 
+            new TrapezoidIntegrator().integrate(1000, f, 1, -1)
+        );
+    }
+
+    @Test
+    public void testBadIterationLimitsTooSmall() {
+        assertThrows(NumberIsTooSmallException.class, () -> 
+            new TrapezoidIntegrator(5, 4)
+        );
+    }
+
+    @Test
+    public void testBadIterationLimitsTooLarge() {
+        assertThrows(NumberIsTooLargeException.class, () -> 
+            new TrapezoidIntegrator(10, 99)
+        );
+    }
+}
+```
+

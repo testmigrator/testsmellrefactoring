@@ -1,0 +1,153 @@
+Input Parameters:
+Test Code:
+ @Test
+    public void testHeaderStartingWithLineSeparator1() {
+        // related to Bugzilla #21215
+        final Options options = new Options();
+        final String header = EOL + "Header";
+        final String footer = "Footer";
+        final Builder builder = HelpFormatter.builder();
+        StringWriter out = new StringWriter();
+        builder.setPrintWriter(new PrintWriter(out)).get().printHelp(new PrintWriter(out), 80, "foobar", header, options, 2, 2, footer, true);
+        //@formatter:off
+        assertEquals(
+                "usage: foobar" + EOL +
+                "" + EOL +
+                "Header" + EOL +
+                "" + EOL +
+                "Footer" + EOL,
+                out.toString());
+        //@formatter:on
+        out = new StringWriter();
+        builder.setPrintWriter(new PrintWriter(out)).get().printHelp("foobar", header, options, footer);
+        //@formatter:off
+        assertEquals(
+                "usage: foobar" + EOL +
+                EOL +
+                "Header" + EOL +
+                EOL +
+                "Footer" + EOL,
+                out.toString());
+        //@formatter:on
+        out = new StringWriter();
+        builder.setPrintWriter(new PrintWriter(out)).get().printHelp(80, "foobar", header, options, footer);
+        //@formatter:off
+        assertEquals(
+                "usage: foobar" + EOL +
+                EOL +
+                "Header" + EOL +
+                EOL +
+                "Footer" + EOL,
+                out.toString());
+        //@formatter:on
+        out = new StringWriter();
+        builder.setPrintWriter(new PrintWriter(out)).get().printHelp("foobar", header, options, footer, false);
+        //@formatter:off
+        assertEquals(
+                "usage: foobar" + EOL +
+                EOL +
+                "Header" + EOL +
+                EOL +
+                "Footer" + EOL,
+                out.toString());
+        //@formatter:on
+        out = new StringWriter();
+        builder.setPrintWriter(new PrintWriter(out)).get().printHelp("foobar", header, options, footer, true);
+        //@formatter:off
+        assertEquals(
+                "usage: foobar" + EOL +
+                EOL +
+                "Header" + EOL +
+                EOL +
+                "Footer" + EOL,
+                out.toString());
+        //@formatter:on
+        out = new StringWriter();
+        builder.setPrintWriter(new PrintWriter(out)).get().printHelp("foobar", options, false);
+        //@formatter:off
+        assertEquals(
+                "usage: foobar" + EOL +
+                "" + EOL,
+                out.toString());
+        //@formatter:on
+    }
+Context: /org/apache/commons/cli/HelpFormatter
+Smell List: ['Assertion_Roulette', 'Sensitive_Equality', 'Eager_Test', 'Duplicate_Assert']
+Smell Description List: ['Test Smell Type：Assertion Roulette\n\nFeature:\nA test method contains more than one assertion statement without an explanation/message (parameter in the assertion method).\n', 'Test Smell Type：Sensitive Equality\n\nFeature:\nA test method invokes the toString() method of an object.\n', 'Test Smell Type：Eager Test\n\nFeature:\nA test method contains multiple calls to multiple production methods.\n', 'Test Smell Type：Duplicate Assert\n\nFeature:\nA test method that contains more than one assertion statement with the same parameters.\n']
+Refactoring DSL: ['RefactorRule:\n  SmellType: Assertion Roulette\n  Description: Add descriptive messages to assert statements to improve readability and maintainability.\n  Steps:\n    - Step:\n        Description: "Add descriptive message to each assert statement(except assertThat, assertThrows)."\n        Action: AddMessageToAssert\n        Parameters:\n          MessagePattern: "{assertionMessage}"\n  Example:\n    Before: |\n      @Test\n      public void T() {\n        stmt\n        assert_1\n        ...\n        assert_n\n        stmt\'\n      }\n    After: |\n      @Test\n      public void T() {\n        stmt\n        assert_1(..., "Descriptive message for assert statement")\n        ...\n        assert_n(..., "Descriptive message for assert statement")\n        stmt\'\n      }\n    Variables:\n      assertionMessage: "Descriptive message for assert statement"\n', 'RefactorRule:\n  SmellType: Sensitive Equality\n  Description: "Avoid using the toString() method for comparing objects in assertions."\n  Steps:\n    - Step:\n        Description: "Extract the value returned by toString() into a separate variable for comparison. Ensure toString() does not directly appear in assertions."\n        Action: ReplaceMethodCall\n        Parameters:\n          TargetPattern: |\n            assertEquals({object1}.toString(), {expectedString});\n          ReplacementPattern: |\n            String actualValue = {object1}.toString();\n            assertEquals({expectedString}, actualValue);\n  Example:\n    Before: |\n      @Test\n      public void T() {\n        Object object1 = new Object();\n        assertEquals(object1.toString(), "expectedString");\n      }\n    After: |\n      @Test\n      public void T() {\n        Object object1 = new Object();\n        String actualValue = object1.toString();\n        assertEquals("expectedString", actualValue);\n      }\n', 'RefactorRule:\n  SmellType: Eager Test\n  Description: "Refactor test methods to group related assertions logically and extract reusable setup logic into private methods."\n  Steps:\n    - Step1:\n        Description: "Extract shared setup logic into a reusable, private method and ensure it is used across all relevant tests."\n        Action: ExtractSetupMethod\n        Parameters:\n          Condition: "If multiple tests share the same setup logic."\n          MethodNamePattern: setupTest{OriginalMethodName}\n    - Step2:\n        Description: "Group related assertions into cohesive sub-tests while retaining necessary setup logic."\n        Action: GroupAssertions\n        Parameters:\n          GroupBy: LogicalConcern\n    - Step3:\n        Description: "Create new test methods for each cohesive group of assertions and ensure readability."\n        Action: CreateTestMethods\n        Parameters:\n          IncludeSetup: True\n          NamePattern: test{OriginalMethodName}_{Concern}\n  Example:\n    Before: |\n      @Test\n      public void testExample() {\n          setup();\n          assertEquals(1, methodA());\n          assertTrue(methodB());\n      }\n    After: |\n      private void setupTestExample() {\n          setup();\n      }\n\n      @Test\n      public void testExample_MethodA() {\n          setupTestExample();\n          assertEquals(1, methodA());\n      }\n\n      @Test\n      public void testExample_MethodB() {\n          setupTestExample();\n          assertTrue(methodB());\n      }\n  Variables:\n    OriginalMethodName: The name of the original test method.\n    LogicalConcern: The logical aspect tested (e.g., a specific API, validation, or behavior).\n', 'RefactorRule:\n  SmellType: Duplicate Assert\n  Description: "If the assertion logic is the same but tested with different inputs, convert the test to a parameterized test using JUnit 5\'s @CsvSource annotation. Otherwise, split the test into multiple separate methods, each containing a single assertion."\n  Steps:\n    - Step:\n        Description: "Check if there are multiple assertions testing the same condition"\n        Action: IdentifySameAssertions\n        Parameters:\n          SourcePattern: |\n\t          assert(expected, ...)\n\t          assert(expected, ...)\n    - Step:\n        Description: "Create new test methods if necessary to separate assertions for different inputs"\n        Action: SplitMethod\n        Parameters:\n          TargetType: Method\n\n    - Step:\n        Description: "Convert the test method to a parameterized test"\n        Action: ConvertToParameterizedTest\n        Parameters:\n          TargetType: Method\n    - Step:\n        Description: "Add @CsvSource annotation to declare parameterized values."\n        Action: AddAnnotation\n        Parameters:\n          TargetType: Method\n          Annotation: |\n            @CsvSource({\n              "{paramValues}"\n            })\n    - Step:\n        Description: "Refactor the test method to use parameterized values."\n        Action: RefactorMethod\n        Parameters:\n          SourcePattern: |\n            public void T() {\n              {originalStatements}\n            }\n          ReplacementPattern: |\n            public void T({parameterNames}) {\n              {refactoredStatements}\n            }\n  Example:\n    Before: |\n      @Test\n      public void T() {\n        assertEquals(expectedA, methodUnderTest(a));\n        assertEquals(expectedB, methodUnderTest(b));\n      }\n\n    After: |\n      @ParameterizedTest\n      @CsvSource({\n        "a, expectedA",\n        "b, expectedB"\n      })\n      public void T(String input, String expected) {\n        assertEquals(expected, methodUnderTest(input));\n      }\n']
+Checkpoints: ['[ ] All assert statements have been added with clear explanatory messages.\n', '[ ] All instances of the ‘Sensitive Equality’ code smell have been refactored by directly comparing objects instead of using the toString() method for comparisons in tests, to enhance stability and avoid future failures due to changes in the toString() method’s implementation.\n', '[ ] All eager tests have been split into separate tests, each focusing on verifying a single API.\n', '[ ] All duplicate assertions have been refactored using JUnit 5 Parameterized Tests, where the lists of parameterizable values are declared in a specific annotation, and the test method is executed independently m times.\n']
+
+Refactored Code: 
+ 
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Options;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class HelpFormatterTest {
+
+    private static final String EOL = System.lineSeparator();
+    private static final String HEADER = EOL + "Header";
+    private static final String FOOTER = "Footer";
+    private static final String USAGE = "usage: foobar" + EOL + EOL;
+
+    private StringWriter setupPrintWriter() {
+        StringWriter out = new StringWriter();
+        HelpFormatter.builder().setPrintWriter(new PrintWriter(out)).get();
+        return out;
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "printHelp(80, foobar, HEADER, options, 2, 2, FOOTER, true), HeaderFooterTrue",
+        "printHelp(foobar, HEADER, options, 2, 2, FOOTER, true), HeaderFooterTrue",
+        "printHelp(80, foobar, HEADER, options, FOOTER, true), HeaderFooterTrue",
+        "printHelp(foobar, HEADER, options, FOOTER, false), HeaderFooterFalse",
+        "printHelp(foobar, HEADER, options, FOOTER, true), HeaderFooterTrue",
+        "printHelp(foobar, options, false), NoHeaderFooter"
+    })
+    public void testHeaderStartingWithLineSeparator(String methodCall, String expectedResult) {
+        StringWriter out = setupPrintWriter();
+        switch (methodCall) {
+            case "printHelp(80, foobar, HEADER, options, 2, 2, FOOTER, true)":
+                HelpFormatter.builder().setPrintWriter(new PrintWriter(out)).get().printHelp(80, "foobar", HEADER, new Options(), 2, 2, FOOTER, true);
+                break;
+            case "printHelp(foobar, HEADER, options, 2, 2, FOOTER, true)":
+                HelpFormatter.builder().setPrintWriter(new PrintWriter(out)).get().printHelp("foobar", HEADER, new Options(), 2, 2, FOOTER, true);
+                break;
+            case "printHelp(80, foobar, HEADER, options, FOOTER, true)":
+                HelpFormatter.builder().setPrintWriter(new PrintWriter(out)).get().printHelp(80, "foobar", HEADER, new Options(), FOOTER, true);
+                break;
+            case "printHelp(foobar, HEADER, options, FOOTER, false)":
+                HelpFormatter.builder().setPrintWriter(new PrintWriter(out)).get().printHelp("foobar", HEADER, new Options(), FOOTER, false);
+                break;
+            case "printHelp(foobar, HEADER, options, FOOTER, true)":
+                HelpFormatter.builder().setPrintWriter(new PrintWriter(out)).get().printHelp("foobar", HEADER, new Options(), FOOTER, true);
+                break;
+            case "printHelp(foobar, options, false)":
+                HelpFormatter.builder().setPrintWriter(new PrintWriter(out)).get().printHelp("foobar", new Options(), false);
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown method call: " + methodCall);
+        }
+
+        String expectedOutput = getExpectedOutput(expectedResult);
+        assertEquals(expectedOutput, out.toString(), "Output does not match expected result for " + methodCall);
+    }
+
+    private String getExpectedOutput(String expectedResult) {
+        switch (expectedResult) {
+            case "HeaderFooterTrue":
+                return USAGE + "Header" + EOL + EOL + "Footer" + EOL;
+            case "HeaderFooterFalse":
+                return USAGE + "Header" + EOL + EOL + "Footer" + EOL;
+            case "NoHeaderFooter":
+                return USAGE;
+            default:
+                throw new IllegalArgumentException("Unknown expected result: " + expectedResult);
+        }
+    }
+}
+
+

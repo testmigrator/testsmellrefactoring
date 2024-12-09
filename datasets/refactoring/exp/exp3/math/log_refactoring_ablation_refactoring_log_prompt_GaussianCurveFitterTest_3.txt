@@ -1,0 +1,26 @@
+asserts result: 
+ ```java
+@Test
+public void testWithMaxIterations1() {
+    // Define meaningful constants for the magic numbers
+    final int maxIterations = 20;
+    final double[] initialParameters = { 3.5e6, 4.2, 0.1 };
+    final double expectedAmplitude = 3496978.1837704973;
+    final double expectedMean = 4.054933085999146;
+    final double expectedSigma = 0.015039355620304326;
+    final double toleranceAmplitude = 1e-2;
+    final double toleranceMean = 1e-4;
+    final double toleranceSigma = 1e-4;
+
+    SimpleCurveFitter fitter = GaussianCurveFitter.create();
+    double[] parameters = fitter
+            .withMaxIterations(maxIterations)
+            .withStartPoint(initialParameters)
+            .fit(createDataset(DATASET1).toList());
+
+    Assert.assertEquals(expectedAmplitude, parameters[0], toleranceAmplitude);
+    Assert.assertEquals(expectedMean, parameters[1], toleranceMean);
+    Assert.assertEquals(expectedSigma, parameters[2], toleranceSigma);
+}
+```
+

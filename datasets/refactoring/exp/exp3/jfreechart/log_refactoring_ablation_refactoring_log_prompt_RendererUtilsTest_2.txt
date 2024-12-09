@@ -1,0 +1,114 @@
+asserts result: 
+ ```java
+import org.jfree.data.xy.DefaultXYDataset;
+import org.jfree.chart.renderer.RendererUtils;
+import static org.junit.Assert.assertEquals;
+import org.junit.Test;
+
+public class RendererUtilsTest {
+
+    private static final double EPSILON = 0.0001;
+
+    @Test
+    public void testFindLiveItemsLowerBound_SeriesWithNoItems() {
+        DefaultXYDataset<String> dataset = createAscendingDataset();
+        dataset.addSeries("S1", new double[][] {{}, {}});
+        int result = RendererUtils.findLiveItemsLowerBound(dataset, 0, 10.0, 11.1);
+        assertEquals("For a series with no items, the lower bound should be 0", 0, result);
+    }
+
+    @Test
+    public void testFindLiveItemsLowerBound_SeriesWithOneItem() {
+        DefaultXYDataset<String> dataset = createAscendingDataset();
+        dataset.addSeries("S2", new double[][] {{1.0}, {9.9}});
+        int result1 = RendererUtils.findLiveItemsLowerBound(dataset, 1, 0.0, 1.1);
+        assertEquals("For a series with one item, the lower bound should be 0", 0, result1);
+
+        int result2 = RendererUtils.findLiveItemsLowerBound(dataset, 1, 2.0, 2.2);
+        assertEquals("For a series with one item, the lower bound should be 0", 0, result2);
+    }
+
+    @Test
+    public void testFindLiveItemsLowerBound_SeriesWithTwoItems() {
+        DefaultXYDataset<String> dataset = createAscendingDataset();
+        dataset.addSeries("S3", new double[][] {{1.0, 2.0}, {9.9, 9.9}});
+        int result1 = RendererUtils.findLiveItemsLowerBound(dataset, 2, 0.0, 1.1);
+        assertEquals("For a series with two items, the lower bound should be 0", 0, result1);
+
+        int result2 = RendererUtils.findLiveItemsLowerBound(dataset, 2, 1.0, 2.2);
+        assertEquals("For a series with two items, the lower bound should be 0", 0, result2);
+
+        int result3 = RendererUtils.findLiveItemsLowerBound(dataset, 2, 2.0, 3.3);
+        assertEquals("For a series with two items, the lower bound should be 1", 1, result3);
+
+        int result4 = RendererUtils.findLiveItemsLowerBound(dataset, 2, 3.0, 4.4);
+        assertEquals("For a series with two items, the lower bound should be 1", 1, result4);
+    }
+
+    @Test
+    public void testFindLiveItemsLowerBound_SeriesWithThreeItems() {
+        DefaultXYDataset<String> dataset = createAscendingDataset();
+        dataset.addSeries("S4", new double[][] {{1.0, 2.0, 3.0}, {9.9, 9.9, 9.9}});
+        int result1 = RendererUtils.findLiveItemsLowerBound(dataset, 3, 0.0, 1.1);
+        assertEquals("For a series with three items, the lower bound should be 0", 0, result1);
+
+        int result2 = RendererUtils.findLiveItemsLowerBound(dataset, 3, 1.0, 2.2);
+        assertEquals("For a series with three items, the lower bound should be 0", 0, result2);
+
+        int result3 = RendererUtils.findLiveItemsLowerBound(dataset, 3, 2.0, 3.3);
+        assertEquals("For a series with three items, the lower bound should be 1", 1, result3);
+
+        int result4 = RendererUtils.findLiveItemsLowerBound(dataset, 3, 3.0, 4.4);
+        assertEquals("For a series with three items, the lower bound should be 2", 2, result4);
+    }
+
+    @Test
+    public void testFindLiveItemsLowerBound_SeriesWithFourItems() {
+        DefaultXYDataset<String> dataset = createAscendingDataset();
+        dataset.addSeries("S5", new double[][] {{1.0, 2.0, 3.0, 4.0}, {9.9, 9.9, 9.9, 9.9}});
+        int result1 = RendererUtils.findLiveItemsLowerBound(dataset, 4, 0.0, 1.1);
+        assertEquals("For a series with four items, the lower bound should be 0", 0, result1);
+
+        int result2 = RendererUtils.findLiveItemsLowerBound(dataset, 4, 1.0, 2.2);
+        assertEquals("For a series with four items, the lower bound should be 0", 0, result2);
+
+        int result3 = RendererUtils.findLiveItemsLowerBound(dataset, 4, 2.0, 3.3);
+        assertEquals("For a series with four items, the lower bound should be 1", 1, result3);
+
+        int result4 = RendererUtils.findLiveItemsLowerBound(dataset, 4, 3.0, 4.4);
+        assertEquals("For a series with four items, the lower bound should be 2", 2, result4);
+
+        int result5 = RendererUtils.findLiveItemsLowerBound(dataset, 4, 4.0, 5.5);
+        assertEquals("For a series with four items, the lower bound should be 3", 3, result5);
+    }
+
+    @Test
+    public void testFindLiveItemsLowerBound_SeriesWithRepeatingItems() {
+        DefaultXYDataset<String> dataset = createAscendingDataset();
+        dataset.addSeries("S6", new double[][] {{1.0, 2.0, 2.0, 2.0, 3.0}, {9.9, 9.9, 9.9, 9.9, 9.9}});
+        int result1 = RendererUtils.findLiveItemsLowerBound(dataset, 5, 0.0, 4.0);
+        assertEquals("For a series with repeating items, the lower bound should be 0", 0, result1);
+
+        int result2 = RendererUtils.findLiveItemsLowerBound(dataset, 5, 1.0, 4.0);
+        assertEquals("For a series with repeating items, the lower bound should be 0", 0, result2);
+
+        int result3 = RendererUtils.findLiveItemsLowerBound(dataset, 5, 2.0, 4.0);
+        assertEquals("For a series with repeating items, the lower bound should be 1", 1, result3);
+
+        int result4 = RendererUtils.findLiveItemsLowerBound(dataset, 5, 3.0, 4.0);
+        assertEquals("For a series with repeating items, the lower bound should be 4", 4, result4);
+    }
+
+    private DefaultXYDataset<String> createAscendingDataset() {
+        return new DefaultXYDataset<String>() {
+            @Override
+            public DomainOrder getDomainOrder() {
+                // we're doing this for testing only, and make sure that we
+                // only add data in ascending order by x-value
+                return DomainOrder.ASCENDING;
+            }
+        };
+    }
+}
+```
+

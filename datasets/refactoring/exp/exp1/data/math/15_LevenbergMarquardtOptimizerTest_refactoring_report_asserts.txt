@@ -1,0 +1,6 @@
+total tests: 3
+total asserts: 4
+Assert.assertTrue("Number of evaluations should be greater than 1", numEval > 1);
+Assert.assertTrue("Cheat optimization should have fewer evaluations: n=" + numEval + " nc=" + cheatNumEval, cheatNumEval < numEval);
+Assert.assertEquals("Expected number of iterations", expectedIterations, optimum.getIterations());
+Assert.assertEquals("Expected number of evaluations", expectedEvaluations, optimum.getEvaluations());

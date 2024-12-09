@@ -1,0 +1,33 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.select.Elements;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class ElementTest {
+
+    private static final String HTML = "<meta http-equiv=content-type value=utf8 id=1> <meta name=foo content=bar id=2> <div http-equiv=content-type value=utf8 id=3>";
+    private static final int EXPECTED_META_SIZE = 1;
+    private static final String EXPECTED_META_ID = "1";
+
+    @Test
+    public void testMetaElementsWithHttpEquivContentAttribute() {
+        Document doc = Jsoup.parse(HTML);
+        Elements metaElements = doc.select("meta[http-equiv=content-type]");
+        
+        assertEquals("Number of meta elements with http-equiv=content-type attribute should be 1", EXPECTED_META_SIZE, metaElements.size());
+        assertEquals("First meta element with http-equiv=content-type attribute should have id 1", EXPECTED_META_ID, metaElements.first().id());
+    }
+
+    @Test
+    public void testMetaElementsWithCharsetAttribute() {
+        Document doc = Jsoup.parse(HTML);
+        Elements metaElements = doc.select("meta[charset]");
+        
+        assertEquals("Number of meta elements with charset attribute should be 0", 0, metaElements.size());
+    }
+}
+```
+

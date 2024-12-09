@@ -1,0 +1,37 @@
+asserts result: 
+ ```java
+import org.jsoup.nodes.Entities;
+import org.jsoup.nodes.OutputSettings;
+import static org.junit.Assert.assertEquals;
+import org.junit.Test;
+
+public class EntitiesTest {
+
+    @Test
+    public void testUnescapeMultiChars() {
+        String text = "&NestedGreaterGreater; &nGg; &nGt; &nGtv; &Gt; &gg;";
+        String expectedUnescaped = "≫ ⋙̸ ≫⃒ ≫̸ ≫ ≫";
+        String actualUnescaped = Entities.unescape(text);
+        assertEquals("Unescaped string does not match expected value", expectedUnescaped, actualUnescaped);
+    }
+
+    @Test
+    public void testEscapeMultiChars() {
+        String unescapedText = "≫ ⋙̸ ≫⃒ ≫̸ ≫ ≫";
+        String expectedEscaped = "&Gt; &Gg;&#x338; &Gt;&#x20d2; &Gt;&#x338; &Gt; &Gt;";
+        OutputSettings settings = new OutputSettings().charset("ascii").escapeMode(Entities.EscapeMode.extended);
+        String actualEscaped = Entities.escape(unescapedText, settings);
+        assertEquals("Escaped string does not match expected value", expectedEscaped, actualEscaped);
+    }
+
+    @Test
+    public void testRoundTripUnescapeAndEscape() {
+        String originalText = "≫ ⋙̸ ≫⃒ ≫̸ ≫ ≫";
+        OutputSettings settings = new OutputSettings().charset("ascii").escapeMode(Entities.EscapeMode.extended);
+        String escapedText = Entities.escape(originalText, settings);
+        String unescapedText = Entities.unescape(escapedText);
+        assertEquals("Round trip unescape and escape does not return the original text", originalText, unescapedText);
+    }
+}
+```
+

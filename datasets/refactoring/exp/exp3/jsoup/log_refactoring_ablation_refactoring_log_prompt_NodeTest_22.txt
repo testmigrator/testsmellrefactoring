@@ -1,0 +1,49 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.*;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.junit.jupiter.api.Test;
+
+class NodeTest {
+
+    @Test
+    public void testClonePreservesClassAndText() {
+        Document doc = Jsoup.parse("<div class=foo>Text</div>");
+        Element el = doc.select("div").first();
+        assertTrue(el.hasClass("foo"), "Original element should have class 'foo'");
+
+        Element elClone = doc.clone().select("div").first();
+        assertTrue(elClone.hasClass("foo"), "Cloned element should have class 'foo'");
+        assertEquals("Text", elClone.text(), "Cloned element should have text 'Text'");
+    }
+
+    @Test
+    public void testRemoveClassAndTextChange() {
+        Document doc = Jsoup.parse("<div class=foo>Text</div>");
+        Element el = doc.select("div").first();
+        assertTrue(el.hasClass("foo"), "Original element should have class 'foo'");
+
+        el.removeClass("foo");
+        assertFalse(el.hasClass("foo"), "Original element should not have class 'foo' after removal");
+
+        el.text("None");
+        assertEquals("None", el.text(), "Original element text should be 'None' after change");
+    }
+
+    @Test
+    public void testCloneIsIndependentOfOriginal() {
+        Document doc = Jsoup.parse("<div class=foo>Text</div>");
+        Element el = doc.select("div").first();
+        Element elClone = doc.clone().select("div").first();
+
+        el.removeClass("foo");
+        el.text("None");
+
+        assertTrue(elClone.hasClass("foo"), "Cloned element should still have class 'foo' after original modification");
+        assertEquals("Text", elClone.text(), "Cloned element should still have text 'Text' after original modification");
+    }
+}
+```
+

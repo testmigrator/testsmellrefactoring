@@ -1,0 +1,13 @@
+asserts result: 
+ ```java
+@Test
+public void testMetaCharsetUpdateEnabledAfterCharsetChange() {
+    final Document doc = createHtmlDocument("dontTouch");
+    doc.charset(Charset.forName("UTF-8"));
+
+    Element selectedElement = doc.select("meta[charset]").first();
+    assertEquals("UTF-8", selectedElement.attr("charset"), "The charset attribute of the meta tag should be updated to UTF-8 after changing the document charset.");
+    assertTrue(doc.select("meta[name=charset]").isEmpty(), "There should be no meta tag with name='charset' after changing the document charset.");
+}
+```
+

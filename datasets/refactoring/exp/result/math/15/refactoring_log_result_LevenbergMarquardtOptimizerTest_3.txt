@@ -1,0 +1,121 @@
+Input Parameters:
+Test Code:
+ @Test
+    public void testParameterValidator() {
+        // Setup.
+        final double xCenter = 123.456;
+        final double yCenter = 654.321;
+        final double xSigma = 10;
+        final double ySigma = 15;
+        final double radius = 111.111;
+        final RandomCirclePointGenerator factory
+            = new RandomCirclePointGenerator(xCenter, yCenter, radius,
+                                             xSigma, ySigma);
+        final CircleProblem circle = new CircleProblem(xSigma, ySigma);
+
+        final int numPoints = 10;
+        factory.samples(numPoints).forEach(circle::addPoint);
+
+        // First guess for the center's coordinates and radius.
+        final double[] init = { 118, 659, 115 };
+
+        final Optimum optimum = optimizer.optimize(
+                builder(circle).maxIterations(50).start(init).build());
+
+        final int numEval = optimum.getEvaluations();
+        Assert.assertTrue(numEval > 1);
+
+        // Build a new problem with a validator that amounts to cheating.
+
+        // Note we cannot return a fixed point.
+        // The optimiser relies on computing a predicted reduction in the cost
+        // function (preRed) and an actual reduction (actRed). The ratio between them must be
+        // non-zero to indicate the step reduced the cost function. If a threshold is not
+        // achieved then the step is rejected and the optimiser can cycle through many iterations
+        // not moving anywhere until alternative thresholds reduce to a level that terminate
+        // the cycle.
+        // Here we take the current point and move it towards an acceptable answer
+        // given the problem (the previous optimum). This should speed up the optimiser.
+        // This can still fail to reduce the iterations when the adjusted step moves
+        // to a sub-optimal position in the cost function.
+        final ParameterValidator cheatValidator
+            = new ParameterValidator() {
+                    @Override
+                    public RealVector validate(RealVector params) {
+                        // Cheat: Move towards the optimum found previously.
+                        final RealVector direction = optimum.getPoint().subtract(params);
+                        return params.add(direction.mapMultiply(0.75));
+                    }
+                };
+
+        final Optimum cheatOptimum
+            = optimizer.optimize(builder(circle).maxIterations(50).start(init).parameterValidator(cheatValidator).build());
+        final int cheatNumEval = cheatOptimum.getEvaluations();
+        Assert.assertTrue("n=" + numEval + " nc=" + cheatNumEval, cheatNumEval < numEval);
+        // System.out.println("n=" + numEval + " nc=" + cheatNumEval);
+    }
+Context: /org/apache/commons/math4/legacy/fitting/leastsquares/LevenbergMarquardtOptimizer
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+Smell Description List: ['Test Smell Type：Assertion Roulette\n\nFeature:\nA test method contains more than one assertion statement without an explanation/message (parameter in the assertion method).\n', 'Test Smell Type：Eager Test\n\nFeature:\nA test method contains multiple calls to multiple production methods.\n']
+Refactoring DSL: ['RefactorRule:\n  SmellType: Assertion Roulette\n  Description: Add descriptive messages to assert statements to improve readability and maintainability.\n  Steps:\n    - Step:\n        Description: "Add descriptive message to each assert statement(except assertThat, assertThrows)."\n        Action: AddMessageToAssert\n        Parameters:\n          MessagePattern: "{assertionMessage}"\n  Example:\n    Before: |\n      @Test\n      public void T() {\n        stmt\n        assert_1\n        ...\n        assert_n\n        stmt\'\n      }\n    After: |\n      @Test\n      public void T() {\n        stmt\n        assert_1(..., "Descriptive message for assert statement")\n        ...\n        assert_n(..., "Descriptive message for assert statement")\n        stmt\'\n      }\n    Variables:\n      assertionMessage: "Descriptive message for assert statement"\n', 'RefactorRule:\n  SmellType: Eager Test\n  Description: "Refactor test methods to group related assertions logically and extract reusable setup logic into private methods."\n  Steps:\n    - Step1:\n        Description: "Extract shared setup logic into a reusable, private method and ensure it is used across all relevant tests."\n        Action: ExtractSetupMethod\n        Parameters:\n          Condition: "If multiple tests share the same setup logic."\n          MethodNamePattern: setupTest{OriginalMethodName}\n    - Step2:\n        Description: "Group related assertions into cohesive sub-tests while retaining necessary setup logic."\n        Action: GroupAssertions\n        Parameters:\n          GroupBy: LogicalConcern\n    - Step3:\n        Description: "Create new test methods for each cohesive group of assertions and ensure readability."\n        Action: CreateTestMethods\n        Parameters:\n          IncludeSetup: True\n          NamePattern: test{OriginalMethodName}_{Concern}\n  Example:\n    Before: |\n      @Test\n      public void testExample() {\n          setup();\n          assertEquals(1, methodA());\n          assertTrue(methodB());\n      }\n    After: |\n      private void setupTestExample() {\n          setup();\n      }\n\n      @Test\n      public void testExample_MethodA() {\n          setupTestExample();\n          assertEquals(1, methodA());\n      }\n\n      @Test\n      public void testExample_MethodB() {\n          setupTestExample();\n          assertTrue(methodB());\n      }\n  Variables:\n    OriginalMethodName: The name of the original test method.\n    LogicalConcern: The logical aspect tested (e.g., a specific API, validation, or behavior).\n']
+Checkpoints: ['[ ] All assert statements have been added with clear explanatory messages.\n', '[ ] All eager tests have been split into separate tests, each focusing on verifying a single API.\n']
+
+Refactored Code: 
+ 
+private void setupTestParameterValidator() {
+    final double xCenter = 123.456;
+    final double yCenter = 654.321;
+    final double xSigma = 10;
+    final double ySigma = 15;
+    final double radius = 111.111;
+    final RandomCirclePointGenerator factory
+        = new RandomCirclePointGenerator(xCenter, yCenter, radius, xSigma, ySigma);
+    final CircleProblem circle = new CircleProblem(xSigma, ySigma);
+
+    final int numPoints = 10;
+    factory.samples(numPoints).forEach(circle::addPoint);
+
+    // First guess for the center's coordinates and radius.
+    final double[] init = { 118, 659, 115 };
+
+    this.circle = circle;
+    this.init = init;
+}
+
+@Test
+public void testParameterValidator_Optimization() {
+    setupTestParameterValidator();
+
+    final Optimum optimum = optimizer.optimize(
+            builder(circle).maxIterations(50).start(init).build());
+
+    final int numEval = optimum.getEvaluations();
+    Assert.assertTrue("Number of evaluations should be greater than 1", numEval > 1);
+}
+
+@Test
+public void testParameterValidator_CheatOptimization() {
+    setupTestParameterValidator();
+
+    final Optimum optimum = optimizer.optimize(
+            builder(circle).maxIterations(50).start(init).build());
+
+    final int numEval = optimum.getEvaluations();
+
+    // Build a new problem with a validator that amounts to cheating.
+    final ParameterValidator cheatValidator
+        = new ParameterValidator() {
+                @Override
+                public RealVector validate(RealVector params) {
+                    final RealVector direction = optimum.getPoint().subtract(params);
+                    return params.add(direction.mapMultiply(0.75));
+                }
+            };
+
+    final Optimum cheatOptimum
+        = optimizer.optimize(builder(circle).maxIterations(50).start(init).parameterValidator(cheatValidator).build());
+    final int cheatNumEval = cheatOptimum.getEvaluations();
+    Assert.assertTrue("Cheat optimization should have fewer evaluations: n=" + numEval + " nc=" + cheatNumEval, cheatNumEval < numEval);
+}
+
+

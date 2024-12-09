@@ -1,0 +1,5 @@
+asserts result: 
+ Yes
+
+The refactored test maintains the same functionality as the original test. It covers all the scenarios provided in the original test and uses parameterized testing to validate the `findWrapPos` method with different inputs and expected outcomes. The functionality is consistent between the two versions.
+

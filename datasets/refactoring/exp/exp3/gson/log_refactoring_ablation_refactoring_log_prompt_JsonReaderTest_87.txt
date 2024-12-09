@@ -1,0 +1,28 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.MalformedJsonException;
+import org.junit.jupiter.api.Test;
+
+public class JsonReaderTest {
+
+    @Test
+    public void testStrictSemicolonDelimitedArray_BeginArray() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("[true;true]"));
+        MalformedJsonException e = assertThrows(MalformedJsonException.class, () -> reader.beginArray());
+        assertEquals("line 1 column 2 path $[0]", e.getMessage());
+    }
+
+    @Test
+    public void testStrictSemicolonDelimitedArray_NextBoolean() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("[true;true]"));
+        reader.beginArray(); // This should throw an exception, but if it doesn't, we proceed to the next step
+        MalformedJsonException e = assertThrows(MalformedJsonException.class, () -> reader.nextBoolean());
+        assertEquals("line 1 column 2 path $[0]", e.getMessage());
+    }
+}
+```
+

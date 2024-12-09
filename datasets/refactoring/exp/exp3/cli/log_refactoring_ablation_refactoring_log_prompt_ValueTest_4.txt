@@ -1,0 +1,15 @@
+asserts result: 
+ ```java
+@Test
+public void testLongWithArgWithOption() {
+    // Verify that the option 'd' is present
+    assertTrue("Expected option 'd' to be present", cl.hasOption(opts.getOption("d")));
+
+    // Verify that the value of option 'd' is not null
+    assertNotNull("Expected option 'd' to have a non-null value", cl.getOptionValue(opts.getOption("d")));
+
+    // Verify that the value of option 'd' is equal to 'bar'
+    assertEquals("Expected option 'd' value to be 'bar'", "bar", cl.getOptionValue(opts.getOption("d")));
+}
+```
+

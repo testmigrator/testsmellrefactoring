@@ -1,0 +1,46 @@
+asserts result: 
+ ```java
+import org.apache.commons.math4.legacy.fitting.HarmonicCurveFitter;
+import org.apache.commons.math4.legacy.fitting.WeightedObservedPoints;
+import org.apache.commons.math4.legacy.util.FastMath;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIf;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class HarmonicOscillatorTest {
+
+    private static final long SEED = 64925784252L;
+    private static final double AMPLITUDE = 0.2;
+    private static final double ANGULAR_FREQUENCY = 3.4;
+    private static final double PHASE = 4.1;
+    private static final double MAX_AMPLITUDE_ERROR = 7.6e-4;
+    private static final double MAX_ANGULAR_FREQUENCY_ERROR = 2.7e-3;
+    private static final double MAX_PHASE_ERROR = 1.3e-2;
+    private static final double NOISE_LEVEL = 0.01;
+
+    @Test
+    @EnabledIf("isRandomizationEnabled")
+    public void test1PercentError() {
+        final Random randomizer = new Random(SEED);
+        final HarmonicOscillator f = new HarmonicOscillator(AMPLITUDE, ANGULAR_FREQUENCY, PHASE);
+
+        final WeightedObservedPoints points = new WeightedObservedPoints();
+        for (double x = 0.0; x < 10.0; x += 0.1) {
+            points.add(1, x, f.value(x) + NOISE_LEVEL * randomizer.nextGaussian());
+        }
+
+        final SimpleCurveFitter fitter = HarmonicCurveFitter.create();
+        final double[] fitted = fitter.fit(points.toList());
+        assertEquals(AMPLITUDE, fitted[0], MAX_AMPLITUDE_ERROR);
+        assertEquals(ANGULAR_FREQUENCY, fitted[1], MAX_ANGULAR_FREQUENCY_ERROR);
+        assertEquals(PHASE, FastMath.toDegrees(FastMath.IEEEremainder(FastMath.toRadians(fitted[2]), 2 * FastMath.PI)), MAX_PHASE_ERROR);
+    }
+
+    private boolean isRandomizationEnabled() {
+        // This method can be used to enable or disable the test based on some condition
+        return true;
+    }
+}
+```
+

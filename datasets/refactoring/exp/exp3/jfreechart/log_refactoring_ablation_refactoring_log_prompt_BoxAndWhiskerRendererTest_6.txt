@@ -1,0 +1,50 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import org.jfree.chart.ChartRenderingInfo;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.CategoryAxis;
+import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.plot.CategoryPlot;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.renderer.category.BoxAndWhiskerRenderer;
+import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.List;
+
+@Test
+public void testBug1572478Horizontal() {
+    var dataset = new DefaultBoxAndWhiskerCategoryDataset<String, String>() {
+
+        @Override
+        public Number getQ1Value(int row, int column) {
+            return null;
+        }
+
+        @Override
+        public Number getQ1Value(String rowKey, String columnKey) {
+            return null;
+        }
+    };
+    List<Double> values = new ArrayList<>();
+    values.add(1.0);
+    values.add(10.0);
+    values.add(100.0);
+    dataset.add(values, "row", "column");
+    CategoryPlot<String, String> plot = new CategoryPlot<>(dataset, new CategoryAxis("x"),
+            new NumberAxis("y"), new BoxAndWhiskerRenderer());
+    plot.setOrientation(PlotOrientation.HORIZONTAL);
+    JFreeChart chart = new JFreeChart(plot);
+
+    assertDoesNotThrow(() -> {
+        BufferedImage image = new BufferedImage(200, 100, BufferedImage.TYPE_INT_RGB);
+        Graphics2D g2 = image.createGraphics();
+        chart.draw(g2, new Rectangle2D.Double(0, 0, 200, 100), null, new ChartRenderingInfo());
+        g2.dispose();
+    });
+}
+```
+

@@ -1,0 +1,4 @@
+total tests: 1
+total asserts: 2
+assertEquals(expected, actual, "Check if simple string generates correct URL fragment");
+assertEquals(expected, actual, "Check if complex string with special characters generates correct URL fragment");

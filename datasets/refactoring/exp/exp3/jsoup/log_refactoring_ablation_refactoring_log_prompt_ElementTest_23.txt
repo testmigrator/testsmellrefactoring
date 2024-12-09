@@ -1,0 +1,45 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class DocumentTest {
+
+    @Test
+    public void testDocumentHtmlWithoutPrettyPrint() {
+        // Arrange
+        String html = "<div>   \n<p>Hello\n there\n</p></div>";
+        Document doc = Jsoup.parse(html);
+        doc.outputSettings().prettyPrint(false);
+
+        // Act
+        String actualHtml = doc.html();
+
+        // Assert
+        assertEquals("Document HTML should match the expected HTML without pretty print", 
+                     "<html><head></head><body><div>   \n<p>Hello\n there\n</p></div></body></html>", 
+                     actualHtml);
+    }
+
+    @Test
+    public void testDivElementHtmlWithoutPrettyPrint() {
+        // Arrange
+        String html = "<div>   \n<p>Hello\n there\n</p></div>";
+        Document doc = Jsoup.parse(html);
+        doc.outputSettings().prettyPrint(false);
+        Element div = doc.select("div").first();
+
+        // Act
+        String actualDivHtml = div.html();
+
+        // Assert
+        assertEquals("Div element HTML should match the expected HTML without pretty print", 
+                     "   \n<p>Hello\n there\n</p>", 
+                     actualDivHtml);
+    }
+}
+```
+

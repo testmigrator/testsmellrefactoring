@@ -1,0 +1,50 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import com.google.gson.stream.JsonReader;
+import java.io.IOException;
+import java.io.StringReader;
+import org.junit.jupiter.api.Test;
+
+class JsonReaderTest {
+
+    @Test
+    public void testNextDoubleWithFractionalPart() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("[1.0,1.0,1.0]"));
+        reader.beginArray();
+        double value = reader.nextDouble();
+        assertEquals(1.0, value, "Expected double value to be 1.0");
+    }
+
+    @Test
+    public void testNextIntWithFractionalPart() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("[1.0,1.0,1.0]"));
+        reader.beginArray();
+        reader.nextDouble(); // Consume the first value
+        int value = reader.nextInt();
+        assertEquals(1, value, "Expected int value to be 1");
+    }
+
+    @Test
+    public void testNextLongWithFractionalPart() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("[1.0,1.0,1.0]"));
+        reader.beginArray();
+        reader.nextDouble(); // Consume the first value
+        reader.nextInt(); // Consume the second value
+        long value = reader.nextLong();
+        assertEquals(1L, value, "Expected long value to be 1L");
+    }
+
+    @Test
+    public void testIOExceptionHandling() {
+        JsonReader reader = new JsonReader(new StringReader("[1.0,1.0,1.0]"));
+        assertThrows(IOException.class, () -> {
+            reader.beginArray();
+            reader.nextLong(); // This should throw an IOException because the next value is a double
+        }, "Expected IOException when reading a long from a double value");
+    }
+}
+```
+

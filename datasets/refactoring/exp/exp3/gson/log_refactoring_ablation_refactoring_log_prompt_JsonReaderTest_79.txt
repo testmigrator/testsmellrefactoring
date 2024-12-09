@@ -1,0 +1,32 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.Strictness;
+import org.junit.jupiter.api.Test;
+
+public class JsonReaderTest {
+
+    @Test
+    public void testLenientSingleQuotedNamesBeginObject() throws IOException {
+        JsonReader reader = new JsonReader(reader("{'a':true}"));
+        assertDoesNotThrow(() -> reader.setStrictness(Strictness.LENIENT));
+        assertDoesNotThrow(() -> reader.beginObject());
+    }
+
+    @Test
+    public void testLenientSingleQuotedNamesNextName() throws IOException {
+        JsonReader reader = new JsonReader(reader("{'a':true}"));
+        reader.setStrictness(Strictness.LENIENT);
+        reader.beginObject();
+        assertEquals("a", reader.nextName());
+    }
+
+    private java.io.Reader reader(String content) {
+        return new java.io.StringReader(content);
+    }
+}
+```
+

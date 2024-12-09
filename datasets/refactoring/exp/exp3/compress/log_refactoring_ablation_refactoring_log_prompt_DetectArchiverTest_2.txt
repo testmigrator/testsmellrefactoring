@@ -1,0 +1,32 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.assertions.AssertionFailedError;
+import org.apache.commons.compress.archivers.ArchiveInputStream;
+import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
+
+import java.io.IOException;
+
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+class ArchiveInputStreamTest {
+
+    @Test
+    public void testCOMPRESS_335() {
+        assertDoesNotThrow(() -> {
+            try (ArchiveInputStream<?> tar = createArchiveInputStream("COMPRESS-335.tar")) {
+                assertTrue(tar != null, "Tar archive input stream should not be null");
+                assertTrue(tar instanceof TarArchiveInputStream, "Input stream should be an instance of TarArchiveInputStream");
+            }
+        }, "Exception should not be thrown when creating and validating the tar archive input stream");
+    }
+
+    private ArchiveInputStream<?> createArchiveInputStream(String filename) throws IOException {
+        // Implementation of creating the ArchiveInputStream
+        // This is a placeholder for the actual implementation
+        return null;
+    }
+}
+```
+

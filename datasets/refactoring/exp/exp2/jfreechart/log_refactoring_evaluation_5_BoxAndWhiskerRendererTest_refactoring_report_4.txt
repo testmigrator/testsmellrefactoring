@@ -1,0 +1,5 @@
+asserts result: 
+ yes
+
+The functionality between the original test and the refactored test is consistent. The main change is the replacement of the `try-catch` block with `assertDoesNotThrow`, which is a more modern and concise way to assert that no exception is thrown during the execution of the code. Both versions ensure that the drawing operation does not throw an exception, maintaining the same test objective.
+

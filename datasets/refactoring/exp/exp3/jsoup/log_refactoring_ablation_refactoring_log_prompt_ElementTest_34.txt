@@ -1,0 +1,23 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.junit.Test;
+
+import static org.junit.Assert.assertThrows;
+
+public class ElementTest {
+
+    @Test
+    public void testThrowsOnPrependNullText() {
+        Document doc = Jsoup.parse("<div id=1><p>Hello</p></div>");
+        Element div = doc.getElementById("1");
+        
+        assertThrows(IllegalArgumentException.class, () -> {
+            div.prependText(null);
+        });
+    }
+}
+```
+

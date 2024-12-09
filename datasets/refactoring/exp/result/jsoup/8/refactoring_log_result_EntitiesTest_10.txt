@@ -1,0 +1,33 @@
+Input Parameters:
+Test Code:
+ @Test public void letterDigitEntities() {
+        String html = "<p>&sup1;&sup2;&sup3;&frac14;&frac12;&frac34;</p>";
+        Document doc = Jsoup.parse(html);
+        doc.outputSettings().charset("ascii");
+        Element p = doc.select("p").first();
+        assertEquals("&sup1;&sup2;&sup3;&frac14;&frac12;&frac34;", p.html());
+        assertEquals("¹²³¼½¾", p.text());
+        doc.outputSettings().charset("UTF-8");
+        assertEquals("¹²³¼½¾", p.html());
+    }
+Context: /org/jsoup/nodes/Entities
+Smell List: ['Assertion_Roulette']
+Smell Description List: ['Test Smell Type：Assertion Roulette\n\nFeature:\nA test method contains more than one assertion statement without an explanation/message (parameter in the assertion method).\n']
+Refactoring DSL: ['RefactorRule:\n  SmellType: Assertion Roulette\n  Description: Add descriptive messages to assert statements to improve readability and maintainability.\n  Steps:\n    - Step:\n        Description: "Add descriptive message to each assert statement(except assertThat, assertThrows)."\n        Action: AddMessageToAssert\n        Parameters:\n          MessagePattern: "{assertionMessage}"\n  Example:\n    Before: |\n      @Test\n      public void T() {\n        stmt\n        assert_1\n        ...\n        assert_n\n        stmt\'\n      }\n    After: |\n      @Test\n      public void T() {\n        stmt\n        assert_1(..., "Descriptive message for assert statement")\n        ...\n        assert_n(..., "Descriptive message for assert statement")\n        stmt\'\n      }\n    Variables:\n      assertionMessage: "Descriptive message for assert statement"\n']
+Checkpoints: ['[ ] All assert statements have been added with clear explanatory messages.\n']
+
+Refactored Code: 
+ 
+@Test
+public void letterDigitEntities() {
+    String html = "<p>&sup1;&sup2;&sup3;&frac14;&frac12;&frac34;</p>";
+    Document doc = Jsoup.parse(html);
+    doc.outputSettings().charset("ascii");
+    Element p = doc.select("p").first();
+    assertEquals("&sup1;&sup2;&sup3;&frac14;&frac12;&frac34;", p.html(), "HTML content should match the ASCII representation of the entities");
+    assertEquals("¹²³¼½¾", p.text(), "Text content should match the Unicode representation of the entities");
+    doc.outputSettings().charset("UTF-8");
+    assertEquals("¹²³¼½¾", p.html(), "HTML content should match the UTF-8 representation of the entities");
+}
+
+

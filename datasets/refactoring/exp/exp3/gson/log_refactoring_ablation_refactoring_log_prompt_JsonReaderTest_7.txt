@@ -1,0 +1,32 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import org.junit.jupiter.api.Test;
+
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.Strictness;
+
+public class JsonReaderTest {
+
+    @Test
+    public void testStrictModeAllowsControlCharacterU007F() throws IOException {
+        String json = "\"\\u007F\"";
+        JsonReader reader = new JsonReader(new StringReader(json));
+        reader.setStrictness(Strictness.STRICT);
+        assertDoesNotThrow(() -> reader.nextString());
+        assertEquals("\u007F", reader.nextString());
+    }
+
+    @Test
+    public void testStrictModeAllowsControlCharacterU009F() throws IOException {
+        String json = "\"\\u009F\"";
+        JsonReader reader = new JsonReader(new StringReader(json));
+        reader.setStrictness(Strictness.STRICT);
+        assertDoesNotThrow(() -> reader.nextString());
+        assertEquals("\u009F", reader.nextString());
+    }
+}
+```
+

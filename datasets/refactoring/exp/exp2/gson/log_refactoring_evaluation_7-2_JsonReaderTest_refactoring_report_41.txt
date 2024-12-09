@@ -1,0 +1,5 @@
+asserts result: 
+ yes
+
+The refactored tests maintain the same functionality as the original test. Each test case in the refactored version checks the same conditions and uses the same input data as the corresponding part of the original test. The refactoring primarily involves breaking down the single large test method into smaller, more focused methods and introducing helper methods to reduce redundancy. This does not alter the core behavior or the assertions being made.
+

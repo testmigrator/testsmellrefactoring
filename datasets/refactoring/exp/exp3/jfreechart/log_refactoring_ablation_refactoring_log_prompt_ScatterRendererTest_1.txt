@@ -1,0 +1,50 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+
+import org.jfree.chart.renderer.category.ScatterRenderer;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+
+public class ScatterRendererTest {
+
+    @Test
+    public void testDefaultEquality() {
+        ScatterRenderer r1 = new ScatterRenderer();
+        ScatterRenderer r2 = new ScatterRenderer();
+        assertEquals(r1, r2, "Two default ScatterRenderers should be equal");
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "setSeriesShapesFilled, 1, true",
+        "setBaseShapesFilled, false",
+        "setUseFillPaint, true",
+        "setDrawOutlines, true",
+        "setUseOutlinePaint, true",
+        "setUseSeriesOffset, false"
+    })
+    public void testEqualityAfterModification(String methodName, Object... args) throws Exception {
+        ScatterRenderer r1 = new ScatterRenderer();
+        ScatterRenderer r2 = new ScatterRenderer();
+
+        invokeMethod(r1, methodName, args);
+        assertNotEquals(r1, r2, "r1 and r2 should not be equal after modifying r1");
+
+        invokeMethod(r2, methodName, args);
+        assertEquals(r1, r2, "r1 and r2 should be equal after modifying both");
+    }
+
+    private void invokeMethod(ScatterRenderer renderer, String methodName, Object... args) throws Exception {
+        var method = ScatterRenderer.class.getMethod(methodName, getParameterTypes(args));
+        method.invoke(renderer, args);
+    }
+
+    private Class<?>[] getParameterTypes(Object... args) {
+        return Arrays.stream(args).map(arg -> arg.getClass()).toArray(Class<?>[]::new);
+    }
+}
+```
+

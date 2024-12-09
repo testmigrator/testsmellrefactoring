@@ -1,0 +1,66 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+
+import java.util.Set;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+public class ElementTest {
+
+    private Document doc;
+    private Element div;
+    private Set<String> classes;
+
+    @BeforeEach
+    public void setUp() {
+        doc = Jsoup.parse("<div class='one two'></div>");
+        div = doc.select("div").first();
+        classes = div.classNames();
+    }
+
+    @Test
+    public void testOriginalClassNames() {
+        assertEquals(2, classes.size(), "Original class count should be 2");
+        assertTrue(classes.contains("one"), "Original classes should contain 'one'");
+        assertTrue(classes.contains("two"), "Original classes should contain 'two'");
+    }
+
+    @Test
+    public void testClonedClassNames() {
+        Element copy = div.clone();
+        Set<String> copyClasses = copy.classNames();
+
+        assertEquals(2, copyClasses.size(), "Cloned class count should be 2");
+        assertTrue(copyClasses.contains("one"), "Cloned classes should contain 'one'");
+        assertTrue(copyClasses.contains("two"), "Cloned classes should contain 'two'");
+
+        copyClasses.add("three");
+        copyClasses.remove("one");
+
+        assertTrue(classes.contains("one"), "Original classes should still contain 'one'");
+        assertFalse(classes.contains("three"), "Original classes should not contain 'three'");
+        assertFalse(copyClasses.contains("one"), "Cloned classes should not contain 'one'");
+        assertTrue(copyClasses.contains("three"), "Cloned classes should contain 'three'");
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "div, \"\"",
+        "copy, \"\""
+    })
+    public void testHtmlContent(String elementName, String expectedHtml) {
+        Element element = "div".equals(elementName) ? div : div.clone();
+        assertEquals(expectedHtml, element.html(), "HTML content should be empty for " + elementName);
+    }
+}
+```
+

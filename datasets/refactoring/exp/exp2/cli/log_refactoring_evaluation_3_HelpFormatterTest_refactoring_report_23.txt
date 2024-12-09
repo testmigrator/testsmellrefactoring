@@ -1,0 +1,10 @@
+asserts result: 
+ yes
+
+The refactored tests maintain the same functionality as the original test. The original test checks both the correct rendering of wrapped text and the exception handling within a single method. The refactored version splits these into two separate methods:
+
+1. `testRenderWrappedTextSingleLine_TextRendering` focuses on verifying that the text is rendered correctly.
+2. `testRenderWrappedTextSingleLine_ExceptionHandling` focuses on verifying that an `UncheckedIOException` is thrown when `appendWrappedText` throws an `IOException`.
+
+Both aspects are still being tested, and the functionality remains consistent.
+

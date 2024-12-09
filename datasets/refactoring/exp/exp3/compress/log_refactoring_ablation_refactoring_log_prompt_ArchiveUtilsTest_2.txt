@@ -1,0 +1,41 @@
+asserts result: 
+ ```java
+import org.junit.Test;
+import static org.junit.Assert.*;
+
+public class ArchiveUtilsTest {
+
+    @Test
+    public void testCompareBA_WithPaddingTrue() {
+        final byte[] buffer1 = { 1, 2, 3 };
+        final byte[] buffer2 = { 1, 2, 3, 0 };
+        assertTrue("Buffer1 and Buffer2 should be equal with padding", ArchiveUtils.isEqual(buffer1, buffer2, true));
+        assertTrue("Buffer2 and Buffer1 should be equal with padding", ArchiveUtils.isEqual(buffer2, buffer1, true));
+    }
+
+    @Test
+    public void testCompareBA_WithPaddingFalse() {
+        final byte[] buffer1 = { 1, 2, 3 };
+        final byte[] buffer2 = { 1, 2, 3, 0 };
+        assertFalse("Buffer1 and Buffer2 should not be equal without padding", ArchiveUtils.isEqual(buffer1, buffer2, false));
+        assertFalse("Buffer2 and Buffer1 should not be equal without padding", ArchiveUtils.isEqual(buffer2, buffer1, false));
+    }
+
+    @Test
+    public void testCompareBA_DefaultComparison() {
+        final byte[] buffer1 = { 1, 2, 3 };
+        final byte[] buffer2 = { 1, 2, 3, 0 };
+        assertFalse("Buffer1 and Buffer2 should not be equal by default comparison", ArchiveUtils.isEqual(buffer1, buffer2));
+        assertFalse("Buffer2 and Buffer1 should not be equal by default comparison", ArchiveUtils.isEqual(buffer2, buffer1));
+    }
+
+    @Test
+    public void testCompareBA_EqualBuffers() {
+        final byte[] buffer1 = { 1, 2, 3 };
+        final byte[] buffer3 = { 1, 2, 3 };
+        assertTrue("Buffer1 and Buffer3 should be equal", ArchiveUtils.isEqual(buffer1, buffer3));
+        assertTrue("Buffer3 and Buffer1 should be equal", ArchiveUtils.isEqual(buffer3, buffer1));
+    }
+}
+```
+

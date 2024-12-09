@@ -1,0 +1,53 @@
+asserts result: 
+ ```java
+import org.apache.commons.math4.legacy.fitting.WeightedObservedPoint;
+import org.apache.commons.math4.legacy.fitting.WeightedObservedPoints;
+import org.junit.Test;
+import static org.junit.Assert.*;
+
+public class WeightedObservedPointsTest {
+
+    private static final double X1 = 1;
+    private static final double Y1 = 2;
+    private static final double W1 = 3;
+    private static final double X2 = 2;
+    private static final double Y2 = -3;
+    private static final double W2 = -4;
+    private static final double X3 = 1.2;
+    private static final double Y3 = 3.4;
+    private static final double W3 = 5.6;
+
+    @Test
+    public void testToListCopyInitialSize() {
+        final WeightedObservedPoints store = new WeightedObservedPoints();
+        store.add(new WeightedObservedPoint(W1, X1, Y1));
+        store.add(new WeightedObservedPoint(W2, X2, Y2));
+
+        final List<WeightedObservedPoint> list = store.toList();
+        assertEquals("List size should be 2", 2, list.size());
+    }
+
+    @Test
+    public void testToListCopyAddElementNoImpact() {
+        final WeightedObservedPoints store = new WeightedObservedPoints();
+        store.add(new WeightedObservedPoint(W1, X1, Y1));
+        store.add(new WeightedObservedPoint(W2, X2, Y2));
+
+        final List<WeightedObservedPoint> list = store.toList();
+        list.add(new WeightedObservedPoint(W3, X3, Y3));
+        assertNotEquals("Adding an element to list should not affect store size", list.size(), store.toList().size());
+    }
+
+    @Test
+    public void testToListCopyClearStoreNoImpact() {
+        final WeightedObservedPoints store = new WeightedObservedPoints();
+        store.add(new WeightedObservedPoint(W1, X1, Y1));
+        store.add(new WeightedObservedPoint(W2, X2, Y2));
+
+        final List<WeightedObservedPoint> list = store.toList();
+        store.clear();
+        assertFalse("List should not be empty after clearing store", list.isEmpty());
+    }
+}
+```
+

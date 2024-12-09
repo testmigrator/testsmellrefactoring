@@ -1,0 +1,112 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.junit.Test;
+import static org.junit.Assert.*;
+
+public class ElementTest {
+
+    private String html = "<div><p>One <a class=big>Two</a> Three</p><p>Another</p>";
+
+    @Test
+    public void testPElementIsP() {
+        Document doc = Jsoup.parse(html);
+        Element p = doc.select("p").first();
+        assertTrue("Element should be a paragraph", p.is("p"));
+    }
+
+    @Test
+    public void testPElementIsNotDiv() {
+        Document doc = Jsoup.parse(html);
+        Element p = doc.select("p").first();
+        assertFalse("Element should not be a div", p.is("div"));
+    }
+
+    @Test
+    public void testPElementHasA() {
+        Document doc = Jsoup.parse(html);
+        Element p = doc.select("p").first();
+        assertTrue("Element should contain an anchor tag", p.is("p:has(a)"));
+    }
+
+    @Test
+    public void testPElementIsNotA() {
+        Document doc = Jsoup.parse(html);
+        Element p = doc.select("p").first();
+        assertFalse("Element should not be an anchor tag", p.is("a"));
+    }
+
+    @Test
+    public void testPElementIsFirstChild() {
+        Document doc = Jsoup.parse(html);
+        Element p = doc.select("p").first();
+        assertTrue("Element should be the first child", p.is("p:first-child"));
+    }
+
+    @Test
+    public void testPElementIsNotLastChild() {
+        Document doc = Jsoup.parse(html);
+        Element p = doc.select("p").first();
+        assertFalse("Element should not be the last child", p.is("p:last-child"));
+    }
+
+    @Test
+    public void testPElementIsAnyElement() {
+        Document doc = Jsoup.parse(html);
+        Element p = doc.select("p").first();
+        assertTrue("Element should match any element selector", p.is("*"));
+    }
+
+    @Test
+    public void testPElementIsNestedInDiv() {
+        Document doc = Jsoup.parse(html);
+        Element p = doc.select("p").first();
+        assertTrue("Element should be nested in a div", p.is("div p"));
+    }
+
+    @Test
+    public void testQElementIsP() {
+        Document doc = Jsoup.parse(html);
+        Element q = doc.select("p").last();
+        assertTrue("Element should be a paragraph", q.is("p"));
+    }
+
+    @Test
+    public void testQElementHasSiblingP() {
+        Document doc = Jsoup.parse(html);
+        Element q = doc.select("p").last();
+        assertTrue("Element should have a sibling paragraph", q.is("p ~ p"));
+    }
+
+    @Test
+    public void testQElementHasAdjacentP() {
+        Document doc = Jsoup.parse(html);
+        Element q = doc.select("p").last();
+        assertTrue("Element should have an adjacent paragraph", q.is("p + p"));
+    }
+
+    @Test
+    public void testQElementIsLastChild() {
+        Document doc = Jsoup.parse(html);
+        Element q = doc.select("p").last();
+        assertTrue("Element should be the last child", q.is("p:last-child"));
+    }
+
+    @Test
+    public void testQElementDoesNotContainA() {
+        Document doc = Jsoup.parse(html);
+        Element q = doc.select("p").last();
+        assertFalse("Element should not contain an anchor tag", q.is("p a"));
+    }
+
+    @Test
+    public void testQElementIsNotA() {
+        Document doc = Jsoup.parse(html);
+        Element q = doc.select("p").last();
+        assertFalse("Element should not be an anchor tag", q.is("a"));
+    }
+}
+```
+

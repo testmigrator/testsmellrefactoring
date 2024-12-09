@@ -1,0 +1,43 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
+
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.MalformedJsonException;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
+
+import java.io.IOException;
+import java.io.StringReader;
+
+class JsonReaderTest {
+
+    @Test
+    public void testStrictExtraCommasInMaps_NameAndValue() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("{\"a\":\"b\",}"));
+        reader.beginObject();
+        assertThat(reader.nextName(), equalTo("a"), "Expected key 'a'");
+        assertThat(reader.nextString(), equalTo("b"), "Expected value 'b'");
+    }
+
+    @Test
+    public void testStrictExtraCommasInMaps_ExpectMalformedJsonException() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("{\"a\":\"b\",}"));
+        reader.beginObject();
+        reader.nextName();
+        reader.nextString();
+
+        Executable peekAction = () -> reader.peek();
+        MalformedJsonException e = assertThrows(MalformedJsonException.class, peekAction, "Expected MalformedJsonException");
+        assertThat(e.getMessage(), equalTo(
+            "Expected name at line 1 column 11 path $.a\n"
+            + "See https://github.com/google/gson/blob/main/Troubleshooting.md#malformed-json"),
+            "Expected specific error message"
+        );
+    }
+}
+```
+

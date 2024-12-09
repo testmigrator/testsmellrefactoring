@@ -1,0 +1,19 @@
+asserts result: 
+ ```java
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.Strictness;
+import org.junit.Test;
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.*;
+
+public class JsonReaderTest {
+
+    @Test
+    public void testSetLenientFalse() {
+        JsonReader reader = new JsonReader(new StringReader("{}"));
+        reader.setLenient(false);
+        assertThat(reader.getStrictness(), equalTo(Strictness.LEGACY_STRICT));
+    }
+}
+```
+

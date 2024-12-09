@@ -1,0 +1,49 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import org.apache.commons.cli.AlreadySelectedException;
+import org.apache.commons.cli.OptionGroup;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.Parser;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+public class OptionGroupTest {
+
+    private Parser parser;
+    private Options options;
+
+    @BeforeEach
+    public void setUp() {
+        parser = new DefaultParser();
+        options = new Options();
+        // Setup your options and groups here if needed
+    }
+
+    @Test
+    public void testTwoOptionsFromGroupThrowsException() {
+        final String[] args = {"-f", "-d"};
+        assertThrows(AlreadySelectedException.class, () -> {
+            parser.parse(options, args);
+        }, "Expected AlreadySelectedException to be thrown when two options from the same group are selected");
+    }
+
+    @Test
+    public void testExceptionContainsCorrectOptionGroup() {
+        final String[] args = {"-f", "-d"};
+        try {
+            parser.parse(options, args);
+        } catch (AlreadySelectedException e) {
+            assertNotNull(e.getOptionGroup(), "Option group should not be null");
+            assertTrue(e.getOptionGroup().isSelected(), "Option group should be selected");
+            assertEquals("f", e.getOptionGroup().getSelected().getOpt(), "Selected option should be 'f'");
+            assertEquals("d", e.getOption().getOpt(), "Option causing the exception should be 'd'");
+        }
+    }
+}
+```
+

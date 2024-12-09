@@ -1,0 +1,112 @@
+asserts result: 
+ ```java
+import org.jsoup.nodes.Element;
+import org.jsoup.nodes.TextNode;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class TextNodeTest {
+
+    @Test
+    public void testSpaceNormalise_getWholeText() {
+        String whole = "Two  spaces";
+        TextNode tn = new TextNode(whole);
+        assertEquals(whole, tn.getWholeText(), "Initial getWholeText should return the original text with double spaces");
+    }
+
+    @Test
+    public void testSpaceNormalise_text() {
+        String whole = "Two  spaces";
+        String norm = "Two spaces";
+        TextNode tn = new TextNode(whole);
+        assertEquals(norm, tn.text(), "Normalized text should remove extra spaces");
+    }
+
+    @Test
+    public void testSpaceNormalise_outerHtml() {
+        String whole = "Two  spaces";
+        String norm = "Two spaces";
+        TextNode tn = new TextNode(whole);
+        assertEquals(norm, tn.outerHtml(), "Normalized outerHtml should remove extra spaces");
+    }
+
+    @Test
+    public void testSpaceNormalise_toString() {
+        String whole = "Two  spaces";
+        String norm = "Two spaces";
+        TextNode tn = new TextNode(whole);
+        assertEquals(norm, tn.toString(), "Normalized toString should remove extra spaces");
+    }
+
+    @Test
+    public void testSpaceNormalise_withParent_getWholeText() {
+        String whole = "Two  spaces";
+        String norm = "Two spaces";
+        TextNode tn = new TextNode(whole);
+        Element el = new Element("p");
+        el.appendChild(tn);
+        assertEquals(whole, tn.getWholeText(), "getWholeText should still return the original text with double spaces after adding to a parent element");
+    }
+
+    @Test
+    public void testSpaceNormalise_withParent_text() {
+        String whole = "Two  spaces";
+        String norm = "Two spaces";
+        TextNode tn = new TextNode(whole);
+        Element el = new Element("p");
+        el.appendChild(tn);
+        assertEquals(norm, tn.text(), "Normalized text should remove extra spaces even after adding to a parent element");
+    }
+
+    @Test
+    public void testSpaceNormalise_withParent_outerHtml() {
+        String whole = "Two  spaces";
+        String norm = "Two spaces";
+        TextNode tn = new TextNode(whole);
+        Element el = new Element("p");
+        el.appendChild(tn);
+        assertEquals(norm, tn.outerHtml(), "Normalized outerHtml should remove extra spaces even after adding to a parent element");
+    }
+
+    @Test
+    public void testSpaceNormalise_withParent_toString() {
+        String whole = "Two  spaces";
+        String norm = "Two spaces";
+        TextNode tn = new TextNode(whole);
+        Element el = new Element("p");
+        el.appendChild(tn);
+        assertEquals(norm, tn.toString(), "Normalized toString should remove extra spaces even after adding to a parent element");
+    }
+
+    @Test
+    public void testSpaceNormalise_elementOuterHtml() {
+        String whole = "Two  spaces";
+        String norm = "Two spaces";
+        TextNode tn = new TextNode(whole);
+        Element el = new Element("p");
+        el.appendChild(tn);
+        assertEquals("<p>" + norm + "</p>", el.outerHtml(), "Element's outerHtml should include normalized text");
+    }
+
+    @Test
+    public void testSpaceNormalise_elementHtml() {
+        String whole = "Two  spaces";
+        String norm = "Two spaces";
+        TextNode tn = new TextNode(whole);
+        Element el = new Element("p");
+        el.appendChild(tn);
+        assertEquals(norm, el.html(), "Element's html should be the normalized text");
+    }
+
+    @Test
+    public void testSpaceNormalise_elementWholeText() {
+        String whole = "Two  spaces";
+        String norm = "Two spaces";
+        TextNode tn = new TextNode(whole);
+        Element el = new Element("p");
+        el.appendChild(tn);
+        assertEquals(whole, el.wholeText(), "Element's wholeText should return the original text with double spaces");
+    }
+}
+```
+

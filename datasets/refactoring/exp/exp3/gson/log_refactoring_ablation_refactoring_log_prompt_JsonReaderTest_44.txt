@@ -1,0 +1,53 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.Strictness;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+
+import java.io.IOException;
+import java.io.StringReader;
+
+class JsonReaderTest {
+
+    private JsonReader reader;
+
+    @BeforeEach
+    void setUp() {
+        String json = "[NaN, -Infinity, Infinity]";
+        reader = new JsonReader(new StringReader(json));
+        reader.setStrictness(Strictness.LENIENT);
+    }
+
+    @Test
+    void testBeginAndEndArray() throws IOException {
+        reader.beginArray();
+        reader.endArray();
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "NaN, true",
+        "-Infinity, false",
+        "Infinity, false"
+    })
+    void testNextDouble(String expectedValue, boolean expectNaN) throws IOException {
+        reader.beginArray();
+        double value = reader.nextDouble();
+        if (expectNaN) {
+            assertTrue(Double.isNaN(value), "Expected NaN but got " + value);
+        } else if (expectedValue.equals("-Infinity")) {
+            assertEquals(Double.NEGATIVE_INFINITY, value, "Expected -Infinity but got " + value);
+        } else if (expectedValue.equals("Infinity")) {
+            assertEquals(Double.POSITIVE_INFINITY, value, "Expected Infinity but got " + value);
+        }
+        reader.endArray();
+    }
+}
+```
+

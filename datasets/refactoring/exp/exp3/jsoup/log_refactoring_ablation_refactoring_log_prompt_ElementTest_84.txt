@@ -1,0 +1,39 @@
+asserts result: 
+ ```java
+import org.jsoup.nodes.Element;
+import static org.junit.Assert.*;
+import org.junit.Test;
+
+public class ElementTest {
+
+    @Test
+    public void testRemoveAttrReturnsElement() {
+        Element el = new Element("a")
+                .attr("href", "http://example.com")
+                .attr("id", "1")
+                .text("Hello");
+        Element el2 = el.removeAttr("href");
+        assertSame("Removing attribute should return the same element instance", el, el2);
+    }
+
+    @Test
+    public void testRemoveAttrUpdatesOuterHtml() {
+        Element el = new Element("a")
+                .attr("href", "http://example.com")
+                .attr("id", "1")
+                .text("Hello");
+        el.removeAttr("href");
+        assertEquals("Element HTML after removing 'href' attribute", "<a id=\"1\">Hello</a>", el.outerHtml());
+    }
+
+    @Test
+    public void testInitialOuterHtml() {
+        Element el = new Element("a")
+                .attr("href", "http://example.com")
+                .attr("id", "1")
+                .text("Hello");
+        assertEquals("Initial element HTML", "<a href=\"http://example.com\" id=\"1\">Hello</a>", el.outerHtml());
+    }
+}
+```
+

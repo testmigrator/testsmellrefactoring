@@ -1,0 +1,12 @@
+total tests: 3
+total asserts: 10
+assertEquals(initialLength, attribute.getLength(), "Initial length should be 29");
+assertEquals(expectedLengthWithLocalVariableTable, attribute.getLength(), "Length with LocalVariableTableAttribute should be 37");
+assertEquals(maxLocals, attribute.maxLocals, "Max locals should match the expected value");
+assertEquals(maxStack, attribute.maxStack, "Max stack should match the expected value");
+assertEquals(expectedByteCodeString, actualByteCodeString, "Byte code at index 4 should match the expected string");
+assertEquals(expectedLabel, actualLabel, "Byte code offset at index " + index + " should match the expected label");
+assertEquals(expectedMaxLocals, attribute.maxLocals, "Max locals should match the expected value");
+assertEquals(expectedMaxStack, attribute.maxStack, "Max stack should match the expected value");
+assertEquals(expectedByteCodeToString, actualByteCodeToString, "Byte code at index 3 should match the expected string");
+assertEquals(expectedLabel, actualLabel, "Byte code offset at index " + index + " should match the expected label");

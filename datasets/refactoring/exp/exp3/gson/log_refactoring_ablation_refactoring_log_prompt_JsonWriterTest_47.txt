@@ -1,0 +1,107 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import com.google.gson.stream.JsonWriter;
+import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.io.StringWriter;
+
+class JsonWriterTest {
+
+    @Test
+    public void testPrettyPrintObject_BeginObject() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.setIndent("   ");
+        jsonWriter.beginObject();
+        String expected = "{\n";
+        assertDoesNotThrow(() -> jsonWriter.close());
+        assertEquals(expected, stringWriter.toString());
+    }
+
+    @Test
+    public void testPrettyPrintObject_NameValue() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.setIndent("   ");
+        jsonWriter.beginObject();
+        jsonWriter.name("a").value(true);
+        jsonWriter.name("b").value(false);
+        jsonWriter.name("c").value(5.0);
+        String expected = "{\n" +
+                "   \"a\": true,\n" +
+                "   \"b\": false,\n" +
+                "   \"c\": 5.0,\n";
+        assertDoesNotThrow(() -> jsonWriter.close());
+        assertEquals(expected, stringWriter.toString());
+    }
+
+    @Test
+    public void testPrettyPrintObject_NullValue() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.setIndent("   ");
+        jsonWriter.beginObject();
+        jsonWriter.name("e").nullValue();
+        String expected = "{\n" +
+                "   \"e\": null,\n";
+        assertDoesNotThrow(() -> jsonWriter.close());
+        assertEquals(expected, stringWriter.toString());
+    }
+
+    @Test
+    public void testPrettyPrintObject_Array() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.setIndent("   ");
+        jsonWriter.beginObject();
+        jsonWriter.name("f").beginArray();
+        jsonWriter.value(6.0);
+        jsonWriter.value(7.0);
+        jsonWriter.endArray();
+        String expected = "{\n" +
+                "   \"f\": [\n" +
+                "      6.0,\n" +
+                "      7.0\n" +
+                "   ],\n";
+        assertDoesNotThrow(() -> jsonWriter.close());
+        assertEquals(expected, stringWriter.toString());
+    }
+
+    @Test
+    public void testPrettyPrintObject_NestedObject() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.setIndent("   ");
+        jsonWriter.beginObject();
+        jsonWriter.name("g").beginObject();
+        jsonWriter.name("h").value(8.0);
+        jsonWriter.name("i").value(9.0);
+        jsonWriter.endObject();
+        String expected = "{\n" +
+                "   \"g\": {\n" +
+                "      \"h\": 8.0,\n" +
+                "      \"i\": 9.0\n" +
+                "   },\n";
+        assertDoesNotThrow(() -> jsonWriter.close());
+        assertEquals(expected, stringWriter.toString());
+    }
+
+    @Test
+    public void testPrettyPrintObject_EndObject() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.setIndent("   ");
+        jsonWriter.beginObject();
+        jsonWriter.endObject();
+        String expected = "{\n" +
+                "}";
+        assertDoesNotThrow(() -> jsonWriter.close());
+        assertEquals(expected, stringWriter.toString());
+    }
+}
+```
+

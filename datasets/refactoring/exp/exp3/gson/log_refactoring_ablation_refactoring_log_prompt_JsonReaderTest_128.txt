@@ -1,0 +1,64 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.junit.jupiter.api.Test;
+
+public class JsonReaderTest {
+
+    @Test
+    public void testMalformedDocuments() {
+        assertThrows(MalformedJsonException.class, () -> assertDocument("{]"));
+        assertThrows(MalformedJsonException.class, () -> assertDocument("{,"));
+        assertThrows(MalformedJsonException.class, () -> assertDocument("{{"));
+        assertThrows(MalformedJsonException.class, () -> assertDocument("{["));
+        assertThrows(MalformedJsonException.class, () -> assertDocument("{:"));
+        assertThrows(MalformedJsonException.class, () -> assertDocument("{\"name\","));
+        assertThrows(MalformedJsonException.class, () -> assertDocument("{\"name\":}"));
+        assertThrows(MalformedJsonException.class, () -> assertDocument("{\"name\"::"));
+        assertThrows(MalformedJsonException.class, () -> assertDocument("{\"name\":,"));
+        assertThrows(MalformedJsonException.class, () -> assertDocument("{\"name\"=}"));
+        assertThrows(MalformedJsonException.class, () -> assertDocument("{\"name\"=>}"));
+        assertThrows(MalformedJsonException.class, () -> assertDocument("{\"name\"=>\"string\":"));
+        assertThrows(MalformedJsonException.class, () -> assertDocument("{\"name\"=>\"string\"="));
+        assertThrows(MalformedJsonException.class, () -> assertDocument("{\"name\"=>\"string\"=>"));
+
+        assertThrows(EOFException.class, () -> assertDocument("{\"name\"=>\"string\","));
+        assertThrows(MalformedJsonException.class, () -> assertDocument("{\"name\"=>\"string\",\"name\""));
+
+        assertThrows(MalformedJsonException.class, () -> assertDocument("[}"));
+        assertThrows(JSONException.class, () -> assertDocument("[,]", BEGIN_ARRAY, NULL, NULL, END_ARRAY));
+
+        assertThrows(EOFException.class, () -> assertDocument("{"));
+        assertThrows(EOFException.class, () -> assertDocument("{\"name\""));
+        assertThrows(MalformedJsonException.class, () -> assertDocument("{\"name\","));
+        assertThrows(EOFException.class, () -> assertDocument("{'name'"));
+        assertThrows(MalformedJsonException.class, () -> assertDocument("{'name',"));
+        assertThrows(EOFException.class, () -> assertDocument("{name"));
+        assertThrows(EOFException.class, () -> assertDocument("["));
+        assertThrows(EOFException.class, () -> assertDocument("[string"));
+        assertThrows(EOFException.class, () -> assertDocument("[\"string\""));
+        assertThrows(EOFException.class, () -> assertDocument("['string'"));
+        assertThrows(EOFException.class, () -> assertDocument("[123"));
+        assertThrows(EOFException.class, () -> assertDocument("[123,"));
+        assertThrows(EOFException.class, () -> assertDocument("{\"name\":123"));
+        assertThrows(EOFException.class, () -> assertDocument("{\"name\":123,"));
+        assertThrows(EOFException.class, () -> assertDocument("{\"name\":\"string\""));
+        assertThrows(EOFException.class, () -> assertDocument("{\"name\":\"string\","));
+        assertThrows(EOFException.class, () -> assertDocument("{\"name\":'string'"));
+        assertThrows(EOFException.class, () -> assertDocument("{\"name\":'string',"));
+        assertThrows(EOFException.class, () -> assertDocument("{\"name\":false"));
+        assertThrows(MalformedJsonException.class, () -> assertDocument("{\"name\":false,,"));
+    }
+
+    private void assertDocument(String document) {
+        // Implementation of assertDocument method
+        // This method should parse the document and assert the expected behavior
+    }
+
+    private void assertDocument(String document, Object... tokens) {
+        // Implementation of assertDocument method with tokens
+        // This method should parse the document and assert the expected behavior with tokens
+    }
+}
+```
+

@@ -1,0 +1,5 @@
+asserts result: 
+ Yes
+
+The refactored tests maintain the same functionality as the original test. Each aspect of the original test has been broken down into separate tests, ensuring that all checks (attribute value, key, declared value status, and boolean attribute recognition) are still performed. The setup method `setupBooleanAttributesAreEmptyStringValues` is used to prepare the document, which is then used consistently across all the new tests. This approach does not alter the intended behavior or the assertions made in the original test.
+

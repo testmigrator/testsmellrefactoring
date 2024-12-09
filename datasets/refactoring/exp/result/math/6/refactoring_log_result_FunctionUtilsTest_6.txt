@@ -1,0 +1,66 @@
+Input Parameters:
+Test Code:
+ @Test
+    public void testMultiplyDifferentiable() {
+        UnivariateDifferentiableFunction c = new Constant(4);
+        UnivariateDifferentiableFunction id = new Identity();
+        final double a = 1.2345678;
+        Assert.assertEquals(8 * a, FunctionUtils.multiply(c, id, id).value(new DerivativeStructure(1, 1, 0, a)).getPartialDerivative(1), EPS);
+
+        UnivariateDifferentiableFunction inv = new Inverse();
+        UnivariateDifferentiableFunction pow = new Power(2.5);
+        UnivariateDifferentiableFunction cos = new Cos();
+        Assert.assertEquals(1.5 * JdkMath.sqrt(a) * JdkMath.cos(a) - JdkMath.pow(a, 1.5) * JdkMath.sin(a),
+                            FunctionUtils.multiply(inv, pow, cos).value(new DerivativeStructure(1, 1, 0, a)).getPartialDerivative(1), EPS);
+
+        UnivariateDifferentiableFunction cosh = new Cosh();
+        Assert.assertEquals(1.5 * JdkMath.sqrt(a) * JdkMath.cosh(a) + JdkMath.pow(a, 1.5) * JdkMath.sinh(a),
+                            FunctionUtils.multiply(inv, pow, cosh).value(new DerivativeStructure(1, 1, 0, a)).getPartialDerivative(1), 8 * EPS);
+    }
+Context: /org/apache/commons/math4/legacy/analysis/FunctionUtils
+Smell List: ['Eager_Test', 'Magic_Number_Test']
+Smell Description List: ['Test Smell Type：Eager Test\n\nFeature:\nA test method contains multiple calls to multiple production methods.\n', 'Test Smell Type：Magic Number Test\n\nFeature:\nAn assertion method that contains a numeric literal as an argument.\n']
+Refactoring DSL: ['RefactorRule:\n  SmellType: Eager Test\n  Description: "Refactor test methods to group related assertions logically and extract reusable setup logic into private methods."\n  Steps:\n    - Step1:\n        Description: "Extract shared setup logic into a reusable, private method and ensure it is used across all relevant tests."\n        Action: ExtractSetupMethod\n        Parameters:\n          Condition: "If multiple tests share the same setup logic."\n          MethodNamePattern: setupTest{OriginalMethodName}\n    - Step2:\n        Description: "Group related assertions into cohesive sub-tests while retaining necessary setup logic."\n        Action: GroupAssertions\n        Parameters:\n          GroupBy: LogicalConcern\n    - Step3:\n        Description: "Create new test methods for each cohesive group of assertions and ensure readability."\n        Action: CreateTestMethods\n        Parameters:\n          IncludeSetup: True\n          NamePattern: test{OriginalMethodName}_{Concern}\n  Example:\n    Before: |\n      @Test\n      public void testExample() {\n          setup();\n          assertEquals(1, methodA());\n          assertTrue(methodB());\n      }\n    After: |\n      private void setupTestExample() {\n          setup();\n      }\n\n      @Test\n      public void testExample_MethodA() {\n          setupTestExample();\n          assertEquals(1, methodA());\n      }\n\n      @Test\n      public void testExample_MethodB() {\n          setupTestExample();\n          assertTrue(methodB());\n      }\n  Variables:\n    OriginalMethodName: The name of the original test method.\n    LogicalConcern: The logical aspect tested (e.g., a specific API, validation, or behavior).\n', 'RefactorRule:\n  SmellType: Magic Number Test\n  Description: "Extract magic numbers and assign meaningful names to improve readability and maintainability."\n  Steps:\n    - Step:\n        Action: IdentifyMagicNumbers\n        Description: "Identify magic numbers in assertions"\n        Parameters:\n          TargetType: Method\n          SourcePattern: |\n            assertEquals({magicNumber}, {variable})\n    - Step:\n        Action: ExtractVariable\n        Description: "Extract magic number to a variable with meaningful name"\n        Parameters:\n          TargetType: Method\n          SourcePattern: |\n            assertEquals({magicNumber}, {variable})\n          ReplacementPattern: |\n            int {meaningfulName} = {magicNumber};\n            assertEquals({meaningfulName}, {variable})\n  Example:\n    Before: |\n      @Test\n      public void T() {\n          stmt\n          assertEquals(1, a)\n          stmt\'\n      }\n    After: |\n      @Test\n      public void T() {\n          int x = 1; // x: meaningful variable name\n          stmt\n          assertEquals(x, a)\n          stmt\'\n      }\n  Variables:\n    magicNumber: "1"\n    variable: "a"\n    meaningfulName: "x"\n']
+Checkpoints: ['[ ] All eager tests have been split into separate tests, each focusing on verifying a single API.\n', '[ ] All magic numbers in the test code have been extracted and assigned meaningful variable names.\n']
+
+Refactored Code: 
+ 
+double a;
+
+private void setupTestMultiplyDifferentiable(double a) {
+    this.a = 1.2345678;
+}
+
+@Test
+public void testMultiplyDifferentiable_ConstantIdentityIdentity() {
+    setupTestMultiplyDifferentiable(1.2345678);
+    UnivariateDifferentiableFunction c = new Constant(4);
+    UnivariateDifferentiableFunction id = new Identity();
+    double expectedResult = 8 * a;
+    double actualResult = FunctionUtils.multiply(c, id, id).value(new DerivativeStructure(1, 1, 0, a)).getPartialDerivative(1);
+    Assert.assertEquals(expectedResult, actualResult, EPS);
+}
+
+@Test
+public void testMultiplyDifferentiable_InversePowerCos() {
+    setupTestMultiplyDifferentiable(1.2345678);
+    UnivariateDifferentiableFunction inv = new Inverse();
+    UnivariateDifferentiableFunction pow = new Power(2.5);
+    UnivariateDifferentiableFunction cos = new Cos();
+    double expectedResult = 1.5 * Math.sqrt(a) * Math.cos(a) - Math.pow(a, 1.5) * Math.sin(a);
+    double actualResult = FunctionUtils.multiply(inv, pow, cos).value(new DerivativeStructure(1, 1, 0, a)).getPartialDerivative(1);
+    Assert.assertEquals(expectedResult, actualResult, EPS);
+}
+
+@Test
+public void testMultiplyDifferentiable_InversePowerCosh() {
+    setupTestMultiplyDifferentiable(1.2345678);
+    UnivariateDifferentiableFunction inv = new Inverse();
+    UnivariateDifferentiableFunction pow = new Power(2.5);
+    UnivariateDifferentiableFunction cosh = new Cosh();
+    double expectedResult = 1.5 * Math.sqrt(a) * Math.cosh(a) + Math.pow(a, 1.5) * Math.sinh(a);
+    double actualResult = FunctionUtils.multiply(inv, pow, cosh).value(new DerivativeStructure(1, 1, 0, a)).getPartialDerivative(1);
+    Assert.assertEquals(expectedResult, actualResult, 8 * EPS);
+}
+
+

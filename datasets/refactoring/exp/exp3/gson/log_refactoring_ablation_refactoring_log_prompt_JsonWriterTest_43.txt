@@ -1,0 +1,49 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import com.google.gson.stream.JsonWriter;
+import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.io.StringWriter;
+
+class JsonWriterTest {
+
+    @Test
+    public void testWriteArrayInObjectA() {
+        assertDoesNotThrow(() -> {
+            StringWriter stringWriter = new StringWriter();
+            try (JsonWriter jsonWriter = new JsonWriter(stringWriter)) {
+                jsonWriter.beginObject();
+                jsonWriter.name("a");
+                jsonWriter.beginArray();
+                jsonWriter.value(5);
+                jsonWriter.value(false);
+                jsonWriter.endArray();
+                jsonWriter.endObject();
+            }
+            assertEquals("{\"a\":[5,false]}", stringWriter.toString());
+        });
+    }
+
+    @Test
+    public void testWriteArrayInObjectB() {
+        assertDoesNotThrow(() -> {
+            StringWriter stringWriter = new StringWriter();
+            try (JsonWriter jsonWriter = new JsonWriter(stringWriter)) {
+                jsonWriter.beginObject();
+                jsonWriter.name("b");
+                jsonWriter.beginArray();
+                jsonWriter.value(6);
+                jsonWriter.value(true);
+                jsonWriter.endArray();
+                jsonWriter.endObject();
+            }
+            assertEquals("{\"b\":[6,true]}", stringWriter.toString());
+        });
+    }
+}
+```
+

@@ -1,0 +1,47 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
+
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
+import com.google.gson.stream.Strictness;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
+
+import java.io.IOException;
+import java.io.StringReader;
+
+class JsonReaderTest {
+
+    @Test
+    public void testPeekingUnquotedStringsPrefixedWithIntegers_PeekString() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("[12.34e5x]"));
+        reader.setStrictness(Strictness.LENIENT);
+        reader.beginArray();
+        assertThat(reader.peek(), equalTo(JsonToken.STRING), "Expected the next token to be a STRING");
+    }
+
+    @Test
+    public void testPeekingUnquotedStringsPrefixedWithIntegers_ThrowsNumberFormatException() {
+        JsonReader reader = new JsonReader(new StringReader("[12.34e5x]"));
+        reader.setStrictness(Strictness.LENIENT);
+        reader.beginArray();
+
+        Executable executable = () -> reader.nextInt();
+        assertThrows(NumberFormatException.class, executable, "Expected NumberFormatException when calling nextInt() on invalid number format");
+    }
+
+    @Test
+    public void testPeekingUnquotedStringsPrefixedWithIntegers_ReadString() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("[12.34e5x]"));
+        reader.setStrictness(Strictness.LENIENT);
+        reader.beginArray();
+        reader.skipValue(); // Skip the peeked value
+        assertThat(reader.nextString(), equalTo("12.34e5x"), "Expected the next string to be '12.34e5x'");
+    }
+}
+```
+

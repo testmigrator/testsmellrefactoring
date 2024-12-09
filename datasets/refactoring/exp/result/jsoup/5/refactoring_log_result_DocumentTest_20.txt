@@ -1,0 +1,65 @@
+Input Parameters:
+Test Code:
+ @Test
+    public void testMetaCharsetUpdateXmlUtf8() {
+        final Document doc = createXmlDocument("1.0", "changeThis", true);
+        doc.updateMetaCharsetElement(true);
+        doc.charset(Charset.forName(charsetUtf8));
+        
+        final String xmlCharsetUTF8 = "<?xml version=\"1.0\" encoding=\"" + charsetUtf8 + "\"?>\n" +
+                                        "<root>\n" +
+                                        " node\n" +
+                                        "</root>";
+        assertEquals(xmlCharsetUTF8, doc.toString());
+
+        XmlDeclaration selectedNode = (XmlDeclaration) doc.childNode(0);
+        assertEquals(charsetUtf8, doc.charset().name());
+        assertEquals(charsetUtf8, selectedNode.attr("encoding"));
+        assertEquals(doc.charset(), doc.outputSettings().charset());
+    }
+Context: /org/jsoup/nodes/Document
+Smell List: ['Assertion_Roulette', 'Sensitive_Equality', 'Eager_Test']
+Smell Description List: ['Test Smell Type：Assertion Roulette\n\nFeature:\nA test method contains more than one assertion statement without an explanation/message (parameter in the assertion method).\n', 'Test Smell Type：Sensitive Equality\n\nFeature:\nA test method invokes the toString() method of an object.\n', 'Test Smell Type：Eager Test\n\nFeature:\nA test method contains multiple calls to multiple production methods.\n']
+Refactoring DSL: ['RefactorRule:\n  SmellType: Assertion Roulette\n  Description: Add descriptive messages to assert statements to improve readability and maintainability.\n  Steps:\n    - Step:\n        Description: "Add descriptive message to each assert statement(except assertThat, assertThrows)."\n        Action: AddMessageToAssert\n        Parameters:\n          MessagePattern: "{assertionMessage}"\n  Example:\n    Before: |\n      @Test\n      public void T() {\n        stmt\n        assert_1\n        ...\n        assert_n\n        stmt\'\n      }\n    After: |\n      @Test\n      public void T() {\n        stmt\n        assert_1(..., "Descriptive message for assert statement")\n        ...\n        assert_n(..., "Descriptive message for assert statement")\n        stmt\'\n      }\n    Variables:\n      assertionMessage: "Descriptive message for assert statement"\n', 'RefactorRule:\n  SmellType: Sensitive Equality\n  Description: "Avoid using the toString() method for comparing objects in assertions."\n  Steps:\n    - Step:\n        Description: "Extract the value returned by toString() into a separate variable for comparison. Ensure toString() does not directly appear in assertions."\n        Action: ReplaceMethodCall\n        Parameters:\n          TargetPattern: |\n            assertEquals({object1}.toString(), {expectedString});\n          ReplacementPattern: |\n            String actualValue = {object1}.toString();\n            assertEquals({expectedString}, actualValue);\n  Example:\n    Before: |\n      @Test\n      public void T() {\n        Object object1 = new Object();\n        assertEquals(object1.toString(), "expectedString");\n      }\n    After: |\n      @Test\n      public void T() {\n        Object object1 = new Object();\n        String actualValue = object1.toString();\n        assertEquals("expectedString", actualValue);\n      }\n', 'RefactorRule:\n  SmellType: Eager Test\n  Description: "Refactor test methods to group related assertions logically and extract reusable setup logic into private methods."\n  Steps:\n    - Step1:\n        Description: "Extract shared setup logic into a reusable, private method and ensure it is used across all relevant tests."\n        Action: ExtractSetupMethod\n        Parameters:\n          Condition: "If multiple tests share the same setup logic."\n          MethodNamePattern: setupTest{OriginalMethodName}\n    - Step2:\n        Description: "Group related assertions into cohesive sub-tests while retaining necessary setup logic."\n        Action: GroupAssertions\n        Parameters:\n          GroupBy: LogicalConcern\n    - Step3:\n        Description: "Create new test methods for each cohesive group of assertions and ensure readability."\n        Action: CreateTestMethods\n        Parameters:\n          IncludeSetup: True\n          NamePattern: test{OriginalMethodName}_{Concern}\n  Example:\n    Before: |\n      @Test\n      public void testExample() {\n          setup();\n          assertEquals(1, methodA());\n          assertTrue(methodB());\n      }\n    After: |\n      private void setupTestExample() {\n          setup();\n      }\n\n      @Test\n      public void testExample_MethodA() {\n          setupTestExample();\n          assertEquals(1, methodA());\n      }\n\n      @Test\n      public void testExample_MethodB() {\n          setupTestExample();\n          assertTrue(methodB());\n      }\n  Variables:\n    OriginalMethodName: The name of the original test method.\n    LogicalConcern: The logical aspect tested (e.g., a specific API, validation, or behavior).\n']
+Checkpoints: ['[ ] All assert statements have been added with clear explanatory messages.\n', '[ ] All instances of the ‘Sensitive Equality’ code smell have been refactored by directly comparing objects instead of using the toString() method for comparisons in tests, to enhance stability and avoid future failures due to changes in the toString() method’s implementation.\n', '[ ] All eager tests have been split into separate tests, each focusing on verifying a single API.\n']
+
+Refactored Code: 
+ 
+private Document setupTestMetaCharsetUpdateXmlUtf8() {
+    final Document doc = createXmlDocument("1.0", "changeThis", true);
+    doc.updateMetaCharsetElement(true);
+    doc.charset(Charset.forName(charsetUtf8));
+    return doc;
+}
+
+@Test
+public void testMetaCharsetUpdateXmlUtf8_ToString() {
+    final Document doc = setupTestMetaCharsetUpdateXmlUtf8();
+    final String xmlCharsetUTF8 = "<?xml version=\"1.0\" encoding=\"" + charsetUtf8 + "\"?>\n" +
+                                  "<root>\n" +
+                                  " node\n" +
+                                  "</root>";
+    String actualValue = doc.toString();
+    assertEquals(xmlCharsetUTF8, actualValue, "XML document string representation should match expected UTF-8 encoded XML");
+}
+
+@Test
+public void testMetaCharsetUpdateXmlUtf8_ChildNode() {
+    final Document doc = setupTestMetaCharsetUpdateXmlUtf8();
+    XmlDeclaration selectedNode = (XmlDeclaration) doc.childNode(0);
+    assertEquals(charsetUtf8, selectedNode.attr("encoding"), "Encoding attribute of the XML declaration should be set to UTF-8");
+}
+
+@Test
+public void testMetaCharsetUpdateXmlUtf8_DocumentCharset() {
+    final Document doc = setupTestMetaCharsetUpdateXmlUtf8();
+    assertEquals(charsetUtf8, doc.charset().name(), "Document charset should be set to UTF-8");
+}
+
+@Test
+public void testMetaCharsetUpdateXmlUtf8_OutputSettingsCharset() {
+    final Document doc = setupTestMetaCharsetUpdateXmlUtf8();
+    assertEquals(doc.charset(), doc.outputSettings().charset(), "Output settings charset should match the document charset");
+}
+
+

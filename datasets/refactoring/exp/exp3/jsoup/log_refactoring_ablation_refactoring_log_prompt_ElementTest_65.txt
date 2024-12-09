@@ -1,0 +1,44 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class ElementTest {
+
+    private static final String HTML_CONTENT = "<html><body><fb:comments /></body></html>";
+    private static final String BASE_URL = "http://example.com/bar/";
+    private static final int EXPECTED_ELEMENT_COUNT = 1;
+    private static final String EXPECTED_CSS_SELECTOR = "html > body > fb|comments";
+
+    @Test
+    public void testNamespacedElementCount() {
+        // Given
+        Document doc = Jsoup.parse(HTML_CONTENT, BASE_URL);
+        Elements els = doc.select("fb|comments");
+
+        // When
+        int actualElementCount = els.size();
+
+        // Then
+        assertEquals("Expected 1 namespaced element but found " + actualElementCount, EXPECTED_ELEMENT_COUNT, actualElementCount);
+    }
+
+    @Test
+    public void testNamespacedElementCssSelector() {
+        // Given
+        Document doc = Jsoup.parse(HTML_CONTENT, BASE_URL);
+        Elements els = doc.select("fb|comments");
+
+        // When
+        String actualCssSelector = els.get(0).cssSelector();
+
+        // Then
+        assertEquals("Expected CSS selector to be " + EXPECTED_CSS_SELECTOR + " but was " + actualCssSelector, EXPECTED_CSS_SELECTOR, actualCssSelector);
+    }
+}
+```
+

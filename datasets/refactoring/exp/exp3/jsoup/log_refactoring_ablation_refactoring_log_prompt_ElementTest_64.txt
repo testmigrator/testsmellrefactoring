@@ -1,0 +1,60 @@
+asserts result: 
+ ```java
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class ElementTest {
+
+    @Test
+    public void shouldMoveDiv3ToBeginningWhenInsertingAtZeroIndex() {
+        Document doc = new Document("");
+        Element body = doc.appendElement("body");
+        Element div3 = body.appendElement("div3").text("Check");
+        Element div4 = body.appendElement("div4");
+
+        ArrayList<Element> toMove = new ArrayList<>();
+        toMove.add(div3);
+
+        body.insertChildren(0, toMove);
+
+        String result = doc.toString().replaceAll("\\s+", "");
+        assertEquals("<body><div3>Check</div3><div4></div4></body>", result);
+    }
+
+    @Test
+    public void shouldMoveDiv4ToBeginningAfterDiv3WhenInsertingAtZeroIndex() {
+        Document doc = new Document("");
+        Element body = doc.appendElement("body");
+        Element div3 = body.appendElement("div3").text("Check");
+        Element div4 = body.appendElement("div4");
+
+        ArrayList<Element> toMove = new ArrayList<>();
+        toMove.add(div4);
+
+        body.insertChildren(0, toMove);
+
+        String result = doc.toString().replaceAll("\\s+", "");
+        assertEquals("<body><div4></div4><div3>Check</div3></body>", result);
+    }
+
+    @Test
+    public void shouldMoveBothDiv3AndDiv4ToBeginningWhenInsertingAtZeroIndex() {
+        Document doc = new Document("");
+        Element body = doc.appendElement("body");
+        Element div3 = body.appendElement("div3").text("Check");
+        Element div4 = body.appendElement("div4");
+
+        ArrayList<Element> toMove = new ArrayList<>();
+        toMove.add(div3);
+        toMove.add(div4);
+
+        body.insertChildren(0, toMove);
+
+        String result = doc.toString().replaceAll("\\s+", "");
+        assertEquals("<body><div3>Check</div3><div4></div4></body>", result);
+    }
+}
+```
+

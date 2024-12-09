@@ -1,0 +1,31 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+class ElementTest {
+
+    @Test
+    public void testParentlessToString() {
+        Document doc = Jsoup.parse("<img src='foo'>");
+        Element img = doc.select("img").first();
+
+        // Verify the initial state of the element
+        assertEquals("<img src=\"foo\">", img.outerHtml(), "Initial HTML representation of the element should match");
+
+        img.remove(); // Remove the element from its parent
+
+        // Verify the state of the element after removal
+        assertEquals("<img src=\"foo\">", img.outerHtml(), "HTML representation of the element after removal should match");
+    }
+}
+```
+
+### Explanation of Refactoring Steps:
+1. **Assertion Roulette**: Added clear explanatory messages to each assertion to explain what is being tested.
+2. **Sensitive Equality**: Replaced `toString()` with `outerHtml()` to directly compare the HTML representation of the element, which is more stable and less prone to changes in the `toString()` method's implementation.
+3. **Duplicate Assert**: Since the assertions are testing different states (before and after removal), they are kept but with clear messages to differentiate their purpose. In this case, parameterized tests are not necessary as the assertions are testing distinct conditions.
+

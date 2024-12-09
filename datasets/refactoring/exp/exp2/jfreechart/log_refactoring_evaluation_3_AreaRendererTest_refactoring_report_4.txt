@@ -1,0 +1,38 @@
+asserts result: 
+ The functionality between the original test and the refactored tests is not consistent. Here’s an overview of the reasons for the inconsistency:
+
+1. **Redundant Code in Refactored Tests**:
+   - In both `testSerialization_Equality` and `testSerialization_Independence`, the setup code is duplicated. The `setupTestSerialization` method is called, but then the same setup code is repeated within each test method. This redundancy means that the setup is performed twice, which is unnecessary and can lead to potential issues if the setup logic changes.
+
+2. **Inconsistent State**:
+   - The `setupTestSerialization` method initializes an `AreaRenderer` object, but this object is not used in the subsequent test methods. Instead, a new `AreaRenderer` object is created and configured again within each test method. This means that the state of the `AreaRenderer` object in the refactored tests is not the same as in the original test, where the setup was done only once.
+
+To make the refactored tests consistent with the original, the redundant setup code should be removed from the test methods, and the `AreaRenderer` object created in `setupTestSerialization` should be used directly in the tests. Here is a corrected version:
+
+```java
+private AreaRenderer setupTestSerialization() {
+    AreaRenderer r1 = new AreaRenderer();
+    r1.setSeriesFillPaint(1, new GradientPaint(1.0f, 2.0f, Color.YELLOW, 4.0f, 3.0f, Color.GREEN));
+    r1.setSeriesPaint(1, Color.BLACK);
+    r1.setSeriesPaint(2, new GradientPaint(1.0f, 2.0f, Color.YELLOW, 4.0f, 3.0f, Color.GREEN));
+    r1.setSeriesStroke(0, new BasicStroke(2.0f));
+    return r1;
+}
+
+@Test
+public void testSerialization_Equality() {
+    AreaRenderer r1 = setupTestSerialization();
+    AreaRenderer r2 = TestUtils.serialised(r1);
+    assertEquals(r1, r2);
+}
+
+@Test
+public void testSerialization_Independence() {
+    AreaRenderer r1 = setupTestSerialization();
+    AreaRenderer r2 = TestUtils.serialised(r1);
+    TestUtils.checkIndependence(r1, r2);
+}
+```
+
+This way, the setup is performed only once, and the state of the `AreaRenderer` object is consistent across the tests.
+

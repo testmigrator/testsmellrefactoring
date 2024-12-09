@@ -1,0 +1,195 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import com.google.gson.stream.JsonWriter;
+import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.io.StringWriter;
+
+class JsonWriterTest {
+
+    @Test
+    public void testFloatsBeginArray() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        assertDoesNotThrow(jsonWriter::beginArray);
+    }
+
+    @Test
+    public void testFloatsValueNegativeZero() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.beginArray();
+        assertDoesNotThrow(() -> jsonWriter.value(-0.0f));
+        assertEquals("[-0.0", stringWriter.toString());
+    }
+
+    @Test
+    public void testFloatsValueOne() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.beginArray();
+        jsonWriter.value(-0.0f);
+        assertDoesNotThrow(() -> jsonWriter.value(1.0f));
+        assertEquals("[-0.0,1.0", stringWriter.toString());
+    }
+
+    @Test
+    public void testFloatsValueMaxValue() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.beginArray();
+        jsonWriter.value(-0.0f);
+        jsonWriter.value(1.0f);
+        assertDoesNotThrow(() -> jsonWriter.value(Float.MAX_VALUE));
+        assertEquals("[-0.0,1.0,3.4028235E38", stringWriter.toString());
+    }
+
+    @Test
+    public void testFloatsValueMinValue() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.beginArray();
+        jsonWriter.value(-0.0f);
+        jsonWriter.value(1.0f);
+        jsonWriter.value(Float.MAX_VALUE);
+        assertDoesNotThrow(() -> jsonWriter.value(Float.MIN_VALUE));
+        assertEquals("[-0.0,1.0,3.4028235E38,1.4E-45", stringWriter.toString());
+    }
+
+    @Test
+    public void testFloatsValueZero() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.beginArray();
+        jsonWriter.value(-0.0f);
+        jsonWriter.value(1.0f);
+        jsonWriter.value(Float.MAX_VALUE);
+        jsonWriter.value(Float.MIN_VALUE);
+        assertDoesNotThrow(() -> jsonWriter.value(0.0f));
+        assertEquals("[-0.0,1.0,3.4028235E38,1.4E-45,0.0", stringWriter.toString());
+    }
+
+    @Test
+    public void testFloatsValueNegativeHalf() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.beginArray();
+        jsonWriter.value(-0.0f);
+        jsonWriter.value(1.0f);
+        jsonWriter.value(Float.MAX_VALUE);
+        jsonWriter.value(Float.MIN_VALUE);
+        jsonWriter.value(0.0f);
+        assertDoesNotThrow(() -> jsonWriter.value(-0.5f));
+        assertEquals("[-0.0,1.0,3.4028235E38,1.4E-45,0.0,-0.5", stringWriter.toString());
+    }
+
+    @Test
+    public void testFloatsValueSmallNumber() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.beginArray();
+        jsonWriter.value(-0.0f);
+        jsonWriter.value(1.0f);
+        jsonWriter.value(Float.MAX_VALUE);
+        jsonWriter.value(Float.MIN_VALUE);
+        jsonWriter.value(0.0f);
+        jsonWriter.value(-0.5f);
+        assertDoesNotThrow(() -> jsonWriter.value(2.2250739E-38f));
+        assertEquals("[-0.0,1.0,3.4028235E38,1.4E-45,0.0,-0.5,2.2250739E-38", stringWriter.toString());
+    }
+
+    @Test
+    public void testFloatsValueThreePointSevenTwoThreeThreeSevenNine() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.beginArray();
+        jsonWriter.value(-0.0f);
+        jsonWriter.value(1.0f);
+        jsonWriter.value(Float.MAX_VALUE);
+        jsonWriter.value(Float.MIN_VALUE);
+        jsonWriter.value(0.0f);
+        jsonWriter.value(-0.5f);
+        jsonWriter.value(2.2250739E-38f);
+        assertDoesNotThrow(() -> jsonWriter.value(3.723379f));
+        assertEquals("[-0.0,1.0,3.4028235E38,1.4E-45,0.0,-0.5,2.2250739E-38,3.723379", stringWriter.toString());
+    }
+
+    @Test
+    public void testFloatsValuePi() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.beginArray();
+        jsonWriter.value(-0.0f);
+        jsonWriter.value(1.0f);
+        jsonWriter.value(Float.MAX_VALUE);
+        jsonWriter.value(Float.MIN_VALUE);
+        jsonWriter.value(0.0f);
+        jsonWriter.value(-0.5f);
+        jsonWriter.value(2.2250739E-38f);
+        jsonWriter.value(3.723379f);
+        assertDoesNotThrow(() -> jsonWriter.value((float) Math.PI));
+        assertEquals("[-0.0,1.0,3.4028235E38,1.4E-45,0.0,-0.5,2.2250739E-38,3.723379,3.1415927", stringWriter.toString());
+    }
+
+    @Test
+    public void testFloatsValueE() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.beginArray();
+        jsonWriter.value(-0.0f);
+        jsonWriter.value(1.0f);
+        jsonWriter.value(Float.MAX_VALUE);
+        jsonWriter.value(Float.MIN_VALUE);
+        jsonWriter.value(0.0f);
+        jsonWriter.value(-0.5f);
+        jsonWriter.value(2.2250739E-38f);
+        jsonWriter.value(3.723379f);
+        jsonWriter.value((float) Math.PI);
+        assertDoesNotThrow(() -> jsonWriter.value((float) Math.E));
+        assertEquals("[-0.0,1.0,3.4028235E38,1.4E-45,0.0,-0.5,2.2250739E-38,3.723379,3.1415927,2.7182817", stringWriter.toString());
+    }
+
+    @Test
+    public void testFloatsEndArray() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.beginArray();
+        jsonWriter.value(-0.0f);
+        jsonWriter.value(1.0f);
+        jsonWriter.value(Float.MAX_VALUE);
+        jsonWriter.value(Float.MIN_VALUE);
+        jsonWriter.value(0.0f);
+        jsonWriter.value(-0.5f);
+        jsonWriter.value(2.2250739E-38f);
+        jsonWriter.value(3.723379f);
+        jsonWriter.value((float) Math.PI);
+        jsonWriter.value((float) Math.E);
+        assertDoesNotThrow(jsonWriter::endArray);
+        assertEquals("[-0.0,1.0,3.4028235E38,1.4E-45,0.0,-0.5,2.2250739E-38,3.723379,3.1415927,2.7182817]", stringWriter.toString());
+    }
+
+    @Test
+    public void testFloatsClose() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.beginArray();
+        jsonWriter.value(-0.0f);
+        jsonWriter.value(1.0f);
+        jsonWriter.value(Float.MAX_VALUE);
+        jsonWriter.value(Float.MIN_VALUE);
+        jsonWriter.value(0.0f);
+        jsonWriter.value(-0.5f);
+        jsonWriter.value(2.2250739E-38f);
+        jsonWriter.value(3.723379f);
+        jsonWriter.value((float) Math.PI);
+        jsonWriter.value((float) Math.E);
+        jsonWriter.endArray();
+        assertDoesNotThrow(jsonWriter::close);
+    }
+}
+```
+

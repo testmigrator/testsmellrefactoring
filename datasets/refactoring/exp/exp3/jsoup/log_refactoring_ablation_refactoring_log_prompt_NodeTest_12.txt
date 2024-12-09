@@ -1,0 +1,33 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
+public class NodeTest {
+
+    @Test
+    public void testOwnerDocumentForElement() {
+        Document doc = Jsoup.parse("<p>Hello");
+        Element p = doc.select("p").first();
+        assertEquals("Element's owner document should be the same as the parsed document", doc, p.ownerDocument());
+    }
+
+    @Test
+    public void testOwnerDocumentForDocument() {
+        Document doc = Jsoup.parse("<p>Hello");
+        assertEquals("Document's owner document should be itself", doc, doc.ownerDocument());
+    }
+
+    @Test
+    public void testParentOfDocument() {
+        Document doc = Jsoup.parse("<p>Hello");
+        assertNull("Document should not have a parent", doc.parent());
+    }
+}
+```
+

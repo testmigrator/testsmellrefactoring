@@ -1,0 +1,27 @@
+asserts result: 
+ ```java
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+class DefaultParserTest {
+
+    private final DefaultParser parser = new DefaultParser();
+    private final Options options = new Options().addOption("b", false, "option b");
+
+    @Test
+    public void testShortOptionConcatenatedQuoteHandling() {
+        final String[] args = {"-b\"quoted string\""};
+
+        assertDoesNotThrow(() -> {
+            CommandLine cl = parser.parse(options, args);
+            assertEquals("\"quoted string\"", cl.getOptionValue("b"), "Confirm -b\"arg\" keeps quotes");
+        });
+    }
+}
+```
+

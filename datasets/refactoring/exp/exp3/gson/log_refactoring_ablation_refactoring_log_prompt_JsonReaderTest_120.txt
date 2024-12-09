@@ -1,0 +1,35 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
+import com.google.gson.stream.Strictness;
+
+import org.junit.jupiter.api.Test;
+
+public class JsonReaderTest {
+
+    @Test
+    public void testSetStrictnessLenient() {
+        JsonReader reader = new JsonReader(reader(repeat('x', 8192)));
+        assertDoesNotThrow(() -> reader.setStrictness(Strictness.LENIENT));
+    }
+
+    @Test
+    public void testSkipValue() throws IOException {
+        JsonReader reader = new JsonReader(reader(repeat('x', 8192)));
+        reader.setStrictness(Strictness.LENIENT);
+        reader.skipValue();
+        assertEquals(JsonToken.END_DOCUMENT, reader.peek());
+    }
+
+    private static String repeat(char c, int count) {
+        char[] chars = new char[count];
+        java.util.Arrays.fill(chars, c);
+        return new String(chars);
+    }
+}
+```
+

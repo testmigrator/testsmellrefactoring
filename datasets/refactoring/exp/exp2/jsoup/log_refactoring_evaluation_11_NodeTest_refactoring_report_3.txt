@@ -1,0 +1,11 @@
+asserts result: 
+ Yes
+
+The refactored tests maintain the same functionality as the original test. The original test `handlesAbsPrefix` has been split into three separate tests, each focusing on a specific aspect of the functionality:
+
+1. `testHandlesAbsPrefix_HrefAttribute` checks that the `href` attribute is correctly set to `/foo`.
+2. `testHandlesAbsPrefix_AbsHrefAttribute` verifies that the `abs:href` attribute resolves to `https://jsoup.org/foo`.
+3. `testHandlesAbsPrefix_HasAbsHrefAttribute` ensures that the `abs:href` attribute exists.
+
+Each of these tests calls a common setup method `setupHandlesAbsPrefix`, which initializes the `Document` and `Element` objects used in the tests. This refactoring does not change the behavior or the assertions made in the original test. Therefore, the functionality is consistent.
+

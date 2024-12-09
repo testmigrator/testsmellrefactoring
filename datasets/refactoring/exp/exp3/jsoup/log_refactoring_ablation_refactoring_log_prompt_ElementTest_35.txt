@@ -1,0 +1,41 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIf;
+
+public class ElementTest {
+
+    private static final String HTML_INPUT = "<div id=1><p>Hello</p></div>";
+    private static final String EXPECTED_HTML_OUTPUT = "<p>Hello</p><p>there</p><p>now</p>";
+
+    @Test
+    public void testAddNewHtmlContent() {
+        Document doc = Jsoup.parse(HTML_INPUT);
+        Element div = doc.getElementById("1");
+        div.append("<p>there</p><p>now</p>");
+        assertEquals(EXPECTED_HTML_OUTPUT, TextUtil.stripNewlines(div.html()), "HTML content should match expected output");
+    }
+
+    @Test
+    @EnabledIf("isSiblingIndexCorrect")
+    public void testSiblingIndexAfterAppending() {
+        Document doc = Jsoup.parse(HTML_INPUT);
+        Element div = doc.getElementById("1");
+        div.append("<p>there</p><p>now</p>");
+        Elements ps = doc.select("p");
+        for (int i = 0; i < ps.size(); i++) {
+            assertEquals(i, ps.get(i).siblingIndex, "Sibling index should match the loop index");
+        }
+    }
+
+    private boolean isSiblingIndexCorrect() {
+        return true; // This can be replaced with actual condition if needed
+    }
+}
+```
+

@@ -1,0 +1,41 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import org.jsoup.Connection;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+
+public class ConnectionTest {
+
+    private static final String echoUrl = "http://example.com/echo";
+
+    @Test
+    public void shouldPerformPutRequest() {
+        try {
+            Connection.Response res = Jsoup.connect(echoUrl)
+                .data("uname", "Jsoup", "uname", "Jonathan", "百", "度一下")
+                .cookie("auth", "token")
+                .method(Connection.Method.PUT)
+                .execute();
+
+            Document doc = res.parse();
+            assertEquals("PUT", ihVal("Method", doc), "HTTP method should be PUT");
+            assertEquals("gzip", ihVal("Accept-Encoding", doc), "Accept-Encoding header should be gzip");
+            assertEquals("auth=token", ihVal("Cookie", doc), "Cookie header should be auth=token");
+        } catch (IOException e) {
+            assertThrows(IOException.class, () -> {
+                throw new IOException("An IO exception occurred during the request", e);
+            });
+        }
+    }
+
+    private String ihVal(String key, Document doc) {
+        // Implementation of ihVal method
+        return doc.select("input[name=" + key + "]").val();
+    }
+}
+```
+

@@ -1,0 +1,79 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.junit.Test;
+import static org.junit.Assert.*;
+
+public class ElementTest {
+
+    @Test
+    public void testClassNamesAreCaseInsensitive() {
+        String html = "<p Class='SomeText AnotherText'>One</p>";
+        Document doc = Jsoup.parse(html);
+        Element p = doc.select("p").first();
+
+        assertEquals("Expected class name to be case insensitive", "SomeText AnotherText", p.className());
+        assertTrue("Expected class names to contain 'SomeText'", p.classNames().contains("SomeText"));
+        assertTrue("Expected class names to contain 'AnotherText'", p.classNames().contains("AnotherText"));
+        assertTrue("Expected element to have class 'SomeText'", p.hasClass("SomeText"));
+        assertTrue("Expected element to have class 'sometext' (case insensitive)", p.hasClass("sometext"));
+        assertTrue("Expected element to have class 'AnotherText'", p.hasClass("AnotherText"));
+        assertTrue("Expected element to have class 'anothertext' (case insensitive)", p.hasClass("anothertext"));
+    }
+
+    @Test
+    public void testClassSelectorIsCaseInsensitive() {
+        String html = "<p Class='SomeText AnotherText'>One</p>";
+        Document doc = Jsoup.parse(html);
+        Element p1 = doc.select(".SomeText").first();
+        Element p2 = doc.select(".sometext").first();
+
+        assertNotNull("Expected element with class 'SomeText'", p1);
+        assertNotNull("Expected element with class 'sometext' (case insensitive)", p2);
+        assertEquals("Expected elements selected by '.SomeText' and '.sometext' to be the same", p1, p2);
+    }
+
+    @Test
+    public void testAttributeSelectorIsCaseInsensitive() {
+        String html = "<p Class='SomeText AnotherText'>One</p>";
+        Document doc = Jsoup.parse(html);
+        Element p1 = doc.select(".SomeText").first();
+        Element p3 = doc.select("[class=SomeText AnotherText]").first();
+        Element p4 = doc.select("[Class=SomeText AnotherText]").first();
+        Element p5 = doc.select("[class=sometext anothertext]").first();
+        Element p6 = doc.select("[class=SomeText AnotherText]").first();
+
+        assertNotNull("Expected element with attribute 'class=SomeText AnotherText'", p3);
+        assertNotNull("Expected element with attribute 'Class=SomeText AnotherText' (case insensitive)", p4);
+        assertNotNull("Expected element with attribute 'class=sometext anothertext' (case insensitive)", p5);
+        assertNotNull("Expected element with attribute 'class=SomeText AnotherText'", p6);
+        assertEquals("Expected elements selected by different case variations to be the same", p1, p3);
+        assertEquals("Expected elements selected by different case variations to be the same", p1, p4);
+        assertEquals("Expected elements selected by different case variations to be the same", p1, p5);
+        assertEquals("Expected elements selected by different case variations to be the same", p1, p6);
+    }
+
+    @Test
+    public void testPartialClassSelectorIsCaseInsensitive() {
+        String html = "<p Class='SomeText AnotherText'>One</p>";
+        Document doc = Jsoup.parse(html);
+        Element p1 = doc.select(".SomeText").first();
+        Element p7 = doc.select("[class^=sometext]").first();
+        Element p8 = doc.select("[class$=nothertext]").first();
+        Element p9 = doc.select("[class^=sometext]").first();
+        Element p10 = doc.select("[class$=AnotherText]").first();
+
+        assertNotNull("Expected element with attribute 'class^=sometext'", p7);
+        assertNotNull("Expected element with attribute 'class$=nothertext'", p8);
+        assertNotNull("Expected element with attribute 'class^=sometext'", p9);
+        assertNotNull("Expected element with attribute 'class$=AnotherText'", p10);
+        assertEquals("Expected elements selected by partial class selector to be the same", p1, p7);
+        assertEquals("Expected elements selected by partial class selector to be the same", p1, p8);
+        assertEquals("Expected elements selected by partial class selector to be the same", p1, p9);
+        assertEquals("Expected elements selected by partial class selector to be the same", p1, p10);
+    }
+}
+```
+

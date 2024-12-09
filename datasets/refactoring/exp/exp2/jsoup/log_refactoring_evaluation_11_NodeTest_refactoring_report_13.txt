@@ -1,0 +1,5 @@
+asserts result: 
+ Yes
+
+The refactored tests maintain the same functionality as the original test. Each assertion from the original `root` method has been preserved and logically separated into individual test methods, ensuring that all conditions are still checked. The use of a helper method `setupRootTest()` to prepare the document does not alter the behavior or the outcomes of the tests. Therefore, the functionality is consistent between the original and refactored versions.
+

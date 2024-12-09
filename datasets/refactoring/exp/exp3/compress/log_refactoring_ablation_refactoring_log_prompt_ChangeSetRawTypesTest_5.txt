@@ -1,0 +1,124 @@
+asserts result: 
+ ```java
+import org.apache.commons.compress.archivers.ArchiveEntry;
+import org.apache.commons.compress.archivers.ArchiveInputStream;
+import org.apache.commons.compress.archivers.ArchiveOutputStream;
+import org.apache.commons.compress.utils.IOUtils;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+@MethodSource("org.apache.commons.compress.changes.TestFixtures#getOutputArchiveNames")
+public class RefactoredTest {
+
+    private static final String ARCHIVE_NAME = "test";
+    private static final String FILE_NAME = "test.txt";
+    private static final String DIR_TO_DELETE = "bla";
+    private static final String ADDED_FILE_PATH = "bla/test.txt";
+
+    @TempDir
+    public Path tempDir;
+
+    private Path inputPath;
+    private Path result;
+    private File file1;
+    private List<String> archiveList;
+
+    @BeforeEach
+    void setUp() throws IOException {
+        inputPath = createArchive(ARCHIVE_NAME);
+        result = Files.createTempFile(tempDir, ARCHIVE_NAME, ".zip");
+        file1 = getFile(FILE_NAME);
+        archiveList = new ArrayList<>();
+    }
+
+    @ParameterizedTest
+    @MethodSource("org.apache.commons.compress.changes.TestFixtures#getOutputArchiveNames")
+    public void testChangeSetResults(final String archiverName) throws Exception {
+        try (InputStream inputStream = Files.newInputStream(inputPath);
+             ArchiveInputStream archiveInputStream = factory.createArchiveInputStream(archiverName, inputStream);
+             OutputStream newOutputStream = Files.newOutputStream(result);
+             ArchiveOutputStream archiveOutputStream = factory.createArchiveOutputStream(archiverName, newOutputStream);
+             InputStream csInputStream = Files.newInputStream(file1.toPath())) {
+            setLongFileMode(archiveOutputStream);
+
+            final ChangeSet changeSet = new ChangeSet();
+            changeSet.deleteDir(DIR_TO_DELETE);
+            archiveListDeleteDir(DIR_TO_DELETE);
+
+            // Add a file
+            final ArchiveEntry entry = archiveOutputStream.createArchiveEntry(file1, ADDED_FILE_PATH);
+            changeSet.add(entry, csInputStream);
+            archiveList.add(ADDED_FILE_PATH);
+
+            final ChangeSetResults results = new ChangeSetPerformer(changeSet).perform(archiveInputStream, archiveOutputStream);
+
+            // Checks
+            assertEquals(1, results.getAddedFromChangeSet().size(), "Expected 1 file to be added from the change set");
+            assertEquals(ADDED_FILE_PATH, results.getAddedFromChangeSet().iterator().next(), "Expected file path to match");
+
+            assertEquals(3, results.getDeleted().size(), "Expected 3 files to be deleted");
+            assertTrue(results.getDeleted().contains("bla/test4.xml"), "Expected 'bla/test4.xml' to be deleted");
+            assertTrue(results.getDeleted().contains("bla/test5.xml"), "Expected 'bla/test5.xml' to be deleted");
+            assertTrue(results.getDeleted().contains("bla/blubber/test6.xml"), "Expected 'bla/blubber/test6.xml' to be deleted");
+
+            List<String> expectedAddedFromStream = List.of(
+                "testdata/test1.xml",
+                "testdata/test2.xml",
+                "test/test3.xml",
+                "test.txt",
+                "something/bla",
+                "test with spaces.txt"
+            );
+
+            assertEquals(6, results.getAddedFromStream().size(), "Expected 6 files to be added from the stream");
+            for (String expected : expectedAddedFromStream) {
+                assertTrue(results.getAddedFromStream().contains(expected), "Expected '" + expected + "' to be added from the stream");
+            }
+        } finally {
+            assertTrue(Files.exists(result), "Result archive should exist");
+            checkArchiveContent(result, archiveList);
+            forceDelete(result);
+        }
+    }
+
+    private Path createArchive(String archiverName) throws IOException {
+        // Implementation for creating the archive
+        return null; // Placeholder
+    }
+
+    private File getFile(String fileName) throws IOException {
+        // Implementation for getting the file
+        return new File(tempDir.resolve(fileName).toString());
+    }
+
+    private void setLongFileMode(ArchiveOutputStream archiveOutputStream) {
+        // Implementation for setting long file mode
+    }
+
+    private void archiveListDeleteDir(String dir) {
+        // Implementation for deleting directory from archive list
+    }
+
+    private void checkArchiveContent(Path result, List<String> archiveList) throws IOException {
+        // Implementation for checking the archive content
+    }
+
+    private void forceDelete(Path path) throws IOException {
+        Files.delete(path);
+    }
+}
+```
+

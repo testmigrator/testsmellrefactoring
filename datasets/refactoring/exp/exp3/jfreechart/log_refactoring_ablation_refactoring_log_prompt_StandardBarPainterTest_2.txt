@@ -1,0 +1,16 @@
+asserts result: 
+ ```java
+import org.junit.Test;
+import static org.junit.Assert.assertFalse;
+
+public class StandardBarPainterTest {
+
+    @Test
+    public void testCloning() {
+        StandardBarPainter p1 = new StandardBarPainter();
+        assertFalse("StandardBarPainter should not implement Cloneable", p1 instanceof Cloneable);
+        assertFalse("StandardBarPainter should not implement PublicCloneable", p1 instanceof PublicCloneable);
+    }
+}
+```
+

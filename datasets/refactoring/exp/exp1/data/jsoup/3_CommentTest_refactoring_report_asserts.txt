@@ -1,0 +1,14 @@
+total tests: 4
+total asserts: 12
+assertEquals("<!-- This is one heck of a comment! -->", commentString, "Check if the comment string is correctly formatted");
+assertEquals("<div>\n <!-- comment-->\n</div>", docBodyHtml, "Check if the document body HTML is correctly formatted");
+assertEquals("<p>One<!-- comment -->Two</p>", docBodyHtmlWithComment, "Check if the document body HTML with comment is correctly formatted");
+assertEquals("OneTwo", docText, "Check if the document text is correctly extracted");
+assertEquals("<!-- a simple comment --><html><head></head><body></body></html>", doc.html(), "HTML output should match expected string when pretty printing is disabled");
+assertEquals("<!-- a simple comment -->", c1.outerHtml(), "Comment outer HTML should match expected string");
+assertNotSame(comment, c1, "Cloned object should not be the same instance as the original object");
+assertEquals(comment.getData(), c1.getData(), "Data in cloned object should be equal to data in the original object");
+assertEquals("New", c1.getData(), "Cloned object's data should be updated to the new value");
+assertNotEquals(c1.getData(), comment.getData(), "Cloned object's data should not be the same as the original object's data after modification");
+assertFalse(comment.isXmlDeclaration(), "Comment should not be an XML declaration");
+assertTrue(decl.isXmlDeclaration(), "Declaration should be an XML declaration");

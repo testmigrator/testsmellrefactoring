@@ -1,0 +1,53 @@
+asserts result: 
+ ```java
+import org.apache.commons.math4.legacy.fitting.HarmonicCurveFitter;
+import org.apache.commons.math4.legacy.fitting.WeightedObservedPoints;
+import org.apache.commons.math4.legacy.fitting.leastsquares.SimpleCurveFitter;
+import org.apache.commons.math4.legacy.function.Angle;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIf;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class HarmonicCurveFitterTest {
+
+    private static final long RANDOM_SEED = 45314242L;
+    private static final double AMPLITUDE = 0.2;
+    private static final double ANGULAR_FREQUENCY = 3.4;
+    private static final double PHASE = 4.1;
+    private static final double STEP_SIZE = 0.1;
+    private static final double NOISE_SCALE = 0.01;
+    private static final double INITIAL_AMPLITUDE_GUESS = 0.15;
+    private static final double INITIAL_ANGULAR_FREQUENCY_GUESS = 3.6;
+    private static final double INITIAL_PHASE_GUESS = 4.5;
+    private static final double AMPLITUDE_TOLERANCE = 1.2e-3;
+    private static final double ANGULAR_FREQUENCY_TOLERANCE = 3.3e-3;
+    private static final double PHASE_TOLERANCE = 1.7e-2;
+
+    @Test
+    @EnabledIf("isTestEnabled")
+    public void testInitialGuess() {
+        final Random randomizer = new Random(RANDOM_SEED);
+        final HarmonicOscillator f = new HarmonicOscillator(AMPLITUDE, ANGULAR_FREQUENCY, PHASE);
+
+        final WeightedObservedPoints points = new WeightedObservedPoints();
+        for (double x = 0.0; x < 10.0; x += STEP_SIZE) {
+            points.add(1, x, f.value(x) + NOISE_SCALE * randomizer.nextGaussian());
+        }
+
+        final SimpleCurveFitter fitter = HarmonicCurveFitter.create()
+                .withStartPoint(new double[] { INITIAL_AMPLITUDE_GUESS, INITIAL_ANGULAR_FREQUENCY_GUESS, INITIAL_PHASE_GUESS });
+        final double[] fitted = fitter.fit(points.toList());
+
+        assertEquals(AMPLITUDE, fitted[0], AMPLITUDE_TOLERANCE);
+        assertEquals(ANGULAR_FREQUENCY, fitted[1], ANGULAR_FREQUENCY_TOLERANCE);
+        assertEquals(PHASE, Angle.Rad.WITHIN_0_AND_2PI.applyAsDouble(fitted[2]), PHASE_TOLERANCE);
+    }
+
+    public boolean isTestEnabled() {
+        // Define the condition for enabling the test
+        return true; // For example, always enable the test
+    }
+}
+```
+

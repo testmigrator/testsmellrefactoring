@@ -1,0 +1,37 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class NodeTest {
+
+    private static final String BASE_URI = "https://jsoup.org";
+
+    @Test
+    public void shouldSetBaseUriOnDocument() {
+        Document doc = Jsoup.parse("<div><p></p></div>");
+        doc.setBaseUri(BASE_URI);
+
+        assertEquals("Base URI should be set on the document", BASE_URI, doc.baseUri());
+    }
+
+    @Test
+    public void shouldSetBaseUriOnDivElement() {
+        Document doc = Jsoup.parse("<div><p></p></div>");
+        doc.setBaseUri(BASE_URI);
+
+        assertEquals("Base URI should be set on the div element", BASE_URI, doc.select("div").first().baseUri());
+    }
+
+    @Test
+    public void shouldSetBaseUriOnPElement() {
+        Document doc = Jsoup.parse("<div><p></p></div>");
+        doc.setBaseUri(BASE_URI);
+
+        assertEquals("Base URI should be set on the p element", BASE_URI, doc.select("p").first().baseUri());
+    }
+}
+```
+

@@ -1,0 +1,5 @@
+asserts result: 
+ no
+
+The original test and the refactored test have different expectations regarding the handling of exceptions. In the original test, the `assertThrows` method is used to verify that a `NumberFormatException` is thrown when `reader.nextLong()` is called. However, in the refactored test, the entire test is wrapped in an `assertDoesNotThrow` block, which means the test will pass only if no exception is thrown at all during the execution of the lambda expression. This change in the exception handling logic makes the tests inconsistent in their expected behavior.
+

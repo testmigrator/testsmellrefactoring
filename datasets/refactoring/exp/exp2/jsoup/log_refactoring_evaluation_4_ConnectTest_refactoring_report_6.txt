@@ -1,0 +1,13 @@
+asserts result: 
+ Yes
+
+The refactored test maintains the same functionality as the original test. The changes include:
+
+1. **Exception Handling**: The refactored test wraps the `Jsoup.connect` call in a try-catch block to handle potential `IOException`. This ensures that any unexpected `IOException` is caught and an assertion failure is reported with a descriptive message.
+
+2. **Assertion Messages**: The refactored test adds detailed messages to the `assertEquals` calls, which can help in understanding the context of the assertion failures.
+
+3. **Null Initialization**: The `doc` variable is initialized to `null` to avoid potential null pointer exceptions if an exception occurs before the assignment.
+
+These changes do not alter the core functionality of the test, which is to verify that the HTTP request is sent correctly with the specified method, headers, and body. Therefore, the functionality remains consistent.
+

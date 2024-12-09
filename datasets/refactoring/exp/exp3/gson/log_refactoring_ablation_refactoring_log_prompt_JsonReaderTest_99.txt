@@ -1,0 +1,67 @@
+asserts result: 
+ ```java
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+
+import java.io.IOException;
+import java.io.StringReader;
+
+class JsonReaderTest {
+
+    private JsonReader reader;
+
+    @BeforeEach
+    void setUp() {
+        // Setup can be used if there's common setup needed for all tests
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "true, true",
+        "false, false"
+    })
+    void testBooleanValues(String input, boolean expected) throws IOException {
+        reader = new JsonReader(new StringReader(input));
+        assertThat(reader.nextBoolean()).as("Checking boolean value for input: " + input).isEqualTo(expected);
+        assertThat(reader.peek()).as("Checking END_DOCUMENT after boolean for input: " + input).isEqualTo(JsonToken.END_DOCUMENT);
+    }
+
+    @Test
+    void testNullValue() throws IOException {
+        reader = new JsonReader(new StringReader("null"));
+        assertThat(reader.peek()).as("Checking NULL token before reading").isEqualTo(JsonToken.NULL);
+        reader.nextNull();
+        assertThat(reader.peek()).as("Checking END_DOCUMENT after null").isEqualTo(JsonToken.END_DOCUMENT);
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "123, 123",
+        "123.4, 123.4"
+    })
+    void testNumberValues(String input, Number expected) throws IOException {
+        reader = new JsonReader(new StringReader(input));
+        if (expected instanceof Integer) {
+            assertThat(reader.nextInt()).as("Checking integer value for input: " + input).isEqualTo(expected.intValue());
+        } else if (expected instanceof Double) {
+            assertThat(reader.nextDouble()).as("Checking double value for input: " + input).isEqualTo(expected.doubleValue());
+        }
+        assertThat(reader.peek()).as("Checking END_DOCUMENT after number for input: " + input).isEqualTo(JsonToken.END_DOCUMENT);
+    }
+
+    @Test
+    void testStringValue() throws IOException {
+        reader = new JsonReader(new StringReader("\"a\""));
+        assertThat(reader.nextString()).as("Checking string value for input: \"a\"").isEqualTo("a");
+        assertThat(reader.peek()).as("Checking END_DOCUMENT after string").isEqualTo(JsonToken.END_DOCUMENT);
+    }
+}
+```
+

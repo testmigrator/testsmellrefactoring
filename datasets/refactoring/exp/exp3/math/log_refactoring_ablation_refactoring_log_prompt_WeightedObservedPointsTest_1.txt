@@ -1,0 +1,33 @@
+asserts result: 
+ ```java
+import org.apache.commons.math4.legacy.fitting.WeightedObservedPoint;
+import org.apache.commons.math4.legacy.fitting.WeightedObservedPoints;
+import org.junit.Test;
+import static org.junit.Assert.*;
+
+public class WeightedObservedPointsTest {
+
+    @Test
+    public void testAdd() {
+        final WeightedObservedPoints store = new WeightedObservedPoints();
+
+        store.add(new WeightedObservedPoint(1, 2, 3));
+        store.add(new WeightedObservedPoint(2, -1, -2));
+
+        assertEquals("Store should contain 2 points after adding", 2, store.toList().size());
+    }
+
+    @Test
+    public void testClear() {
+        final WeightedObservedPoints store = new WeightedObservedPoints();
+
+        store.add(new WeightedObservedPoint(1, 2, 3));
+        store.add(new WeightedObservedPoint(2, -1, -2));
+
+        store.clear();
+
+        assertTrue("Store should be empty after clear", store.toList().isEmpty());
+    }
+}
+```
+

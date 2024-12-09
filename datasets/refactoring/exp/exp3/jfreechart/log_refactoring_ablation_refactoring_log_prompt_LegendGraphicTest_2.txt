@@ -1,0 +1,27 @@
+asserts result: 
+ ```java
+import static org.junit.Assert.assertEquals;
+
+import org.jfree.chart.legend.LegendGraphic;
+import org.junit.Test;
+
+public class LegendGraphicTest {
+
+    @Test
+    public void testEquality() {
+        LegendGraphic g1 = new LegendGraphic(new Rectangle2D.Double(1.0, 2.0, 3.0, 4.0), Color.BLACK);
+        LegendGraphic g2 = new LegendGraphic(new Rectangle2D.Double(1.0, 2.0, 3.0, 4.0), Color.BLACK);
+        assertEquals("Objects should be equal", g1, g2);
+    }
+
+    @Test
+    public void testHashCode() {
+        LegendGraphic g1 = new LegendGraphic(new Rectangle2D.Double(1.0, 2.0, 3.0, 4.0), Color.BLACK);
+        LegendGraphic g2 = new LegendGraphic(new Rectangle2D.Double(1.0, 2.0, 3.0, 4.0), Color.BLACK);
+        int h1 = g1.hashCode();
+        int h2 = g2.hashCode();
+        assertEquals("Hash codes should be equal", h1, h2);
+    }
+}
+```
+

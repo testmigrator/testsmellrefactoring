@@ -1,0 +1,53 @@
+asserts result: 
+ ```java
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.Option;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class HelpFormatterTest {
+
+    @Test
+    public void testPrintSortedUsageWithNullComparatorOutput() {
+        final Options opts = createOptions();
+        final HelpFormatter helpFormatter = new HelpFormatter();
+        helpFormatter.setOptionComparator(null);
+
+        final StringWriter out = new StringWriter();
+        helpFormatter.printUsage(new PrintWriter(out), 80, "app", opts);
+
+        assertEquals("usage: app [-c] [-b] [-a]" + System.lineSeparator(), out.toString());
+    }
+
+    @Test
+    public void testPrintSortedUsageWithNullComparatorOptionsOrder() {
+        final Options opts = createOptions();
+        final HelpFormatter helpFormatter = new HelpFormatter();
+        helpFormatter.setOptionComparator(null);
+
+        final StringWriter out = new StringWriter();
+        helpFormatter.printUsage(new PrintWriter(out), 80, "app", opts);
+
+        String expectedUsage = "usage: app [-c] [-b] [-a]" + System.lineSeparator();
+        String actualUsage = out.toString();
+
+        // Verify the order of options in the usage string
+        String[] expectedOptions = {"-c", "-b", "-a"};
+        String[] actualOptions = actualUsage.split("\\s+");
+
+        for (int i = 0; i < expectedOptions.length; i++) {
+            assertEquals(expectedOptions[i], actualOptions[i + 2]); // Skip "usage: app" part
+        }
+    }
+
+    private Options createOptions() {
+        final Options opts = new Options();
+        opts.addOption(new Option("c", "first"));
+        opts.addOption(new Option("b", "second"));
+        opts.addOption(new Option("a", "third"));
+        return opts;
+    }
+}
+```
+

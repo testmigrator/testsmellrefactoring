@@ -1,0 +1,33 @@
+asserts result: 
+ - **assertNotEquals(x.outerHtml(), y.outerHtml(), "Modifying the cloned object's text should change its content");** - yes
+- **assertEquals("zzz", x.text(), "Original object's text should remain unchanged after modifying the cloned object");** - yes
+- **assertEquals("zzz", x.text(), "Original object's text should remain unchanged after modifying the cloned object's text");** - yes
+- **assertEquals("xxx", y.text(), "Cloned object's text should reflect the modification");** - yes
+- **assertEquals("Original text should remain unchanged after cloning and modifying the clone", "zzz", x.text());** - yes
+- **assertEquals("Cloned text should be modified as expected", "xxx", y.text());** - yes
+- **assertFalse(StringUtil.isBlank(textNode.text()), "Text node should not be blank: " + textNode.text());** - yes
+- **assertEquals("One ", textNode.text(), "First text node should be 'One '");** - yes
+- **assertEquals("One ", textNode.getWholeText(), "First text node whole text should be 'One '");** - yes
+- **assertTrue(verifyFirstTextNode(doc), "First text node should be found");** - yes
+- **assertEquals("POST", ihVal("Method", doc), "HTTP method should be POST");** - yes
+- **assertEquals("gzip", ihVal("Accept-Encoding", doc), "Accept-Encoding header should be gzip");** - yes
+- **assertEquals("auth=token", ihVal("Cookie", doc), "Cookie header should be auth=token");** - yes
+- **assertEquals("度一下", ihVal("百", doc), "Value for key '百' should be '度一下'");** - yes
+- **assertEquals("Jsoup, Jonathan", ihVal("uname", doc), "Value for key 'uname' should be 'Jsoup, Jonathan'");** - yes
+- **assertEquals("application/x-www-form-urlencoded; charset=UTF-8", ihVal("Content-Type", doc), "Content-Type header should be application/x-www-form-urlencoded; charset=UTF-8");** - yes
+- **assertTrue(ihVal("Content-Type", doc).contains(MULTIPART_FORM_DATA), "Content-Type should contain multipart/form-data");** - yes
+- **assertTrue(ihVal("Content-Type", doc).contains("boundary"), "Content-Type should contain boundary");** - yes
+- **assertEquals("Jsoup, Jonathan", ihVal("uname", doc), "uname should be Jsoup, Jonathan");** - yes
+- **assertEquals("度一下", ihVal("百", doc), "百 should be 度一下");** - yes
+- **assertEquals("POST", ihVal("Method", doc), "HTTP method should be POST");** - yes
+- **assertEquals("application/json", ihVal("Content-Type", doc), "Content-Type header should be application/json");** - yes
+- **assertEquals("foo=true", ihVal("Query String", doc), "Query string should be foo=true");** - yes
+- **assertEquals(body, ihVal("Post Data", doc), "Post data should match the sent body");** - yes
+- **assertEquals("POST", ihVal("Method", doc), "HTTP method should be POST");** - yes
+- **assertEquals("application/json", ihVal("Content-Type", doc), "Content-Type header should be application/json");** - yes
+- **assertEquals(body, ihVal("Post Data", doc), "Request body should match the expected JSON body");** - yes
+- **assertEquals("POST", ihVal("Method", doc), "HTTP method should be POST");** - yes
+- **assertEquals("text/plain", ihVal("Content-Type", doc), "Content-Type header should be text/plain");** - yes
+- **assertEquals(body, ihVal("Post Data", doc), "Request body should match the expected value");** - yes
+
+All provided assert statements meet the specified criteria.

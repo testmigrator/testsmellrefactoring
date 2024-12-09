@@ -1,0 +1,5 @@
+asserts result: 
+ Yes
+
+The functionality between the original test and the refactored test is consistent. The only change is the removal of the try-with-resources statement, which means the `PipedInputStream` will not be automatically closed at the end of the test. However, since the test is focused on verifying that a `NullPointerException` is thrown when creating a `Change` object with a null argument, the management of the `PipedInputStream` resource does not affect the outcome of this specific test. Therefore, the refactoring does not alter the test's primary purpose or its expected behavior.
+

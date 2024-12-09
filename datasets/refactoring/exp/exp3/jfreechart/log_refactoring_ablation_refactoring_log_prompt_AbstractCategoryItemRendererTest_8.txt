@@ -1,0 +1,51 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
+import org.jfree.chart.renderer.category.BarRenderer;
+import org.jfree.chart.labels.StandardCategorySeriesLabelGenerator;
+
+class BarRendererTest {
+
+    @Test
+    public void testCloning_LegendItemToolTipGenerator_CloneCreatesDifferentInstance() {
+        StandardCategorySeriesLabelGenerator generator = new StandardCategorySeriesLabelGenerator("Series {0}");
+        BarRenderer r1 = new BarRenderer();
+        r1.setLegendItemToolTipGenerator(generator);
+        BarRenderer r2 = (BarRenderer) r1.clone();
+
+        assertNotSame(r1, r2, "Cloned object should be a different instance from the original.");
+    }
+
+    @Test
+    public void testCloning_LegendItemToolTipGenerator_ClonePreservesClassType() {
+        StandardCategorySeriesLabelGenerator generator = new StandardCategorySeriesLabelGenerator("Series {0}");
+        BarRenderer r1 = new BarRenderer();
+        r1.setLegendItemToolTipGenerator(generator);
+        BarRenderer r2 = (BarRenderer) r1.clone();
+
+        assertSame(r1.getClass(), r2.getClass(), "Cloned object should have the same class type as the original.");
+    }
+
+    @Test
+    public void testCloning_LegendItemToolTipGenerator_ClonePreservesEquality() {
+        StandardCategorySeriesLabelGenerator generator = new StandardCategorySeriesLabelGenerator("Series {0}");
+        BarRenderer r1 = new BarRenderer();
+        r1.setLegendItemToolTipGenerator(generator);
+        BarRenderer r2 = (BarRenderer) r1.clone();
+
+        assertEquals(r1, r2, "Cloned object should be equal to the original.");
+    }
+
+    @Test
+    public void testCloning_LegendItemToolTipGenerator_GeneratorIsAlsoCloned() {
+        StandardCategorySeriesLabelGenerator generator = new StandardCategorySeriesLabelGenerator("Series {0}");
+        BarRenderer r1 = new BarRenderer();
+        r1.setLegendItemToolTipGenerator(generator);
+        BarRenderer r2 = (BarRenderer) r1.clone();
+
+        assertNotSame(r1.getLegendItemToolTipGenerator(), r2.getLegendItemToolTipGenerator(), "The legend item tool tip generator should also be cloned.");
+    }
+}
+```
+

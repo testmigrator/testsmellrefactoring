@@ -1,0 +1,19 @@
+asserts result: 
+ ```java
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class LegendTitleTest {
+
+    @Test
+    public void testSerialization() {
+        XYPlot<String> plot = new XYPlot<>();
+        LegendTitle t1 = new LegendTitle(plot);
+        LegendTitle t2 = TestUtils.serialised(t1);
+
+        assertEquals("Serialized and deserialized LegendTitle should be equal", t1, t2);
+        assertEquals("The source of the deserialized LegendTitle should be the original plot", plot, t2.getSources()[0]);
+    }
+}
+```
+

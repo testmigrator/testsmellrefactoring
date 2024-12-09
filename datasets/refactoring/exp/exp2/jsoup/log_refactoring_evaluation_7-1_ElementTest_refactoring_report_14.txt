@@ -1,0 +1,5 @@
+asserts result: 
+ yes
+
+The refactored tests maintain the same functionality as the original test. Each of the three new test methods (`testElementSiblingIndexSameContent_FirstP`, `testElementSiblingIndexSameContent_SecondP`, and `testElementSiblingIndexSameContent_ThirdP`) checks the `elementSiblingIndex` for one of the `<p>` elements, ensuring that the indices are 0, 1, and 2 respectively, just like the original test did. The only difference is that the refactored version splits the single test into three separate tests, each focusing on a specific `<p>` element, which improves readability and maintainability without altering the functionality.
+

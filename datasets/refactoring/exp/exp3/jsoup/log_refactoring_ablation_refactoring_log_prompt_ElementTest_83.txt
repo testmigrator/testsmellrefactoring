@@ -1,0 +1,30 @@
+asserts result: 
+ ```java
+import org.jsoup.nodes.Element;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+
+public class ElementTest {
+
+    @Test
+    public void testClearAttributesReturnsElement() {
+        Element el = new Element("a").attr("href", "http://example.com").text("Hello");
+        Element el2 = el.clearAttributes();
+        assertSame("clearAttributes should return the same instance", el, el2);
+    }
+
+    @Test
+    public void testClearAttributesRemovesAttributes() {
+        Element el = new Element("a").attr("href", "http://example.com").text("Hello");
+        el.clearAttributes();
+        assertEquals("Element should have no attributes after clearAttributes", "<a>Hello</a>", el.outerHtml());
+    }
+
+    @Test
+    public void testInitialElementOuterHtml() {
+        Element el = new Element("a").attr("href", "http://example.com").text("Hello");
+        assertEquals("Initial element outer HTML should match expected value", "<a href=\"http://example.com\">Hello</a>", el.outerHtml());
+    }
+}
+```
+

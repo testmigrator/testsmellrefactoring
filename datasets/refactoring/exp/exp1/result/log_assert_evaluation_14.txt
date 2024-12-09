@@ -1,0 +1,38 @@
+asserts result: 
+- yes
+- yes
+- yes
+- yes
+- yes
+- yes
+- yes
+- yes
+- yes
+- yes
+- yes
+- yes
+- yes
+- yes
+- yes
+- yes
+- yes
+- yes
+- yes
+- yes
+- yes
+- yes
+- yes
+- yes
+- yes
+- yes
+- yes
+- yes
+- yes
+- yes
+- yes
+- yes
+- yes
+- yes
+
+Note: The issue with `assertNotSame` was a typographical error in the explanation, as the actual usage in the provided test assertions is correct. All provided assertions meet the criteria.
+

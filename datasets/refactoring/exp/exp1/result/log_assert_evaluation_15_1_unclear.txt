@@ -1,0 +1,9 @@
+asserts result: 
+ - The first 16 assert statements meet the criteria, so the response is "yes" for those.
+- For the 17th assert statement: `assertEquals("", noBase.absUrl("relHref"), "With no base, 'relHref' should not fallback to href attribute");`, the message parameter is not semantically clear because it does not clearly state what is being tested (i.e., that the method should return an empty string when there is no base URL and a relative URL is provided). The message could be more specific, such as: `"With no base, 'relHref' should return an empty string"`.
+- The remaining assert statements from 18 to 25 meet the criteria, so the response is "yes" for those.
+
+Summary of responses:
+- yes (for statements 1-16 and 18-25)
+- no, for statement 17 due to unclear message parameter.
+

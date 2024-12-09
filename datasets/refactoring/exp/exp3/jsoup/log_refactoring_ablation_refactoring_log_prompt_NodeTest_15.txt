@@ -1,0 +1,31 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Tag;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class NodeTest {
+
+    @Test
+    public void testAfterMethodWithElement() {
+        Document doc = Jsoup.parse("<p>One <b>two</b> three</p>");
+        Element newNode = new Element(Tag.valueOf("em"), "");
+        newNode.appendText("four");
+
+        doc.select("b").first().after(newNode);
+        assertEquals("<p>One <b>two</b><em>four</em> three</p>", doc.body().html(), "After method should insert the new element after the selected element");
+    }
+
+    @Test
+    public void testAfterMethodWithHtmlString() {
+        Document doc = Jsoup.parse("<p>One <b>two</b> three</p>");
+
+        doc.select("b").first().after("<i>five</i>");
+        assertEquals("<p>One <b>two</b><i>five</i> three</p>", doc.body().html(), "After method should insert the HTML string after the selected element");
+    }
+}
+```
+

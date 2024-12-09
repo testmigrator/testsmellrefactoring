@@ -1,0 +1,43 @@
+asserts result: 
+ ```java
+@Test
+public void testGetLegendItemSeriesIndex() {
+    // Define meaningful variable names for magic numbers
+    double value1 = 21.0;
+    double value2 = 22.0;
+    double value3 = 23.0;
+    double value4 = 24.0;
+    double value5 = 25.0;
+    String rowKey1 = "R1";
+    String rowKey2 = "R2";
+    String rowKey3 = "R3";
+    String rowKey4 = "R4";
+    String rowKey5 = "R5";
+    String columnKey = "C1";
+
+    // Create datasets with meaningful data
+    DefaultCategoryDataset<String, String> dataset0 = new DefaultCategoryDataset<>();
+    dataset0.addValue(value1, rowKey1, columnKey);
+    dataset0.addValue(value2, rowKey2, columnKey);
+
+    DefaultCategoryDataset<String, String> dataset1 = new DefaultCategoryDataset<>();
+    dataset1.addValue(value3, rowKey3, columnKey);
+    dataset1.addValue(value4, rowKey4, columnKey);
+    dataset1.addValue(value5, rowKey5, columnKey);
+
+    // Set up the renderer and plot
+    AreaRenderer r = new AreaRenderer();
+    CategoryPlot<String, String> plot = new CategoryPlot<>(dataset0, new CategoryAxis("x"), new NumberAxis("y"), r);
+    plot.setDataset(1, dataset1);
+
+    // Create the chart (commented out as it's not used in the test)
+    /*JFreeChart chart =*/ new JFreeChart(plot);
+
+    // Get the legend item and perform assertions with clear messages
+    LegendItem li = r.getLegendItem(1, 2);
+    assertEquals("Label should be R5", rowKey5, li.getLabel());
+    assertEquals("Dataset index should be 1", 1, li.getDatasetIndex());
+    assertEquals("Series index should be 2", 2, li.getSeriesIndex());
+}
+```
+

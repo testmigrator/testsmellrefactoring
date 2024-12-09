@@ -1,0 +1,36 @@
+asserts result: 
+ For the provided test assertions, here is the evaluation based on the given criteria:
+
+1. `assertTrue(p.is("div p"), "Element should match the selector 'div p'");` - yes
+2. `assertTrue(q.is("p"), "Element should match the selector 'p'");` - yes
+3. `assertTrue(q.is("p ~ p"), "Element should match the selector 'p ~ p'");` - yes
+4. `assertTrue(q.is("p + p"), "Element should match the selector 'p + p'");` - yes
+5. `assertTrue(q.is("p:last-child"), "Element should match the selector 'p:last-child'");` - yes
+6. `assertFalse(q.is("p a"), "Element should not match the selector 'p a'");` - yes
+7. `assertFalse(q.is("a"), "Element should not match the selector 'a'");` - yes
+8. `assertEquals("<!doctype html>", html5.outerHtml(), "HTML5 doctype should be generated correctly");` - yes
+9. `assertEquals("<!DOCTYPE html PUBLIC \\"-//IETF//DTD HTML//\\">", publicDocType.outerHtml(), "Public doctype should be generated correctly");` - yes
+10. `assertEquals("<!DOCTYPE html SYSTEM \\"http://www.ibm.com/data/dtd/v11/ibmxhtml1-transitional.dtd\\">", systemDocType.outerHtml(), "System doctype should be generated correctly");` - yes
+11. `assertEquals("<!DOCTYPE notHtml PUBLIC \\"--public\\" \\"--system\\">", combo.outerHtml(), "Combo doctype should be generated correctly");` - yes
+12. `assertEquals("notHtml", combo.name(), "Name should match");` - yes
+13. `assertEquals("--public", combo.publicId(), "Public ID should match");` - yes
+14. `assertEquals("--system", combo.systemId(), "System ID should match");` - yes
+15. `assertEquals("<!doctype html>", htmlOutput(base), "HTML output for base DOCTYPE should be lowercase");` - yes
+16. `assertEquals(base, xmlOutput(base), "XML output for base DOCTYPE should match input");` - yes
+17. `assertEquals(publicDoc, htmlOutput(publicDoc), "HTML output for public DOCTYPE should match input");` - yes
+18. `assertEquals(publicDoc, xmlOutput(publicDoc), "XML output for public DOCTYPE should match input");` - yes
+19. `assertEquals(systemDoc, htmlOutput(systemDoc), "HTML output for system DOCTYPE should match input");` - yes
+20. `assertEquals(systemDoc, xmlOutput(systemDoc), "XML output for system DOCTYPE should match input");` - yes
+21. `assertEquals(legacyDoc, htmlOutput(legacyDoc), "HTML output for legacy DOCTYPE should match input");` - yes
+22. `assertEquals(legacyDoc, xmlOutput(legacyDoc), "XML output for legacy DOCTYPE should match input");` - yes
+23. `assertEquals(expectedTitle, doc.title(), "The title of the document does not match the expected value.");` - yes
+24. `assertEquals(expectedLanguage, doc.select("html").attr("xml:lang"), "The language attribute of the HTML tag does not match the expected value.");` - yes
+25. `assertEquals(expectedArticleBodySize, articleBody.size(), "The size of the article body elements does not match the expected value.");` - yes
+26. `assertTrue(in.exists() && !in.isDirectory(), "Input file does not exist or is not a regular file.");` - yes
+27. `assertEquals("News.com.au | News from Australia and around the world online | NewsComAu", doc.title(), "Title does not match expected value");` - yes
+28. `assertNotNull(headline, "Headline element not found");` - yes
+29. `assertEquals("Brace yourself for Metro meltdown", headline.text().trim(), "Headline text does not match expected value");` - yes
+30. `assertNotNull(horoscopesLink, "Horoscopes link not found");` - yes
+
+All assert statements meet the criteria for both semantically clear message parameters and correct expression of the purpose of the assert statement.
+

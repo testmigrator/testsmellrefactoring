@@ -1,0 +1,42 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import org.apache.commons.math3.optim.nonlinear.vector.LeastSquaresProblem;
+import org.apache.commons.math3.optim.nonlinear.vector.jacobian.LeastSquaresBuilder;
+import org.apache.commons.math3.optim.nonlinear.vector.jacobian.LeastSquaresOptimizer;
+import org.apache.commons.math3.optim.nonlinear.vector.jacobian.GaussNewtonOptimizer;
+import org.apache.commons.math3.optim.nonlinear.vector.jacobian.LevenbergMarquardtOptimizer;
+import org.apache.commons.math3.optim.nonlinear.vector.jacobian.CircleVectorial;
+import org.apache.commons.math3.optim.ConvergenceChecker;
+import org.apache.commons.math3.optim.SimpleVectorValueChecker;
+import org.apache.commons.math3.exception.TooManyEvaluationsException;
+import org.junit.jupiter.api.Test;
+
+public class CircleVectorialTest {
+
+    @Test
+    public void testMaxEvaluations() {
+        CircleVectorial circle = new CircleVectorial();
+        circle.addPoint(30.0, 68.0);
+        circle.addPoint(50.0, -6.0);
+        circle.addPoint(110.0, -20.0);
+        circle.addPoint(35.0, 15.0);
+        circle.addPoint(45.0, 97.0);
+
+        LeastSquaresProblem lsp = new LeastSquaresBuilder()
+                .model(circle)
+                .checker(new SimpleVectorValueChecker(1e-30, 1e-30))
+                .maxIterations(Integer.MAX_VALUE)
+                .start(new double[]{98.680, 47.345})
+                .build();
+
+        LeastSquaresOptimizer optimizer = new LevenbergMarquardtOptimizer();
+
+        assertThrows(TooManyEvaluationsException.class, () -> {
+            optimizer.optimize(lsp);
+        });
+    }
+}
+```
+

@@ -1,0 +1,5 @@
+asserts result: 
+ yes
+
+The refactored tests maintain the same functionality as the original test. The original single test method has been split into two separate methods, each testing a specific file (`yahoo-jp.html` and `nyt-article-1.html`). The setup for creating these files is now handled in the `@BeforeEach` method, ensuring that the files are created before each test runs. The assertions and the logic within the tests remain consistent with the original implementation.
+

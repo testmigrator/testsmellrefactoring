@@ -1,0 +1,38 @@
+asserts result: 
+ ```java
+import org.jsoup.nodes.TextNode;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class TextNodeTest {
+
+    @Test
+    public void testClonePreservesOriginalText() {
+        // Arrange
+        TextNode x = new TextNode("zzz");
+        x.attributes(); // This line is necessary as per the issue #1176
+
+        // Act
+        TextNode y = x.clone();
+
+        // Assert
+        assertEquals("Cloning should preserve the original text", "zzz", x.text());
+    }
+
+    @Test
+    public void testClonedNodeTextCanBeModified() {
+        // Arrange
+        TextNode x = new TextNode("zzz");
+        x.attributes(); // This line is necessary as per the issue #1176
+        TextNode y = x.clone();
+
+        // Act
+        y.text("xxx");
+
+        // Assert
+        assertEquals("Modifying cloned node's text should not affect the original node", "zzz", x.text());
+        assertEquals("Cloned node's text should be updated correctly", "xxx", y.text());
+    }
+}
+```
+

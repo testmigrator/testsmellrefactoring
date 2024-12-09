@@ -1,0 +1,13 @@
+asserts result: 
+ Yes
+
+The refactored tests cover the same scenarios as the original test and maintain the same assertions. The functionality tested in each scenario remains consistent:
+
+1. **testFindRangeBounds_NullDataset**: Checks that `findRangeBounds` returns `null` when the dataset is `null`.
+2. **testFindRangeBounds_EmptyDataset**: Checks that `findRangeBounds` returns `null` when the dataset is empty.
+3. **testFindRangeBounds_WithBaseInRange**: Checks that `findRangeBounds` returns the correct range when `includeBaseInRange` is `true`.
+4. **testFindRangeBounds_WithoutBaseInRange**: Checks that `findRangeBounds` returns the correct range when `includeBaseInRange` is `false`.
+5. **testFindRangeBounds_SeriesNotVisible**: Checks that `findRangeBounds` returns the correct range when a series is not visible.
+
+Each test method in the refactored code is clearly named and isolates the specific behavior being tested, ensuring that the functionality is consistent with the original test.
+

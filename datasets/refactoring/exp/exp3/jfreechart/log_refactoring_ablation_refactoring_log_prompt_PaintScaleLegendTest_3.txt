@@ -1,0 +1,30 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
+import org.jfree.chart.legend.PaintScaleLegend;
+import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.paintscale.GrayPaintScale;
+import org.jfree.chart.util.CloneUtils;
+
+class PaintScaleLegendTest {
+
+    @Test
+    void testCloning() {
+        PaintScaleLegend l1 = new PaintScaleLegend(new GrayPaintScale(), new NumberAxis("X"));
+
+        PaintScaleLegend l2 = null;
+        try {
+            l2 = CloneUtils.clone(l1);
+        } catch (CloneNotSupportedException e) {
+            fail("CloneNotSupportedException should not be thrown: " + e.getMessage());
+        }
+
+        assertNotNull(l2, "Cloned object should not be null");
+        assertNotSame(l1, l2, "Cloned object should not be the same instance as the original");
+        assertEquals(l1.getClass(), l2.getClass(), "Cloned object should be of the same class as the original");
+        assertEquals(l1, l2, "Cloned object should be equal to the original");
+    }
+}
+```
+

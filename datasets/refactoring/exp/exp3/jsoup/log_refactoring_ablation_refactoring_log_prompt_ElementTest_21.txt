@@ -1,0 +1,57 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class ElementTest {
+
+    @Test
+    public void testAddClass() {
+        Document doc = Jsoup.parse("<div class='mellow yellow'></div>");
+        Element div = doc.select("div").first();
+
+        div.addClass("green");
+        assertEquals("Class 'green' should be added to the element", "mellow yellow green", div.className());
+    }
+
+    @Test
+    public void testRemoveClassNoop() {
+        Document doc = Jsoup.parse("<div class='mellow yellow'></div>");
+        Element div = doc.select("div").first();
+
+        div.removeClass("red"); // noop
+        assertEquals("Removing non-existent class 'red' should have no effect", "mellow yellow", div.className());
+    }
+
+    @Test
+    public void testRemoveClassExisting() {
+        Document doc = Jsoup.parse("<div class='mellow yellow'></div>");
+        Element div = doc.select("div").first();
+
+        div.removeClass("yellow");
+        assertEquals("Class 'yellow' should be removed from the element", "mellow", div.className());
+    }
+
+    @Test
+    public void testToggleClassAddAndRemove() {
+        Document doc = Jsoup.parse("<div class='mellow'></div>");
+        Element div = doc.select("div").first();
+
+        div.toggleClass("green").toggleClass("red");
+        assertEquals("Classes 'green' and 'red' should be toggled correctly", "mellow green red", div.className());
+    }
+
+    @Test
+    public void testToggleClassRemoveAndAdd() {
+        Document doc = Jsoup.parse("<div class='mellow green red'></div>");
+        Element div = doc.select("div").first();
+
+        div.toggleClass("green").toggleClass("red");
+        assertEquals("Classes 'green' and 'red' should be toggled correctly", "mellow", div.className());
+    }
+}
+```
+

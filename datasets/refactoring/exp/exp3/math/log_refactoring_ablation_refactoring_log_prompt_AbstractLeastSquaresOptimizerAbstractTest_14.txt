@@ -1,0 +1,51 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIf;
+import static org.junit.jupiter.api.Assertions.*;
+
+class CircleVectorialTest {
+
+    private static final double EXPECTED_EVALUATIONS_THRESHOLD = 25;
+    private static final double EXPECTED_RMS = 0.043;
+    private static final double EXPECTED_RADIUS = 0.292235;
+    private static final double EXPECTED_CENTER_X = -0.151738;
+    private static final double EXPECTED_CENTER_Y = 0.2075001;
+    private static final double TOLERANCE = 1e-6;
+    private static final double START_X = -12;
+    private static final double START_Y = -12;
+    private static final double WEIGHT_VALUE = 2;
+
+    @Test
+    @EnabledIf("isTestCircleFittingBadInitEnabled")
+    public void testCircleFittingBadInit() {
+        CircleVectorial circle = new CircleVectorial();
+        double[][] points = circlePoints;
+        double[] weights = new double[points.length];
+        Arrays.fill(weights, WEIGHT_VALUE);
+
+        for (int i = 0; i < points.length; ++i) {
+            circle.addPoint(points[i][0], points[i][1]);
+        }
+
+        Optimum optimum = optimizer.optimize(builder(circle)
+                .weight(new DiagonalMatrix(weights))
+                .start(new double[]{START_X, START_Y})
+                .build());
+
+        Vector2D center = Vector2D.of(optimum.getPoint().getEntry(0), optimum.getPoint().getEntry(1));
+
+        assertTrue(optimum.getEvaluations() < EXPECTED_EVALUATIONS_THRESHOLD, "Evaluations should be less than " + EXPECTED_EVALUATIONS_THRESHOLD);
+        assertEquals(EXPECTED_RMS, optimum.getRMS(), TOLERANCE, "RMS should be close to " + EXPECTED_RMS);
+        assertEquals(EXPECTED_RADIUS, circle.getRadius(center), TOLERANCE, "Radius should be close to " + EXPECTED_RADIUS);
+        assertEquals(EXPECTED_CENTER_X, center.getX(), TOLERANCE, "Center X should be close to " + EXPECTED_CENTER_X);
+        assertEquals(EXPECTED_CENTER_Y, center.getY(), TOLERANCE, "Center Y should be close to " + EXPECTED_CENTER_Y);
+    }
+
+    public boolean isTestCircleFittingBadInitEnabled() {
+        // Define the condition for enabling this test
+        return true; // For example, always enable the test
+    }
+}
+```
+

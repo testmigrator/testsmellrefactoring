@@ -1,0 +1,5 @@
+asserts result: 
+ The refactored tests maintain the same functionality as the original test. The logic and assertions are preserved, and the refactoring primarily involves breaking down the single large test method into smaller, more focused test methods and adding a parameterized test for better coverage and clarity. 
+
+Therefore, the answer is: **yes**.
+

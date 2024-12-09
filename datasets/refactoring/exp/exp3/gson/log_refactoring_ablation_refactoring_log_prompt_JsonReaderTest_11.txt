@@ -1,0 +1,32 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.startsWith;
+
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.Strictness;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+
+public class JsonReaderTest {
+
+    @ParameterizedTest
+    @ValueSource(strings = {"NULL", "nulL"})
+    public void testCapitalizedNullFailsWhenStrict(String input) {
+        JsonReader reader = new JsonReader(reader(input));
+        reader.setStrictness(Strictness.STRICT);
+
+        IOException expected = assertThrows(IOException.class, reader::nextNull);
+        assertThat(expected.getMessage(), startsWith(
+            "Use JsonReader.setStrictness(Strictness.LENIENT) to accept malformed JSON at line 1 column 1 path $\n"
+        ));
+    }
+
+    private static java.io.Reader reader(String input) {
+        return new java.io.StringReader(input);
+    }
+}
+```
+

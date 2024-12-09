@@ -1,0 +1,25 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+
+public class StatisticalBarRendererTest {
+
+    @Test
+    public void testDrawWithNullDeviationHorizontal() {
+        assertDoesNotThrow(() -> {
+            DefaultStatisticalCategoryDataset<String, String> dataset
+                = new DefaultStatisticalCategoryDataset<>();
+            dataset.add(1.0, 2.0, "S1", "C1");
+            dataset.add(4.0, null, "S1", "C2");
+            CategoryPlot<String, String> plot = new CategoryPlot<>(dataset,
+                new CategoryAxis("Category"), new NumberAxis("Value"),
+                new StatisticalBarRenderer());
+            plot.setOrientation(PlotOrientation.HORIZONTAL);
+            JFreeChart chart = new JFreeChart(plot);
+            /* BufferedImage image = */ chart.createBufferedImage(300, 200, null);
+        });
+    }
+}
+```
+

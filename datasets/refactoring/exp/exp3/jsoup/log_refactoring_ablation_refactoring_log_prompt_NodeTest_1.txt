@@ -1,0 +1,49 @@
+asserts result: 
+ ```java
+import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Attributes;
+import org.jsoup.nodes.Tag;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class ElementTest {
+
+    @Test
+    public void testHandlesBaseUriWithNoBase() {
+        Tag tag = Tag.valueOf("a");
+        Attributes attribs = new Attributes();
+        attribs.put("relHref", "/foo");
+        attribs.put("absHref", "http://bar/qux");
+
+        Element noBase = new Element(tag, "", attribs);
+        assertEquals("With no base, should NOT fallback to href attrib, whatever it is", "", noBase.absUrl("relHref"));
+        assertEquals("No base but valid attrib, return attrib", "http://bar/qux", noBase.absUrl("absHref"));
+    }
+
+    @Test
+    public void testHandlesBaseUriWithValidBase() {
+        Tag tag = Tag.valueOf("a");
+        Attributes attribs = new Attributes();
+        attribs.put("relHref", "/foo");
+        attribs.put("absHref", "http://bar/qux");
+
+        Element withBase = new Element(tag, "http://foo/", attribs);
+        assertEquals("Construct abs from base + rel", "http://foo/foo", withBase.absUrl("relHref"));
+        assertEquals("Href is abs, so returns that", "http://bar/qux", withBase.absUrl("absHref"));
+        assertEquals("Return empty string if attribute does not exist", "", withBase.absUrl("noval"));
+    }
+
+    @Test
+    public void testHandlesBaseUriWithInvalidBase() {
+        Tag tag = Tag.valueOf("a");
+        Attributes attribs = new Attributes();
+        attribs.put("relHref", "/foo");
+        attribs.put("absHref", "http://bar/qux");
+
+        Element dodgyBase = new Element(tag, "wtf://no-such-protocol/", attribs);
+        assertEquals("Base fails, but href good, so get that", "http://bar/qux", dodgyBase.absUrl("absHref"));
+        assertEquals("Base fails, only rel href, so return nothing", "", dodgyBase.absUrl("relHref"));
+    }
+}
+```
+

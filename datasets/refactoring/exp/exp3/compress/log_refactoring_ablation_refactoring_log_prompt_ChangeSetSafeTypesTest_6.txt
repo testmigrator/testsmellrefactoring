@@ -1,0 +1,94 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.condition.EnabledIf;
+
+import java.io.*;
+import java.nio.file.*;
+import java.util.zip.*;
+import java.util.stream.Stream;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+@ExtendWith(ArchiveTestCondition.class)
+public class ArchiveTest {
+
+    @TempDir
+    public Path tempDir;
+
+    @ParameterizedTest
+    @MethodSource("org.apache.commons.compress.changes.TestFixtures#getOutputArchiveNames")
+    @EnabledIf("isArchiveAvailable")
+    public void testDeletePlusAddSame(final String archiverName) throws Exception {
+        final Path input = createArchive(archiverName);
+        final Path result = tempDir.resolve("test." + archiverName);
+        final Path testTxt = tempDir.resolve("test.txt");
+        Files.write(testTxt, "111111111111111111111111111000101011".getBytes());
+
+        try (InputStream inputStream = Files.newInputStream(input);
+             ArchiveInputStream<E> ais = createArchiveInputStream(archiverName, inputStream);
+             OutputStream outputStream = Files.newOutputStream(result);
+             ArchiveOutputStream<E> out = createArchiveOutputStream(archiverName, outputStream);
+             InputStream csInputStream = Files.newInputStream(testTxt)) {
+            final ChangeSet<E> changeSet = createChangeSet();
+            changeSet.delete("test/test3.xml");
+            // Add a file
+            final E entry = out.createArchiveEntry(testTxt, "test/test3.xml");
+            changeSet.add(entry, csInputStream);
+
+            new ChangeSetPerformer<>(changeSet).perform(ais, out);
+        }
+
+        // Checks
+        try (BufferedInputStream buf = new BufferedInputStream(Files.newInputStream(result));
+             ArchiveInputStream<E> in = createArchiveInputStream(buf)) {
+            final Path check = checkArchiveContent(in, tempDir.resolve("result"), false);
+            final Path test3xml = check.resolve("test/test3.xml");
+
+            assertTrue(Files.exists(test3xml), "File should exist");
+            assertEquals(Files.size(testTxt), Files.size(test3xml));
+
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(Files.newInputStream(test3xml)))) {
+                String str;
+                while ((str = reader.readLine()) != null) {
+                    assertEquals("111111111111111111111111111000101011", str);
+                }
+            }
+        }
+    }
+
+    private static class ArchiveTestCondition implements ParameterResolver {
+        @Override
+        public boolean supportsParameter(ParameterContext parameterContext, ExtensionContext extensionContext) {
+            return parameterContext.getParameter().getType() == Path.class && parameterContext.getParameter().isAnnotationPresent(TempDir.class);
+        }
+
+        @Override
+        public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext) {
+            return Files.createTempDirectory("tempDir");
+        }
+
+        public static boolean isArchiveAvailable() {
+            // Implement the condition to check if the archive is available
+            return true; // Placeholder, replace with actual condition
+        }
+    }
+}
+```
+
+### Explanation of Refactoring:
+1. **Conditional Test Logic**:
+   - The `@EnabledIf` annotation is used to conditionally enable the test based on the availability of the archive, which is checked in the `isArchiveAvailable` method.
+
+2. **Exception_Catching_Throwing**:
+   - The exception handling within the test method is kept as part of the try-with-resources block, which is a standard way to handle resources in Java. No explicit exception handling is needed as the exceptions are allowed to propagate and will be caught by JUnit's exception handling mechanism.
+
+3. **Mystery_Guest**:
+   - The `@TempDir` annotation is used to create a temporary directory for the test, eliminating the need to create and manage temporary files manually. This addresses the 'Mystery Guest' code smell by ensuring that all file operations are performed within a controlled and temporary environment.
+
+4. **Resource_Optimism**:
+   - An assertion `assertTrue(Files.exists(test3xml), "File should exist");` is added to ensure that the file exists before performing further checks. This addresses the 'Resource Optimism' code smell by verifying the existence of the file before attempting to read it.
+

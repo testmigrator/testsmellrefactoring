@@ -1,0 +1,29 @@
+total tests: 8
+total asserts: 27
+assertEquals(expectedSize, data.size(), "The form data size should be 6");
+assertEquals("one=two", actualOne, "The first form element should be 'one=two'");
+assertEquals("three=four", actualThreeFirst, "The second form element should be 'three=four'");
+assertEquals("three=five", actualThreeSecond, "The third form element should be 'three=five'");
+assertEquals("six=seven", actualSix, "The fourth form element should be 'six=seven'");
+assertEquals("seven=on", actualSeven, "The fifth form element should be 'seven=on'");
+assertEquals("eight=on", actualEight, "The sixth form element should be 'eight=on'");
+assertEquals(Connection.Method.GET, con.request().method(), "The connection method should be GET");
+assertEquals("http://example.com/search", con.request().url().toExternalForm(), "The connection URL should match the expected URL");
+assertEquals("q=jsoup", actualValue, "The data list should contain the expected key-value pair");
+assertEquals(Connection.Method.POST, con.request().method(), "The connection method should be POST");
+assertEquals("Could not determine a form action URL for submit. Ensure you set a base URI when parsing.", exception.getMessage(), "The exception message should match the expected message");
+assertTrue(formEl instanceof FormElement, "The element selected should be an instance of FormElement");
+assertEquals(expectedElementCount, form.elements().size(), "The form should contain exactly one input element");
+assertTrue(formEl instanceof FormElement, "The selected element should be an instance of FormElement");
+assertEquals(expectedElementsSize, form.elements().size(), "The form should contain exactly one element");
+assertEquals(expectedFormData, actualValue, "The form data should contain 'foo=bar'");
+assertEquals("on", data.get(0).value(), "The value of the checkbox should default to 'on' if no value is set");
+assertEquals("foo", data.get(0).key(), "The key of the checkbox should match the name attribute 'foo'");
+assertEquals(expectedDataSize, data.size(), "The form should contain exactly 3 input elements");
+assertEquals(expectedUserKey, data.get(0).key(), "The first input element should be named 'user'");
+assertEquals(expectedPassKey, data.get(1).key(), "The second input element should be named 'pass'");
+assertEquals(expectedLoginKey, data.get(2).key(), "The third input element should be named 'login'");
+assertEquals(expectedFormDataSize, data.size(), "The form data size should be 2 after removing the password field");
+assertEquals("user", data.get(0).key(), "The first key in form data should be 'user'");
+assertEquals("login", data.get(1).key(), "The second key in form data should be 'login'");
+assertNull(doc.selectFirst("input[name=pass]"), "The password field should be removed from the document");

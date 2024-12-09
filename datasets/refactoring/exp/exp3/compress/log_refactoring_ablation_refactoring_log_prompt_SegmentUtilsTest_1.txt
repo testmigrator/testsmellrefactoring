@@ -1,0 +1,54 @@
+asserts result: 
+ ```java
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class SegmentUtilsTest {
+
+    private static final long[] ONE_TO_TEN = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+    private static final long[] FIVE_SIX_SEVEN = { 5, 6, 7 };
+
+    @Test
+    public void testCountMatchesWithMultipleSegmentsAndEvenPredicate() {
+        int expectedCount = 6;
+        int actualCount = SegmentUtils.countMatches(new long[][] { ONE_TO_TEN, FIVE_SIX_SEVEN }, even);
+        assertEquals("Expected 6 matches for even predicate across multiple segments", expectedCount, actualCount);
+    }
+
+    @Test
+    public void testCountMatchesWithSingleSegmentAndEvenPredicate() {
+        int expectedCount = 5;
+        int actualCount = SegmentUtils.countMatches(new long[][] { ONE_TO_TEN }, even);
+        assertEquals("Expected 5 matches for even predicate in a single segment", expectedCount, actualCount);
+    }
+
+    @Test
+    public void testCountMatchesWithSingleArrayAndEvenPredicate() {
+        int expectedCount = 5;
+        int actualCount = SegmentUtils.countMatches(ONE_TO_TEN, even);
+        assertEquals("Expected 5 matches for even predicate in a single array", expectedCount, actualCount);
+    }
+
+    @Test
+    public void testCountMatchesWithMultipleSegmentsAndFivePredicate() {
+        int expectedCount = 3;
+        int actualCount = SegmentUtils.countMatches(new long[][] { ONE_TO_TEN, FIVE_SIX_SEVEN }, five);
+        assertEquals("Expected 3 matches for five predicate across multiple segments", expectedCount, actualCount);
+    }
+
+    @Test
+    public void testCountMatchesWithSingleSegmentAndFivePredicate() {
+        int expectedCount = 2;
+        int actualCount = SegmentUtils.countMatches(new long[][] { ONE_TO_TEN }, five);
+        assertEquals("Expected 2 matches for five predicate in a single segment", expectedCount, actualCount);
+    }
+
+    @Test
+    public void testCountMatchesWithSingleArrayAndFivePredicate() {
+        int expectedCount = 2;
+        int actualCount = SegmentUtils.countMatches(ONE_TO_TEN, five);
+        assertEquals("Expected 2 matches for five predicate in a single array", expectedCount, actualCount);
+    }
+}
+```
+

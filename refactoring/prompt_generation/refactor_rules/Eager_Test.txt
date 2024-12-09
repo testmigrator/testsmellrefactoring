@@ -1,60 +1,48 @@
 RefactorRule:
   SmellType: Eager Test
-  Description: "Split the test method to ensure each test focuses on verifying a single API."
+  Description: "Refactor test methods to group related assertions logically and extract reusable setup logic into private methods."
   Steps:
-    - Step:
-        Description: "Identify assert statements for each API"
-        Action: IdentifyAssertions
+    - Step1:
+        Description: "Extract shared setup logic into a reusable, private method and ensure it is used across all relevant tests."
+        Action: ExtractSetupMethod
         Parameters:
-          TargetType: Method
-          SourcePattern: |
-            assertEquals(.{api}(), is("{value}"))
-    - Step:
-        Description: "Create new test methods for each assert statement"
-        Action: CreateTestMethod
+          Condition: "If multiple tests share the same setup logic."
+          MethodNamePattern: setupTest{OriginalMethodName}
+    - Step2:
+        Description: "Group related assertions into cohesive sub-tests while retaining necessary setup logic."
+        Action: GroupAssertions
         Parameters:
-          TargetType: Method
-          SourcePattern: |
-            @Test
-            public void {originalMethod}() {
-              stmt
-              assertEquals(.{api}(), is("{value}"))
-            }
-          ReplacementPattern: |
-            @Test
-            public void {newMethod}_{api}() {
-              stmt
-              assertEquals(.{api}(), is("{value}"))
-            }
+          GroupBy: LogicalConcern
+    - Step3:
+        Description: "Create new test methods for each cohesive group of assertions and ensure readability."
+        Action: CreateTestMethods
+        Parameters:
+          IncludeSetup: True
+          NamePattern: test{OriginalMethodName}_{Concern}
   Example:
     Before: |
       @Test
-      public void T() {
-        stmt
-        assertEquals(.api1(), is("1.5"));
-        assertEquals(.api2(), is("2.5"));
-        assertEquals(.api3(), is("3.5"));
+      public void testExample() {
+          setup();
+          assertEquals(1, methodA());
+          assertTrue(methodB());
       }
     After: |
-      @Test
-      public void T_api1() {
-        stmt
-        assertEquals(.api1(), is("1.5"));
+      private void setupTestExample() {
+          setup();
       }
 
       @Test
-      public void T_api2() {
-        stmt
-        assertEquals(.api2(), is("2.5"));
+      public void testExample_MethodA() {
+          setupTestExample();
+          assertEquals(1, methodA());
       }
 
       @Test
-      public void T_api3() {
-        stmt
-        assertEquals(.api3(), is("3.5"));
+      public void testExample_MethodB() {
+          setupTestExample();
+          assertTrue(methodB());
       }
   Variables:
-    originalMethod: "T"
-    newMethod: "T"
-    api: "api1, api2, api3"
-    value: "1.5, 2.5, 3.5"
+    OriginalMethodName: The name of the original test method.
+    LogicalConcern: The logical aspect tested (e.g., a specific API, validation, or behavior).

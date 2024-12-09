@@ -1,0 +1,60 @@
+asserts result: 
+ ```java
+import org.apache.commons.math4.legacy.analysis.BivariateFunction;
+import org.apache.commons.math4.legacy.analysis.FunctionUtils;
+import org.apache.commons.math4.legacy.analysis.MultivariateFunction;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class FunctionUtilsTest {
+
+    private static final double EPSILON = 0.001;
+
+    @ParameterizedTest(name = "Test collector with {0} function and initial value {1}")
+    @CsvSource({
+            "Add, 0, [1, 2, 3, 4], 10",
+            "Multiply, 1, [1, 2, 3, 4], 24",
+            "Max, -Infinity, [1, -2, 7.5, 10, -24, 9.99], 10",
+            "Min, Infinity, [1, -2, 7.5, 10, -24, 9.99], -24"
+    })
+    @DisplayName("Test Collector Function")
+    public void testCollector(String functionName, double initialValue, String[] values, double expectedResult) {
+        BivariateFunction bi = getBivariateFunction(functionName);
+        MultivariateFunction coll = FunctionUtils.collector(bi, initialValue);
+        double[] doubleValues = parseDoubleArray(values);
+        assertEquals(expectedResult, coll.value(doubleValues), EPSILON);
+    }
+
+    private BivariateFunction getBivariateFunction(String functionName) {
+        switch (functionName) {
+            case "Add":
+                return new Add();
+            case "Multiply":
+                return new Multiply();
+            case "Max":
+                return new Max();
+            case "Min":
+                return new Min();
+            default:
+                throw new IllegalArgumentException("Unknown function name: " + functionName);
+        }
+    }
+
+    private double[] parseDoubleArray(String[] values) {
+        double[] result = new double[values.length];
+        for (int i = 0; i < values.length; i++) {
+            result[i] = Double.parseDouble(values[i]);
+        }
+        return result;
+    }
+}
+```
+
+### Explanation of Refactoring Steps:
+1. **Split Eager Tests**: The original test method `testCollector` was performing multiple tests within a single method. This was refactored into a parameterized test using JUnit 5's `@ParameterizedTest` and `@CsvSource` annotations to separate each test case.
+2. **Refactor Duplicate Assertions**: The duplicate assertions were handled by parameterizing the test cases, ensuring each test case is executed independently.
+3. **Extract Magic Numbers**: The magic number `EPS` was replaced with a named constant `EPSILON` to improve readability and maintainability.
+

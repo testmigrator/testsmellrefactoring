@@ -1,0 +1,41 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.*;
+import static com.google.common.truth.Truth.assertThat;
+
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
+import com.google.gson.stream.Strictness;
+
+import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.io.StringReader;
+
+class JsonReaderTest {
+
+    @Test
+    public void testLongLargerThanMinLongThatWrapsAround_PeekReturnsNumber() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("[-22233720368547758070]"));
+        reader.setStrictness(Strictness.LENIENT);
+        reader.beginArray();
+        assertThat(reader.peek()).isEqualTo(JsonToken.NUMBER).withFailMessage("Expected the next token to be a number");
+    }
+
+    @Test
+    public void testLongLargerThanMinLongThatWrapsAround_NextLongThrowsNumberFormatException() {
+        JsonReader reader = new JsonReader(new StringReader("[-22233720368547758070]"));
+        reader.setStrictness(Strictness.LENIENT);
+        try {
+            reader.beginArray();
+            reader.nextLong();
+            fail("Expected NumberFormatException to be thrown");
+        } catch (NumberFormatException e) {
+            // Expected exception
+        } catch (IOException e) {
+            fail("Unexpected IOException was thrown", e);
+        }
+    }
+}
+```
+

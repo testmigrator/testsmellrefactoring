@@ -1,0 +1,56 @@
+asserts result: 
+ ```java
+import org.jfree.chart.renderer.category.IntervalBarRenderer;
+import org.jfree.data.category.DefaultIntervalCategoryDataset;
+import org.junit.Test;
+import static org.junit.Assert.*;
+
+public class IntervalBarRendererTest {
+
+    private static final double MIN_VALUE = 0.0;
+    private static final double MAX_VALUE = 0.9;
+
+    @Test
+    public void testFindRangeBoundsWithNullDataset() {
+        IntervalBarRenderer renderer = new IntervalBarRenderer();
+        assertNull("Expected null range for null dataset", renderer.findRangeBounds(null));
+    }
+
+    @Test
+    public void testFindRangeBoundsWithEmptyDataset() {
+        IntervalBarRenderer renderer = new IntervalBarRenderer();
+        DefaultIntervalCategoryDataset dataset = new DefaultIntervalCategoryDataset(new double[0][0], new double[0][0]);
+        assertNull("Expected null range for empty dataset", renderer.findRangeBounds(dataset));
+    }
+
+    @Test
+    public void testFindRangeBoundsWithNonEmptyDataset() {
+        IntervalBarRenderer renderer = new IntervalBarRenderer();
+        double[][] starts = new double[][] {{0.1, 0.2, 0.3}, {0.3, 0.4, 0.5}};
+        double[][] ends = new double[][] {{0.5, 0.6, 0.7}, {0.7, 0.8, 0.9}};
+        DefaultIntervalCategoryDataset dataset = new DefaultIntervalCategoryDataset(starts, ends);
+
+        assertEquals("Expected range [0.0, 0.9] for non-empty dataset with includeBaseInRange=true",
+                new Range(MIN_VALUE, MAX_VALUE), renderer.findRangeBounds(dataset));
+
+        renderer.setIncludeBaseInRange(false);
+        assertEquals("Expected range [0.1, 0.9] for non-empty dataset with includeBaseInRange=false",
+                new Range(0.1, MAX_VALUE), renderer.findRangeBounds(dataset));
+
+        renderer.setIncludeBaseInRange(true);
+    }
+
+    @Test
+    public void testFindRangeBoundsWithHiddenSeries() {
+        IntervalBarRenderer renderer = new IntervalBarRenderer();
+        double[][] starts = new double[][] {{0.1, 0.2, 0.3}, {0.3, 0.4, 0.5}};
+        double[][] ends = new double[][] {{0.5, 0.6, 0.7}, {0.7, 0.8, 0.9}};
+        DefaultIntervalCategoryDataset dataset = new DefaultIntervalCategoryDataset(starts, ends);
+
+        renderer.setSeriesVisible(1, Boolean.FALSE);
+        assertEquals("Expected range [0.0, 0.7] for non-empty dataset with hidden series",
+                new Range(MIN_VALUE, 0.7), renderer.findRangeBounds(dataset));
+    }
+}
+```
+

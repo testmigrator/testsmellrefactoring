@@ -1,0 +1,15 @@
+asserts result: 
+ - **Statement 10**: `assertEquals("file:/var/log/messages", two.absUrl("href"), "Second link should resolve to file:/var/log/messages");`
+  - **Reason**: The message is misleading because it suggests that the second link should resolve to `file:/var/log/messages`, but the expected value in the assert statement is also `file:/var/log/messages`. This could lead to confusion about what the actual issue is if the test fails. The message should clarify what the expected behavior is or why this specific URL is expected.
+
+- **Statement 14**: `assertEquals("https://jsoup.org/path/file?foo", a1.absUrl("href"), "A1 absolute URL should be correctly resolved");`
+  - **Reason**: The message is slightly ambiguous. It would be clearer if it specified what "correctly resolved" means, such as "A1 absolute URL should resolve to the expected path and query parameters."
+
+- **Statement 15**: `assertEquals("https://jsoup.org/path/bar.html?foo", a2.absUrl("href"), "A2 absolute URL should be correctly resolved");`
+  - **Reason**: Similar to Statement 14, the message is slightly ambiguous. It would be clearer if it specified what "correctly resolved" means, such as "A2 absolute URL should resolve to the expected path and query parameters."
+
+- **Statement 23**: `assertTrue(standAlone.ownerDocument() == null, "A standalone element should have no owner document");`
+  - **Reason**: The message is clear, but the condition being checked (`== null`) could be more explicitly stated in the message, such as "A standalone element should have its owner document set to null."
+
+For all other assert statements, the criteria are met: "yes".
+

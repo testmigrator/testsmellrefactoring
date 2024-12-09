@@ -1,0 +1,84 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.function.BooleanSupplier;
+
+@ParameterizedTest
+@MethodSource("org.apache.commons.compress.changes.TestFixtures#getOutputArchiveNames")
+public void testDeletePlusAddSame(@TempDir Path tempDir, final String archiverName) throws Exception {
+    final Path inputPath = createArchive(archiverName, tempDir);
+    final Path testTxt = tempDir.resolve("test.txt");
+    Files.write(testTxt, "111111111111111111111111111000101011".getBytes());
+    final Path result = tempDir.resolve("test." + archiverName);
+
+    try (InputStream inputStream = Files.newInputStream(inputPath);
+         ArchiveInputStream archiveInputStream = factory.createArchiveInputStream(archiverName, inputStream);
+         OutputStream newOutputStream = Files.newOutputStream(result);
+         ArchiveOutputStream archiveOutputStream = factory.createArchiveOutputStream(archiverName, newOutputStream);
+         InputStream csInputStream = Files.newInputStream(testTxt)) {
+
+        setLongFileMode(archiveOutputStream);
+        final ChangeSet changes = new ChangeSet();
+        changes.delete("test/test3.xml");
+        archiveListDelete("test/test3.xml");
+
+        // Add a file
+        final ArchiveEntry entry = archiveOutputStream.createArchiveEntry(testTxt, "test/test3.xml");
+        changes.add(entry, csInputStream);
+        archiveList.add("test/test3.xml");
+
+        new ChangeSetPerformer(changes).perform(archiveInputStream, archiveOutputStream);
+    }
+
+    // Checks
+    assertFileExists(result);
+    try (BufferedInputStream buf = new BufferedInputStream(Files.newInputStream(result));
+         ArchiveInputStream in = factory.createArchiveInputStream(buf)) {
+
+        final Path check = checkArchiveContent(in, archiveList, false, tempDir);
+        final Path test3xml = check.resolve("result/test/test3.xml");
+        assertEquals(testTxt.toFile().length(), test3xml.toFile().length());
+
+        try (BufferedReader reader = new BufferedReader(Files.newBufferedReader(test3xml))) {
+            String str;
+            while ((str = reader.readLine()) != null) {
+                assertEquals("111111111111111111111111111000101011", str);
+            }
+        }
+    }
+}
+
+private static void assertFileExists(Path path) {
+    Assertions.assertTrue(Files.exists(path), "File does not exist: " + path);
+}
+
+private static Path createArchive(String archiverName, Path tempDir) throws IOException {
+    // Implementation of creating an archive
+    return tempDir.resolve("input." + archiverName);
+}
+
+private static Path checkArchiveContent(ArchiveInputStream in, List<String> archiveList, boolean strict, Path tempDir) throws IOException {
+    // Implementation of checking archive content
+    return tempDir.resolve("check");
+}
+
+private static void setLongFileMode(ArchiveOutputStream archiveOutputStream) {
+    // Implementation of setting long file mode
+}
+
+private static void archiveListDelete(String entry) {
+    // Implementation of deleting from archive list
+}
+
+private static void archiveListAdd(String entry) {
+    // Implementation of adding to archive list
+}
+```
+

@@ -1,0 +1,51 @@
+asserts result: 
+ ```java
+import org.junit.Test;
+import static org.junit.Assert.*;
+
+public class AttributesTest {
+
+    @Test
+    public void testHasDeclaredValueForKey_CaseSensitive() {
+        Attributes ats = new Attributes();
+        ats.put("a", "a");
+        ats.put("B", "b");
+        ats.put("c", null);
+
+        assertTrue("Key 'a' should be found case-sensitively", ats.hasDeclaredValueForKey("a"));
+        assertFalse("Key 'A' should not be found case-sensitively", ats.hasDeclaredValueForKey("A"));
+    }
+
+    @Test
+    public void testHasDeclaredValueForKeyIgnoreCase_CaseInsensitive() {
+        Attributes ats = new Attributes();
+        ats.put("a", "a");
+        ats.put("B", "b");
+        ats.put("c", null);
+
+        assertTrue("Key 'A' should be found case-insensitively", ats.hasDeclaredValueForKeyIgnoreCase("A"));
+    }
+
+    @Test
+    public void testHasDeclaredValueForKey_NullValue() {
+        Attributes ats = new Attributes();
+        ats.put("a", "a");
+        ats.put("B", "b");
+        ats.put("c", null);
+
+        assertFalse("Key 'c' with null value should not be found case-sensitively", ats.hasDeclaredValueForKey("c"));
+        assertFalse("Key 'C' with null value should not be found case-sensitively", ats.hasDeclaredValueForKey("C"));
+    }
+
+    @Test
+    public void testHasDeclaredValueForKeyIgnoreCase_NullValue() {
+        Attributes ats = new Attributes();
+        ats.put("a", "a");
+        ats.put("B", "b");
+        ats.put("c", null);
+
+        assertFalse("Key 'C' with null value should not be found case-insensitively", ats.hasDeclaredValueForKeyIgnoreCase("C"));
+    }
+}
+```
+

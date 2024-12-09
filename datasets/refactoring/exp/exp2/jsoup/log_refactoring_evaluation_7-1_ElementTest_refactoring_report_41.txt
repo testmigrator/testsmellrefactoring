@@ -1,0 +1,11 @@
+asserts result: 
+ Yes
+
+The original test and the refactored tests are functionally consistent. The refactored version splits the original single test into three separate tests, each focusing on a specific aspect of the `testTagNameSet` method. However, all assertions from the original test are preserved and correctly implemented in the refactored tests:
+
+1. **testTagNameSet_iTagRemoved**: Ensures that no `<i>` tags remain after the tag name change.
+2. **testTagNameSet_emTagAdded**: Ensures that one `<em>` tag is present after the tag name change.
+3. **testTagNameSet_htmlContent**: Ensures that the content of the `<div>` is updated to `<em>Hello</em>`.
+
+Each of these tests uses the `setupTestTagNameSet` method to prepare the document, ensuring that the setup is consistent across all tests. Therefore, the functionality is consistent between the original and refactored tests.
+

@@ -1,0 +1,11 @@
+asserts result: 
+ Yes
+
+The refactored tests maintain the same functionality as the original test. The original single test has been split into three separate tests, each focusing on a specific aspect of the `clone` method:
+
+1. **testClone_OrphanedClone**: Verifies that the cloned element is orphaned and has the correct sibling index and parent.
+2. **testClone_AppendChild**: Verifies that appending a child to the cloned element does not modify the original document.
+3. **testClone_AdoptClone**: Verifies that adopting the cloned element into the document updates its parent and modifies the document as expected.
+
+Each of these tests covers the same assertions as the original test, ensuring that the functionality remains consistent.
+

@@ -1,0 +1,5 @@
+total tests: 1
+total asserts: 3
+assertEquals(" href=\"abc\"", generator.generateURLFragment("abc"), "Simple path should generate correct URL fragment");
+assertEquals(" href=\"images/abc.png\"", generator.generateURLFragment("images/abc.png"), "Relative path should generate correct URL fragment");
+assertEquals(" href=\"http://www.jfree.org/images/abc.png\"", generator.generateURLFragment("http://www.jfree.org/images/abc.png"), "Absolute path should generate correct URL fragment");

@@ -1,0 +1,25 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.FormElement;
+import org.jsoup.helper.Connection;
+import static org.junit.Assert.assertEquals;
+import org.junit.Test;
+
+public class FormElementTest {
+
+    @Test
+    public void usesOnForCheckboxValueIfNoValueSet() {
+        // Arrange
+        Document doc = Jsoup.parse("<form><input type=checkbox checked name=foo></form>");
+        FormElement form = (FormElement) doc.select("form").first();
+        List<Connection.KeyVal> data = form.formData();
+
+        // Act & Assert
+        assertEquals("Expected checkbox value to be 'on' when no value is set", "on", data.get(0).value());
+        assertEquals("Expected checkbox key to be 'foo'", "foo", data.get(0).key());
+    }
+}
+```
+

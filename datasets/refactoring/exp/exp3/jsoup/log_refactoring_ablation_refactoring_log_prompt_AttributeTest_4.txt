@@ -1,0 +1,27 @@
+asserts result: 
+ ```java
+import org.junit.Test;
+import static org.junit.Assert.*;
+
+public class AttributeTest {
+
+    @Test
+    public void testHasDeclaredValueWithEmptyString() {
+        Attribute a1 = new Attribute("one", "");
+        assertTrue("Expected attribute with empty string value to have declared value", a1.hasDeclaredValue());
+    }
+
+    @Test
+    public void testHasDeclaredValueWithNull() {
+        Attribute a2 = new Attribute("two", null);
+        assertFalse("Expected attribute with null value to not have declared value", a2.hasDeclaredValue());
+    }
+
+    @Test
+    public void testHasDeclaredValueWithNonEmptyString() {
+        Attribute a3 = new Attribute("thr", "thr");
+        assertTrue("Expected attribute with non-empty string value to have declared value", a3.hasDeclaredValue());
+    }
+}
+```
+

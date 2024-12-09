@@ -1,0 +1,20 @@
+asserts result: 
+ ```java
+import org.junit.Test;
+import static org.junit.Assert.*;
+
+public class RendererChangeDetectorTest {
+
+    @Test
+    public void testDefaultPaintChangeNotification() {
+        RendererChangeDetector detector = new RendererChangeDetector();
+        BarRenderer r1 = new BarRenderer();
+        r1.addChangeListener(detector);
+
+        detector.setNotified(false);
+        r1.setDefaultPaint(Color.RED);
+        assertTrue(detector.getNotified());
+    }
+}
+```
+

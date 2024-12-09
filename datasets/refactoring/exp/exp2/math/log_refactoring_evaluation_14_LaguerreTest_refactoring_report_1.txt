@@ -1,0 +1,5 @@
+asserts result: 
+ yes
+
+The refactored code maintains the same functionality as the original test. The changes primarily involve extracting the computation of the gamma value into a separate method (`computeGammaValue`) and using constants for tolerance and integration order. These changes do not alter the logic or the expected outcomes of the tests. The loop and assertions are still performing the same checks, ensuring that the results match within the specified tolerance.
+

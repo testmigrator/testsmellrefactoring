@@ -1,0 +1,41 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+
+import java.io.IOException;
+import java.io.StringWriter;
+import com.google.gson.stream.JsonWriter;
+
+class JsonWriterTest {
+
+    @ParameterizedTest
+    @ValueSource(strings = {"hello"})
+    public void testNameBeforeBeginObject(String name) throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+
+        IllegalStateException e = assertThrows(IllegalStateException.class, () -> jsonWriter.name(name));
+        assertThat(e.getMessage(), equalTo("Please begin an object before writing a name."));
+    }
+
+    @Test
+    public void testValueAfterName() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+
+        jsonWriter.beginObject();
+        jsonWriter.value(12);
+        jsonWriter.close();
+
+        IllegalStateException e = assertThrows(IllegalStateException.class, () -> jsonWriter.name("hello"));
+        assertThat(e.getMessage(), equalTo("JsonWriter is closed."));
+    }
+}
+```
+

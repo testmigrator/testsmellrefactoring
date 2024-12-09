@@ -1,0 +1,30 @@
+asserts result: 
+ ```java
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.Parser;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+class CommandLineParserTest {
+
+    private Parser parser;
+    private Options options;
+
+    @Test
+    void testSingleOptionFromGroup() {
+        final String[] args = {"-f"};
+
+        CommandLine cl = assertDoesNotThrow(() -> parser.parse(options, args), "Parsing should not throw an exception");
+
+        assertFalse(cl.hasOption("r"), "Confirm -r is NOT set");
+        assertTrue(cl.hasOption("f"), "Confirm -f is set");
+        assertFalse(cl.hasOption("d"), "Confirm -d is NOT set");
+        assertFalse(cl.hasOption("s"), "Confirm -s is NOT set");
+        assertFalse(cl.hasOption("c"), "Confirm -c is NOT set");
+        assertTrue(cl.getArgList().isEmpty(), "Confirm no extra args");
+    }
+}
+```
+

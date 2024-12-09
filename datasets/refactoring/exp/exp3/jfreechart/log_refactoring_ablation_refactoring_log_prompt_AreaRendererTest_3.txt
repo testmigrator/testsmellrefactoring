@@ -1,0 +1,32 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
+
+class AreaRendererTest {
+
+    @Test
+    public void testCloning() {
+        AreaRenderer r1 = new AreaRenderer();
+        
+        // Check if cloning throws CloneNotSupportedException
+        assertDoesNotThrow(() -> CloneUtils.clone(r1), "Cloning should not throw CloneNotSupportedException");
+
+        AreaRenderer r2 = CloneUtils.clone(r1);
+
+        // Verify that r1 and r2 are different objects
+        assertNotSame(r1, r2, "r1 and r2 should be different objects");
+
+        // Verify that r1 and r2 are instances of the same class
+        assertSame(r1.getClass(), r2.getClass(), "r1 and r2 should be instances of the same class");
+
+        // Verify that r1 and r2 are equal
+        assertEquals(r1, r2, "r1 and r2 should be equal");
+
+        // Verify that r1 and r2 are independent
+        TestUtils.checkIndependence(r1, r2, "r1 and r2 should be independent");
+    }
+}
+```
+

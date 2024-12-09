@@ -1,0 +1,36 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class ElementTest {
+
+    private static final String HTML = "<div style='bold'><p title=qux><p><b style></b></p></div>";
+    private static final int EXPECTED_STYLED_ELEMENTS_COUNT = 2;
+    private static final String EXPECTED_FIRST_STYLED_ELEMENT_TAG = "div";
+    private static final String EXPECTED_SECOND_STYLED_ELEMENT_TAG = "b";
+    private static final int EXPECTED_CLASS_ELEMENTS_COUNT = 0;
+
+    @Test
+    public void testGetElementsWithStyleAttribute() {
+        Document doc = Jsoup.parse(HTML);
+        List<Element> styledElements = doc.getElementsByAttribute("style");
+
+        assertEquals("Expected number of elements with 'style' attribute", EXPECTED_STYLED_ELEMENTS_COUNT, styledElements.size());
+        assertEquals("First element with 'style' attribute should be a 'div'", EXPECTED_FIRST_STYLED_ELEMENT_TAG, styledElements.get(0).tagName());
+        assertEquals("Second element with 'style' attribute should be a 'b'", EXPECTED_SECOND_STYLED_ELEMENT_TAG, styledElements.get(1).tagName());
+    }
+
+    @Test
+    public void testGetElementsWithClassAttribute() {
+        Document doc = Jsoup.parse(HTML);
+        List<Element> classElements = doc.getElementsByAttribute("class");
+
+        assertEquals("Expected number of elements with 'class' attribute", EXPECTED_CLASS_ELEMENTS_COUNT, classElements.size());
+    }
+}
+```
+

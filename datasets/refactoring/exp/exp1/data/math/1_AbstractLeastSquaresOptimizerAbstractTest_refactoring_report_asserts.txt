@@ -1,0 +1,7 @@
+total tests: 1
+total asserts: 5
+Assert.assertTrue("Optimum evaluations should be less than " + maxEvaluations,optimum.getEvaluations() < maxEvaluations);
+Assert.assertEquals("Optimum RMS should be close to " + expectedRMS, expectedRMS, optimum.getRMS(), 1e-3);
+Assert.assertEquals("Circle radius should be close to " + expectedRadius, expectedRadius, circle.getRadius(center), 1e-6);
+Assert.assertEquals("Center X coordinate should be close to " + expectedCenterX, expectedCenterX, center.getX(), 1e-6);
+Assert.assertEquals("Center Y coordinate should be close to " + expectedCenterY, expectedCenterY, center.getY(), 1e-6);

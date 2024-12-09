@@ -1,0 +1,36 @@
+Input Parameters:
+Test Code:
+ @Test public void testKeepsPreTextAtDepth() {
+        String h = "<pre><code><span><b>code\n\ncode</b></span></code></pre>";
+        Document doc = Jsoup.parse(h);
+        assertEquals("code\n\ncode", doc.text());
+        assertEquals("<pre><code><span><b>code\n\ncode</b></span></code></pre>", doc.body().html());
+    }
+Context: /org/jsoup/nodes/Element
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+Smell Description List: ['Test Smell Type：Assertion Roulette\n\nFeature:\nA test method contains more than one assertion statement without an explanation/message (parameter in the assertion method).\n', 'Test Smell Type：Eager Test\n\nFeature:\nA test method contains multiple calls to multiple production methods.\n']
+Refactoring DSL: ['RefactorRule:\n  SmellType: Assertion Roulette\n  Description: Add descriptive messages to assert statements to improve readability and maintainability.\n  Steps:\n    - Step:\n        Description: "Add descriptive message to each assert statement(except assertThat, assertThrows)."\n        Action: AddMessageToAssert\n        Parameters:\n          MessagePattern: "{assertionMessage}"\n  Example:\n    Before: |\n      @Test\n      public void T() {\n        stmt\n        assert_1\n        ...\n        assert_n\n        stmt\'\n      }\n    After: |\n      @Test\n      public void T() {\n        stmt\n        assert_1(..., "Descriptive message for assert statement")\n        ...\n        assert_n(..., "Descriptive message for assert statement")\n        stmt\'\n      }\n    Variables:\n      assertionMessage: "Descriptive message for assert statement"\n', 'RefactorRule:\n  SmellType: Eager Test\n  Description: "Refactor test methods to group related assertions logically and extract reusable setup logic into private methods."\n  Steps:\n    - Step1:\n        Description: "Extract shared setup logic into a reusable, private method and ensure it is used across all relevant tests."\n        Action: ExtractSetupMethod\n        Parameters:\n          Condition: "If multiple tests share the same setup logic."\n          MethodNamePattern: setupTest{OriginalMethodName}\n    - Step2:\n        Description: "Group related assertions into cohesive sub-tests while retaining necessary setup logic."\n        Action: GroupAssertions\n        Parameters:\n          GroupBy: LogicalConcern\n    - Step3:\n        Description: "Create new test methods for each cohesive group of assertions and ensure readability."\n        Action: CreateTestMethods\n        Parameters:\n          IncludeSetup: True\n          NamePattern: test{OriginalMethodName}_{Concern}\n  Example:\n    Before: |\n      @Test\n      public void testExample() {\n          setup();\n          assertEquals(1, methodA());\n          assertTrue(methodB());\n      }\n    After: |\n      private void setupTestExample() {\n          setup();\n      }\n\n      @Test\n      public void testExample_MethodA() {\n          setupTestExample();\n          assertEquals(1, methodA());\n      }\n\n      @Test\n      public void testExample_MethodB() {\n          setupTestExample();\n          assertTrue(methodB());\n      }\n  Variables:\n    OriginalMethodName: The name of the original test method.\n    LogicalConcern: The logical aspect tested (e.g., a specific API, validation, or behavior).\n']
+Checkpoints: ['[ ] All assert statements have been added with clear explanatory messages.\n', '[ ] All eager tests have been split into separate tests, each focusing on verifying a single API.\n']
+
+Refactored Code: 
+String h;
+Document doc;
+
+private void setupTestKeepsPreTextAtDepth() {
+    h = "<pre><code><span><b>code\n\ncode</b></span></code></pre>";
+    doc = Jsoup.parse(h);
+}
+
+@Test
+public void testKeepsPreTextAtDepth_Text() {
+    setupTestKeepsPreTextAtDepth();
+    assertEquals("code\n\ncode", doc.text(), "Text content should match the expected value");
+}
+
+@Test
+public void testKeepsPreTextAtDepth_Html() {
+    setupTestKeepsPreTextAtDepth();
+    assertEquals("<pre><code><span><b>code\n\ncode</b></span></code></pre>", doc.body().html(), "HTML content should match the expected value");
+}
+
+

@@ -1,0 +1,5 @@
+asserts result: 
+ Yes
+
+The refactored code maintains the same functionality as the original test. The changes made are primarily structural, moving common setup code into a `@BeforeEach` method and using a parameterized test to handle different inputs. This approach ensures that each test case is run independently with its own setup, maintaining the consistency of the original test's behavior.
+

@@ -1,0 +1,26 @@
+asserts result: 
+ ```java
+import static org.junit.Assert.assertEquals;
+
+import org.junit.Test;
+
+public class OverLIBToolTipTagFragmentGeneratorTest {
+
+    @Test
+    public void testGenerateURLFragmentWithSimpleString() {
+        OverLIBToolTipTagFragmentGenerator generator = new OverLIBToolTipTagFragmentGenerator();
+        String expected = " onMouseOver=\"return overlib('abc');\" onMouseOut=\"return nd();\"";
+        String actual = generator.generateToolTipFragment("abc");
+        assertEquals("For input 'abc', the generated tooltip fragment should match the expected output", expected, actual);
+    }
+
+    @Test
+    public void testGenerateURLFragmentWithComplexString() {
+        OverLIBToolTipTagFragmentGenerator generator = new OverLIBToolTipTagFragmentGenerator();
+        String expected = " onMouseOver=\"return overlib('It\\'s \\\"A\\\", 100.0');\" onMouseOut=\"return nd();\"";
+        String actual = generator.generateToolTipFragment("It's \"A\", 100.0");
+        assertEquals("For input 'It's \"A\", 100.0', the generated tooltip fragment should match the expected output", expected, actual);
+    }
+}
+```
+

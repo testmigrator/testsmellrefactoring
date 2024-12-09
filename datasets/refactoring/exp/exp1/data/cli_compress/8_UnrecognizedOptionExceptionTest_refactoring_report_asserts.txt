@@ -1,0 +1,5 @@
+total tests: 1
+total asserts: 3
+assertEquals("a", new UnrecognizedOptionException("a").getMessage(), "Check if the message is set correctly for single argument constructor");
+assertEquals("a", new UnrecognizedOptionException("a", "b").getMessage(), "Check if the message is set correctly for two arguments constructor");
+assertEquals("b", new UnrecognizedOptionException("a", "b").getOption(), "Check if the option is set correctly for two arguments constructor");

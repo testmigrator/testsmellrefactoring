@@ -1,0 +1,5 @@
+asserts result: 
+ yes
+
+The refactored test maintains the same functionality as the original test. The setup and action parts are identical, and the singularity failure check has been updated to use `assertThrows`, which is a more modern and concise way to assert that an exception is thrown. This change does not affect the functionality of the test.
+

@@ -1,0 +1,18 @@
+asserts result: 
+ ```java
+@Test
+public void testLeadNodesHaveNoChildren() {
+    // Arrange
+    Document doc = Jsoup.parse("<div>Hello there</div>");
+    Element div = doc.select("div").first();
+    TextNode tn = (TextNode) div.childNode(0);
+
+    // Act
+    List<Node> nodes = tn.childNodes();
+
+    // Assert
+    int expectedNumberOfChildren = 0;
+    assertEquals(expectedNumberOfChildren, nodes.size());
+}
+```
+

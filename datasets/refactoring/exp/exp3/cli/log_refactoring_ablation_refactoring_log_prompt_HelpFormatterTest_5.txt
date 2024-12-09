@@ -1,0 +1,36 @@
+asserts result: 
+ ```java
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Options;
+import org.junit.Test;
+
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
+import static org.junit.Assert.assertEquals;
+
+public class HelpFormatterTest {
+
+    private static final String EOL = System.lineSeparator();
+
+    @Test
+    public void testHeaderStartingWithLineSeparator0() {
+        // related to Bugzilla #21215
+        final Options options = new Options();
+        final HelpFormatter formatter = new HelpFormatter();
+        final String header = EOL + "Header";
+        final String footer = "Footer";
+        final StringWriter out = new StringWriter();
+        formatter.printHelp(new PrintWriter(out), 80, "foobar", header, options, 2, 2, footer, true);
+
+        final String expectedOutput = "usage: foobar" + EOL +
+                                      EOL +
+                                      "Header" + EOL +
+                                      EOL +
+                                      "Footer" + EOL;
+
+        assertEquals(expectedOutput, out.toString());
+    }
+}
+```
+

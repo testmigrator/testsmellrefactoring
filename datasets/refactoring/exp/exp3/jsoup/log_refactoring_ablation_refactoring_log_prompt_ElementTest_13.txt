@@ -1,0 +1,33 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.junit.Test;
+import static org.junit.Assert.assertTrue;
+
+public class ElementSiblingIndexTest {
+
+    @Test
+    public void testFirstElementSiblingIndex() {
+        Document doc = Jsoup.parse("<div><p>One</p>...<p>Two</p>...<p>Three</p>");
+        Element firstP = doc.select("p").get(0);
+        assertTrue("First <p> element should have sibling index 0", 0 == firstP.elementSiblingIndex());
+    }
+
+    @Test
+    public void testSecondElementSiblingIndex() {
+        Document doc = Jsoup.parse("<div><p>One</p>...<p>Two</p>...<p>Three</p>");
+        Element secondP = doc.select("p").get(1);
+        assertTrue("Second <p> element should have sibling index 1", 1 == secondP.elementSiblingIndex());
+    }
+
+    @Test
+    public void testThirdElementSiblingIndex() {
+        Document doc = Jsoup.parse("<div><p>One</p>...<p>Two</p>...<p>Three</p>");
+        Element thirdP = doc.select("p").get(2);
+        assertTrue("Third <p> element should have sibling index 2", 2 == thirdP.elementSiblingIndex());
+    }
+}
+```
+

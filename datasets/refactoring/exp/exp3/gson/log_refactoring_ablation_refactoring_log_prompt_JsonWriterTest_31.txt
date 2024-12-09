@@ -1,0 +1,106 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import com.google.gson.stream.JsonWriter;
+import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.io.StringWriter;
+
+class JsonWriterTest {
+
+    @Test
+    public void testBeginArray() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        assertDoesNotThrow(jsonWriter::beginArray);
+        assertEquals("[", stringWriter.toString());
+    }
+
+    @Test
+    public void testValueZero() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.beginArray();
+        assertDoesNotThrow(() -> jsonWriter.value(0));
+        assertEquals("[0", stringWriter.toString());
+    }
+
+    @Test
+    public void testValueOne() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.beginArray();
+        jsonWriter.value(0);
+        assertDoesNotThrow(() -> jsonWriter.value(1));
+        assertEquals("[0,1", stringWriter.toString());
+    }
+
+    @Test
+    public void testValueNegativeOne() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.beginArray();
+        jsonWriter.value(0);
+        jsonWriter.value(1);
+        assertDoesNotThrow(() -> jsonWriter.value(-1));
+        assertEquals("[0,1,-1", stringWriter.toString());
+    }
+
+    @Test
+    public void testValueMinLong() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.beginArray();
+        jsonWriter.value(0);
+        jsonWriter.value(1);
+        jsonWriter.value(-1);
+        assertDoesNotThrow(() -> jsonWriter.value(Long.MIN_VALUE));
+        assertEquals("[0,1,-1,-9223372036854775808", stringWriter.toString());
+    }
+
+    @Test
+    public void testValueMaxLong() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.beginArray();
+        jsonWriter.value(0);
+        jsonWriter.value(1);
+        jsonWriter.value(-1);
+        jsonWriter.value(Long.MIN_VALUE);
+        assertDoesNotThrow(() -> jsonWriter.value(Long.MAX_VALUE));
+        assertEquals("[0,1,-1,-9223372036854775808,9223372036854775807", stringWriter.toString());
+    }
+
+    @Test
+    public void testEndArray() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.beginArray();
+        jsonWriter.value(0);
+        jsonWriter.value(1);
+        jsonWriter.value(-1);
+        jsonWriter.value(Long.MIN_VALUE);
+        jsonWriter.value(Long.MAX_VALUE);
+        assertDoesNotThrow(jsonWriter::endArray);
+        assertEquals("[0,1,-1,-9223372036854775808,9223372036854775807]", stringWriter.toString());
+    }
+
+    @Test
+    public void testClose() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.beginArray();
+        jsonWriter.value(0);
+        jsonWriter.value(1);
+        jsonWriter.value(-1);
+        jsonWriter.value(Long.MIN_VALUE);
+        jsonWriter.value(Long.MAX_VALUE);
+        jsonWriter.endArray();
+        assertDoesNotThrow(jsonWriter::close);
+    }
+}
+```
+

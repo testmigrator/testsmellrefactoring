@@ -1,0 +1,11 @@
+asserts result: 
+ yes
+
+The refactored tests maintain the same functionality as the original test. The original single test has been split into three separate tests, each focusing on a specific part of the functionality:
+
+1. **testHelpWithLongOptSeparator_DefaultSeparator**: This checks that the default long option separator is correctly set to `--`.
+2. **testHelpWithLongOptSeparator_SetSeparator**: This verifies that the long option separator can be set to a custom value (`=` in this case).
+3. **testHelpWithLongOptSeparator_PrintHelp**: This tests the actual output of the help message, ensuring it matches the expected format with the correct long option separator.
+
+The refactored code also includes helper methods to reduce redundancy and improve readability, but the overall functionality remains consistent with the original test.
+

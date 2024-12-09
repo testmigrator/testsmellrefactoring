@@ -1,0 +1,41 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import static org.junit.jupiter.api.Assertions.*;
+
+class LevelRendererTest {
+
+    private LevelRenderer r1;
+    private LevelRenderer r2;
+
+    @BeforeEach
+    void setUp() {
+        r1 = new LevelRenderer();
+        r2 = new LevelRenderer();
+    }
+
+    @Test
+    void testEquals_DefaultState() {
+        assertEquals(r1, r2, "Default state should be equal");
+        assertEquals(r2, r1, "Default state should be equal");
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "0.123, setItemMargin",
+        "0.234, setMaximumItemWidth"
+    })
+    void testEquals_AfterSettingSingleProperty(double value, String methodName) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        Method method = LevelRenderer.class.getMethod(methodName, double.class);
+        method.invoke(r1, value);
+        assertNotEquals(r1, r2, "Objects should not be equal after setting " + methodName + " on r1");
+
+        method.invoke(r2, value);
+        assertEquals(r1, r2, "Objects should be equal after setting " + methodName + " on both r1 and r2");
+    }
+}
+```
+

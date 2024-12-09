@@ -1,0 +1,11 @@
+asserts result: 
+ yes
+
+The refactored tests maintain the same functionality as the original test. Each refactored test method focuses on a specific part of the original test:
+
+1. `testLenientExtraCommasInMaps_BeginObjectAndNextName` checks that the JSON reader can correctly parse the object and the first name.
+2. `testLenientExtraCommasInMaps_NextString` verifies that the next string value is correctly read.
+3. `testLenientExtraCommasInMaps_PeekThrowsException` ensures that attempting to peek after an extra comma results in the expected `MalformedJsonException`.
+
+All these methods together cover the same logic and assertions as the original test, ensuring consistency in functionality.
+

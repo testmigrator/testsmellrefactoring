@@ -1,0 +1,12 @@
+total tests: 3
+total asserts: 10
+assertEquals("Expected r1 and r2 to be equal", r1, r2);
+assertEquals("Expected hash codes of r1 and r2 to be equal", h1, h2);
+assertNotSame(r1, r2, "The cloned object should not be the same instance as the original");
+assertSame(r1.getClass(), r2.getClass(), "The cloned object should be of the same class as the original");
+assertEquals(r1, r2, "The cloned object should be equal to the original");
+assertNull(renderer.findRangeBounds(null), "Expected null when dataset is null");
+assertNull(renderer.findRangeBounds(dataset), "Expected null when dataset is empty");
+assertEquals(expectedRange, renderer.findRangeBounds(dataset), "Expected range with base included");
+assertEquals(expectedRange, renderer.findRangeBounds(dataset), "Expected range without base included");
+assertEquals(expectedRange, renderer.findRangeBounds(dataset), "Expected range when series 1 is not visible");

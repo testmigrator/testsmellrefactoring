@@ -1,0 +1,34 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import org.apache.commons.cli.TypeHandler;
+import org.junit.jupiter.api.Test;
+
+public class TypeHandlerTest {
+
+    private static final String ZERO_STRING = "0";
+    private static final String ZERO_FLOAT_STRING = "0.0";
+    private static final long EXPECTED_ZERO_LONG = 0L;
+    private static final double EXPECTED_ZERO_DOUBLE = 0.0;
+
+    @Test
+    public void testCreateNumberZeroLong() {
+        long result = TypeHandler.createNumber(ZERO_STRING);
+        assertEquals(EXPECTED_ZERO_LONG, result, "Expected createNumber(\"0\") to return 0L");
+    }
+
+    @Test
+    public void testCreateNumberZeroDouble() {
+        double result = TypeHandler.createNumber(ZERO_FLOAT_STRING);
+        assertEquals(EXPECTED_ZERO_DOUBLE, result, "Expected createNumber(\"0.0\") to return 0.0");
+    }
+
+    @Test
+    public void testCreateNumberParseException() {
+        assertThrows(ParseException.class, () -> TypeHandler.createNumber("invalid"));
+    }
+}
+```
+

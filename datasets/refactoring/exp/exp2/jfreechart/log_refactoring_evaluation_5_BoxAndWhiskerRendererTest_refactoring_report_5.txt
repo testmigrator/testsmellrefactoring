@@ -1,0 +1,5 @@
+asserts result: 
+ yes
+
+The functionality between the original test and the refactored test is consistent. The main change in the refactored code is the use of `assertDoesNotThrow` instead of manually catching exceptions and setting a boolean flag to check if the operation was successful. This change does not alter the core behavior of the test, which is to ensure that drawing the chart does not throw an exception. Both versions of the test will pass if no exception is thrown during the drawing process.
+

@@ -1,0 +1,77 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+
+class LegendGraphicTest {
+
+    private LegendGraphic g1;
+    private LegendGraphic g2;
+
+    @BeforeEach
+    public void setUp() {
+        g1 = new LegendGraphic(new Rectangle2D.Double(1.0, 2.0, 3.0, 4.0), Color.BLACK);
+        g2 = new LegendGraphic(new Rectangle2D.Double(1.0, 2.0, 3.0, 4.0), Color.BLACK);
+    }
+
+    @Test
+    public void testInitialEquality() {
+        assertEquals(g1, g2, "Initial objects should be equal");
+        assertEquals(g2, g1, "Initial objects should be equal in reverse order");
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "setShapeVisible, false, false",
+        "setShape, 4.0, 3.0, 2.0, 1.0, 4.0, 3.0, 2.0, 1.0",
+        "setShapeFilled, false, false",
+        "setFillPaint, GREEN, GREEN",
+        "setShapeOutlineVisible, false, false",
+        "setOutlinePaint, GREEN, GREEN",
+        "setOutlineStroke, 1.23, 1.23",
+        "setShapeAnchor, BOTTOM_RIGHT, BOTTOM_RIGHT",
+        "setShapeLocation, BOTTOM_RIGHT, BOTTOM_RIGHT",
+        "setLineVisible, false, false",
+        "setLine, 1.0, 2.0, 3.0, 4.0, 1.0, 2.0, 3.0, 4.0",
+        "setLinePaint, GREEN, GREEN",
+        "setLineStroke, 1.23, 1.23",
+        "setFillPaintTransformer, CENTER_HORIZONTAL, CENTER_HORIZONTAL"
+    })
+    public void testPropertyChanges(String methodName, Object... params) throws Exception {
+        invokeMethod(g1, methodName, params);
+        assertNotEquals(g1, g2, "Objects should not be equal after changing " + methodName);
+
+        invokeMethod(g2, methodName, params);
+        assertEquals(g1, g2, "Objects should be equal after changing " + methodName + " in both instances");
+    }
+
+    private void invokeMethod(Object target, String methodName, Object[] params) throws Exception {
+        Class<?> targetClass = target.getClass();
+        Class<?>[] paramTypes = new Class<?>[params.length];
+        for (int i = 0; i < params.length; i++) {
+            if (params[i] instanceof Double) {
+                paramTypes[i] = double.class;
+            } else if (params[i] instanceof Float) {
+                paramTypes[i] = float.class;
+            } else if (params[i] instanceof Boolean) {
+                paramTypes[i] = boolean.class;
+            } else if (params[i] instanceof String) {
+                paramTypes[i] = Class.forName("org.jfree.ui.RectangleAnchor");
+            } else if (params[i] instanceof Color) {
+                paramTypes[i] = Color.class;
+            } else if (params[i] instanceof GradientPaintTransformType) {
+                paramTypes[i] = GradientPaintTransformType.class;
+            } else {
+                throw new IllegalArgumentException("Unsupported parameter type: " + params[i].getClass());
+            }
+        }
+        targetClass.getMethod(methodName, paramTypes).invoke(target, params);
+    }
+}
+```
+

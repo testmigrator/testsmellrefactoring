@@ -1,0 +1,62 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import static org.junit.jupiter.api.Assertions.*;
+import org.jfree.chart.renderer.category.BarRenderer;
+import org.jfree.data.category.DefaultCategoryDataset;
+import org.jfree.data.Range;
+
+public class BarRendererTest {
+
+    private BarRenderer renderer;
+    private DefaultCategoryDataset<String, String> dataset;
+
+    @BeforeEach
+    public void setUp() {
+        renderer = new BarRenderer();
+        dataset = new DefaultCategoryDataset<>();
+    }
+
+    @Test
+    public void testFindRangeBoundsWithNullDataset() {
+        assertNull(renderer.findRangeBounds(null), "Expected null for null dataset");
+    }
+
+    @Test
+    public void testFindRangeBoundsWithEmptyDataset() {
+        assertNull(renderer.findRangeBounds(dataset), "Expected null for empty dataset");
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "1.0, true, 0.0, 1.0",
+        "1.0, false, 1.0, 1.0",
+        "-2.0, true, -2.0, 1.0",
+        "-6.0, true, -6.0, 1.0"
+    })
+    public void testFindRangeBoundsWithValues(double value, boolean includeBase, double expectedLowerBound, double expectedUpperBound) {
+        dataset.addValue(value, "R1", "C1");
+        renderer.setIncludeBaseInRange(includeBase);
+        assertEquals(new Range(expectedLowerBound, expectedUpperBound), renderer.findRangeBounds(dataset),
+            "Expected range [" + expectedLowerBound + ", " + expectedUpperBound + "] for value " + value + " and includeBase " + includeBase);
+    }
+
+    @Test
+    public void testFindRangeBoundsWithNullValue() {
+        dataset.addValue(-2.0, "R1", "C2");
+        dataset.addValue(null, "R1", "C3");
+        assertEquals(new Range(-2.0, 1.0), renderer.findRangeBounds(dataset), "Expected range [-2.0, 1.0] with null value");
+    }
+
+    @Test
+    public void testFindRangeBoundsWithHiddenSeries() {
+        dataset.addValue(-6.0, "R2", "C1");
+        renderer.setSeriesVisible(1, Boolean.FALSE);
+        assertEquals(new Range(-2.0, 1.0), renderer.findRangeBounds(dataset), "Expected range [-2.0, 1.0] with hidden series");
+    }
+}
+```
+

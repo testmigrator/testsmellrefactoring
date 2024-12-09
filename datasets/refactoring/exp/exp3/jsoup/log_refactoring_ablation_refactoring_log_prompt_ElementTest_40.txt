@@ -1,0 +1,29 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import static org.junit.Assert.assertEquals;
+
+public class ElementTest {
+
+    @Test
+    public void testBeforeWithMultipleElements() {
+        Document doc = Jsoup.parse("<div><p>Hello</p><p>There</p></div>");
+        Element p1 = doc.select("p").first();
+        p1.before("<div>one</div><div>two</div>");
+        String expectedHtml = "<div><div>one</div><div>two</div><p>Hello</p><p>There</p></div>";
+        assertEquals("Inserting multiple elements before the first <p> tag", expectedHtml, TextUtil.stripNewlines(doc.body().html()));
+    }
+
+    @Test
+    public void testBeforeWithSingleElementAndComment() {
+        Document doc = Jsoup.parse("<div><p>Hello</p><p>There</p></div>");
+        Element lastP = doc.select("p").last();
+        lastP.before("<p>Three</p><!-- four -->");
+        String expectedHtml = "<div><p>Hello</p><p>Three</p><!-- four --><p>There</p></div>";
+        assertEquals("Inserting a single element and a comment before the last <p> tag", expectedHtml, TextUtil.stripNewlines(doc.body().html()));
+    }
+}
+```
+

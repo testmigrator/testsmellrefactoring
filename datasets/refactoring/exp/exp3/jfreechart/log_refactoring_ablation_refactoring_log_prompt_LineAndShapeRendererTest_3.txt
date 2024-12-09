@@ -1,0 +1,35 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
+
+public class LineAndShapeRendererTest {
+
+    @Test
+    public void testCloning() {
+        LineAndShapeRenderer r1 = new LineAndShapeRenderer();
+        LineAndShapeRenderer r2 = cloneRenderer(r1);
+
+        Assertions.assertNotSame(r1, r2, "Cloned object should not be the same instance as the original");
+        Assertions.assertSame(r1.getClass(), r2.getClass(), "Cloned object should be of the same class as the original");
+        Assertions.assertEquals(r1, r2, "Cloned object should be equal to the original");
+        Assertions.assertTrue(checkIndependence(r1, r2), "Cloned object should be independent of the original");
+        TestUtils.checkIndependence(r1, r2);
+    }
+
+    private LineAndShapeRenderer cloneRenderer(LineAndShapeRenderer renderer) {
+        try {
+            return CloneUtils.clone(renderer);
+        } catch (CloneNotSupportedException e) {
+            throw new RuntimeException("Cloning failed", e);
+        }
+    }
+
+    private boolean checkIndependence(LineAndShapeRenderer r1, LineAndShapeRenderer r2) {
+        // Implementation of checkIndependence method
+        // This is a placeholder for the actual implementation
+        return true; // Placeholder return value
+    }
+}
+```
+

@@ -1,0 +1,60 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.junit.Test;
+import static org.junit.Assert.*;
+
+public class ElementTest {
+
+    private static final String HTML = "<div><span class=' mellow yellow '>Hello <b>Yellow</b></span></div>";
+    private static final String SPAN_CLASS_NAME = "mellow yellow";
+    private static final int EXPECTED_CLASS_COUNT = 2;
+
+    @Test
+    public void testSpanClassName() {
+        Document doc = Jsoup.parse(HTML);
+        Element span = doc.getElementsByAttribute("class").get(0);
+        assertEquals("Expected span class name to be 'mellow yellow'", SPAN_CLASS_NAME, span.className());
+    }
+
+    @Test
+    public void testSpanHasClasses() {
+        Document doc = Jsoup.parse(HTML);
+        Element span = doc.getElementsByAttribute("class").get(0);
+        assertTrue("Expected span to have class 'mellow'", span.hasClass("mellow"));
+        assertTrue("Expected span to have class 'yellow'", span.hasClass("yellow"));
+    }
+
+    @Test
+    public void testSpanClassCount() {
+        Document doc = Jsoup.parse(HTML);
+        Element span = doc.getElementsByAttribute("class").get(0);
+        Set<String> classes = span.classNames();
+        assertEquals("Expected span to have 2 classes", EXPECTED_CLASS_COUNT, classes.size());
+        assertTrue("Expected span to contain class 'mellow'", classes.contains("mellow"));
+        assertTrue("Expected span to contain class 'yellow'", classes.contains("yellow"));
+    }
+
+    @Test
+    public void testDocumentClassName() {
+        Document doc = Jsoup.parse(HTML);
+        assertEquals("Expected document class name to be empty", "", doc.className());
+    }
+
+    @Test
+    public void testDocumentClassCount() {
+        Document doc = Jsoup.parse(HTML);
+        Set<String> classes = doc.classNames();
+        assertEquals("Expected document to have 0 classes", 0, classes.size());
+    }
+
+    @Test
+    public void testDocumentHasNoClasses() {
+        Document doc = Jsoup.parse(HTML);
+        assertFalse("Expected document to not have class 'mellow'", doc.hasClass("mellow"));
+    }
+}
+```
+

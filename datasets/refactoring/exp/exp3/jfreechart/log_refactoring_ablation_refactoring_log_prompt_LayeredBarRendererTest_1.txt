@@ -1,0 +1,52 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import static org.junit.jupiter.api.Assertions.*;
+
+class LayeredBarRendererTest {
+
+    private LayeredBarRenderer r1;
+    private LayeredBarRenderer r2;
+
+    @BeforeEach
+    public void setUp() {
+        r1 = new LayeredBarRenderer();
+        r2 = new LayeredBarRenderer();
+    }
+
+    @Test
+    public void testEquals_initialState() {
+        assertEquals(r1, r2, "Initial state should be equal");
+    }
+
+    @Test
+    public void testEquals_afterSettingSeriesBarWidth() {
+        r1.setSeriesBarWidth(1, 10.0);
+        assertNotEquals(r1, r2, "Should not be equal after setting series bar width on r1");
+
+        r2.setSeriesBarWidth(1, 10.0);
+        assertEquals(r1, r2, "Should be equal after setting series bar width on both r1 and r2");
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "3.0, 0.0",
+        "0.0, 3.0",
+        "3.0, 3.0"
+    })
+    public void testEquals_afterSettingBase(double base1, double base2) {
+        r1.setBase(base1);
+        r2.setBase(base2);
+
+        if (base1 == base2) {
+            assertEquals(r1, r2, "Should be equal after setting base to " + base1);
+        } else {
+            assertNotEquals(r1, r2, "Should not be equal after setting different bases");
+        }
+    }
+}
+```
+

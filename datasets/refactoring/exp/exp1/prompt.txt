@@ -1,0 +1,5 @@
+Prompt:
+Suppose you are a Java testing expert. Given a set of assert statements, please evaluate each assert statement on the following criteria:
+1. Whether the message parameter information is semantically clear.
+2. Whether the meaning of the message correctly expresses the purpose of the assert statement.
+Response format: If the criteria are met, simply reply with: “yes”. If the criteria are not met for either of the two conditions, please indicate which assert statement it is and the reason for the non-compliance.

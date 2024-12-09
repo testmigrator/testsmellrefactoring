@@ -1,0 +1,44 @@
+Input Parameters:
+Test Code:
+ @Test
+    public void testYahooArticle() throws IOException {
+        File in = getFile("/htmltests/yahoo-article-1.html");
+        Document doc = Jsoup.parse(in, "UTF-8", "http://news.yahoo.com/s/nm/20100831/bs_nm/us_gm_china");
+        Element p = doc.select("p:contains(Volt will be sold in the United States)").first();
+        assertEquals("In July, GM said its electric Chevrolet Volt will be sold in the United States at $41,000 -- $8,000 more than its nearest competitor, the Nissan Leaf.", p.text());
+    }
+Context: 
+Smell List: ['Exception_Catching_Throwing', 'Mystery_Guest', 'Resource_Optimism']
+Smell Description List: ['Test Smell Type：Exception_Catching_Throwing\n\nFeature:\nA test method that contains either a throw statement or a catch clause.\n', 'Test Smell Type：Mystery Guest\n\nFeature:\nA test method containing object instances of files and databases classes.\n', 'Test Smell Type：Resource Optimism\n\nFeature:\nThis smell occurs when a test method makes an optimistic assumption that the external resource (e.g., File), utilized by the test method, exists.\n']
+Refactoring DSL: ['RefactorRule:\n  SmellType: Exception_Catching_Throwing\n  Description: Ensure tests use assertDoesNotThrow to verify no exceptions are thrown and remove any throws declaration in test methods.\n  Steps:\n    - Step:\n        Description: "Handle try-catch blocks containing \'fail\' calls"\n        Action: ReplaceTryCatchWithAssertThrows\n        Parameters:\n          SourcePattern: |\n            try {\n              {tryBlock}\n              fail();\n            } catch ({exception}) {\n              {catchBlock}\n            }\n          ReplacementPattern: |\n            {exception} exception = assertThrows({exception}.class, () -> {\n              {tryBlock}\n            });\n            {catchBlock}\n    - Step:\n        Description: "Handle test methods with \'throws\' declaration but no try-catch block"\n        Action: WrapWithAssertDoesNotThrow\n        Parameters:\n          DetectionPattern: |\n            MethodDeclaration [throws!=null && BodyContainsTryCatch=false]\n          ReplacementPattern: |\n            assertDoesNotThrow(() -> {\n              {methodBody}\n            }, "Unexpected exception occurred during the test");\n\n    - Step:\n        Description: "Handle test methods with try-catch blocks without \'fail\' calls"\n        Action: ReplaceTryCatchWithoutFail\n        Parameters:\n          SourcePattern: |\n            try {\n              {tryBlock}\n            } catch ({exception}) {\n              {catchBlock}\n            }\n          ReplacementPattern: |\n            assertDoesNotThrow(() -> {\n              {tryBlock}\n            });\n            {catchBlock}\n\n  Example:\n    Before: |\n      @Test\n      public void T() {\n        stmt\n        try {\n            stmt\'\n            fail();\n        } catch (E) {\n            evs\n        }\n        stmt\'\'\n      }\n    After: |\n      @Test\n      public void T() {\n        stmt\n        assertThrows(E.class, () -> {\n            stmt\'\n        });\n        evs\n        stmt\'\'\n      }\n  Variables:\n    exception: E\n    tryBlock: stmt\'\n    catchBlock: evs\n    tryBlockStatement: stmt\'i\n', 'RefactorRule:\n  SmellType: Mystery Guest\n  Description: "Use JUnit 5 Temporary Directory feature to handle temporary files in a more controlled manner."\n  Steps:\n    - Step:\n        Description: "Annotate test method with @TempDir to inject a temporary directory"\n        Action: AddAnnotation\n        Parameters:\n          TargetType: Method\n          Annotation: @TempDir File {tempDirVariable}\n    - Step:\n        Description: "Replace direct creation of temporary files with creation using the injected temporary directory"\n        Action: ReplaceMethodCall\n        Parameters:\n          TargetMethod: "File.createTempFile"\n          ReplacementPattern: "{tempDirVariable}.createTempFile"\n          Import: "org.junit.jupiter.api.io.TempDir"\n  Example:\n    Before: |\n      @Test\n      public void T() {\n          stmt\n          File.createTempFile(params)\n          stmt\'\n      }\n    After: |\n      @Test\n      public void T(@TempDir File D) {\n          stmt\n          D.createTempFile(params)\n          stmt\'\n      }\n  Variables:\n    tempDirVariable: "D"\n', 'RefactorRule:\n  SmellType: Resource Optimism\n  Description: "Add an assertion to ensure that the required file or directory exists before performing operations on it, or give a hint if the test logic does not require file existence check."\n  Steps:\n    - Step:\n        Description: "Check if the file existence is critical for the test, and add an assertion if necessary."\n        Action: |\n          If {fileVariable} requires existence check:\n            AddAssertion\n            Parameters:\n              TargetPattern: |\n                File {fileVariable} = ...;\n              Assertion: |\n                if (!{fileVariable}.exists() || {fileVariable}.isDirectory()) {\n                    fail("File or directory does not exist or is not of the expected type.");\n                }\n          Else:\n            ProvideHint\n            Parameters:\n              HintMessage: "The file existence is not critical for this test. Consider reviewing if a file check is necessary. For example, \'new File(\\"\\")\' does not represent a real file."\n\n  Example:\n   Before: |\n      @Test\n      public void T() {\n        File outputFile = ...;\n        stmt\n        assert\n      }\n    After: |\n      @Test\n      public void T() {\n        File outputFile = ...;\n        if (!outputFile.exists() || outputFile.isDirectory()) {\n            // Hint: The file does not exist, but this may be expected behavior for the test.\n        }\n        stmt\n        assert\n      }\n  Variables:\n    fileVariable: "file"\n']
+Checkpoints: ['[ ] All exception handling has been refactored to use the JUnit 5 Exception Handling feature.\n', '[ ] All instances of the ‘Mystery Guest’ code smell have been refactored using the JUnit 5 Temporary Directory feature, annotating a temporary directory and considering its use in the external file instantiation steps.\n', '[ ] All instances of the ‘Resource Optimism’ code smell have been refactored by adding an assertion to check for file existence.\n']
+
+Refactored Code: 
+ 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+
+import java.io.File;
+import java.io.IOException;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+public class YahooArticleTest {
+
+    @Test
+    public void testYahooArticle(@TempDir File tempDir) {
+        File in = new File(tempDir, "yahoo-article-1.html");
+        assertTrue(in.exists() && in.isFile(), "File or directory does not exist or is not of the expected type.");
+
+        assertDoesNotThrow(() -> {
+            Document doc = Jsoup.parse(in, "UTF-8", "http://news.yahoo.com/s/nm/20100831/bs_nm/us_gm_china");
+            Element p = doc.select("p:contains(Volt will be sold in the United States)").first();
+            assertEquals("In July, GM said its electric Chevrolet Volt will be sold in the United States at $41,000 -- $8,000 more than its nearest competitor, the Nissan Leaf.", p.text());
+        }, "Unexpected exception occurred during the test");
+    }
+}
+
+

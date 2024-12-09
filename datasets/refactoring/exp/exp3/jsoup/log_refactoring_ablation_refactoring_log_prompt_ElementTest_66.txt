@@ -1,0 +1,66 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class ElementTest {
+
+    @Test
+    public void testRemoveAttributeZero() {
+        String html = "<a one two three four>Text</a>";
+        Document doc = Jsoup.parse(html);
+        Element a = doc.select("a").first();
+        a.removeAttr("zero");
+        assertEquals("<a one two three four>Text</a>", a.outerHtml());
+    }
+
+    @Test
+    public void testRemoveAttributeOne() {
+        String html = "<a one two three four>Text</a>";
+        Document doc = Jsoup.parse(html);
+        Element a = doc.select("a").first();
+        a.removeAttr("one");
+        assertEquals("<a two three four>Text</a>", a.outerHtml());
+    }
+
+    @Test
+    public void testRemoveAttributeTwo() {
+        String html = "<a one two three four>Text</a>";
+        Document doc = Jsoup.parse(html);
+        Element a = doc.select("a").first();
+        a.removeAttr("two");
+        assertEquals("<a one three four>Text</a>", a.outerHtml());
+    }
+
+    @Test
+    public void testRemoveAttributeThree() {
+        String html = "<a one two three four>Text</a>";
+        Document doc = Jsoup.parse(html);
+        Element a = doc.select("a").first();
+        a.removeAttr("three");
+        assertEquals("<a one two four>Text</a>", a.outerHtml());
+    }
+
+    @Test
+    public void testRemoveAttributeFour() {
+        String html = "<a one two three four>Text</a>";
+        Document doc = Jsoup.parse(html);
+        Element a = doc.select("a").first();
+        a.removeAttr("four");
+        assertEquals("<a one two three>Text</a>", a.outerHtml());
+    }
+
+    @Test
+    public void testRemoveAttributeFive() {
+        String html = "<a one two three four>Text</a>";
+        Document doc = Jsoup.parse(html);
+        Element a = doc.select("a").first();
+        a.removeAttr("five");
+        assertEquals("<a one two three four>Text</a>", a.outerHtml());
+    }
+}
+```
+

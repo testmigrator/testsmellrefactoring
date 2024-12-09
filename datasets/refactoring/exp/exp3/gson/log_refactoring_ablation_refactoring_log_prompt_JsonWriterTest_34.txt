@@ -1,0 +1,60 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+
+import com.google.gson.stream.JsonWriter;
+import com.google.gson.internal.LazilyParsedNumber;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import java.io.IOException;
+import java.io.StringWriter;
+
+@DisplayName("Tests for malformed numbers")
+public class MalformedNumbersTest {
+
+    @ParameterizedTest(name = "Testing malformed number: {0}")
+    @ValueSource(strings = {
+        "some text",
+        "",
+        ".",
+        "00",
+        "01",
+        "-00",
+        "-",
+        "--1",
+        "+1",
+        "+",
+        "1,0",
+        "1,000",
+        "0.",
+        ".1",
+        "e1",
+        ".e1",
+        ".1e1",
+        "1e-",
+        "1e+",
+        "1e--1",
+        "1e+-1",
+        "1e1e1",
+        "1+e1",
+        "1e1.0"
+    })
+    public void testMalformedNumbers(String malformedNumber) {
+        JsonWriter jsonWriter = new JsonWriter(new StringWriter());
+        IllegalArgumentException e = assertThrows(
+            IllegalArgumentException.class,
+            () -> jsonWriter.value(new LazilyParsedNumber(malformedNumber)),
+            "Expected IllegalArgumentException to be thrown for malformed number: " + malformedNumber
+        );
+        assertThat(e.getMessage(), equalTo(
+            "String created by class com.google.gson.internal.LazilyParsedNumber is not a valid" +
+            " JSON number: " + malformedNumber
+        ));
+    }
+}
+```
+

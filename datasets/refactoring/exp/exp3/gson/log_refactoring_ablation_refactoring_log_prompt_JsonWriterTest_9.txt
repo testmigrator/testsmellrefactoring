@@ -1,0 +1,38 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+
+import com.google.gson.stream.JsonWriter;
+import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.io.StringWriter;
+
+class JsonWriterTest {
+
+    @Test
+    public void testBeginObject() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.beginObject();
+
+        // Verify that beginObject starts an object
+        assertThat(stringWriter.toString(), equalTo("{"));
+    }
+
+    @Test
+    public void testWriteNameTwice() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.beginObject();
+        jsonWriter.name("a");
+
+        // Verify that writing the same name twice throws an IllegalStateException
+        var e = assertThrows(IllegalStateException.class, () -> jsonWriter.name("a"));
+        assertThat(e.getMessage(), equalTo("Already wrote a name, expecting a value."));
+    }
+}
+```
+

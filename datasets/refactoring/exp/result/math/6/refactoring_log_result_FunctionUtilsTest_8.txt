@@ -1,0 +1,83 @@
+Input Parameters:
+Test Code:
+ @Test
+    public void testCollector() {
+        BivariateFunction bi = new Add();
+        MultivariateFunction coll = FunctionUtils.collector(bi, 0);
+        Assert.assertEquals(10, coll.value(new double[] {1, 2, 3, 4}), EPS);
+
+        bi = new Multiply();
+        coll = FunctionUtils.collector(bi, 1);
+        Assert.assertEquals(24, coll.value(new double[] {1, 2, 3, 4}), EPS);
+
+        bi = new Max();
+        coll = FunctionUtils.collector(bi, Double.NEGATIVE_INFINITY);
+        Assert.assertEquals(10, coll.value(new double[] {1, -2, 7.5, 10, -24, 9.99}), 0);
+
+        bi = new Min();
+        coll = FunctionUtils.collector(bi, Double.POSITIVE_INFINITY);
+        Assert.assertEquals(-24, coll.value(new double[] {1, -2, 7.5, 10, -24, 9.99}), 0);
+    }
+Context: /org/apache/commons/math4/legacy/analysis/FunctionUtils
+Smell List: ['Eager_Test', 'Duplicate_Assert', 'Magic_Number_Test']
+Smell Description List: ['Test Smell Type：Eager Test\n\nFeature:\nA test method contains multiple calls to multiple production methods.\n', 'Test Smell Type：Duplicate Assert\n\nFeature:\nA test method that contains more than one assertion statement with the same parameters.\n', 'Test Smell Type：Magic Number Test\n\nFeature:\nAn assertion method that contains a numeric literal as an argument.\n']
+Refactoring DSL: ['RefactorRule:\n  SmellType: Eager Test\n  Description: "Refactor test methods to group related assertions logically and extract reusable setup logic into private methods."\n  Steps:\n    - Step1:\n        Description: "Extract shared setup logic into a reusable, private method and ensure it is used across all relevant tests."\n        Action: ExtractSetupMethod\n        Parameters:\n          Condition: "If multiple tests share the same setup logic."\n          MethodNamePattern: setupTest{OriginalMethodName}\n    - Step2:\n        Description: "Group related assertions into cohesive sub-tests while retaining necessary setup logic."\n        Action: GroupAssertions\n        Parameters:\n          GroupBy: LogicalConcern\n    - Step3:\n        Description: "Create new test methods for each cohesive group of assertions and ensure readability."\n        Action: CreateTestMethods\n        Parameters:\n          IncludeSetup: True\n          NamePattern: test{OriginalMethodName}_{Concern}\n  Example:\n    Before: |\n      @Test\n      public void testExample() {\n          setup();\n          assertEquals(1, methodA());\n          assertTrue(methodB());\n      }\n    After: |\n      private void setupTestExample() {\n          setup();\n      }\n\n      @Test\n      public void testExample_MethodA() {\n          setupTestExample();\n          assertEquals(1, methodA());\n      }\n\n      @Test\n      public void testExample_MethodB() {\n          setupTestExample();\n          assertTrue(methodB());\n      }\n  Variables:\n    OriginalMethodName: The name of the original test method.\n    LogicalConcern: The logical aspect tested (e.g., a specific API, validation, or behavior).\n', 'RefactorRule:\n  SmellType: Duplicate Assert\n  Description: "If the assertion logic is the same but tested with different inputs, convert the test to a parameterized test using JUnit 5\'s @CsvSource annotation. Otherwise, split the test into multiple separate methods, each containing a single assertion."\n  Steps:\n    - Step:\n        Description: "Check if there are multiple assertions testing the same condition"\n        Action: IdentifySameAssertions\n        Parameters:\n          SourcePattern: |\n\t          assert(expected, ...)\n\t          assert(expected, ...)\n    - Step:\n        Description: "Create new test methods if necessary to separate assertions for different inputs"\n        Action: SplitMethod\n        Parameters:\n          TargetType: Method\n\n    - Step:\n        Description: "Convert the test method to a parameterized test"\n        Action: ConvertToParameterizedTest\n        Parameters:\n          TargetType: Method\n    - Step:\n        Description: "Add @CsvSource annotation to declare parameterized values."\n        Action: AddAnnotation\n        Parameters:\n          TargetType: Method\n          Annotation: |\n            @CsvSource({\n              "{paramValues}"\n            })\n    - Step:\n        Description: "Refactor the test method to use parameterized values."\n        Action: RefactorMethod\n        Parameters:\n          SourcePattern: |\n            public void T() {\n              {originalStatements}\n            }\n          ReplacementPattern: |\n            public void T({parameterNames}) {\n              {refactoredStatements}\n            }\n  Example:\n    Before: |\n      @Test\n      public void T() {\n        assertEquals(expectedA, methodUnderTest(a));\n        assertEquals(expectedB, methodUnderTest(b));\n      }\n\n    After: |\n      @ParameterizedTest\n      @CsvSource({\n        "a, expectedA",\n        "b, expectedB"\n      })\n      public void T(String input, String expected) {\n        assertEquals(expected, methodUnderTest(input));\n      }\n', 'RefactorRule:\n  SmellType: Magic Number Test\n  Description: "Extract magic numbers and assign meaningful names to improve readability and maintainability."\n  Steps:\n    - Step:\n        Action: IdentifyMagicNumbers\n        Description: "Identify magic numbers in assertions"\n        Parameters:\n          TargetType: Method\n          SourcePattern: |\n            assertEquals({magicNumber}, {variable})\n    - Step:\n        Action: ExtractVariable\n        Description: "Extract magic number to a variable with meaningful name"\n        Parameters:\n          TargetType: Method\n          SourcePattern: |\n            assertEquals({magicNumber}, {variable})\n          ReplacementPattern: |\n            int {meaningfulName} = {magicNumber};\n            assertEquals({meaningfulName}, {variable})\n  Example:\n    Before: |\n      @Test\n      public void T() {\n          stmt\n          assertEquals(1, a)\n          stmt\'\n      }\n    After: |\n      @Test\n      public void T() {\n          int x = 1; // x: meaningful variable name\n          stmt\n          assertEquals(x, a)\n          stmt\'\n      }\n  Variables:\n    magicNumber: "1"\n    variable: "a"\n    meaningfulName: "x"\n']
+Checkpoints: ['[ ] All eager tests have been split into separate tests, each focusing on verifying a single API.\n', '[ ] All duplicate assertions have been refactored using JUnit 5 Parameterized Tests, where the lists of parameterizable values are declared in a specific annotation, and the test method is executed independently m times.\n', '[ ] All magic numbers in the test code have been extracted and assigned meaningful variable names.\n']
+
+Refactored Code: 
+ 
+import org.apache.commons.math4.analysis.function.Add;
+import org.apache.commons.math4.analysis.function.Max;
+import org.apache.commons.math4.analysis.function.Min;
+import org.apache.commons.math4.analysis.function.Multiply;
+import org.apache.commons.math4.legacy.analysis.FunctionUtils;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class FunctionUtilsTest {
+
+    private static final double[] TEST_ARRAY = new double[] {1, 2, 3, 4};
+    private static final double[] TEST_ARRAY_NEGATIVE = new double[] {1, -2, 7.5, 10, -24, 9.99};
+
+    private MultivariateFunction setupCollector(BivariateFunction bi, double identity) {
+        return FunctionUtils.collector(bi, identity);
+    }
+
+    @Test
+    public void testCollector_Add() {
+        BivariateFunction bi = new Add();
+        MultivariateFunction coll = setupCollector(bi, 0);
+        int expectedResult = 10;
+        Assert.assertEquals(expectedResult, coll.value(TEST_ARRAY), EPS);
+    }
+
+    @Test
+    public void testCollector_Multiply() {
+        BivariateFunction bi = new Multiply();
+        MultivariateFunction coll = setupCollector(bi, 1);
+        int expectedResult = 24;
+        Assert.assertEquals(expectedResult, coll.value(TEST_ARRAY), EPS);
+    }
+
+    @Test
+    public void testCollector_Max() {
+        BivariateFunction bi = new Max();
+        MultivariateFunction coll = setupCollector(bi, Double.NEGATIVE_INFINITY);
+        int expectedResult = 10;
+        int delta = 0;
+        Assert.assertEquals(expectedResult, coll.value(TEST_ARRAY_NEGATIVE), delta);
+    }
+
+    @Test
+    public void testCollector_Min() {
+        BivariateFunction bi = new Min();
+        MultivariateFunction coll = setupCollector(bi, Double.POSITIVE_INFINITY);
+        int expectedResult = -24;
+        int delta = 0;
+        Assert.assertEquals(expectedResult, coll.value(TEST_ARRAY_NEGATIVE), delta);
+    }
+}
+
+

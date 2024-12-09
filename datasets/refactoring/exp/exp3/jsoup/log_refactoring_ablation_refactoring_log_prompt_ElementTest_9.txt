@@ -1,0 +1,23 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class DocumentTest {
+
+    @ParameterizedTest
+    @CsvSource({
+        "<p> Hello\nthere &nbsp;  </p>, Hello\\nthere\\u00a0",
+        "<p>Hello  \\n  there</p>, Hello  \\n  there",
+        "<p>Hello  <div>\\n  there</div></p>, Hello  \\n  there"
+    })
+    public void testWholeText(String html, String expectedText) {
+        Document doc = Jsoup.parse(html);
+        assertEquals(expectedText, doc.wholeText(), "The whole text should match the expected output");
+    }
+}
+```
+

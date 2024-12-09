@@ -1,0 +1,61 @@
+asserts result: 
+ ```java
+import org.apache.commons.math4.legacy.analysis.UnivariateFunction;
+import org.apache.commons.math4.legacy.analysis.function.Identity;
+import org.apache.commons.math4.legacy.analysis.function.Constant;
+import org.apache.commons.math4.legacy.analysis.function.Minus;
+import org.apache.commons.math4.legacy.analysis.function.Inverse;
+import org.apache.commons.math4.legacy.analysis.function.Power;
+import org.apache.commons.math4.legacy.analysis.FunctionUtils;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+class FunctionUtilsTest {
+
+    private static final double EPS = 1e-6;
+
+    @ParameterizedTest
+    @CsvSource({
+        "Identity,Identity,Identity,3,3",
+        "Identity,Constant,3,4",
+        "Constant,Identity,3,4",
+        "Minus,3,-3",
+        "Minus,Minus,3,3",
+        "Inverse,Minus,Constant,Identity,3,-0.25",
+        "Power,Power,3,81"
+    })
+    void testCompose(String... params) {
+        UnivariateFunction[] functions = new UnivariateFunction[params.length - 2];
+        double input = Double.parseDouble(params[params.length - 2]);
+        double expectedOutput = Double.parseDouble(params[params.length - 1]);
+
+        for (int i = 0; i < params.length - 2; i++) {
+            functions[i] = createFunction(params[i]);
+        }
+
+        UnivariateFunction composedFunction = FunctionUtils.compose(functions);
+        assertEquals(expectedOutput, composedFunction.value(input), EPS);
+    }
+
+    private UnivariateFunction createFunction(String functionName) {
+        switch (functionName) {
+            case "Identity":
+                return new Identity();
+            case "Constant":
+                return new Constant(4);
+            case "Minus":
+                return new Minus();
+            case "Inverse":
+                return new Inverse();
+            case "Power":
+                return new Power(2);
+            default:
+                throw new IllegalArgumentException("Unknown function: " + functionName);
+        }
+    }
+}
+```
+

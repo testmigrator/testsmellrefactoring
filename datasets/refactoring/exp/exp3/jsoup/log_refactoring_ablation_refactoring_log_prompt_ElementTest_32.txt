@@ -1,0 +1,28 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import static org.junit.Assert.assertEquals;
+import org.junit.Test;
+
+public class ElementTest {
+
+    @Test
+    public void testPrependTextUpdatesTextContent() {
+        Document doc = Jsoup.parse("<div id=1><p>Hello</p></div>");
+        Element div = doc.getElementById("1");
+        div.prependText("there & now > ");
+        assertEquals("Prepend text should update the text content", "there & now > Hello", div.text());
+    }
+
+    @Test
+    public void testPrependTextUpdatesHtmlContent() {
+        Document doc = Jsoup.parse("<div id=1><p>Hello</p></div>");
+        Element div = doc.getElementById("1");
+        div.prependText("there & now > ");
+        assertEquals("Prepend text should update the HTML content", "there &amp; now &gt; <p>Hello</p>", TextUtil.stripNewlines(div.html()));
+    }
+}
+```
+

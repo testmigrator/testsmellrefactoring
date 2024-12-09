@@ -1,0 +1,11 @@
+total tests: 3
+total asserts: 9
+assertEquals(r2, r1, "Default state should be equal");
+assertEquals(r1, r2, "Default state should be equal");
+assertNotEquals(r1, r2, "Render as percentages should make them not equal");
+assertEquals(r1, r2, "Setting render as percentages to true should make them equal");
+assertEquals("r1 and r2 should be equal", r1, r2);
+assertEquals("Hash codes of r1 and r2 should be equal", h1, h2);
+assertNotSame(r1, r2, "Cloned objects should not be the same instance");
+assertSame(r1.getClass(), r2.getClass(), "Cloned object should be of the same class as the original");
+assertEquals(r1, r2, "Cloned object should be equal to the original");

@@ -1,0 +1,26 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.junit.Test;
+import static org.junit.Assert.*;
+
+public class NodeTest {
+
+    @Test
+    public void testLiteralAbsPrefixHasAttribute() {
+        Document doc = Jsoup.parse("<a abs:href='odd'>One</a>");
+        Element el = doc.select("a").first();
+        assertTrue("Element should have 'abs:href' attribute", el.hasAttr("abs:href"));
+    }
+
+    @Test
+    public void testLiteralAbsPrefixAttributeValue() {
+        Document doc = Jsoup.parse("<a abs:href='odd'>One</a>");
+        Element el = doc.select("a").first();
+        assertEquals("Attribute 'abs:href' should have value 'odd'", "odd", el.attr("abs:href"));
+    }
+}
+```
+

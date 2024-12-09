@@ -1,0 +1,6 @@
+total tests: 2
+total asserts: 4
+assertEquals(p1, p2, "Objects p1 and p2 should be equal");
+assertEquals(h1, h2, "Hash codes of p1 and p2 should be equal");
+assertFalse(p1 instanceof Cloneable, "StandardBarPainter should not implement Cloneable");
+assertFalse(p1 instanceof PublicCloneable, "StandardBarPainter should not implement PublicCloneable");

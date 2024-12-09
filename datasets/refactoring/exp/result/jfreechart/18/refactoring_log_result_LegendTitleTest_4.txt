@@ -1,0 +1,28 @@
+Input Parameters:
+Test Code:
+ @Test
+    public void testSerialization() {
+        XYPlot<String> plot = new XYPlot<>();
+        LegendTitle t1 = new LegendTitle(plot);
+        LegendTitle t2 = TestUtils.serialised(t1);
+        assertEquals(t1, t2);
+        assertEquals(t2.getSources()[0], plot);
+    }
+Context: /org/jfree/chart/legend/LegendTitle
+Smell List: ['Assertion_Roulette']
+Smell Description List: ['Test Smell Type：Assertion Roulette\n\nFeature:\nA test method contains more than one assertion statement without an explanation/message (parameter in the assertion method).\n']
+Refactoring DSL: ['RefactorRule:\n  SmellType: Assertion Roulette\n  Description: Add descriptive messages to assert statements to improve readability and maintainability.\n  Steps:\n    - Step:\n        Description: "Add descriptive message to each assert statement(except assertThat, assertThrows)."\n        Action: AddMessageToAssert\n        Parameters:\n          MessagePattern: "{assertionMessage}"\n  Example:\n    Before: |\n      @Test\n      public void T() {\n        stmt\n        assert_1\n        ...\n        assert_n\n        stmt\'\n      }\n    After: |\n      @Test\n      public void T() {\n        stmt\n        assert_1(..., "Descriptive message for assert statement")\n        ...\n        assert_n(..., "Descriptive message for assert statement")\n        stmt\'\n      }\n    Variables:\n      assertionMessage: "Descriptive message for assert statement"\n']
+Checkpoints: ['[ ] All assert statements have been added with clear explanatory messages.\n']
+
+Refactored Code: 
+ 
+@Test
+public void testSerialization() {
+    XYPlot<String> plot = new XYPlot<>();
+    LegendTitle t1 = new LegendTitle(plot);
+    LegendTitle t2 = TestUtils.serialised(t1);
+    assertEquals(t1, t2, "Serialized and deserialized LegendTitle objects should be equal");
+    assertEquals(t2.getSources()[0], plot, "The source of the deserialized LegendTitle should be the original plot");
+}
+
+

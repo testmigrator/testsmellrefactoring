@@ -1,0 +1,56 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.assertions.AssertionConsumer;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+class LegendTitleTest {
+
+    @Test
+    public void testCloning() {
+        // Arrange
+        XYPlot<String> plot = new XYPlot<>();
+        Rectangle2D bounds1 = new Rectangle2D.Double(10.0, 20.0, 30.0, 40.0);
+        LegendTitle t1 = new LegendTitle(plot);
+        t1.setBackgroundPaint(new GradientPaint(1.0f, 2.0f, Color.RED, 3.0f, 4.0f, Color.YELLOW));
+        t1.setBounds(bounds1);
+        
+        // Act
+        LegendTitle t2 = CloneUtils.clone(t1);
+        
+        // Assert
+        assertNotNull(t2, "Cloned object should not be null");
+        assertNotSame(t1, t2, "Cloned object should not be the same instance as the original");
+        assertEquals(t1.getClass(), t2.getClass(), "Cloned object should be of the same class as the original");
+        assertEquals(t1, t2, "Cloned object should be equal to the original");
+        
+        // Check independence
+        bounds1.setFrame(40.0, 30.0, 20.0, 10.0);
+        assertNotEquals(t1, t2, "Modifying original bounds should not affect cloned object");
+
+        t2.setBounds(new Rectangle2D.Double(40.0, 30.0, 20.0, 10.0));
+        assertEquals(t1, t2, "After setting bounds of cloned object, it should be equal to the original");
+    }
+
+    @Test
+    public void testCloningWithExceptionHandling() {
+        // Arrange
+        XYPlot<String> plot = new XYPlot<>();
+        Rectangle2D bounds1 = new Rectangle2D.Double(10.0, 20.0, 30.0, 40.0);
+        LegendTitle t1 = new LegendTitle(plot);
+        t1.setBackgroundPaint(new GradientPaint(1.0f, 2.0f, Color.RED, 3.0f, 4.0f, Color.YELLOW));
+        t1.setBounds(bounds1);
+        
+        // Act and Assert
+        assertDoesNotThrow(() -> {
+            LegendTitle t2 = CloneUtils.clone(t1);
+            assertNotNull(t2, "Cloned object should not be null");
+            assertNotSame(t1, t2, "Cloned object should not be the same instance as the original");
+            assertEquals(t1.getClass(), t2.getClass(), "Cloned object should be of the same class as the original");
+            assertEquals(t1, t2, "Cloned object should be equal to the original");
+        }, "Cloning should not throw an exception");
+    }
+}
+```
+

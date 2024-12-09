@@ -1,0 +1,55 @@
+asserts result: 
+ ```java
+import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Tag;
+import org.junit.Test;
+import static org.junit.Assert.*;
+
+public class ElementTest {
+
+    private static final String TRUE_ATTRIBUTE_NAME = "true";
+    private static final String FALSE_ATTRIBUTE_NAME = "false";
+    private static final String DIV_TAG = "div";
+    private static final int EXPECTED_ATTRIBUTE_COUNT = 1;
+
+    @Test
+    public void testAddTrueBooleanAttribute() {
+        Element div = new Element(Tag.valueOf(DIV_TAG), "");
+        div.attr(TRUE_ATTRIBUTE_NAME, true);
+
+        assertTrue("Element should have the 'true' attribute", div.hasAttr(TRUE_ATTRIBUTE_NAME));
+        assertEquals("Value of 'true' attribute should be an empty string", "", div.attr(TRUE_ATTRIBUTE_NAME));
+    }
+
+    @Test
+    public void testAddFalseBooleanAttribute() {
+        Element div = new Element(Tag.valueOf(DIV_TAG), "");
+        div.attr(FALSE_ATTRIBUTE_NAME, "value");
+        div.attr(FALSE_ATTRIBUTE_NAME, false);
+
+        assertFalse("Element should not have the 'false' attribute", div.hasAttr(FALSE_ATTRIBUTE_NAME));
+    }
+
+    @Test
+    public void testAttributeCountAfterAddingAttributes() {
+        Element div = new Element(Tag.valueOf(DIV_TAG), "");
+        div.attr(TRUE_ATTRIBUTE_NAME, true);
+        div.attr(FALSE_ATTRIBUTE_NAME, "value");
+        div.attr(FALSE_ATTRIBUTE_NAME, false);
+
+        List<Attribute> attributes = div.attributes().asList();
+        assertEquals("There should be one attribute", EXPECTED_ATTRIBUTE_COUNT, attributes.size());
+    }
+
+    @Test
+    public void testOuterHtmlAfterAddingAttributes() {
+        Element div = new Element(Tag.valueOf(DIV_TAG), "");
+        div.attr(TRUE_ATTRIBUTE_NAME, true);
+        div.attr(FALSE_ATTRIBUTE_NAME, "value");
+        div.attr(FALSE_ATTRIBUTE_NAME, false);
+
+        assertEquals("Expected outer HTML", "<div true></div>", div.outerHtml());
+    }
+}
+```
+

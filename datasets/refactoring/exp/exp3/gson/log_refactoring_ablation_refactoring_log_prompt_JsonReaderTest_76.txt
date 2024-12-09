@@ -1,0 +1,23 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.Strictness;
+import org.junit.jupiter.api.Test;
+
+public class JsonReaderTest {
+
+    @Test
+    public void testLenientUnquotedNamesNextName() {
+        JsonReader reader = new JsonReader(new java.io.StringReader("{a:true}"));
+        reader.setStrictness(Strictness.LENIENT);
+        assertDoesNotThrow(() -> {
+            reader.beginObject();
+            assertEquals("a", reader.nextName());
+        });
+    }
+}
+```
+

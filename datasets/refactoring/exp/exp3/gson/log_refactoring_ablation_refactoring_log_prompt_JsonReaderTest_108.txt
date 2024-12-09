@@ -1,0 +1,51 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
+import com.google.gson.stream.Strictness;
+import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.io.StringReader;
+
+public class JsonReaderTest {
+
+    @Test
+    public void testVeryLongUnquotedLiteralParsing() {
+        String literal = "a" + repeat('b', 8192) + "c";
+        JsonReader reader = new JsonReader(new StringReader("[" + literal + "]"));
+        reader.setStrictness(Strictness.LENIENT);
+
+        assertDoesNotThrow(() -> {
+            reader.beginArray();
+            assertEquals(JsonToken.STRING, reader.peek());
+            assertEquals(literal, reader.nextString());
+            reader.endArray();
+        });
+    }
+
+    @Test
+    public void testVeryLongUnquotedLiteralStrictness() {
+        String literal = "a" + repeat('b', 8192) + "c";
+        JsonReader reader = new JsonReader(new StringReader("[" + literal + "]"));
+        reader.setStrictness(Strictness.LENIENT);
+
+        assertDoesNotThrow(() -> {
+            reader.beginArray();
+            assertEquals(JsonToken.STRING, reader.peek());
+            reader.nextString();
+            reader.endArray();
+        });
+    }
+
+    private String repeat(char c, int count) {
+        char[] chars = new char[count];
+        java.util.Arrays.fill(chars, c);
+        return new String(chars);
+    }
+}
+```
+

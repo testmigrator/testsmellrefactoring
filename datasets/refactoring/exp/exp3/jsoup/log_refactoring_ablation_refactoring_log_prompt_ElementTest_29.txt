@@ -1,0 +1,45 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.condition.EnabledIf;
+
+public class ElementTest {
+
+    @Test
+    public void testPrependRowToTable() {
+        Document doc = Jsoup.parse("<table><tr><td>1</td></tr></table>");
+        Element table = doc.select("tbody").first();
+        table.prepend("<tr><td>2</td></tr>");
+
+        assertEquals("<table><tbody><tr><td>2</td></tr><tr><td>1</td></tr></tbody></table>", 
+                     TextUtil.stripNewlines(doc.body().html()), "HTML content after prepending row should match expected output");
+    }
+
+    @Test
+    @EnabledIf("hasMultipleRows")
+    public void testSiblingIndexAfterPrependingRow() {
+        Document doc = Jsoup.parse("<table><tr><td>1</td></tr></table>");
+        Element table = doc.select("tbody").first();
+        table.prepend("<tr><td>2</td></tr>");
+
+        Elements rows = doc.select("tr");
+        for (int i = 0; i < rows.size(); i++) {
+            assertEquals(i, rows.get(i).siblingIndex(), "Sibling index of row at position " + i + " should be " + i);
+        }
+    }
+
+    private boolean hasMultipleRows() {
+        Document doc = Jsoup.parse("<table><tr><td>1</td></tr></table>");
+        Element table = doc.select("tbody").first();
+        table.prepend("<tr><td>2</td></tr>");
+        return doc.select("tr").size() > 1;
+    }
+}
+```
+

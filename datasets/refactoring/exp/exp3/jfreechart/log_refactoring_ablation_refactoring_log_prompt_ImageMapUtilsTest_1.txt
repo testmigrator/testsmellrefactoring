@@ -1,0 +1,54 @@
+asserts result: 
+ ```java
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class ImageMapUtilsTest {
+
+    @Test
+    public void testHTMLEscapeEmptyString() {
+        assertEquals("Should return empty string when input is empty", "", ImageMapUtils.htmlEscape(""));
+    }
+
+    @Test
+    public void testHTMLEscapeNoSpecialChars() {
+        assertEquals("Should return the same string when no special characters are present", "abc", ImageMapUtils.htmlEscape("abc"));
+    }
+
+    @Test
+    public void testHTMLEscapeAmpersand() {
+        assertEquals("Should escape ampersand to &amp;", "&amp;", ImageMapUtils.htmlEscape("&"));
+    }
+
+    @Test
+    public void testHTMLEscapeQuote() {
+        assertEquals("Should escape double quote to &quot;", "&quot;", ImageMapUtils.htmlEscape("\""));
+    }
+
+    @Test
+    public void testHTMLEscapeLessThan() {
+        assertEquals("Should escape less than to &lt;", "&lt;", ImageMapUtils.htmlEscape("<"));
+    }
+
+    @Test
+    public void testHTMLEscapeGreaterThan() {
+        assertEquals("Should escape greater than to &gt;", "&gt;", ImageMapUtils.htmlEscape(">"));
+    }
+
+    @Test
+    public void testHTMLEscapeSingleQuote() {
+        assertEquals("Should escape single quote to &#39;", "&#39;", ImageMapUtils.htmlEscape("'"));
+    }
+
+    @Test
+    public void testHTMLEscapeBackslash() {
+        assertEquals("Should escape backslash followed by text to \\abc", "&#092;abc", ImageMapUtils.htmlEscape("\\abc"));
+    }
+
+    @Test
+    public void testHTMLEscapeNewline() {
+        assertEquals("Should preserve newline character", "abc\n", ImageMapUtils.htmlEscape("abc\n"));
+    }
+}
+```
+

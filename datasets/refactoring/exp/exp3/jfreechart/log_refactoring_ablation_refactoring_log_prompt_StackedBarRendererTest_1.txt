@@ -1,0 +1,46 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+
+import org.jfree.chart.renderer.category.StackedBarRenderer;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+
+public class StackedBarRendererTest {
+
+    @Test
+    public void testEquals_DefaultState() {
+        StackedBarRenderer r1 = new StackedBarRenderer();
+        StackedBarRenderer r2 = new StackedBarRenderer();
+
+        assertEquals(r1, r2, "Two default StackedBarRenderers should be equal");
+        assertEquals(r2, r1, "Two default StackedBarRenderers should be equal when reversed");
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "false, false",
+        "true, false",
+        "false, true",
+        "true, true"
+    })
+    public void testEquals_RenderAsPercentages(boolean r1Percentage, boolean r2Percentage) {
+        StackedBarRenderer r1 = new StackedBarRenderer();
+        StackedBarRenderer r2 = new StackedBarRenderer();
+
+        r1.setRenderAsPercentages(r1Percentage);
+        r2.setRenderAsPercentages(r2Percentage);
+
+        if (r1Percentage == r2Percentage) {
+            assertEquals(r1, r2, "StackedBarRenderers with the same renderAsPercentages setting should be equal");
+            assertEquals(r2, r1, "StackedBarRenderers with the same renderAsPercentages setting should be equal when reversed");
+        } else {
+            assertNotEquals(r1, r2, "StackedBarRenderers with different renderAsPercentages settings should not be equal");
+            assertNotEquals(r2, r1, "StackedBarRenderers with different renderAsPercentages settings should not be equal when reversed");
+        }
+    }
+}
+```
+

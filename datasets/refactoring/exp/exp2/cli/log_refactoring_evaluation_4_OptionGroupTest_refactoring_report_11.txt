@@ -1,0 +1,5 @@
+asserts result: 
+ yes
+
+The refactored test maintains the same functionality as the original test. Both versions check if the `CommandLine` object has the specified options (`--export` and `--import`) without throwing an exception. The only difference is that the refactored version uses `assertDoesNotThrow` to ensure that no unexpected exceptions are thrown during the execution of the test cases, which is a more modern and explicit way to handle potential exceptions in JUnit 5. This does not change the core functionality of the tests.
+

@@ -1,0 +1,49 @@
+asserts result: 
+ ```java
+import org.jfree.chart.plot.CategoryPlot;
+import org.jfree.chart.renderer.category.AbstractCategoryItemRenderer;
+import org.jfree.chart.renderer.category.LineAndShapeRenderer;
+import org.jfree.data.category.DefaultCategoryDataset;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+public class AbstractCategoryItemRendererTest {
+
+    private AbstractCategoryItemRenderer renderer;
+    private DefaultCategoryDataset<String, String> dataset;
+    private CategoryPlot<String, String> plot;
+
+    @BeforeEach
+    public void setUp() {
+        renderer = new LineAndShapeRenderer();
+        dataset = new DefaultCategoryDataset<>();
+        plot = new CategoryPlot<>();
+        plot.setDataset(dataset);
+        plot.setRenderer(renderer);
+    }
+
+    @Test
+    public void testInitialLegendItemCount() {
+        LegendItemCollection legendItems = renderer.getLegendItems();
+        assertNotNull(legendItems, "Legend items should not be null");
+        assertEquals(0, legendItems.getItemCount(), "Initially, there should be no legend items");
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "1.0, S1, C1, 1, S1"
+    })
+    public void testLegendItemCountAfterAddingValue(double value, String series, String category, int expectedItemCount, String expectedLabel) {
+        dataset.addValue(value, series, category);
+        LegendItemCollection legendItems = renderer.getLegendItems();
+        assertEquals(expectedItemCount, legendItems.getItemCount(), "Legend item count should match the expected count after adding a value");
+        assertEquals(expectedLabel, legendItems.get(0).getLabel(), "The label of the first legend item should match the expected label");
+    }
+}
+```
+

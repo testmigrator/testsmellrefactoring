@@ -1,0 +1,5 @@
+asserts result: 
+ Yes
+
+The refactored code maintains the same functionality as the original test. The setup steps have been moved to a separate method `setupTestUsageWithLongOptSeparator`, but the logic and the final assertion in the test method `testUsageWithLongOptSeparator_UsageOutput` remain consistent with the original test. The expected output and the actual output are compared in the same way, ensuring that the test still verifies the same behavior.
+

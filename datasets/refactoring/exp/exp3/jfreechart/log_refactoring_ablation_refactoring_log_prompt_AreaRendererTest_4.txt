@@ -1,0 +1,46 @@
+asserts result: 
+ ```java
+import org.jfree.chart.renderer.category.AreaRenderer;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class AreaRendererTest {
+
+    @Test
+    public void testSerialization_SetSeriesFillPaint() {
+        AreaRenderer r1 = new AreaRenderer();
+        r1.setSeriesFillPaint(1, new GradientPaint(1.0f, 2.0f, Color.YELLOW, 4.0f, 3.0f, Color.GREEN));
+        AreaRenderer r2 = TestUtils.serialised(r1);
+        assertEquals(r1.getSeriesFillPaint(1), r2.getSeriesFillPaint(1));
+        TestUtils.checkIndependence(r1, r2);
+    }
+
+    @Test
+    public void testSerialization_SetSeriesPaint() {
+        AreaRenderer r1 = new AreaRenderer();
+        r1.setSeriesPaint(1, Color.BLACK);
+        AreaRenderer r2 = TestUtils.serialised(r1);
+        assertEquals(r1.getSeriesPaint(1), r2.getSeriesPaint(1));
+        TestUtils.checkIndependence(r1, r2);
+    }
+
+    @Test
+    public void testSerialization_SetSeriesPaint_Gradient() {
+        AreaRenderer r1 = new AreaRenderer();
+        r1.setSeriesPaint(2, new GradientPaint(1.0f, 2.0f, Color.YELLOW, 4.0f, 3.0f, Color.GREEN));
+        AreaRenderer r2 = TestUtils.serialised(r1);
+        assertEquals(r1.getSeriesPaint(2), r2.getSeriesPaint(2));
+        TestUtils.checkIndependence(r1, r2);
+    }
+
+    @Test
+    public void testSerialization_SetSeriesStroke() {
+        AreaRenderer r1 = new AreaRenderer();
+        r1.setSeriesStroke(0, new BasicStroke(2.0f));
+        AreaRenderer r2 = TestUtils.serialised(r1);
+        assertEquals(r1.getSeriesStroke(0), r2.getSeriesStroke(0));
+        TestUtils.checkIndependence(r1, r2);
+    }
+}
+```
+

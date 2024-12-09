@@ -1,0 +1,44 @@
+asserts result: 
+ ```java
+import org.apache.commons.math4.legacy.fitting.GaussianCurveFitter;
+import org.apache.commons.math4.legacy.fitting.WeightedObservedPoints;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class GaussianCurveFitterTest {
+
+    private static final double EXPECTED_AMPLITUDE = 420.8397296167364;
+    private static final double EXPECTED_MEAN = 0.603770729862231;
+    private static final double EXPECTED_STANDARD_DEVIATION = 1.0786447936766612;
+    private static final double TOLERANCE = 1e-12;
+
+    @Test
+    public void testMath798() {
+        // When the data points are not commented out below, the fit stalls.
+        // This is expected however, since the whole dataset hardly looks like
+        // a Gaussian.
+        // When commented out, the fit proceeds fine.
+
+        final WeightedObservedPoints obs = new WeightedObservedPoints();
+
+        obs.add(0.23, 395.0);
+        //obs.add(0.68, 0.0);
+        obs.add(1.14, 376.0);
+        //obs.add(1.59, 0.0);
+        obs.add(2.05, 163.0);
+        //obs.add(2.50, 0.0);
+        obs.add(2.95, 49.0);
+        //obs.add(3.41, 0.0);
+        obs.add(3.86, 16.0);
+        //obs.add(4.32, 0.0);
+        obs.add(4.77, 1.0);
+
+        final double[] p = GaussianCurveFitter.create().fit(obs.toList());
+
+        assertEquals(EXPECTED_AMPLITUDE, p[0], TOLERANCE);
+        assertEquals(EXPECTED_MEAN, p[1], TOLERANCE);
+        assertEquals(EXPECTED_STANDARD_DEVIATION, p[2], TOLERANCE);
+    }
+}
+```
+

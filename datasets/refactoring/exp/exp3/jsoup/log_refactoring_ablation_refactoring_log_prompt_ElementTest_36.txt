@@ -1,0 +1,38 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class ElementTest {
+
+    @Test
+    public void testPrependNewHtmlContent() {
+        Document doc = Jsoup.parse("<div id=1><p>Hello</p></div>");
+        Element div = doc.getElementById("1");
+        div.prepend("<p>there</p><p>now</p>");
+        
+        String expectedHtml = "<p>there</p><p>now</p><p>Hello</p>";
+        String actualHtml = TextUtil.stripNewlines(div.html());
+        
+        assertEquals(expectedHtml, actualHtml, "The prepended HTML content does not match the expected output.");
+    }
+
+    @Test
+    public void testSiblingIndexAfterPrepend() {
+        Document doc = Jsoup.parse("<div id=1><p>Hello</p></div>");
+        Element div = doc.getElementById("1");
+        div.prepend("<p>there</p><p>now</p>");
+        
+        Elements ps = doc.select("p");
+        for (int i = 0; i < ps.size(); i++) {
+            int actualIndex = ps.get(i).siblingIndex();
+            assertEquals(i, actualIndex, "The sibling index of paragraph " + i + " does not match the expected index.");
+        }
+    }
+}
+```
+

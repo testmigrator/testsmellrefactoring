@@ -1,0 +1,49 @@
+asserts result: 
+ ```java
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class ImageMapUtilsTest {
+
+    @Test
+    public void testJavascriptEscapeEmptyString() {
+        String input = "";
+        String expectedOutput = "";
+        String actualOutput = ImageMapUtils.javascriptEscape(input);
+        assertEquals("Expected empty string to remain unchanged", expectedOutput, actualOutput);
+    }
+
+    @Test
+    public void testJavascriptEscapeNoSpecialCharacters() {
+        String input = "abc";
+        String expectedOutput = "abc";
+        String actualOutput = ImageMapUtils.javascriptEscape(input);
+        assertEquals("Expected string with no special characters to remain unchanged", expectedOutput, actualOutput);
+    }
+
+    @Test
+    public void testJavascriptEscapeSingleQuote() {
+        String input = "'";
+        String expectedOutput = "\\'";
+        String actualOutput = ImageMapUtils.javascriptEscape(input);
+        assertEquals("Expected single quote to be escaped", expectedOutput, actualOutput);
+    }
+
+    @Test
+    public void testJavascriptEscapeDoubleQuote() {
+        String input = "\"";
+        String expectedOutput = "\\\"";
+        String actualOutput = ImageMapUtils.javascriptEscape(input);
+        assertEquals("Expected double quote to be escaped", expectedOutput, actualOutput);
+    }
+
+    @Test
+    public void testJavascriptEscapeBackslash() {
+        String input = "\\";
+        String expectedOutput = "\\\\";
+        String actualOutput = ImageMapUtils.javascriptEscape(input);
+        assertEquals("Expected backslash to be escaped", expectedOutput, actualOutput);
+    }
+}
+```
+

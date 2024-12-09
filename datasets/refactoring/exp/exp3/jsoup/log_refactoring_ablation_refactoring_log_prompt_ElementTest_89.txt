@@ -1,0 +1,65 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import static org.junit.Assert.assertEquals;
+import org.junit.Test;
+
+public class ElementTest {
+
+    @Test
+    public void testInsertChildrenAtEnd() {
+        String html = "<div><p>One<p>Two";
+        Document doc = Jsoup.parse(html);
+        Element new1 = new Element("p").text("Three");
+        Element new2 = new Element("p").text("Four");
+
+        doc.body().insertChildren(-1, new1, new2);
+        assertEquals("New elements should be inserted at the end of the body", 
+                     "<div><p>One</p><p>Two</p></div><p>Three</p><p>Four</p>", 
+                     TextUtil.stripNewlines(doc.body().html()));
+    }
+
+    @Test
+    public void testInsertChildrenAtBeginning() {
+        String html = "<div><p>One<p>Two";
+        Document doc = Jsoup.parse(html);
+        Element new1 = new Element("p").text("Three");
+        Element new2 = new Element("p").text("Four");
+
+        doc.body().insertChildren(0, new1, new2);
+        assertEquals("New elements should be inserted at the beginning of the body", 
+                     "<p>Three</p><p>Four</p><div><p>One</p><p>Two</p></div>", 
+                     TextUtil.stripNewlines(doc.body().html()));
+    }
+
+    @Test
+    public void testInsertClonedChildrenAtBeginning() {
+        String html = "<div><p>One<p>Two";
+        Document doc = Jsoup.parse(html);
+        Element new1 = new Element("p").text("Three");
+        Element new2 = new Element("p").text("Four");
+
+        doc.body().insertChildren(0, new2.clone(), new1.clone());
+        assertEquals("Cloned elements should be inserted at the beginning of the body", 
+                     "<p>Four</p><p>Three</p><p>Three</p><p>Four</p><div><p>One</p><p>Two</p></div>", 
+                     TextUtil.stripNewlines(doc.body().html()));
+    }
+
+    @Test
+    public void testAppendChildToEnd() {
+        String html = "<div><p>One<p>Two";
+        Document doc = Jsoup.parse(html);
+        Element new1 = new Element("p").text("Three");
+        Element new2 = new Element("p").text("Four");
+
+        doc.body().insertChildren(0, new2.clone(), new1.clone());
+        doc.body().appendChild(new1);
+        assertEquals("Appended element should be added to the end of the body", 
+                     "<p>Four</p><p>Three</p><p>Four</p><div><p>One</p><p>Two</p></div><p>Three</p>", 
+                     TextUtil.stripNewlines(doc.body().html()));
+    }
+}
+```
+

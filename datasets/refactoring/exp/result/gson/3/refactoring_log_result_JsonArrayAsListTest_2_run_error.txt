@@ -1,0 +1,43 @@
+Input Parameters:
+Test Code:
+ @Test
+  public void testSize() {
+    JsonArray a = new JsonArray();
+    a.add(1);
+
+    List<JsonElement> list = a.asList();
+    assertThat(list).hasSize(1);
+    list.add(new JsonPrimitive(2));
+    assertThat(list).hasSize(2);
+  }
+Context: 
+Smell List: ['Assertion_Roulette', 'Duplicate_Assert']
+Smell Description List: ['Test Smell Type：Assertion Roulette\n\nFeature:\nA test method contains more than one assertion statement without an explanation/message (parameter in the assertion method).\n', 'Test Smell Type：Duplicate Assert\n\nFeature:\nA test method that contains more than one assertion statement with the same parameters.\n']
+Refactoring DSL: ['RefactorRule:\n  SmellType: Assertion Roulette\n  Description: Add descriptive messages to assert statements to improve readability and maintainability.\n  Steps:\n    - Step:\n        Description: "Add descriptive message to each assert statement(except assertThat, assertThrows)."\n        Action: AddMessageToAssert\n        Parameters:\n          MessagePattern: "{assertionMessage}"\n  Example:\n    Before: |\n      @Test\n      public void T() {\n        stmt\n        assert_1\n        ...\n        assert_n\n        stmt\'\n      }\n    After: |\n      @Test\n      public void T() {\n        stmt\n        assert_1(..., "Descriptive message for assert statement")\n        ...\n        assert_n(..., "Descriptive message for assert statement")\n        stmt\'\n      }\n    Variables:\n      assertionMessage: "Descriptive message for assert statement"\n', 'RefactorRule:\n  SmellType: Duplicate Assert\n  Description: "If the assertion logic is the same but tested with different inputs, convert the test to a parameterized test using JUnit 5\'s @CsvSource annotation. Otherwise, split the test into multiple separate methods, each containing a single assertion."\n  Steps:\n    - Step:\n        Description: "Check if there are multiple assertions testing the same condition"\n        Action: IdentifySameAssertions\n        Parameters:\n          SourcePattern: |\n\t          assert(expected, ...)\n\t          assert(expected, ...)\n    - Step:\n        Description: "Create new test methods if necessary to separate assertions for different inputs"\n        Action: SplitMethod\n        Parameters:\n          TargetType: Method\n\n    - Step:\n        Description: "Convert the test method to a parameterized test"\n        Action: ConvertToParameterizedTest\n        Parameters:\n          TargetType: Method\n    - Step:\n        Description: "Add @CsvSource annotation to declare parameterized values."\n        Action: AddAnnotation\n        Parameters:\n          TargetType: Method\n          Annotation: |\n            @CsvSource({\n              "{paramValues}"\n            })\n    - Step:\n        Description: "Refactor the test method to use parameterized values."\n        Action: RefactorMethod\n        Parameters:\n          SourcePattern: |\n            public void T() {\n              {originalStatements}\n            }\n          ReplacementPattern: |\n            public void T({parameterNames}) {\n              {refactoredStatements}\n            }\n  Example:\n    Before: |\n      @Test\n      public void T() {\n        assertEquals(expectedA, methodUnderTest(a));\n        assertEquals(expectedB, methodUnderTest(b));\n      }\n\n    After: |\n      @ParameterizedTest\n      @CsvSource({\n        "a, expectedA",\n        "b, expectedB"\n      })\n      public void T(String input, String expected) {\n        assertEquals(expected, methodUnderTest(input));\n      }\n']
+Checkpoints: ['[ ] All assert statements have been added with clear explanatory messages.\n', '[ ] All duplicate assertions have been refactored using JUnit 5 Parameterized Tests, where the lists of parameterizable values are declared in a specific annotation, and the test method is executed independently m times.\n']
+
+Refactored Code: 
+ 
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import static org.assertj.core.api.Assertions.assertThat;
+
+class JsonArrayTest {
+
+    @ParameterizedTest
+    @CsvSource({
+        "1, 1",
+        "1, 2"
+    })
+    public void testSize(int initialElement, int finalSize) {
+        JsonArray a = new JsonArray();
+        a.add(initialElement);
+
+        List<JsonElement> list = a.asList();
+        assertThat(list).hasSize(1, "List should have size 1 after adding the first element");
+        list.add(new JsonPrimitive(finalSize));
+        assertThat(list).hasSize(finalSize, "List should have the final size after adding the second element");
+    }
+}
+
+

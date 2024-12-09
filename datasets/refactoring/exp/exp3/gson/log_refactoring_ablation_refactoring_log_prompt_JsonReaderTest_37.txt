@@ -1,0 +1,33 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.MalformedJsonException;
+import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.io.StringReader;
+
+class JsonReaderTest {
+
+    @Test
+    public void testUnescapingInvalidCharacters_throwsMalformedJsonException() throws IOException {
+        String json = "[\"\\u000g\"]";
+        JsonReader reader = new JsonReader(new StringReader(json));
+        
+        // Verify that the JSON array starts correctly
+        reader.beginArray();
+
+        // Verify that the next string throws MalformedJsonException
+        var exception = assertThrows(MalformedJsonException.class, () -> reader.nextString());
+        assertThat(exception.getMessage(), equalTo(
+            "Malformed Unicode escape \\u000g at line 1 column 5 path $[0]\n" +
+            "See https://github.com/google/gson/blob/main/Troubleshooting.md#malformed-json"
+        ));
+    }
+}
+```
+

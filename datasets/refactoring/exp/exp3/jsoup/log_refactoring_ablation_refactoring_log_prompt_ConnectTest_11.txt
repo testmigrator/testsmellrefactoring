@@ -1,0 +1,29 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import org.jsoup.Connection;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.junit.jupiter.api.Test;
+
+public class ConnectionResponseTest {
+
+    private static final String echoUrl = "http://example.com";
+
+    @Test
+    public void multipleParsesOkAfterBufferUp() {
+        assertDoesNotThrow(() -> {
+            Connection.Response res = Jsoup.connect(echoUrl).execute().bufferUp();
+
+            Document doc = res.parse();
+            assertTrue(doc.title().contains("Environment"), "First parse should contain 'Environment' in the title");
+
+            Document doc2 = res.parse();
+            assertTrue(doc2.title().contains("Environment"), "Second parse should contain 'Environment' in the title");
+        }, "Jsoup connection and parsing should not throw exceptions");
+    }
+}
+```
+

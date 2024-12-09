@@ -1,0 +1,11 @@
+asserts result: 
+ Yes
+
+The refactored tests maintain the same functionality as the original test. The original single test method has been split into three methods, each focusing on a specific part of the test:
+
+1. `testUnescapeMultiChars_Unescape` checks if the unescaping process works correctly.
+2. `testUnescapeMultiChars_Escape` checks if the escaping process works correctly.
+3. `testUnescapeMultiChars_RoundTrip` checks if the round-trip (escaping followed by unescaping) results in the original text.
+
+Each of these methods performs the same assertions as the original test, ensuring that the functionality remains consistent.
+

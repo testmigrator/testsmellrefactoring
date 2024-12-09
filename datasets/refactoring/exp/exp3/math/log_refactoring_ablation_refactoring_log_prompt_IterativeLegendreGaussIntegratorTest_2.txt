@@ -1,0 +1,38 @@
+asserts result: 
+ ```java
+import org.apache.commons.math4.legacy.analysis.UnivariateFunction;
+import org.apache.commons.math4.legacy.analysis.integration.IterativeLegendreGaussIntegrator;
+import org.apache.commons.math4.legacy.analysis.integration.BaseAbstractUnivariateIntegrator;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+class QuinticFunctionTest {
+
+    private static final int INTEGRATION_STEPS = 10000;
+    private static final double RELATIVE_ACCURACY = BaseAbstractUnivariateIntegrator.DEFAULT_RELATIVE_ACCURACY;
+    private static final double ABSOLUTE_ACCURACY = BaseAbstractUnivariateIntegrator.DEFAULT_ABSOLUTE_ACCURACY;
+    private static final int MIN_ITERATIONS_COUNT = BaseAbstractUnivariateIntegrator.DEFAULT_MIN_ITERATIONS_COUNT;
+    private static final int MAX_ITERATIONS_COUNT = 64;
+
+    @ParameterizedTest
+    @CsvSource({
+        "0, 1, -1.0/48",
+        "0, 0.5, 11.0/768",
+        "-1, 4, 2048/3.0 - 78 + 1.0/48"
+    })
+    public void testQuinticFunction(double min, double max, double expected) {
+        UnivariateFunction f = new QuinticFunction();
+        UnivariateIntegrator integrator = new IterativeLegendreGaussIntegrator(
+            3, 
+            RELATIVE_ACCURACY, 
+            ABSOLUTE_ACCURACY, 
+            MIN_ITERATIONS_COUNT, 
+            MAX_ITERATIONS_COUNT
+        );
+        double result = integrator.integrate(INTEGRATION_STEPS, f, min, max);
+        assertEquals(expected, result, 1.0e-16);
+    }
+}
+```
+

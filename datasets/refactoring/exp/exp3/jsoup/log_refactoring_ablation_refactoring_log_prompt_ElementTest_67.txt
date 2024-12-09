@@ -1,0 +1,30 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.junit.jupiter.api.Test;
+
+public class ElementTest {
+
+    private static final String HTML = "<a one two three four>Text</a><p foo>Two</p>";
+
+    @Test
+    public void testClearAttributesForAnchorTag() {
+        Document doc = Jsoup.parse(HTML);
+        Element anchor = doc.select("a").first();
+        anchor.clearAttributes();
+        assertEquals("<a>Text</a>", anchor.outerHtml());
+    }
+
+    @Test
+    public void testClearAttributesForParagraphTag() {
+        Document doc = Jsoup.parse(HTML);
+        Element paragraph = doc.select("p").first();
+        paragraph.clearAttributes();
+        assertEquals("<p>Two</p>", paragraph.outerHtml());
+    }
+}
+```
+

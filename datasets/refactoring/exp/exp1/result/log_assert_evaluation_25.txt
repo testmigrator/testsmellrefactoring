@@ -1,0 +1,32 @@
+asserts result: 
+ - 'assertEquals("/entertainment/horoscopes", horoscopesLink.attr("href"), "Relative href attribute does not match expected value");' - yes
+- 'assertEquals("http://www.news.com.au/entertainment/horoscopes", horoscopesLink.attr("abs:href"), "Absolute href attribute does not match expected value");' - yes
+- 'assertNotNull(naughtyCornersLink, "Naughty corners link not found");' - yes
+- 'assertEquals("http://www.heraldsun.com.au/news/naughty-corners-are-a-bad-idea-for-kids/story-e6frf7jo-1225817899003", naughtyCornersLink.attr("href"), "Href attribute does not match expected value");' - yes
+- 'assertEquals(naughtyCornersLink.attr("href"), naughtyCornersLink.attr("abs:href"), "Absolute href attribute does not match href attribute");' - yes
+- 'assertEquals(expectedSize, data.size(), "The form data size should be 6");' - yes
+- 'assertEquals("one=two", actualOne, "The first form element should be \'one=two\'");' - yes
+- 'assertEquals("three=four", actualThreeFirst, "The second form element should be \'three=four\'");' - yes
+- 'assertEquals("three=five", actualThreeSecond, "The third form element should be \'three=five\'");' - yes
+- 'assertEquals("six=seven", actualSix, "The fourth form element should be \'six=seven\'");' - yes
+- 'assertEquals("seven=on", actualSeven, "The fifth form element should be \'seven=on\'");' - yes
+- 'assertEquals("eight=on", actualEight, "The sixth form element should be \'eight=on\'");' - yes
+- 'assertEquals(Connection.Method.GET, con.request().method(), "The connection method should be GET");' - yes
+- 'assertEquals("http://example.com/search", con.request().url().toExternalForm(), "The connection URL should match the expected URL");' - yes
+- 'assertEquals("q=jsoup", actualValue, "The data list should contain the expected key-value pair");' - yes
+- 'assertEquals(Connection.Method.POST, con.request().method(), "The connection method should be POST");' - yes
+- 'assertEquals("Could not determine a form action URL for submit. Ensure you set a base URI when parsing.", exception.getMessage(), "The exception message should match the expected message");' - yes
+- 'assertTrue(formEl instanceof FormElement, "The element selected should be an instance of FormElement");' - yes
+- 'assertEquals(expectedElementCount, form.elements().size(), "The form should contain exactly one input element");' - yes
+- 'assertTrue(formEl instanceof FormElement, "The selected element should be an instance of FormElement");' - yes
+- 'assertEquals(expectedElementsSize, form.elements().size(), "The form should contain exactly one element");' - yes
+- 'assertEquals(expectedFormData, actualValue, "The form data should contain \'foo=bar\'");' - yes
+- 'assertEquals("on", data.get(0).value(), "The value of the checkbox should default to \'on\' if no value is set");' - yes
+- 'assertEquals("foo", data.get(0).key(), "The key of the checkbox should match the name attribute \'foo\'");' - yes
+- 'assertEquals(expectedDataSize, data.size(), "The form should contain exactly 3 input elements");' - yes
+- 'assertEquals(expectedUserKey, data.get(0).key(), "The first input element should be named \'user\'");' - yes
+- 'assertEquals(expectedPassKey, data.get(1).key(), "The second input element should be named \'pass\'");' - yes
+- 'assertEquals(expectedLoginKey, data.get(2).key(), "The third input element should be named \'login\'");' - yes
+- 'assertEquals(expectedFormDataSize, data.size(), "The form data size should be 2 after removing the password field");' - yes
+- 'assertEquals("user", data.get(0).key(), "The first key in form data should be \'user\'");' - yes
+

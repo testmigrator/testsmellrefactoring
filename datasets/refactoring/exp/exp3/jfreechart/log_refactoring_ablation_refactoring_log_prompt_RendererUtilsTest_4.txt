@@ -1,0 +1,88 @@
+asserts result: 
+ ```java
+import static org.junit.Assert.assertEquals;
+
+import org.jfree.chart.renderer.RendererUtils;
+import org.jfree.data.xy.DefaultXYDataset;
+import org.junit.Test;
+
+public class RendererUtilsTest {
+
+    private static final double TOLERANCE = 0.0001;
+
+    @Test
+    public void testFindLiveItemsUpperBound_NoItems() {
+        DefaultXYDataset<String> dataset = createDataset(new double[][] {{}, {}});
+        int upperBound = RendererUtils.findLiveItemsUpperBound(dataset, 0, 10.0, 11.0);
+        assertEquals("No items should return 0", 0, upperBound);
+    }
+
+    @Test
+    public void testFindLiveItemsUpperBound_OneItem() {
+        DefaultXYDataset<String> dataset = createDataset(new double[][] {{1.0}, {9.9}});
+        int upperBound1 = RendererUtils.findLiveItemsUpperBound(dataset, 1, 0.0, 1.1);
+        assertEquals("One item within range should return 0", 0, upperBound1);
+
+        int upperBound2 = RendererUtils.findLiveItemsUpperBound(dataset, 1, 2.0, 3.3);
+        assertEquals("One item outside range should return 0", 0, upperBound2);
+    }
+
+    @Test
+    public void testFindLiveItemsUpperBound_TwoItems() {
+        DefaultXYDataset<String> dataset = createDataset(new double[][] {{1.0, 2.0}, {9.9, 9.9}});
+        int upperBound1 = RendererUtils.findLiveItemsUpperBound(dataset, 2, 0.0, 1.1);
+        assertEquals("Two items, first within range should return 0", 0, upperBound1);
+
+        int upperBound2 = RendererUtils.findLiveItemsUpperBound(dataset, 2, 1.0, 2.2);
+        assertEquals("Two items, both within range should return 1", 1, upperBound2);
+
+        int upperBound3 = RendererUtils.findLiveItemsUpperBound(dataset, 2, 2.0, 3.3);
+        assertEquals("Two items, second within range should return 1", 1, upperBound3);
+
+        int upperBound4 = RendererUtils.findLiveItemsUpperBound(dataset, 2, 3.0, 4.4);
+        assertEquals("Two items, both outside range should return 1", 1, upperBound4);
+    }
+
+    @Test
+    public void testFindLiveItemsUpperBound_ThreeItems() {
+        DefaultXYDataset<String> dataset = createDataset(new double[][] {{1.0, 2.0, 1.5}, {9.9, 9.9, 9.9}});
+        int upperBound1 = RendererUtils.findLiveItemsUpperBound(dataset, 3, 0.0, 1.1);
+        assertEquals("Three items, first within range should return 0", 0, upperBound1);
+
+        int upperBound2 = RendererUtils.findLiveItemsUpperBound(dataset, 3, 1.0, 2.2);
+        assertEquals("Three items, first two within range should return 2", 2, upperBound2);
+
+        int upperBound3 = RendererUtils.findLiveItemsUpperBound(dataset, 3, 2.0, 3.3);
+        assertEquals("Three items, last two within range should return 2", 2, upperBound3);
+
+        int upperBound4 = RendererUtils.findLiveItemsUpperBound(dataset, 3, 3.0, 4.4);
+        assertEquals("Three items, all outside range should return 2", 2, upperBound4);
+    }
+
+    @Test
+    public void testFindLiveItemsUpperBound_FourItems() {
+        DefaultXYDataset<String> dataset = createDataset(new double[][] {{1.0, 2.0, 1.5, 1.8}, {9.9, 9.9, 9.9, 9.9}});
+        int upperBound1 = RendererUtils.findLiveItemsUpperBound(dataset, 4, 0.0, 1.1);
+        assertEquals("Four items, first within range should return 0", 0, upperBound1);
+
+        int upperBound2 = RendererUtils.findLiveItemsUpperBound(dataset, 4, 1.0, 2.2);
+        assertEquals("Four items, first three within range should return 3", 3, upperBound2);
+
+        int upperBound3 = RendererUtils.findLiveItemsUpperBound(dataset, 4, 2.0, 3.3);
+        assertEquals("Four items, last three within range should return 3", 3, upperBound3);
+
+        int upperBound4 = RendererUtils.findLiveItemsUpperBound(dataset, 4, 3.0, 4.4);
+        assertEquals("Four items, all outside range should return 3", 3, upperBound4);
+
+        int upperBound5 = RendererUtils.findLiveItemsUpperBound(dataset, 4, 4.0, 5.5);
+        assertEquals("Four items, all outside range should return 3", 3, upperBound5);
+    }
+
+    private DefaultXYDataset<String> createDataset(double[][] data) {
+        DefaultXYDataset<String> dataset = new DefaultXYDataset<>();
+        dataset.addSeries("Series", data);
+        return dataset;
+    }
+}
+```
+

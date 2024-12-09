@@ -1,0 +1,41 @@
+asserts result: 
+ ```java
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.PosixParser;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+class CommandLineTest {
+
+    private final Options options = new Options();
+    private final PosixParser parser = new PosixParser();
+
+    @Test
+    void testSingleOption() {
+        options.addOption(Option.builder("r").build());
+        options.addOption(Option.builder("f").build());
+        options.addOption(Option.builder("d").build());
+        options.addOption(Option.builder("s").build());
+        options.addOption(Option.builder("c").build());
+
+        final String[] args = {"-r"};
+
+        try {
+            final CommandLine cl = parser.parse(options, args);
+
+            assertTrue(cl.hasOption("r"), "Confirm -r is set");
+            assertFalse(cl.hasOption("f"), "Confirm -f is NOT set");
+            assertFalse(cl.hasOption("d"), "Confirm -d is NOT set");
+            assertFalse(cl.hasOption("s"), "Confirm -s is NOT set");
+            assertFalse(cl.hasOption("c"), "Confirm -c is NOT set");
+            assertTrue(cl.getArgList().isEmpty(), "Confirm no extra args");
+        } catch (ParseException e) {
+            fail("Unexpected ParseException: " + e.getMessage());
+        }
+    }
+}
+```
+

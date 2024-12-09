@@ -1,0 +1,5 @@
+asserts result: 
+ Yes
+
+The refactored tests maintain the same functionality as the original test. Each part of the original test has been broken down into separate test methods, each focusing on a specific aspect of the `testOutputEncoding` function. The `setupTestOutputEncoding` method initializes the document, and the individual test methods then perform assertions based on different settings (default charset, ASCII charset, extended escape mode). All the assertions and the logic remain consistent with the original test.
+

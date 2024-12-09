@@ -1,0 +1,33 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.assertions.AssertionFailedError;
+import org.junit.jupiter.api.function.Executable;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class ArchiveInputStreamTest {
+
+    @Test
+    public void testDetectOldTarFormatArchive() {
+        try {
+            ArchiveInputStream<?> tar = createArchiveInputStream("COMPRESS-612/test-times-star-folder.tar");
+            assertNotNull(tar, "The archive input stream should not be null.");
+            assertTrue(tar instanceof TarArchiveInputStream, "The archive input stream should be an instance of TarArchiveInputStream.");
+        } catch (Exception e) {
+            fail("An unexpected exception occurred: " + e.getMessage());
+        }
+    }
+
+    private ArchiveInputStream<?> createArchiveInputStream(String fileName) throws Exception {
+        // Implementation of creating an ArchiveInputStream from a file name
+        // This is a placeholder for the actual implementation
+        return new TarArchiveInputStream(new FileInputStream(fileName));
+    }
+}
+```
+
+### Explanation:
+1. **Assertion Messages**: Added clear explanatory messages to the `assertNotNull` and `assertTrue` statements to address the **Assertion Roulette** smell.
+2. **Exception Handling**: Replaced the generic `catch` block with a specific `fail` statement that provides a clear message about the unexpected exception, addressing the **Exception_Catching_Throwing** smell.
+

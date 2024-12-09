@@ -1,0 +1,107 @@
+Input Parameters:
+Test Code:
+ @ParameterizedTest
+    @MethodSource("org.apache.commons.compress.changes.TestFixtures#getOutputArchiveNames")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public void testChangeSetResults(final String archiverName) throws Exception {
+        final Path inputPath = createArchive(archiverName);
+        final Path result = Files.createTempFile("test", "." + archiverName);
+        final File file1 = getFile("test.txt");
+        try (InputStream inputStream = Files.newInputStream(inputPath);
+                ArchiveInputStream archiveInputStream = factory.createArchiveInputStream(archiverName, inputStream);
+                OutputStream newOutputStream = Files.newOutputStream(result);
+                ArchiveOutputStream archiveOutputStream = factory.createArchiveOutputStream(archiverName, newOutputStream);
+                InputStream csInputStream = Files.newInputStream(file1.toPath())) {
+            setLongFileMode(archiveOutputStream);
+            final ChangeSet changeSet = new ChangeSet();
+            changeSet.deleteDir("bla");
+            archiveListDeleteDir("bla");
+            // Add a file
+            final ArchiveEntry entry = archiveOutputStream.createArchiveEntry(file1, "bla/test.txt");
+            changeSet.add(entry, csInputStream);
+            archiveList.add("bla/test.txt");
+            final ChangeSetResults results = new ChangeSetPerformer(changeSet).perform(archiveInputStream, archiveOutputStream);
+            inputStream.close();
+            // Checks
+            assertEquals(1, results.getAddedFromChangeSet().size());
+            assertEquals("bla/test.txt", results.getAddedFromChangeSet().iterator().next());
+            assertEquals(3, results.getDeleted().size());
+            assertTrue(results.getDeleted().contains("bla/test4.xml"));
+            assertTrue(results.getDeleted().contains("bla/test5.xml"));
+            assertTrue(results.getDeleted().contains("bla/blubber/test6.xml"));
+
+            assertTrue(results.getAddedFromStream().contains("testdata/test1.xml"));
+            assertTrue(results.getAddedFromStream().contains("testdata/test2.xml"));
+            assertTrue(results.getAddedFromStream().contains("test/test3.xml"));
+            assertTrue(results.getAddedFromStream().contains("test.txt"));
+            assertTrue(results.getAddedFromStream().contains("something/bla"));
+            assertTrue(results.getAddedFromStream().contains("test with spaces.txt"));
+            assertEquals(6, results.getAddedFromStream().size());
+        } finally {
+            checkArchiveContent(result, archiveList);
+            forceDelete(result);
+        }
+
+    }
+Context: 
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing', 'Mystery_Guest', 'Resource_Optimism', 'Magic_Number_Test']
+Smell Description List: ['Test Smell Type：Assertion Roulette\n\nFeature:\nA test method contains more than one assertion statement without an explanation/message (parameter in the assertion method).\n', 'Test Smell Type：Exception_Catching_Throwing\n\nFeature:\nA test method that contains either a throw statement or a catch clause.\n', 'Test Smell Type：Mystery Guest\n\nFeature:\nA test method containing object instances of files and databases classes.\n', 'Test Smell Type：Resource Optimism\n\nFeature:\nThis smell occurs when a test method makes an optimistic assumption that the external resource (e.g., File), utilized by the test method, exists.\n', 'Test Smell Type：Magic Number Test\n\nFeature:\nAn assertion method that contains a numeric literal as an argument.\n']
+Refactoring DSL: ['RefactorRule:\n  SmellType: Assertion Roulette\n  Description: Add descriptive messages to assert statements to improve readability and maintainability.\n  Steps:\n    - Step:\n        Description: "Add descriptive message to each assert statement(except assertThat, assertThrows)."\n        Action: AddMessageToAssert\n        Parameters:\n          MessagePattern: "{assertionMessage}"\n  Example:\n    Before: |\n      @Test\n      public void T() {\n        stmt\n        assert_1\n        ...\n        assert_n\n        stmt\'\n      }\n    After: |\n      @Test\n      public void T() {\n        stmt\n        assert_1(..., "Descriptive message for assert statement")\n        ...\n        assert_n(..., "Descriptive message for assert statement")\n        stmt\'\n      }\n    Variables:\n      assertionMessage: "Descriptive message for assert statement"\n', 'RefactorRule:\n  SmellType: Exception_Catching_Throwing\n  Description: Ensure tests use assertDoesNotThrow to verify no exceptions are thrown and remove any throws declaration in test methods.\n  Steps:\n    - Step:\n        Description: "Handle try-catch blocks containing \'fail\' calls"\n        Action: ReplaceTryCatchWithAssertThrows\n        Parameters:\n          SourcePattern: |\n            try {\n              {tryBlock}\n              fail();\n            } catch ({exception}) {\n              {catchBlock}\n            }\n          ReplacementPattern: |\n            {exception} exception = assertThrows({exception}.class, () -> {\n              {tryBlock}\n            });\n            {catchBlock}\n    - Step:\n        Description: "Handle test methods with \'throws\' declaration but no try-catch block"\n        Action: WrapWithAssertDoesNotThrow\n        Parameters:\n          DetectionPattern: |\n            MethodDeclaration [throws!=null && BodyContainsTryCatch=false]\n          ReplacementPattern: |\n            assertDoesNotThrow(() -> {\n              {methodBody}\n            }, "Unexpected exception occurred during the test");\n\n    - Step:\n        Description: "Handle test methods with try-catch blocks without \'fail\' calls"\n        Action: ReplaceTryCatchWithoutFail\n        Parameters:\n          SourcePattern: |\n            try {\n              {tryBlock}\n            } catch ({exception}) {\n              {catchBlock}\n            }\n          ReplacementPattern: |\n            assertDoesNotThrow(() -> {\n              {tryBlock}\n            });\n            {catchBlock}\n\n  Example:\n    Before: |\n      @Test\n      public void T() {\n        stmt\n        try {\n            stmt\'\n            fail();\n        } catch (E) {\n            evs\n        }\n        stmt\'\'\n      }\n    After: |\n      @Test\n      public void T() {\n        stmt\n        assertThrows(E.class, () -> {\n            stmt\'\n        });\n        evs\n        stmt\'\'\n      }\n  Variables:\n    exception: E\n    tryBlock: stmt\'\n    catchBlock: evs\n    tryBlockStatement: stmt\'i\n', 'RefactorRule:\n  SmellType: Mystery Guest\n  Description: "Use JUnit 5 Temporary Directory feature to handle temporary files in a more controlled manner."\n  Steps:\n    - Step:\n        Description: "Annotate test method with @TempDir to inject a temporary directory"\n        Action: AddAnnotation\n        Parameters:\n          TargetType: Method\n          Annotation: @TempDir File {tempDirVariable}\n    - Step:\n        Description: "Replace direct creation of temporary files with creation using the injected temporary directory"\n        Action: ReplaceMethodCall\n        Parameters:\n          TargetMethod: "File.createTempFile"\n          ReplacementPattern: "{tempDirVariable}.createTempFile"\n          Import: "org.junit.jupiter.api.io.TempDir"\n  Example:\n    Before: |\n      @Test\n      public void T() {\n          stmt\n          File.createTempFile(params)\n          stmt\'\n      }\n    After: |\n      @Test\n      public void T(@TempDir File D) {\n          stmt\n          D.createTempFile(params)\n          stmt\'\n      }\n  Variables:\n    tempDirVariable: "D"\n', 'RefactorRule:\n  SmellType: Resource Optimism\n  Description: "Add an assertion to ensure that the required file or directory exists before performing operations on it, or give a hint if the test logic does not require file existence check."\n  Steps:\n    - Step:\n        Description: "Check if the file existence is critical for the test, and add an assertion if necessary."\n        Action: |\n          If {fileVariable} requires existence check:\n            AddAssertion\n            Parameters:\n              TargetPattern: |\n                File {fileVariable} = ...;\n              Assertion: |\n                if (!{fileVariable}.exists() || {fileVariable}.isDirectory()) {\n                    fail("File or directory does not exist or is not of the expected type.");\n                }\n          Else:\n            ProvideHint\n            Parameters:\n              HintMessage: "The file existence is not critical for this test. Consider reviewing if a file check is necessary. For example, \'new File(\\"\\")\' does not represent a real file."\n\n  Example:\n   Before: |\n      @Test\n      public void T() {\n        File outputFile = ...;\n        stmt\n        assert\n      }\n    After: |\n      @Test\n      public void T() {\n        File outputFile = ...;\n        if (!outputFile.exists() || outputFile.isDirectory()) {\n            // Hint: The file does not exist, but this may be expected behavior for the test.\n        }\n        stmt\n        assert\n      }\n  Variables:\n    fileVariable: "file"\n', 'RefactorRule:\n  SmellType: Magic Number Test\n  Description: "Extract magic numbers and assign meaningful names to improve readability and maintainability."\n  Steps:\n    - Step:\n        Action: IdentifyMagicNumbers\n        Description: "Identify magic numbers in assertions"\n        Parameters:\n          TargetType: Method\n          SourcePattern: |\n            assertEquals({magicNumber}, {variable})\n    - Step:\n        Action: ExtractVariable\n        Description: "Extract magic number to a variable with meaningful name"\n        Parameters:\n          TargetType: Method\n          SourcePattern: |\n            assertEquals({magicNumber}, {variable})\n          ReplacementPattern: |\n            int {meaningfulName} = {magicNumber};\n            assertEquals({meaningfulName}, {variable})\n  Example:\n    Before: |\n      @Test\n      public void T() {\n          stmt\n          assertEquals(1, a)\n          stmt\'\n      }\n    After: |\n      @Test\n      public void T() {\n          int x = 1; // x: meaningful variable name\n          stmt\n          assertEquals(x, a)\n          stmt\'\n      }\n  Variables:\n    magicNumber: "1"\n    variable: "a"\n    meaningfulName: "x"\n']
+Checkpoints: ['[ ] All assert statements have been added with clear explanatory messages.\n', '[ ] All exception handling has been refactored to use the JUnit 5 Exception Handling feature.\n', '[ ] All instances of the ‘Mystery Guest’ code smell have been refactored using the JUnit 5 Temporary Directory feature, annotating a temporary directory and considering its use in the external file instantiation steps.\n', '[ ] All instances of the ‘Resource Optimism’ code smell have been refactored by adding an assertion to check for file existence.\n', '[ ] All magic numbers in the test code have been extracted and assigned meaningful variable names.\n']
+
+Refactored Code: 
+ 
+@ParameterizedTest
+@MethodSource("org.apache.commons.compress.changes.TestFixtures#getOutputArchiveNames")
+@SuppressWarnings({ "unchecked", "rawtypes" })
+public void testChangeSetResults(@TempDir Path tempDir, final String archiverName) throws Exception {
+    final Path inputPath = createArchive(archiverName);
+    final Path result = tempDir.resolve("test." + archiverName);
+    final Path file1 = getFile("test.txt").toPath();
+
+    if (!file1.toFile().exists() || file1.toFile().isDirectory()) {
+        fail("File or directory does not exist or is not of the expected type.");
+    }
+
+    try (InputStream inputStream = Files.newInputStream(inputPath);
+         ArchiveInputStream archiveInputStream = factory.createArchiveInputStream(archiverName, inputStream);
+         OutputStream newOutputStream = Files.newOutputStream(result);
+         ArchiveOutputStream archiveOutputStream = factory.createArchiveOutputStream(archiverName, newOutputStream);
+         InputStream csInputStream = Files.newInputStream(file1)) {
+
+        setLongFileMode(archiveOutputStream);
+        final ChangeSet changeSet = new ChangeSet();
+        changeSet.deleteDir("bla");
+        archiveListDeleteDir("bla");
+
+        // Add a file
+        final ArchiveEntry entry = archiveOutputStream.createArchiveEntry(file1.toFile(), "bla/test.txt");
+        changeSet.add(entry, csInputStream);
+        archiveList.add("bla/test.txt");
+
+        final ChangeSetResults results = new ChangeSetPerformer(changeSet).perform(archiveInputStream, archiveOutputStream);
+
+        // Checks
+        assertEquals(1, results.getAddedFromChangeSet().size(), "Expected 1 item to be added from the change set");
+        assertEquals("bla/test.txt", results.getAddedFromChangeSet().iterator().next(), "Expected 'bla/test.txt' to be added from the change set");
+
+        assertEquals(3, results.getDeleted().size(), "Expected 3 items to be deleted");
+        assertTrue(results.getDeleted().contains("bla/test4.xml"), "Expected 'bla/test4.xml' to be deleted");
+        assertTrue(results.getDeleted().contains("bla/test5.xml"), "Expected 'bla/test5.xml' to be deleted");
+        assertTrue(results.getDeleted().contains("bla/blubber/test6.xml"), "Expected 'bla/blubber/test6.xml' to be deleted");
+
+        assertEquals(6, results.getAddedFromStream().size(), "Expected 6 items to be added from the stream");
+        assertTrue(results.getAddedFromStream().contains("testdata/test1.xml"), "Expected 'testdata/test1.xml' to be added from the stream");
+        assertTrue(results.getAddedFromStream().contains("testdata/test2.xml"), "Expected 'testdata/test2.xml' to be added from the stream");
+        assertTrue(results.getAddedFromStream().contains("test/test3.xml"), "Expected 'test/test3.xml' to be added from the stream");
+        assertTrue(results.getAddedFromStream().contains("test.txt"), "Expected 'test.txt' to be added from the stream");
+        assertTrue(results.getAddedFromStream().contains("something/bla"), "Expected 'something/bla' to be added from the stream");
+        assertTrue(results.getAddedFromStream().contains("test with spaces.txt"), "Expected 'test with spaces.txt' to be added from the stream");
+
+    } finally {
+        checkArchiveContent(result, archiveList);
+        forceDelete(result);
+    }
+}
+
+

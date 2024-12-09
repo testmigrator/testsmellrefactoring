@@ -1,0 +1,54 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Entities;
+import org.jsoup.select.Elements;
+import static org.junit.Assert.assertEquals;
+
+public class ElementTest {
+
+    private static final String HTML = "<div id=1>Text <p>One</p> Text <p>Two</p></div><div id=2></div>";
+    private static final int EXPECTED_CHILD_NODE_SIZE_DIV1 = 4;
+    private static final int EXPECTED_CHILD_NODE_SIZE_DIV2 = 2;
+    private static final String EXPECTED_HTML_OUTPUT = "<div id=\"1\">Text <p>One</p> Text <p>Two</p></div><div id=\"2\"><p>One cloned</p><p>Two</p></div>";
+
+    @Test
+    public void testInsertChildrenAsCopy_childNodeSizeDiv1() {
+        Document doc = Jsoup.parse(HTML);
+        Element div1 = doc.select("div").get(0);
+        Element div2 = doc.select("div").get(1);
+        Elements ps = doc.select("p").clone();
+        ps.first().text("One cloned");
+        div2.insertChildren(-1, ps);
+
+        assertEquals("Child node size of div1 should remain unchanged", EXPECTED_CHILD_NODE_SIZE_DIV1, div1.childNodeSize());
+    }
+
+    @Test
+    public void testInsertChildrenAsCopy_childNodeSizeDiv2() {
+        Document doc = Jsoup.parse(HTML);
+        Element div1 = doc.select("div").get(0);
+        Element div2 = doc.select("div").get(1);
+        Elements ps = doc.select("p").clone();
+        ps.first().text("One cloned");
+        div2.insertChildren(-1, ps);
+
+        assertEquals("Child node size of div2 should be 2 after insertion", EXPECTED_CHILD_NODE_SIZE_DIV2, div2.childNodeSize());
+    }
+
+    @Test
+    public void testInsertChildrenAsCopy_htmlOutput() {
+        Document doc = Jsoup.parse(HTML);
+        Element div1 = doc.select("div").get(0);
+        Element div2 = doc.select("div").get(1);
+        Elements ps = doc.select("p").clone();
+        ps.first().text("One cloned");
+        div2.insertChildren(-1, ps);
+
+        assertEquals("HTML output should match expected structure", EXPECTED_HTML_OUTPUT, Entities.escape(TextUtil.stripNewlines(doc.body().html())));
+    }
+}
+```
+

@@ -1,0 +1,22 @@
+total tests: 6
+total asserts: 20
+assertEquals("r1 and r2 should be equal", r1, r2);
+assertEquals("Hash codes of r1 and r2 should be equal", h1, h2);
+assertNotSame(r1, r2, "Cloned instances should be different objects");
+assertSame(r1.getClass(), r2.getClass(), "Cloned instance should have the same class type as the original");
+assertEquals(r1, r2, "Cloned instance should have the same content as the original");
+assertEquals(r1, r2, "Serialized and deserialized objects should be equal");
+assertNotSame(r1, r2, "Serialized and deserialized objects should not be the same instance");
+assertNotNull(li, "The legend item should be visible when series is visible in legend.");
+assertNull(li, "The legend item should not be visible when series is hidden in legend.");
+assertEquals(expectedLabel, li.getLabel(), "The label of the legend item should match the expected value.");
+assertEquals(expectedDatasetIndex, li.getDatasetIndex(), "The dataset index of the legend item should match the expected value.");
+assertEquals(expectedSeriesIndex, li.getSeriesIndex(), "The series index of the legend item should match the expected value.");
+assertNull(renderer.findRangeBounds(null), "Expected null when dataset is null");
+assertNull(renderer.findRangeBounds(dataset), "Expected null when dataset is empty");
+assertEquals(expectedRange, renderer.findRangeBounds(dataset), "Expected range [0.0, 1.0] for single positive value");
+assertEquals(expectedRange, renderer.findRangeBounds(dataset), "Expected range [1.0, 1.0] with base excluded");
+assertEquals(expectedRange, renderer.findRangeBounds(dataset), "Expected range [-2.0, 1.0] with multiple values");
+assertEquals(expectedRange, renderer.findRangeBounds(dataset), "Expected range [-2.0, 1.0] with null value");
+assertEquals(expectedRange, renderer.findRangeBounds(dataset), "Expected range [-6.0, 1.0] with multiple series");
+assertEquals(expectedRange, renderer.findRangeBounds(dataset), "Expected range [-2.0, 1.0] with series 1 invisible");

@@ -1,0 +1,55 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.*;
+import static com.google.common.truth.Truth.assertThat;
+
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
+
+import java.io.IOException;
+
+class JsonReaderTest {
+
+    @Test
+    public void testSkipValueAtObjectEnd_PeekReturnsEndDocument() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("{}"));
+        reader.beginObject();
+        reader.skipValue();
+        assertThat(reader.peek()).isEqualTo(JsonToken.END_DOCUMENT)
+                .withFailMessage("Expected END_DOCUMENT after skipping value at object end");
+    }
+
+    @Test
+    public void testSkipValueAtObjectEnd_GetPathReturnsRoot() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("{}"));
+        reader.beginObject();
+        reader.skipValue();
+        assertThat(reader.getPath()).isEqualTo("$")
+                .withFailMessage("Expected root path ($) after skipping value at object end");
+    }
+
+    @Test
+    public void testSkipValueAtObjectEnd_HandlesIOException() {
+        JsonReader reader = new JsonReader(new FailingStringReader("{}"));
+        Executable executable = () -> {
+            reader.beginObject();
+            reader.skipValue();
+        };
+        assertThrows(IOException.class, executable, "Expected IOException when reading from failing reader");
+    }
+
+    private static class FailingStringReader extends StringReader {
+        public FailingStringReader(String s) {
+            super(s);
+        }
+
+        @Override
+        public int read(char[] cbuf, int off, int len) throws IOException {
+            throw new IOException("Simulated read failure");
+        }
+    }
+}
+```
+

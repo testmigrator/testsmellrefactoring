@@ -1,0 +1,10 @@
+asserts result: 
+ Yes
+
+The refactored test maintains the same functionality as the original test. The main changes are:
+
+1. The use of `assertDoesNotThrow` to wrap the entire test logic, which ensures that no unexpected exceptions are thrown during the execution of the test.
+2. Adding descriptive messages to the `assertThat` statements for better readability and understanding of what each assertion is checking.
+
+These changes do not alter the core behavior or the assertions being made in the test, so the functionality remains consistent.
+

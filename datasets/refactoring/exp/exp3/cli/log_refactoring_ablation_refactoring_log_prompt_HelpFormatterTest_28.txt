@@ -1,0 +1,29 @@
+asserts result: 
+ ```java
+import org.apache.commons.cli.HelpFormatter;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+
+public class HelpFormatterTest {
+
+    @Test
+    public void testRenderWrappedTextSingleLinePadded2() {
+        // single line padded text 2
+        final int width = 53;
+        final int padding = 24;
+        //@formatter:off
+        final String text = "  -p,--period <PERIOD>  PERIOD is time duration of form " +
+                            "DATE[-DATE] where DATE has form YYYY[MM[DD]]";
+        final String expected = "  -p,--period <PERIOD>  PERIOD is time duration of" + System.lineSeparator() +
+                                "                        form DATE[-DATE] where DATE" + System.lineSeparator() +
+                                "                        has form YYYY[MM[DD]]";
+        //@formatter:on
+
+        final StringBuilder sb = new StringBuilder();
+        new HelpFormatter().renderWrappedText(sb, width, padding, text);
+        assertEquals(expected, sb.toString());
+    }
+}
+```
+

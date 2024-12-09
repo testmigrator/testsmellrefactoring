@@ -1,0 +1,38 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class DocumentTest {
+
+    @Test
+    public void testNoTitleDocument() {
+        Document noTitle = Jsoup.parse("<p>Hello</p>");
+        
+        assertEquals("Expected empty title for document with no title tag", "", noTitle.title());
+        noTitle.title("Hello");
+        assertEquals("Expected title to be set to 'Hello'", "Hello", noTitle.title());
+        assertEquals("Expected <title>Hello</title> after setting title", "Hello", noTitle.select("title").first().text());
+    }
+
+    @Test
+    public void testWithTitleDocument() {
+        Document withTitle = Jsoup.parse("<title>First</title><title>Ignore</title><p>Hello</p>");
+        
+        assertEquals("Expected title to be 'First' from the first <title> tag", "First", withTitle.title());
+        withTitle.title("Hello");
+        assertEquals("Expected title to be set to 'Hello'", "Hello", withTitle.title());
+        assertEquals("Expected <title>Hello</title> after setting title", "Hello", withTitle.select("title").first().text());
+    }
+
+    @Test
+    public void testNormalizeTitle() {
+        Document normaliseTitle = Jsoup.parse("<title>   Hello\nthere   \n   now   \n");
+        
+        assertEquals("Expected normalized title text", "Hello there now", normaliseTitle.title());
+    }
+}
+```
+

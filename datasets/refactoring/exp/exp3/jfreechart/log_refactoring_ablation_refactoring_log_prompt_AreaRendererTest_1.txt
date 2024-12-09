@@ -1,0 +1,37 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+
+import org.jfree.chart.renderer.category.AreaRenderer;
+import org.jfree.chart.renderer.category.AreaRendererEndType;
+import org.junit.jupiter.api.Test;
+
+public class AreaRendererTest {
+
+    @Test
+    public void testEquals_DefaultState() {
+        AreaRenderer r1 = new AreaRenderer();
+        AreaRenderer r2 = new AreaRenderer();
+        assertEquals(r1, r2, "Default state should be equal");
+    }
+
+    @Test
+    public void testEquals_DifferentEndType() {
+        AreaRenderer r1 = new AreaRenderer();
+        AreaRenderer r2 = new AreaRenderer();
+        r1.setEndType(AreaRendererEndType.LEVEL);
+        assertNotEquals(r1, r2, "Different end type should not be equal");
+    }
+
+    @Test
+    public void testEquals_SameEndType() {
+        AreaRenderer r1 = new AreaRenderer();
+        AreaRenderer r2 = new AreaRenderer();
+        r1.setEndType(AreaRendererEndType.LEVEL);
+        r2.setEndType(AreaRendererEndType.LEVEL);
+        assertEquals(r1, r2, "Same end type should be equal");
+    }
+}
+```
+

@@ -1,0 +1,5 @@
+asserts result: 
+ Yes
+
+The refactored test `testDrawWithNullInfo` maintains the same functionality as the original test. Both tests aim to ensure that no `NullPointerException` is thrown when creating a buffered image from a `JFreeChart` object. The refactored version uses the `assertDoesNotThrow` method from JUnit 5 to achieve this, which is functionally equivalent to the original try-catch block used to fail the test if an exception is thrown. The assertion message in the refactored version provides additional context, but does not change the core behavior of the test.
+

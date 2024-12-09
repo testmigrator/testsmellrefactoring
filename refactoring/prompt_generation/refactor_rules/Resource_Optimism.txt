@@ -1,19 +1,26 @@
 RefactorRule:
   SmellType: Resource Optimism
-  Description: "Add an assertion to ensure that the required file or directory exists before performing operations on it."
+  Description: "Add an assertion to ensure that the required file or directory exists before performing operations on it, or give a hint if the test logic does not require file existence check."
   Steps:
     - Step:
-        Description: "Add assertion to check for the existence of the file or directory."
-        Action: AddAssertion
-        Parameters:
-          TargetPattern: |
-            File {fileVariable} = ...;
-          Assertion: |
-            if (!{fileVariable}.exists() || ({fileVariable}.isDirectory() != {isDirectory})) {
-                fail("File or directory does not exist or is not of the expected type");
-            }
+        Description: "Check if the file existence is critical for the test, and add an assertion if necessary."
+        Action: |
+          If {fileVariable} requires existence check:
+            AddAssertion
+            Parameters:
+              TargetPattern: |
+                File {fileVariable} = ...;
+              Assertion: |
+                if (!{fileVariable}.exists() || {fileVariable}.isDirectory()) {
+                    fail("File or directory does not exist or is not of the expected type.");
+                }
+          Else:
+            ProvideHint
+            Parameters:
+              HintMessage: "The file existence is not critical for this test. Consider reviewing if a file check is necessary. For example, 'new File(\"\")' does not represent a real file."
+
   Example:
-    Before: |
+   Before: |
       @Test
       public void T() {
         File outputFile = ...;
@@ -25,11 +32,10 @@ RefactorRule:
       public void T() {
         File outputFile = ...;
         if (!outputFile.exists() || outputFile.isDirectory()) {
-            fail("Output file does not exist or is not a file");
+            // Hint: The file does not exist, but this may be expected behavior for the test.
         }
         stmt
         assert
       }
   Variables:
-    fileVariable: "outputFile"
-    isDirectory: "false"
+    fileVariable: "file"

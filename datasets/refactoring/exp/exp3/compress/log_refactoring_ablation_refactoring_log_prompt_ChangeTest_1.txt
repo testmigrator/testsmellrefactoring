@@ -1,0 +1,15 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+public class ChangeTest {
+
+    @Test
+    public void testFailsToCreateChangeTakingFourArgumentsThrowsNullPointerException() {
+        PipedInputStream pipedInputStream = new PipedInputStream(1);
+        assertThrows(NullPointerException.class, () -> new Change<>(null, pipedInputStream, false));
+    }
+}
+```
+

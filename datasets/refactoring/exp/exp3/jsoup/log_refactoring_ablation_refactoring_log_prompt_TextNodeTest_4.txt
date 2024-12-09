@@ -1,0 +1,34 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.nodes.TextNode;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class TextNodeTest {
+
+    @Test
+    public void testSplitText() {
+        Document doc = Jsoup.parse("<div>Hello there</div>");
+        Element div = doc.select("div").first();
+        TextNode tn = (TextNode) div.childNode(0);
+        TextNode tail = tn.splitText(6);
+
+        assertEquals("Hello ", TextUtil.stripNewlines(tn.getWholeText()));
+        assertEquals("there", TextUtil.stripNewlines(tail.getWholeText()));
+    }
+
+    @Test
+    public void testWrapTextInBold() {
+        Document doc = Jsoup.parse("<div>Hello <b>there</b></div>");
+        Element div = doc.select("div").first();
+        Element b = div.select("b").first();
+
+        assertEquals("there", TextUtil.stripNewlines(b.text()));
+        assertEquals("Hello <b>there</b>", TextUtil.stripNewlines(div.html()));
+    }
+}
+```
+

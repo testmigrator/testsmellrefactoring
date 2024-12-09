@@ -1,0 +1,10 @@
+total tests: 3
+total asserts: 8
+assertEquals(r1, r2, "Default state should be equal");
+assertNotEquals(r1, r2, "Should not be equal after setting render as percentages on one instance");
+assertEquals(r1, r2, "Should be equal after setting render as percentages on both instances");
+assertEquals("Expected r1 to be equal to r2", r1, r2);
+assertEquals("Expected hash codes of r1 and r2 to be equal", h1, h2);
+assertNotSame(r1, r2, "The cloned object should not be the same instance as the original.");
+assertSame(r1.getClass(), r2.getClass(), "The cloned object should be of the same class as the original.");
+assertEquals(r1, r2, "The cloned object should be equal to the original.");

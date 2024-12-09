@@ -1,0 +1,36 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class ElementTest {
+
+    @Test
+    public void testSetTitleContentWithPlainText() {
+        Document doc = Jsoup.parse("<html><head id=2><title id=1></title></head></html>");
+        Element title = doc.getElementById("1");
+        title.html("good");
+        assertEquals("Setting title content with plain text should match", "good", title.html());
+    }
+
+    @Test
+    public void testSetTitleContentWithHtml() {
+        Document doc = Jsoup.parse("<html><head id=2><title id=1></title></head></html>");
+        Element title = doc.getElementById("1");
+        title.html("<i>bad</i>");
+        assertEquals("Setting title content with HTML should be escaped", "&lt;i&gt;bad&lt;/i&gt;", title.html());
+    }
+
+    @Test
+    public void testSetHeadContentWithHtml() {
+        Document doc = Jsoup.parse("<html><head id=2><title id=1></title></head></html>");
+        Element head = doc.getElementById("2");
+        head.html("<title><i>bad</i></title>");
+        assertEquals("Setting head content with HTML should be correctly set", "<title>&lt;i&gt;bad&lt;/i&gt;</title>", head.html());
+    }
+}
+```
+

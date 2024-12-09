@@ -1,0 +1,86 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+import static org.junit.Assert.assertEquals;
+
+public class ElementTest {
+
+    private static final String HTML = "<div><p><a>One</a></p><p><a>Two</a></p>Three</div><span>Four</span><foo></foo><img>";
+
+    @Test
+    public void testDivChildrenElements() {
+        Document doc = Jsoup.parse(HTML);
+        Element div = doc.select("div").first();
+
+        int expectedChildCount = 2;
+        assertEquals("Div should have 2 child elements", expectedChildCount, div.children().size());
+
+        String expectedFirstChildHtml = "<p><a>One</a></p>";
+        assertEquals("First child element of div should be <p><a>One</a></p>", expectedFirstChildHtml, div.children().get(0).outerHtml());
+
+        String expectedSecondChildHtml = "<p><a>Two</a></p>";
+        assertEquals("Second child element of div should be <p><a>Two</a></p>", expectedSecondChildHtml, div.children().get(1).outerHtml());
+
+        int expectedChildNodeCount = 3;
+        assertEquals("Div should have 3 child nodes", expectedChildNodeCount, div.childNodes().size());
+
+        String expectedThirdChildNodeHtml = "Three";
+        assertEquals("Third child node of div should be 'Three'", expectedThirdChildNodeHtml, div.childNodes().get(2).outerHtml());
+    }
+
+    @Test
+    public void testPChildrenElements() {
+        Document doc = Jsoup.parse(HTML);
+        Element p = doc.select("p").first();
+
+        int expectedChildCount = 1;
+        assertEquals("P should have 1 child element", expectedChildCount, p.children().size());
+
+        String expectedFirstChildText = "One";
+        assertEquals("First child element of p should contain text 'One'", expectedFirstChildText, p.children().text());
+    }
+
+    @Test
+    public void testSpanChildrenElements() {
+        Document doc = Jsoup.parse(HTML);
+        Element span = doc.select("span").first();
+
+        int expectedChildCount = 0;
+        assertEquals("Span should have 0 child elements", expectedChildCount, span.children().size());
+
+        int expectedChildNodeCount = 1;
+        assertEquals("Span should have 1 child node", expectedChildNodeCount, span.childNodes().size());
+
+        String expectedFirstChildNodeHtml = "Four";
+        assertEquals("First child node of span should be 'Four'", expectedFirstChildNodeHtml, span.childNodes().get(0).outerHtml());
+    }
+
+    @Test
+    public void testFooChildrenElements() {
+        Document doc = Jsoup.parse(HTML);
+        Element foo = doc.select("foo").first();
+
+        int expectedChildCount = 0;
+        assertEquals("Foo should have 0 child elements", expectedChildCount, foo.children().size());
+
+        int expectedChildNodeCount = 0;
+        assertEquals("Foo should have 0 child nodes", expectedChildNodeCount, foo.childNodes().size());
+    }
+
+    @Test
+    public void testImgChildrenElements() {
+        Document doc = Jsoup.parse(HTML);
+        Element img = doc.select("img").first();
+
+        int expectedChildCount = 0;
+        assertEquals("Img should have 0 child elements", expectedChildCount, img.children().size());
+
+        int expectedChildNodeCount = 0;
+        assertEquals("Img should have 0 child nodes", expectedChildNodeCount, img.childNodes().size());
+    }
+}
+```
+

@@ -1,0 +1,34 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.MalformedJsonException;
+import org.junit.jupiter.api.Test;
+
+public class JsonReaderTest {
+
+    @Test
+    public void testBeginAndEndArray() throws IOException {
+        JsonReader reader = new JsonReader(reader("[] []"));
+        reader.beginArray();
+        reader.endArray();
+    }
+
+    @Test
+    public void testPeekThrowsMalformedJsonException() throws IOException {
+        JsonReader reader = new JsonReader(reader("[] []"));
+        reader.beginArray();
+        reader.endArray();
+
+        MalformedJsonException e = assertThrows(MalformedJsonException.class, () -> reader.peek());
+        assertEquals("line 1 column 5 path $", e.getMessage());
+    }
+
+    private Reader reader(String content) {
+        return new StringReader(content);
+    }
+}
+```
+

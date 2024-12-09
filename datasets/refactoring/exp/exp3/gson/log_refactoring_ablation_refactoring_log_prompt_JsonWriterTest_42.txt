@@ -1,0 +1,53 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.assertj.core.api.Assertions.assertThat;
+
+import com.google.gson.stream.JsonWriter;
+import org.junit.jupiter.api.Test;
+import java.io.IOException;
+import java.io.StringWriter;
+
+class JsonWriterTest {
+
+    @Test
+    public void testBeginAndEndArray() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        assertDoesNotThrow(() -> jsonWriter.beginArray());
+        assertDoesNotThrow(() -> jsonWriter.endArray());
+        assertThat(stringWriter.toString()).isEqualTo("[]");
+    }
+
+    @Test
+    public void testSingleObjectInArray() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        assertDoesNotThrow(() -> jsonWriter.beginArray());
+        assertDoesNotThrow(() -> jsonWriter.beginObject());
+        assertDoesNotThrow(() -> jsonWriter.name("a").value(5));
+        assertDoesNotThrow(() -> jsonWriter.name("b").value(false));
+        assertDoesNotThrow(() -> jsonWriter.endObject());
+        assertDoesNotThrow(() -> jsonWriter.endArray());
+        assertThat(stringWriter.toString()).isEqualTo("[{\"a\":5,\"b\":false}]");
+    }
+
+    @Test
+    public void testMultipleObjectsInArray() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        assertDoesNotThrow(() -> jsonWriter.beginArray());
+        assertDoesNotThrow(() -> jsonWriter.beginObject());
+        assertDoesNotThrow(() -> jsonWriter.name("a").value(5));
+        assertDoesNotThrow(() -> jsonWriter.name("b").value(false));
+        assertDoesNotThrow(() -> jsonWriter.endObject());
+        assertDoesNotThrow(() -> jsonWriter.beginObject());
+        assertDoesNotThrow(() -> jsonWriter.name("c").value(6));
+        assertDoesNotThrow(() -> jsonWriter.name("d").value(true));
+        assertDoesNotThrow(() -> jsonWriter.endObject());
+        assertDoesNotThrow(() -> jsonWriter.endArray());
+        assertThat(stringWriter.toString()).isEqualTo("[{\"a\":5,\"b\":false},{\"c\":6,\"d\":true}]");
+    }
+}
+```
+

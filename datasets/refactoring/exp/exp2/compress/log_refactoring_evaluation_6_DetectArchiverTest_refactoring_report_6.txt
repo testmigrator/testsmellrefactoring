@@ -1,0 +1,5 @@
+asserts result: 
+ Yes
+
+The functionality between the original test and the refactored test is consistent. The only changes made are the addition of more descriptive messages in the assertions, which do not alter the behavior or outcome of the test. Both versions of the test check that an `ArchiveException` is thrown and that `ArchiveStreamFactory.detect(in)` returns `null`.
+

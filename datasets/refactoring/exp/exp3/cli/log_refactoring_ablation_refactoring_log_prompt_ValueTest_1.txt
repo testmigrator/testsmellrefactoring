@@ -1,0 +1,9 @@
+asserts result: 
+ ```java
+@Test
+public void testLongNoArg() {
+    assertTrue("Expected the option 'c' to be present", cl.hasOption("c"));
+    assertNull("Expected the value of option 'c' to be null", cl.getOptionValue("c"));
+}
+```
+

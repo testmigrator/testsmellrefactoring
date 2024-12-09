@@ -1,0 +1,50 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+
+import com.google.gson.stream.JsonWriter;
+import com.google.gson.stream.Strictness;
+import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.io.StringWriter;
+
+class JsonWriterTest {
+
+    @Test
+    public void testNonFiniteFloatsWhenLenient_NaN() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.setStrictness(Strictness.LENIENT);
+        jsonWriter.beginArray();
+        jsonWriter.value(Float.NaN);
+        jsonWriter.endArray();
+        assertThat(stringWriter.toString(), is("[NaN]"));
+    }
+
+    @Test
+    public void testNonFiniteFloatsWhenLenient_NegativeInfinity() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.setStrictness(Strictness.LENIENT);
+        jsonWriter.beginArray();
+        jsonWriter.value(Float.NEGATIVE_INFINITY);
+        jsonWriter.endArray();
+        assertThat(stringWriter.toString(), is("[-Infinity]"));
+    }
+
+    @Test
+    public void testNonFiniteFloatsWhenLenient_PositiveInfinity() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.setStrictness(Strictness.LENIENT);
+        jsonWriter.beginArray();
+        jsonWriter.value(Float.POSITIVE_INFINITY);
+        jsonWriter.endArray();
+        assertThat(stringWriter.toString(), is("[Infinity]"));
+    }
+}
+```
+

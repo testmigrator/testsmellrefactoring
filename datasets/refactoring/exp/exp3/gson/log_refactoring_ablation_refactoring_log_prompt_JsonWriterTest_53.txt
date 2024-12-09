@@ -1,0 +1,49 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+
+import java.io.IOException;
+import java.io.StringWriter;
+
+class JsonWriterTest {
+
+    @Test
+    public void testWriterCloseIsIdempotentFirstCall() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter writer = new JsonWriter(stringWriter);
+        writer.beginArray();
+        writer.endArray();
+        writer.close();
+        assertEquals("[]", stringWriter.toString(), "First close call should produce an empty array JSON");
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {1, 2})
+    public void testWriterCloseIsIdempotentMultipleCalls(int callCount) throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter writer = new JsonWriter(stringWriter);
+        writer.beginArray();
+        writer.endArray();
+        for (int i = 0; i < callCount; i++) {
+            writer.close();
+        }
+        assertEquals("[]", stringWriter.toString(), "Multiple close calls should still produce an empty array JSON");
+    }
+
+    @Test
+    public void testWriterCloseDoesNotThrowExceptionOnMultipleCalls() {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter writer = new JsonWriter(stringWriter);
+        writer.beginArray();
+        writer.endArray();
+        writer.close();
+        assertDoesNotThrow(() -> writer.close(), "Subsequent close calls should not throw exceptions");
+    }
+}
+```
+

@@ -1,0 +1,11 @@
+total tests: 3
+total asserts: 9
+assertEquals("t1 and t2 should be equal", t1, t2);
+assertEquals("Hash codes of t1 and t2 should be equal", h1, h2);
+assertNotSame(t1, t2, "t1 and t2 should be different instances");
+assertSame(t1.getClass(), t2.getClass(), "t1 and t2 should have the same class");
+assertEquals(t1, t2, "t1 and t2 should be equal after cloning");
+assertNotEquals(t1, t2, "t1 and t2 should not be equal after modifying t1's bounds");
+assertEquals(t1, t2, "t1 and t2 should be equal again after setting t2's bounds to match t1");
+assertEquals(t1, t2, "Serialized and deserialized LegendTitle objects should be equal");
+assertEquals(t2.getSources()[0], plot, "The source of the deserialized LegendTitle should be the original plot");

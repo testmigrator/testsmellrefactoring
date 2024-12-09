@@ -1,0 +1,27 @@
+asserts result: 
+ ```java
+import static org.junit.Assert.assertEquals;
+
+import org.jfree.chart.renderer.category.LayeredBarRenderer;
+import org.junit.Test;
+
+public class LayeredBarRendererTest {
+
+    @Test
+    public void testEquals() {
+        LayeredBarRenderer r1 = new LayeredBarRenderer();
+        LayeredBarRenderer r2 = new LayeredBarRenderer();
+        assertEquals("Two default LayeredBarRenderers should be equal", r1, r2);
+    }
+
+    @Test
+    public void testHashCode() {
+        LayeredBarRenderer r1 = new LayeredBarRenderer();
+        LayeredBarRenderer r2 = new LayeredBarRenderer();
+        int h1 = r1.hashCode();
+        int h2 = r2.hashCode();
+        assertEquals("Hash codes of two default LayeredBarRenderers should be equal", h1, h2);
+    }
+}
+```
+

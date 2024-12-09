@@ -1,0 +1,45 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.Strictness;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+
+import java.io.IOException;
+import java.io.StringReader;
+
+class JsonReaderTest {
+
+    private JsonReader reader(String json) {
+        return new JsonReader(new StringReader(json));
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "[true,,true], true, null, true",
+        "[,true], null, true",
+        "[true,], true, null",
+        "[,], null, null"
+    })
+    void testLenientUnnecessaryArraySeparators(String json, Boolean... expectedValues) throws IOException {
+        JsonReader reader = reader(json);
+        reader.setStrictness(Strictness.LENIENT);
+        reader.beginArray();
+
+        for (Boolean expectedValue : expectedValues) {
+            if (expectedValue == null) {
+                reader.nextNull();
+            } else {
+                assertThat(reader.nextBoolean()).withFailMessage("Expected value does not match").isEqualTo(expectedValue);
+            }
+        }
+
+        reader.endArray();
+    }
+}
+```
+

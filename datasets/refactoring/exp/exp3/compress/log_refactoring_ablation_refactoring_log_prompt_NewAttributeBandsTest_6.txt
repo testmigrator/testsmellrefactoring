@@ -1,0 +1,54 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
+
+public class NewAttributeBandsTest {
+
+    private static final String CONTEXT_CLASS = "CONTEXT_CLASS";
+    private static final String LAYOUT_STRING = "NH[PHOHRUHRSHH]";
+    private static final int LAYOUT_SIZE = 1;
+    private static final int REPLICATION_SIZE = 5;
+    private static final String COUNT_TAG = "H";
+    private static final String FIRST_ELEMENT_TAG = "PH";
+    private static final String SECOND_ELEMENT_TAG = "OH";
+    private static final String THIRD_ELEMENT_TAG = "RUH";
+    private static final String FOURTH_ELEMENT_TAG = "RSH";
+    private static final String FIFTH_ELEMENT_TAG = "H";
+
+    @Test
+    public void testReplicationLayout() {
+        MockNewAttributeBands newAttributeBands = new MockNewAttributeBands(
+            new MockSegment(), 
+            new AttributeLayout("test", CONTEXT_CLASS, LAYOUT_STRING, 25)
+        );
+
+        List layoutElements = newAttributeBands.getLayoutElements();
+        assertEquals(LAYOUT_SIZE, layoutElements.size(), "Layout elements size should be 1");
+
+        Replication element = (Replication) layoutElements.get(0);
+        Integral countElement = element.getCountElement();
+        assertEquals(COUNT_TAG, countElement.getTag(), "Count element tag should be H");
+
+        List replicatedElements = element.getLayoutElements();
+        assertEquals(REPLICATION_SIZE, replicatedElements.size(), "Replicated elements size should be 5");
+
+        Integral firstElement = (Integral) replicatedElements.get(0);
+        assertEquals(FIRST_ELEMENT_TAG, firstElement.getTag(), "First element tag should be PH");
+
+        Integral secondElement = (Integral) replicatedElements.get(1);
+        assertEquals(SECOND_ELEMENT_TAG, secondElement.getTag(), "Second element tag should be OH");
+
+        Reference thirdElement = (Reference) replicatedElements.get(2);
+        assertEquals(THIRD_ELEMENT_TAG, thirdElement.getTag(), "Third element tag should be RUH");
+
+        Reference fourthElement = (Reference) replicatedElements.get(3);
+        assertEquals(FOURTH_ELEMENT_TAG, fourthElement.getTag(), "Fourth element tag should be RSH");
+
+        Integral fifthElement = (Integral) replicatedElements.get(4);
+        assertEquals(FIFTH_ELEMENT_TAG, fifthElement.getTag(), "Fifth element tag should be H");
+    }
+}
+```
+

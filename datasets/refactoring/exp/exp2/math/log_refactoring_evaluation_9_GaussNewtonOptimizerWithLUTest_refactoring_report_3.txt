@@ -1,0 +1,5 @@
+asserts result: 
+ yes
+
+The functionality of the test case remains consistent between the original and the refactored version. Both versions aim to verify that a `TooManyEvaluationsException` is thrown when the optimizer exceeds the maximum number of evaluations. The refactored version uses JUnit's `assertThrows` method to explicitly check for the exception, which is functionally equivalent to the original try-catch block where the exception is caught and the test passes if the exception is thrown.
+

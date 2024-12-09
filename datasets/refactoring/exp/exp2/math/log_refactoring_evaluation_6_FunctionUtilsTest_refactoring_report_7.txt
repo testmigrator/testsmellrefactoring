@@ -1,0 +1,5 @@
+asserts result: 
+ Yes
+
+The refactored tests maintain the same functionality as the original test. Each test case is now separated into its own method, which enhances readability and maintainability. The use of `setupCollector` to create the `MultivariateFunction` object ensures that the behavior remains consistent across all test cases. The expected results and the test data arrays (`TEST_ARRAY` and `TEST_ARRAY_NEGATIVE`) are also correctly used in each test method, preserving the original test logic.
+

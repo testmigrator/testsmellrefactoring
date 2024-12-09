@@ -1,0 +1,40 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+public class DocumentTest {
+
+    private Document createHtmlDocument(String charset) {
+        return Jsoup.parse("<html>\n" +
+                " <head>\n" +
+                "  <meta charset=\"" + charset + "\">\n" +
+                "  <meta name=\"charset\" content=\"" + charset + "\">\n" +
+                " </head>\n" +
+                " <body></body>\n" +
+                "</html>");
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "meta[charset], dontTouch",
+            "meta[name=charset], dontTouch"
+    })
+    public void testMetaCharsetUpdateDisabledNoChanges(String selector, String expectedValue) {
+        final Document doc = createHtmlDocument("dontTouch");
+
+        Element selectedElement = doc.select(selector).first();
+        assertNotNull(selectedElement, "Element with selector " + selector + " should not be null");
+        assertEquals(expectedValue, selectedElement.attr(selector.contains("charset") ? "charset" : "content"),
+                "Attribute value for selector " + selector + " should match " + expectedValue);
+    }
+}
+```
+

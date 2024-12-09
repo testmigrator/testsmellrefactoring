@@ -1,0 +1,64 @@
+Input Parameters:
+Test Code:
+ @Test public void testClassDomMethods() {
+        Document doc = Jsoup.parse("<div><span class=' mellow yellow '>Hello <b>Yellow</b></span></div>");
+        List<Element> els = doc.getElementsByAttribute("class");
+        Element span = els.get(0);
+        assertEquals("mellow yellow", span.className());
+        assertTrue(span.hasClass("mellow"));
+        assertTrue(span.hasClass("yellow"));
+        Set<String> classes = span.classNames();
+        assertEquals(2, classes.size());
+        assertTrue(classes.contains("mellow"));
+        assertTrue(classes.contains("yellow"));
+
+        assertEquals("", doc.className());
+        classes = doc.classNames();
+        assertEquals(0, classes.size());
+        assertFalse(doc.hasClass("mellow"));
+    }
+Context: /org/jsoup/nodes/Element
+Smell List: ['Assertion_Roulette', 'Eager_Test', 'Magic_Number_Test']
+Smell Description List: ['Test Smell Type：Assertion Roulette\n\nFeature:\nA test method contains more than one assertion statement without an explanation/message (parameter in the assertion method).\n', 'Test Smell Type：Eager Test\n\nFeature:\nA test method contains multiple calls to multiple production methods.\n', 'Test Smell Type：Magic Number Test\n\nFeature:\nAn assertion method that contains a numeric literal as an argument.\n']
+Refactoring DSL: ['RefactorRule:\n  SmellType: Assertion Roulette\n  Description: Add descriptive messages to assert statements to improve readability and maintainability.\n  Steps:\n    - Step:\n        Description: "Add descriptive message to each assert statement(except assertThat, assertThrows)."\n        Action: AddMessageToAssert\n        Parameters:\n          MessagePattern: "{assertionMessage}"\n  Example:\n    Before: |\n      @Test\n      public void T() {\n        stmt\n        assert_1\n        ...\n        assert_n\n        stmt\'\n      }\n    After: |\n      @Test\n      public void T() {\n        stmt\n        assert_1(..., "Descriptive message for assert statement")\n        ...\n        assert_n(..., "Descriptive message for assert statement")\n        stmt\'\n      }\n    Variables:\n      assertionMessage: "Descriptive message for assert statement"\n', 'RefactorRule:\n  SmellType: Eager Test\n  Description: "Refactor test methods to group related assertions logically and extract reusable setup logic into private methods."\n  Steps:\n    - Step1:\n        Description: "Extract shared setup logic into a reusable, private method and ensure it is used across all relevant tests."\n        Action: ExtractSetupMethod\n        Parameters:\n          Condition: "If multiple tests share the same setup logic."\n          MethodNamePattern: setupTest{OriginalMethodName}\n    - Step2:\n        Description: "Group related assertions into cohesive sub-tests while retaining necessary setup logic."\n        Action: GroupAssertions\n        Parameters:\n          GroupBy: LogicalConcern\n    - Step3:\n        Description: "Create new test methods for each cohesive group of assertions and ensure readability."\n        Action: CreateTestMethods\n        Parameters:\n          IncludeSetup: True\n          NamePattern: test{OriginalMethodName}_{Concern}\n  Example:\n    Before: |\n      @Test\n      public void testExample() {\n          setup();\n          assertEquals(1, methodA());\n          assertTrue(methodB());\n      }\n    After: |\n      private void setupTestExample() {\n          setup();\n      }\n\n      @Test\n      public void testExample_MethodA() {\n          setupTestExample();\n          assertEquals(1, methodA());\n      }\n\n      @Test\n      public void testExample_MethodB() {\n          setupTestExample();\n          assertTrue(methodB());\n      }\n  Variables:\n    OriginalMethodName: The name of the original test method.\n    LogicalConcern: The logical aspect tested (e.g., a specific API, validation, or behavior).\n', 'RefactorRule:\n  SmellType: Magic Number Test\n  Description: "Extract magic numbers and assign meaningful names to improve readability and maintainability."\n  Steps:\n    - Step:\n        Action: IdentifyMagicNumbers\n        Description: "Identify magic numbers in assertions"\n        Parameters:\n          TargetType: Method\n          SourcePattern: |\n            assertEquals({magicNumber}, {variable})\n    - Step:\n        Action: ExtractVariable\n        Description: "Extract magic number to a variable with meaningful name"\n        Parameters:\n          TargetType: Method\n          SourcePattern: |\n            assertEquals({magicNumber}, {variable})\n          ReplacementPattern: |\n            int {meaningfulName} = {magicNumber};\n            assertEquals({meaningfulName}, {variable})\n  Example:\n    Before: |\n      @Test\n      public void T() {\n          stmt\n          assertEquals(1, a)\n          stmt\'\n      }\n    After: |\n      @Test\n      public void T() {\n          int x = 1; // x: meaningful variable name\n          stmt\n          assertEquals(x, a)\n          stmt\'\n      }\n  Variables:\n    magicNumber: "1"\n    variable: "a"\n    meaningfulName: "x"\n']
+Checkpoints: ['[ ] All assert statements have been added with clear explanatory messages.\n', '[ ] All eager tests have been split into separate tests, each focusing on verifying a single API.\n', '[ ] All magic numbers in the test code have been extracted and assigned meaningful variable names.\n']
+
+Refactored Code: 
+ 
+private Document setupTestClassDomMethods() {
+    return Jsoup.parse("<div><span class=' mellow yellow '>Hello <b>Yellow</b></span></div>");
+}
+
+@Test
+public void testClassDomMethods_SpanClasses() {
+    Document doc = setupTestClassDomMethods();
+    List<Element> els = doc.getElementsByAttribute("class");
+    Element span = els.get(0);
+
+    String expectedSpanClassName = "mellow yellow";
+    assertEquals(expectedSpanClassName, span.className(), "Span element should have the correct class name");
+
+    assertTrue(span.hasClass("mellow"), "Span element should have the 'mellow' class");
+    assertTrue(span.hasClass("yellow"), "Span element should have the 'yellow' class");
+
+    int expectedNumberOfClasses = 2;
+    Set<String> classes = span.classNames();
+    assertEquals(expectedNumberOfClasses, classes.size(), "Span element should have exactly 2 classes");
+    assertTrue(classes.contains("mellow"), "Span element's classes should contain 'mellow'");
+    assertTrue(classes.contains("yellow"), "Span element's classes should contain 'yellow'");
+}
+
+@Test
+public void testClassDomMethods_DocumentClasses() {
+    Document doc = setupTestClassDomMethods();
+
+    String expectedDocumentClassName = "";
+    assertEquals(expectedDocumentClassName, doc.className(), "Document element should have no class name");
+
+    int expectedNumberOfDocumentClasses = 0;
+    Set<String> classes = doc.classNames();
+    assertEquals(expectedNumberOfDocumentClasses, classes.size(), "Document element should have no classes");
+    assertFalse(doc.hasClass("mellow"), "Document element should not have the 'mellow' class");
+}
+
+

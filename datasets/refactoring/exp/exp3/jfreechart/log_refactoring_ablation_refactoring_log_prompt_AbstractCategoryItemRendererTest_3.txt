@@ -1,0 +1,32 @@
+asserts result: 
+ ```java
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+
+import org.jfree.chart.renderer.category.BarRenderer;
+import org.jfree.chart.labels.StandardCategoryToolTipGenerator;
+import org.junit.Test;
+
+public class BarRendererTest {
+
+    @Test
+    public void testEquals_SameSeriesToolTipGenerators() {
+        BarRenderer r1 = new BarRenderer();
+        r1.setSeriesToolTipGenerator(0, new StandardCategoryToolTipGenerator());
+        BarRenderer r2 = new BarRenderer();
+        r2.setSeriesToolTipGenerator(0, new StandardCategoryToolTipGenerator());
+        assertEquals(r1, r2);
+    }
+
+    @Test
+    public void testNotEquals_DifferentSeriesToolTipGenerators() {
+        BarRenderer r1 = new BarRenderer();
+        r1.setSeriesToolTipGenerator(0, new StandardCategoryToolTipGenerator());
+        BarRenderer r2 = new BarRenderer();
+        r2.setSeriesToolTipGenerator(0, new StandardCategoryToolTipGenerator());
+        r2.setSeriesToolTipGenerator(1, new StandardCategoryToolTipGenerator("X", new java.text.DecimalFormat("0.0")));
+        assertNotEquals(r1, r2);
+    }
+}
+```
+

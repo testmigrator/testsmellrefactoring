@@ -1,0 +1,25 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import static org.junit.Assert.assertEquals;
+
+public class ElementTest {
+
+    @Test
+    public void testGetChildText() {
+        Document doc = Jsoup.parse("<p>Hello <b>there</b> now");
+        Element p = doc.select("p").first();
+        assertEquals("The text content should include all child elements", "Hello there now", p.text());
+    }
+
+    @Test
+    public void testGetOwnText() {
+        Document doc = Jsoup.parse("<p>Hello <b>there</b> now");
+        Element p = doc.select("p").first();
+        assertEquals("The own text content should exclude child elements", "Hello now", p.ownText());
+    }
+}
+```
+

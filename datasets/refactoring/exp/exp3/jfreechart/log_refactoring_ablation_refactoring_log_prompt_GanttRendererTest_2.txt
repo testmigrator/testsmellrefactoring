@@ -1,0 +1,26 @@
+asserts result: 
+ ```java
+import static org.junit.Assert.assertEquals;
+
+import org.jfree.chart.renderer.category.GanttRenderer;
+import org.junit.Test;
+
+public class GanttRendererTest {
+
+    @Test
+    public void testHashCodeEquality() {
+        // Arrange
+        GanttRenderer r1 = new GanttRenderer();
+        GanttRenderer r2 = new GanttRenderer();
+
+        // Act
+        int hashCode1 = r1.hashCode();
+        int hashCode2 = r2.hashCode();
+
+        // Assert
+        assertEquals("Expected r1 and r2 to be equal", r1, r2);
+        assertEquals("Expected hash codes of r1 and r2 to be equal", hashCode1, hashCode2);
+    }
+}
+```
+

@@ -1,0 +1,43 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+public class ElementTest {
+
+    private static final String TEST_TEXT = "\uD83D\uDC69\u200D\uD83D\uDCBB\uD83E\uDD26\uD83C\uDFFB\u200D\u2642\uFE0F";
+    private static final String DIV_TEXT = "One\u200DTwo";
+
+    @Test
+    public void testDoesntDeleteZWJWhenNormalizingTextInParagraph() {
+        Document doc = Jsoup.parse("<p>" + TEST_TEXT + "</p>");
+        Element p = doc.selectFirst("p");
+
+        assertEquals("Paragraph text length should be 12", 12, p.text().length());
+        assertEquals("Paragraph text should match the original text", TEST_TEXT, p.text());
+    }
+
+    @Test
+    public void testDoesntDeleteZWJWhenNormalizingTextInDiv() {
+        Document doc = Jsoup.parse("<div>" + DIV_TEXT + "</div>");
+        Element d = doc.selectFirst("div");
+
+        assertEquals("Div text length should be 7", 7, d.text().length());
+        assertEquals("Div text should match the expected text", DIV_TEXT, d.text());
+    }
+
+    @Test
+    public void testDoesntDeleteZWJWhenNormalizingTextInDivContains() {
+        Document doc = Jsoup.parse("<div>" + DIV_TEXT + "</div>");
+        Element d = doc.selectFirst("div");
+        Element found = doc.selectFirst("div:contains(" + DIV_TEXT + ")");
+
+        assertTrue("Found element should have the same value as the div", found.hasSameValue(d));
+    }
+}
+```
+

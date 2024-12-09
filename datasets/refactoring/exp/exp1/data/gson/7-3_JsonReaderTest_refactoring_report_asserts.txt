@@ -1,0 +1,9 @@
+total tests: 1
+total asserts: 7
+assertEquals(JsonToken.BEGIN_OBJECT, reader.peek(), "Expected BEGIN_OBJECT token");
+assertEquals(JsonToken.NAME, reader.peek(), "Expected NAME token");
+assertEquals("", reader.nextName(), "Expected empty string as name");
+assertEquals(JsonToken.BOOLEAN, reader.peek(), "Expected BOOLEAN token");
+assertTrue(reader.nextBoolean(), "Expected true value");
+assertEquals(JsonToken.END_OBJECT, reader.peek(), "Expected END_OBJECT token");
+assertEquals(JsonToken.END_DOCUMENT, reader.peek(), "Expected END_DOCUMENT token");

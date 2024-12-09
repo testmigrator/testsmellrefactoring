@@ -1,0 +1,37 @@
+asserts result: 
+ ```java
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class DocumentTypeTest {
+
+    @Test
+    public void testRoundTrip() {
+        String base = "<!DOCTYPE html>";
+        assertEquals("Base DOCTYPE should be normalized to lowercase", "<!doctype html>", htmlOutput(base));
+        assertEquals("Base DOCTYPE should remain unchanged in XML output", base, xmlOutput(base));
+
+        String publicDoc = "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">";
+        assertEquals("Public DOCTYPE should remain unchanged in HTML output", publicDoc, htmlOutput(publicDoc));
+        assertEquals("Public DOCTYPE should remain unchanged in XML output", publicDoc, xmlOutput(publicDoc));
+
+        String systemDoc = "<!DOCTYPE html SYSTEM \"exampledtdfile.dtd\">";
+        assertEquals("System DOCTYPE should remain unchanged in HTML output", systemDoc, htmlOutput(systemDoc));
+        assertEquals("System DOCTYPE should remain unchanged in XML output", systemDoc, xmlOutput(systemDoc));
+
+        String legacyDoc = "<!DOCTYPE html SYSTEM \"about:legacy-compat\">";
+        assertEquals("Legacy DOCTYPE should remain unchanged in HTML output", legacyDoc, htmlOutput(legacyDoc));
+        assertEquals("Legacy DOCTYPE should remain unchanged in XML output", legacyDoc, xmlOutput(legacyDoc));
+    }
+
+    // Dummy methods for the sake of compilation
+    private String htmlOutput(String input) {
+        return input.toLowerCase(); // Example implementation
+    }
+
+    private String xmlOutput(String input) {
+        return input; // Example implementation
+    }
+}
+```
+

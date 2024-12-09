@@ -1,0 +1,44 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIf;
+import static org.assertj.core.api.Assertions.assertThat;
+
+public class LinearProblemTest {
+
+    private static final double TOLERANCE = 1e-6;
+
+    @Test
+    @EnabledIf("isMatrixIdentity")
+    public void testNoDependency() {
+        double[][] matrix = createIdentityMatrix(6);
+        double[] target = createTargetArray();
+
+        LinearProblem problem = new LinearProblem(matrix, target);
+        Optimum optimum = optimizer.optimize(problem.getBuilder().build());
+
+        assertThat(optimum.getRMS()).isCloseTo(0, within(TOLERANCE));
+        for (int i = 0; i < target.length; ++i) {
+            assertThat(optimum.getPoint().getEntry(i)).isCloseTo(0.55 * i, within(TOLERANCE));
+        }
+    }
+
+    private boolean isMatrixIdentity() {
+        return true; // This can be replaced with actual condition checking logic if needed
+    }
+
+    private double[][] createIdentityMatrix(int size) {
+        double[][] matrix = new double[size][size];
+        for (int i = 0; i < size; i++) {
+            matrix[i][i] = 2;
+        }
+        return matrix;
+    }
+
+    private double[] createTargetArray() {
+        double[] target = {0, 1.1, 2.2, 3.3, 4.4, 5.5};
+        return target;
+    }
+}
+```
+

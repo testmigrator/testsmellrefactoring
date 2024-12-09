@@ -1,0 +1,5 @@
+asserts result: 
+ Yes
+
+The refactored test maintains the same functionality as the original test. The primary change involves moving the JSON writing logic into a separate method (`setupJsonWriter`), which simplifies the main test method (`testPrettyPrintObject_JsonWriter`). This refactoring does not alter the behavior or the outcome of the test; it only improves the structure and readability of the code. The assertion in the refactored test still checks that the `stringWriter` content matches the expected JSON string, ensuring consistency with the original test.
+

@@ -1,0 +1,42 @@
+asserts result: 
+ ```java
+import org.jsoup.nodes.TextNode;
+import org.junit.Test;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+public class TextNodeTest {
+
+    @Test
+    public void testBlankEmptyString() {
+        TextNode node = new TextNode("");
+        assertTrue("Expected empty string to be blank", node.isBlank());
+    }
+
+    @Test
+    public void testBlankWhitespaceOnly() {
+        TextNode node = new TextNode("     ");
+        assertTrue("Expected whitespace-only string to be blank", node.isBlank());
+    }
+
+    @Test
+    public void testBlankNewlinesAndSpaces() {
+        TextNode node = new TextNode("  \n\n   ");
+        assertTrue("Expected string with newlines and spaces to be blank", node.isBlank());
+    }
+
+    @Test
+    public void testNotBlankWithText() {
+        TextNode node = new TextNode("Hello");
+        assertFalse("Expected non-empty string with text to not be blank", node.isBlank());
+    }
+
+    @Test
+    public void testNotBlankWithTextAndLeadingWhitespace() {
+        TextNode node = new TextNode("  \nHello ");
+        assertFalse("Expected non-empty string with leading whitespace and text to not be blank", node.isBlank());
+    }
+}
+```
+

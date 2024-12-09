@@ -1,0 +1,49 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
+import com.google.gson.stream.Strictness;
+import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.io.StringReader;
+
+class JsonReaderTest {
+
+    @Test
+    public void testReaderThrowsIOExceptionForU2028() throws IOException {
+        String jsonInvalid2028 = "[\u2028\"whatever\"]";
+        JsonReader readerInvalid2028 = new JsonReader(new StringReader(jsonInvalid2028));
+        readerInvalid2028.beginArray();
+        assertThrows(IOException.class, readerInvalid2028::nextString, "Expected IOException for U+2028");
+    }
+
+    @Test
+    public void testReaderThrowsIOExceptionForU2029() throws IOException {
+        String jsonInvalid2029 = "[\u2029\"whatever\"]";
+        JsonReader readerInvalid2029 = new JsonReader(new StringReader(jsonInvalid2029));
+        readerInvalid2029.beginArray();
+        assertThrows(IOException.class, readerInvalid2029::nextString, "Expected IOException for U+2029");
+    }
+
+    @Test
+    public void testReaderAcceptsNewlineInArray() throws IOException {
+        String jsonValid = "[\n\"whatever\"]";
+        JsonReader readerValid = new JsonReader(new StringReader(jsonValid));
+        readerValid.beginArray();
+        assertEquals("whatever", readerValid.nextString(), "Expected 'whatever' to be read correctly");
+    }
+
+    @Test
+    public void testReaderAcceptsU2028AndU2029InStrictMode() throws IOException {
+        String jsonValid2028And2029 = "\"whatever\u2028\u2029\"";
+        JsonReader readerValid2028And2029 = new JsonReader(new StringReader(jsonValid2028And2029));
+        readerValid2028And2029.setStrictness(Strictness.STRICT);
+        assertEquals("whatever\u2028\u2029", readerValid2028And2029.nextString(), "Expected 'whatever\u2028\u2029' to be read correctly in strict mode");
+    }
+}
+```
+

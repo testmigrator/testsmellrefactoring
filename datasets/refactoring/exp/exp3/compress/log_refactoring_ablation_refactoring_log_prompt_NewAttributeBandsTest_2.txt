@@ -1,0 +1,59 @@
+asserts result: 
+ ```java
+import org.apache.commons.compress.harmony.pack200.AttributeLayout;
+import org.apache.commons.compress.harmony.pack200.MockNewAttributeBands;
+import org.apache.commons.compress.harmony.pack200.MockSegment;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+
+import java.io.IOException;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+class NewAttributeBandsTest {
+
+    private static final int CONTEXT_CLASS = 25;
+
+    @ParameterizedTest
+    @ValueSource(strings = { "B", "FB", "SB", "H", "FH", "SH", "I", "FI", "SI", "PB", "OB", "OSB", "POB", "PH", "OH", "OSH", "POH", "PI", "OI", "OSI", "POI" })
+    @DisplayName("Test integral layout elements")
+    public void testIntegralLayout(final String layoutStr) {
+        // Arrange
+        final MockNewAttributeBands newAttributeBands = createMockNewAttributeBands(layoutStr);
+
+        // Act
+        final List layoutElements = newAttributeBands.getLayoutElements();
+
+        // Assert
+        assertEquals(1, layoutElements.size(), "Expected exactly one layout element");
+        final Integral element = (Integral) layoutElements.get(0);
+        assertEquals(layoutStr, element.getTag(), "Expected tag to match layout string");
+    }
+
+    @Test
+    @DisplayName("Test exception handling for invalid layout string")
+    public void testInvalidLayoutString() {
+        // Arrange
+        String invalidLayoutStr = "INVALID";
+
+        // Act & Assert
+        assertThrows(Pack200Exception.class, () -> {
+            createMockNewAttributeBands(invalidLayoutStr);
+        }, "Expected Pack200Exception for invalid layout string");
+    }
+
+    private MockNewAttributeBands createMockNewAttributeBands(String layoutStr) {
+        try {
+            return new MockNewAttributeBands(new MockSegment(),
+                    new AttributeLayout("test", AttributeLayout.CONTEXT_CLASS, layoutStr, CONTEXT_CLASS));
+        } catch (IOException | Pack200Exception e) {
+            throw new RuntimeException("Failed to create MockNewAttributeBands", e);
+        }
+    }
+}
+```
+

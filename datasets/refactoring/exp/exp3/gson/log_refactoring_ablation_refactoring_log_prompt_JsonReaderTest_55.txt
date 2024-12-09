@@ -1,0 +1,28 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
+import com.google.gson.stream.Strictness;
+
+class JsonReaderTest {
+
+    @Test
+    public void testLongLargerThanMaxLongThatWrapsAround_PeekReturnsNumber() throws Exception {
+        JsonReader reader = new JsonReader(new StringReader("[22233720368547758070]"));
+        reader.setStrictness(Strictness.LENIENT);
+        reader.beginArray();
+        assertEquals(JsonToken.NUMBER, reader.peek(), "Expected token type should be NUMBER");
+    }
+
+    @Test
+    public void testLongLargerThanMaxLongThatWrapsAround_ThrowsNumberFormatException() {
+        JsonReader reader = new JsonReader(new StringReader("[22233720368547758070]"));
+        reader.setStrictness(Strictness.LENIENT);
+        reader.beginArray();
+        assertThrows(NumberFormatException.class, () -> reader.nextLong(), "Expected NumberFormatException when reading long larger than max long");
+    }
+}
+```
+

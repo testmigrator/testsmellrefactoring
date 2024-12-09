@@ -1,0 +1,25 @@
+asserts result: 
+ ```java
+import org.jfree.chart.plot.XYPlot;
+import org.jfree.chart.legend.LegendTitle;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class LegendTitleTest {
+
+    @Test
+    public void testHashCodeEquality() {
+        // Arrange
+        XYPlot<String> plot1 = new XYPlot<>();
+        LegendTitle t1 = new LegendTitle(plot1);
+        LegendTitle t2 = new LegendTitle(plot1);
+
+        // Act and Assert
+        assertEquals("t1 and t2 should be equal", t1, t2);
+        int h1 = t1.hashCode();
+        int h2 = t2.hashCode();
+        assertEquals("Hash codes of t1 and t2 should be equal", h1, h2);
+    }
+}
+```
+

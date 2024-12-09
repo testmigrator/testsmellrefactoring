@@ -1,0 +1,15 @@
+asserts result: 
+ yes
+
+The refactored tests maintain the same functionality as the original test. The original test checks two things:
+
+1. The `peek` method returns `NUMBER`.
+2. The `nextLong` method throws a `NumberFormatException`.
+
+In the refactored version, these checks are split into two separate tests:
+
+1. `testLongLargerThanMaxLongThatWrapsAround_ReaderPeek` checks that `peek` returns `JsonToken.NUMBER` and provides a more detailed failure message.
+2. `testLongLargerThanMaxLongThatWrapsAround_NextLongThrowsException` checks that `nextLong` throws a `NumberFormatException` and also provides a more detailed failure message.
+
+Both refactored tests cover the same functionality as the original test, ensuring that the behavior remains consistent.
+

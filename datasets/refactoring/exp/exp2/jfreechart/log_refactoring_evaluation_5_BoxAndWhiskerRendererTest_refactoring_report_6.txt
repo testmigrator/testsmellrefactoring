@@ -1,0 +1,13 @@
+asserts result: 
+ Yes
+
+The refactored tests maintain the same functionality as the original test. The original test checks two conditions:
+1. The legend item is not null when the series is visible in the legend.
+2. The legend item is null when the series is hidden in the legend.
+
+These conditions are preserved in the refactored tests:
+- `testGetLegendItem_LegendItemNotNull` ensures that the legend item is not null when the series is visible.
+- `testGetLegendItem_LegendItemNullWhenHidden` ensures that the legend item is null when the series is hidden.
+
+The refactoring splits the original test into two separate tests, each focusing on one specific condition, which improves clarity and maintainability. The setup methods (`setupDataset` and `setupRendererWithPlot`) are used to reduce code duplication and make the tests more modular.
+

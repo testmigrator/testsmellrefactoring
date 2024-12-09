@@ -1,0 +1,47 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.MalformedJsonException;
+import org.junit.jupiter.api.Test;
+
+public class JsonReaderTest {
+
+    @Test
+    public void testStrictUnnecessaryArraySeparators_WithEmptyEntriesAtStart() {
+        JsonReader reader = new JsonReader(new StringReader("[,true]"));
+        reader.beginArray();
+        MalformedJsonException e = assertThrows(MalformedJsonException.class, () -> reader.nextNull());
+        assertTrue(e.getMessage().contains("line 1 column 3 path $[0]"), "Expected error at line 1 column 3 path $[0]");
+    }
+
+    @Test
+    public void testStrictUnnecessaryArraySeparators_WithEmptyEntriesAtEnd() {
+        JsonReader reader = new JsonReader(new StringReader("[true,]"));
+        reader.beginArray();
+        assertTrue(reader.nextBoolean(), "Expected true at the first element");
+        MalformedJsonException e = assertThrows(MalformedJsonException.class, () -> reader.nextNull());
+        assertTrue(e.getMessage().contains("line 1 column 8 path $[1]"), "Expected error at line 1 column 8 path $[1]");
+    }
+
+    @Test
+    public void testStrictUnnecessaryArraySeparators_WithEmptyEntriesInMiddle() {
+        JsonReader reader = new JsonReader(new StringReader("[true,,true]"));
+        reader.beginArray();
+        assertTrue(reader.nextBoolean(), "Expected true at the first element");
+        MalformedJsonException e = assertThrows(MalformedJsonException.class, () -> reader.nextNull());
+        assertTrue(e.getMessage().contains("line 1 column 8 path $[1]"), "Expected error at line 1 column 8 path $[1]");
+    }
+
+    @Test
+    public void testStrictUnnecessaryArraySeparators_WithEmptyEntriesOnly() {
+        JsonReader reader = new JsonReader(new StringReader("[,]"));
+        reader.beginArray();
+        MalformedJsonException e = assertThrows(MalformedJsonException.class, () -> reader.nextNull());
+        assertTrue(e.getMessage().contains("line 1 column 3 path $[0]"), "Expected error at line 1 column 3 path $[0]");
+    }
+}
+```
+

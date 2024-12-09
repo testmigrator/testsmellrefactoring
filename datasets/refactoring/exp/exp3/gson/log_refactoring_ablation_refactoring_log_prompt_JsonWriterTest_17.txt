@@ -1,0 +1,25 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+public class JsonWriterTest {
+
+    @Test
+    public void testNullNameThrowsNullPointerException() {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.beginObject();
+        assertThrows(NullPointerException.class, () -> jsonWriter.name(null));
+    }
+
+    // Additional test to ensure beginObject does not throw an exception
+    @Test
+    public void testBeginObjectDoesNotThrowException() {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        assertDoesNotThrow(() -> jsonWriter.beginObject());
+    }
+}
+```
+

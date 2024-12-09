@@ -1,0 +1,76 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import com.google.gson.stream.JsonWriter;
+import com.google.gson.stream.Strictness;
+import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.io.StringWriter;
+
+class JsonWriterTest {
+
+    @Test
+    public void testNonFiniteNumbersWhenLenient_NaN() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.setStrictness(Strictness.LENIENT);
+        jsonWriter.beginArray();
+        jsonWriter.value(Double.valueOf(Double.NaN));
+        jsonWriter.endArray();
+        assertEquals("[NaN]", stringWriter.toString());
+    }
+
+    @Test
+    public void testNonFiniteNumbersWhenLenient_NegativeInfinity() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.setStrictness(Strictness.LENIENT);
+        jsonWriter.beginArray();
+        jsonWriter.value(Double.valueOf(Double.NEGATIVE_INFINITY));
+        jsonWriter.endArray();
+        assertEquals("[-Infinity]", stringWriter.toString());
+    }
+
+    @Test
+    public void testNonFiniteNumbersWhenLenient_PositiveInfinity() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.setStrictness(Strictness.LENIENT);
+        jsonWriter.beginArray();
+        jsonWriter.value(Double.valueOf(Double.POSITIVE_INFINITY));
+        jsonWriter.endArray();
+        assertEquals("[Infinity]", stringWriter.toString());
+    }
+
+    @Test
+    public void testNonFiniteNumbersWhenLenient_LazilyParsedNumberInfinity() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.setStrictness(Strictness.LENIENT);
+        jsonWriter.beginArray();
+        jsonWriter.value(new LazilyParsedNumber("Infinity"));
+        jsonWriter.endArray();
+        assertEquals("[Infinity]", stringWriter.toString());
+    }
+
+    @Test
+    public void testNonFiniteNumbersWhenLenient_Array() throws IOException {
+        assertDoesNotThrow(() -> {
+            StringWriter stringWriter = new StringWriter();
+            JsonWriter jsonWriter = new JsonWriter(stringWriter);
+            jsonWriter.setStrictness(Strictness.LENIENT);
+            jsonWriter.beginArray();
+            jsonWriter.value(Double.valueOf(Double.NaN));
+            jsonWriter.value(Double.valueOf(Double.NEGATIVE_INFINITY));
+            jsonWriter.value(Double.valueOf(Double.POSITIVE_INFINITY));
+            jsonWriter.value(new LazilyParsedNumber("Infinity"));
+            jsonWriter.endArray();
+            assertEquals("[NaN,-Infinity,Infinity,Infinity]", stringWriter.toString());
+        });
+    }
+}
+```
+

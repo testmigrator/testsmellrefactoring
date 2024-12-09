@@ -1,0 +1,45 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
+import java.io.IOException;
+import java.io.StringReader;
+
+class JsonReaderTest {
+
+    @Test
+    public void testReadObjectStartsWithA() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("{\"a\": \"android\", \"b\": \"banana\"}"));
+        reader.beginObject();
+        assertEquals("a", reader.nextName(), "Expected first name to be 'a'");
+        assertEquals("android", reader.nextString(), "Expected value for 'a' to be 'android'");
+        reader.endObject();
+        assertEquals(JsonToken.END_DOCUMENT, reader.peek(), "Expected end of document after reading object");
+    }
+
+    @Test
+    public void testReadObjectStartsWithB() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("{\"b\": \"banana\", \"a\": \"android\"}"));
+        reader.beginObject();
+        assertEquals("b", reader.nextName(), "Expected first name to be 'b'");
+        assertEquals("banana", reader.nextString(), "Expected value for 'b' to be 'banana'");
+        reader.endObject();
+        assertEquals(JsonToken.END_DOCUMENT, reader.peek(), "Expected end of document after reading object");
+    }
+
+    @Test
+    public void testReadObjectWithEmptyEntries() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("{\"a\": null, \"b\": null}"));
+        reader.beginObject();
+        assertEquals("a", reader.nextName(), "Expected first name to be 'a'");
+        assertNull(reader.nextNull(), "Expected value for 'a' to be null");
+        assertEquals("b", reader.nextName(), "Expected second name to be 'b'");
+        assertNull(reader.nextNull(), "Expected value for 'b' to be null");
+        reader.endObject();
+        assertEquals(JsonToken.END_DOCUMENT, reader.peek(), "Expected end of document after reading object");
+    }
+}
+```
+

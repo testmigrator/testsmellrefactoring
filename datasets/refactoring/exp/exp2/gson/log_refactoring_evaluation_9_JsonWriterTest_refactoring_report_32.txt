@@ -1,0 +1,5 @@
+asserts result: 
+ yes
+
+The refactored code maintains the same functionality as the original test. The `setupJsonWriter` method encapsulates the logic for setting up the `JsonWriter` and writing values to it, and it is called within the `testNumbers` method. The expected output and the actual output are compared using `assertEquals`, which is functionally equivalent to the original use of `assertThat`. The refactoring does not change the behavior or the outcome of the test.
+

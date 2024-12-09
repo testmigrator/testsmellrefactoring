@@ -1,0 +1,90 @@
+Input Parameters:
+Test Code:
+ @Test
+    public void testExactIntegration() {
+        Random random = new Random(86343623467878363L);
+        for (int n = 2; n < 6; ++n) {
+            IterativeLegendreGaussIntegrator integrator =
+                new IterativeLegendreGaussIntegrator(n,
+                                                     BaseAbstractUnivariateIntegrator.DEFAULT_RELATIVE_ACCURACY,
+                                                     BaseAbstractUnivariateIntegrator.DEFAULT_ABSOLUTE_ACCURACY,
+                                                     BaseAbstractUnivariateIntegrator.DEFAULT_MIN_ITERATIONS_COUNT,
+                                                     64);
+
+            // an n points Gauss-Legendre integrator integrates 2n-1 degree polynoms exactly
+            for (int degree = 0; degree <= 2 * n - 1; ++degree) {
+                for (int i = 0; i < 10; ++i) {
+                    double[] coeff = new double[degree + 1];
+                    for (int k = 0; k < coeff.length; ++k) {
+                        coeff[k] = 2 * random.nextDouble() - 1;
+                    }
+                    PolynomialFunction p = new PolynomialFunction(coeff);
+                    double result    = integrator.integrate(10000, p, -5.0, 15.0);
+                    double reference = exactIntegration(p, -5.0, 15.0);
+                    Assert.assertEquals(n + " " + degree + " " + i, reference, result, 1.0e-12 * (1.0 + JdkMath.abs(reference)));
+                }
+            }
+        }
+    }
+Context: /org/apache/commons/math4/legacy/analysis/integration/IterativeLegendreGaussIntegrator
+Smell List: ['Conditional_Test_Logic']
+Smell Description List: ['Test Smell Type：Conditional Test Logic\n\nFeature:\nA test method that contains one or more control statements (i.e if, switch, conditional expression, for, foreach and while statement).\n']
+Refactoring DSL: ['RefactorRule:\n  SmellType: Conditional Test Logic\n  Description: "Extract complex control flow logic into separate helper methods to improve readability and testability."\n  Steps:\n    - Step:\n        Description: "Identify complex control flow constructs"\n        Action: IdentifyComplexControlFlow\n        Parameters:\n          TargetType: Method\n    - Step:\n        Description: "Extract control flow logic into a separate helper method"\n        Action: ExtractMethod\n        Parameters:\n          TargetType: Method\n          SourcePattern: |\n            (if|switch|for|while|do-while) ({condition}) {\n                {statements}\n            }\n          ExtractedMethod: |\n            private boolean/void helperMethodName() {\n                {extractedStatements}\n            }\n    - Step:\n        Description: "Replace complex control flow with a call to the helper method"\n        Action: ReplaceControlFlow\n        Parameters:\n          SourcePattern: |\n            (if|switch|for|while|do-while) ({condition}) {\n                {statements}\n            }\n          ReplacementPattern: |\n            helperMethodName();\n  Example:\n    Before: |\n      @Test\n      public void complexTest() {\n          if (condition1 && condition2) {\n              if (condition3) {\n                  doSomething();\n              } else {\n                  doSomethingElse();\n              }\n          } else {\n              doDefault();\n          }\n      }\n    After: |\n      private boolean isComplexConditionMet() {\n          return condition1 && condition2 && condition3;\n      }\n\n      private void handleComplexScenario() {\n          if (isComplexConditionMet()) {\n              doSomething();\n          } else {\n              doSomethingElse();\n          }\n      }\n\n      @Test\n      public void complexTest() {\n          handleComplexScenario();\n          doDefault();\n      }\n']
+Checkpoints: ['[ ] All conditional test logic has been refactored to use JUnit 5’s conditional test execution feature, with the condition verified in an external method assigned via the @EnabledIf annotation.\n']
+
+Refactored Code: 
+ 
+import org.apache.commons.math4.legacy.analysis.integration.IterativeLegendreGaussIntegrator;
+import org.apache.commons.math4.legacy.analysis.polynomials.PolynomialFunction;
+import org.apache.commons.math4.legacy.analysis.integration.BaseAbstractUnivariateIntegrator;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class IntegratorTest {
+
+    private static final long SEED = 86343623467878363L;
+
+    @Test
+    public void testExactIntegration() {
+        for (int n = 2; n < 6; ++n) {
+            IterativeLegendreGaussIntegrator integrator = createIntegrator(n);
+            testPolynomialIntegrations(integrator, n);
+        }
+    }
+
+    private IterativeLegendreGaussIntegrator createIntegrator(int n) {
+        return new IterativeLegendreGaussIntegrator(n,
+                                                    BaseAbstractUnivariateIntegrator.DEFAULT_RELATIVE_ACCURACY,
+                                                    BaseAbstractUnivariateIntegrator.DEFAULT_ABSOLUTE_ACCURACY,
+                                                    BaseAbstractUnivariateUnivariateIntegrator.DEFAULT_MIN_ITERATIONS_COUNT,
+                                                    64);
+    }
+
+    private void testPolynomialIntegrations(IterativeLegendreGaussIntegrator integrator, int n) {
+        for (int degree = 0; degree <= 2 * n - 1; ++degree) {
+            for (int i = 0; i < 10; ++i) {
+                PolynomialFunction p = createRandomPolynomial(degree);
+                double result = integrator.integrate(10000, p, -5.0, 15.0);
+                double reference = exactIntegration(p, -5.0, 15.0);
+                assertEquals(n + " " + degree + " " + i, reference, result, 1.0e-12 * (1.0 + Math.abs(reference)));
+            }
+        }
+    }
+
+    private PolynomialFunction createRandomPolynomial(int degree) {
+        Random random = new Random(SEED);
+        double[] coeff = new double[degree + 1];
+        for (int k = 0; k < coeff.length; ++k) {
+            coeff[k] = 2 * random.nextDouble() - 1;
+        }
+        return new PolynomialFunction(coeff);
+    }
+
+    private double exactIntegration(PolynomialFunction p, double a, double b) {
+        // Implementation of exact integration
+        // This is a placeholder for the actual implementation
+        return 0.0;
+    }
+}
+
+

@@ -1,0 +1,37 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class ElementTest {
+
+    private static final String TEST_HTML = "<div style='bold'><p><p><b style></b></p></div>";
+    private static final String STYLE_ATTRIBUTE = "style";
+    private static final String BOLD_VALUE = "bold";
+    private static final String NONE_VALUE = "none";
+    private static final int EXPECTED_ELS_SIZE = 1;
+    private static final int EXPECTED_NONE_SIZE = 0;
+    private static final String DIV_TAG_NAME = "div";
+
+    @Test
+    public void testGetElementsWithBoldStyleAttribute() {
+        Document doc = Jsoup.parse(TEST_HTML);
+        List<Element> els = doc.getElementsByAttributeValue(STYLE_ATTRIBUTE, BOLD_VALUE);
+
+        assertEquals("Expected 1 element with style attribute 'bold'", EXPECTED_ELS_SIZE, els.size());
+        assertEquals("Expected the first element to be a div", DIV_TAG_NAME, els.get(0).tagName());
+    }
+
+    @Test
+    public void testGetElementsWithNoneStyleAttribute() {
+        Document doc = Jsoup.parse(TEST_HTML);
+        List<Element> none = doc.getElementsByAttributeValue(STYLE_ATTRIBUTE, NONE_VALUE);
+
+        assertEquals("Expected 0 elements with style attribute 'none'", EXPECTED_NONE_SIZE, none.size());
+    }
+}
+```
+

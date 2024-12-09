@@ -1,0 +1,39 @@
+asserts result: 
+ ```java
+import org.apache.commons.math3.linear.ArrayRealVector;
+import org.apache.commons.math3.linear.RealVector;
+import org.apache.commons.math3.optim.nonlinear.vector.leastsquares.LeastSquaresProblem;
+import org.apache.commons.math3.optim.nonlinear.vector.leastsquares.LeastSquaresProblem.Evaluation;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.assertions.AssertionFailedError;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class YourTestClass {
+
+    @Test
+    public void testEvaluateCopiesPoint() throws IOException {
+        // Setup
+        StatisticalReferenceDataset dataset = StatisticalReferenceDatasetFactory.createKirby2();
+        LeastSquaresProblem lsp = builder(dataset).build();
+        int parameterSize = lsp.getParameterSize();
+        RealVector point = new ArrayRealVector(parameterSize);
+
+        // Action
+        Evaluation evaluation = lsp.evaluate(point);
+
+        // Verify
+        assertNotSame(point, evaluation.getPoint(), "The evaluation should create a new point instance");
+
+        double initialEntryValue = 0.0;
+        point.setEntry(0, 1.0);
+        assertEquals(initialEntryValue, evaluation.getPoint().getEntry(0), 0.0, "The entry value at index 0 should remain unchanged");
+    }
+
+    private LeastSquaresProblem.Builder builder(StatisticalReferenceDataset dataset) {
+        // Assuming this method is part of the setup and returns a valid LeastSquaresProblem.Builder
+        return new LeastSquaresProblem.Builder().model(dataset.getModel()).start(dataset.getStart());
+    }
+}
+```
+

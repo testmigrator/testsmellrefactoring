@@ -1,0 +1,5 @@
+asserts result: 
+ Yes
+
+The refactored tests maintain the same functionality as the original test. Each part of the original test has been broken down into separate, more focused tests, but the assertions and the logic remain consistent. The use of a helper method `setupTestGetElementsByTagName` to initialize the document does not alter the behavior of the tests. Each test method in the refactored version checks the same conditions as the corresponding parts in the original test.
+

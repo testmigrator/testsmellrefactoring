@@ -1,0 +1,33 @@
+asserts result: 
+ ```java
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.Options;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+class DefaultParserTest {
+
+    private final Options options = new Options();
+
+    @Test
+    public void testLongOptionWithEqualsQuoteHandlingWithoutStrip() {
+        var parser = DefaultParser.builder().setStripLeadingAndTrailingQuotes(false).build();
+        final String[] args = {"--bfile=\"quoted string\""};
+
+        CommandLine cl = parser.parse(options, args);
+
+        assertEquals("\"quoted string\"", cl.getOptionValue("bfile"), "Confirm --bfile=\"arg\" keeps quotes");
+    }
+
+    @Test
+    public void testParseThrowsExceptionOnInvalidInput() {
+        var parser = DefaultParser.builder().setStripLeadingAndTrailingQuotes(false).build();
+        final String[] invalidArgs = {"--invalid"};
+
+        assertThrows(Exception.class, () -> parser.parse(options, invalidArgs));
+    }
+}
+```
+

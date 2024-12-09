@@ -1,0 +1,34 @@
+asserts result: 
+ - 'assertArrayEquals(new byte[] { (byte) 83, (byte) 79, (byte) 67, (byte) 75, (byte) 69, (byte) 84 }, byteArray, "ASCII byte conversion should match expected values");' - yes
+- 'assertFalse(ArchiveUtils.isEqualWithNull(byteArray, 0, 46, byteArray, 63, 0), "Equality check with invalid parameters should return false");' - yes
+- 'assertEquals(expectedZero, TypeHandler.createNumber("0"), "The result for creating a number from \'0\' should be 0L");' - yes
+- 'assertEquals(expectedZeroPointZero, TypeHandler.createNumber("0.0"), "The result for creating a number from \'0.0\' should be 0d");' - yes
+- 'assertEquals(Converter.PATH, typeHandler.getConverter(Path.class), "Default converter should be PATH");' - yes
+- 'assertEquals(PATH_CONVERTER, typeHandler.getConverter(Path.class), "Custom converter should be PATH_CONVERTER");' - yes
+- 'assertEquals(Converter.DEFAULT, typeHandler.getConverter(Path.class), "After removal, default converter should revert to DEFAULT");' - yes
+- 'assertEquals(HelpFormatter.DEFAULT_LONG_OPT_SEPARATOR, defaultSeparator, "Default long option separator should be \'--\'");' - yes
+- 'assertEquals("=", separator, "Long option separator should be set to \'=\'");' - yes
+- 'assertArrayEquals(expected, actual, "Rendered options do not match expected output");' - yes
+- 'assertThrows(UncheckedIOException.class, () -> spy.renderOptions(sb, 50, options, 2, 5), "Expected UncheckedIOException to be thrown");' - yes
+- 'assertEquals(expected, sb.toString(), "Single line text rendering should match expected output");' - yes
+- 'assertThrows(UncheckedIOException.class, () -> spy.renderWrappedText(sb, width, padding, text), "Should throw UncheckedIOException when appendWrappedText throws IOException");' - yes
+- 'assertNull(formatter.rtrim(null), "rtrim should return null when input is null");' - yes
+- 'assertEquals("", formatter.rtrim(""), "rtrim should return an empty string when input is an empty string");' - yes
+- 'assertEquals("  foo", formatter.rtrim("  foo  "), "rtrim should remove trailing whitespace but preserve leading whitespace");' - yes
+- 'assertNotNull(exception.getOptionGroup(), "Option group should not be null");' - yes
+- 'assertTrue(exception.getOptionGroup().isSelected(), "Option group should be selected");' - yes
+- 'assertEquals("f", exception.getOptionGroup().getSelected(), "Selected option should be \'f\'");' - yes
+- 'assertEquals("d", exception.getOption().getOpt(), "Option should be \'d\'");' - yes
+- 'assertNotNull(exception.getOptionGroup(), "Option group should not be null");' - yes
+- 'assertTrue(exception.getOptionGroup().isSelected(), "Option group should be selected");' - yes
+- 'assertEquals("f", exception.getOptionGroup().getSelected(), "Incorrect selected option");' - yes
+- 'assertEquals("d", exception.getOption().getOpt(), "Incorrect option");' - yes
+- 'assertTrue(cl.hasOption("f"), "Expected option \'f\' to be present");' - yes
+- 'assertFalse(cl.hasOption("d"), "Expected option \'d\' to not be present");' - yes
+- 'assertEquals("a", new UnrecognizedOptionException("a").getMessage(), "Check if the message is set correctly for single argument constructor");' - yes
+- 'assertEquals("a", new UnrecognizedOptionException("a", "b").getMessage(), "Check if the message is set correctly for two arguments constructor");' - yes
+- 'assertEquals("b", new UnrecognizedOptionException("a", "b").getOption(), "Check if the option is set correctly for two arguments constructor");' - yes
+- 'assertNotNull(tar, "The ArchiveInputStream should not be null");' - yes
+
+All assert statements meet the specified criteria.
+

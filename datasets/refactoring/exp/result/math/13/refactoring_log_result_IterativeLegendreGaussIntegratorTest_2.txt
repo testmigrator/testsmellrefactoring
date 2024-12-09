@@ -1,0 +1,70 @@
+Input Parameters:
+Test Code:
+ @Test
+    public void testQuinticFunction() {
+        UnivariateFunction f = new QuinticFunction();
+        UnivariateIntegrator integrator =
+                new IterativeLegendreGaussIntegrator(3,
+                                                     BaseAbstractUnivariateIntegrator.DEFAULT_RELATIVE_ACCURACY,
+                                                     BaseAbstractUnivariateIntegrator.DEFAULT_ABSOLUTE_ACCURACY,
+                                                     BaseAbstractUnivariateIntegrator.DEFAULT_MIN_ITERATIONS_COUNT,
+                                                     64);
+        double min;
+        double max;
+        double expected;
+        double result;
+
+        min = 0; max = 1; expected = -1.0/48;
+        result = integrator.integrate(10000, f, min, max);
+        Assert.assertEquals(expected, result, 1.0e-16);
+
+        min = 0; max = 0.5; expected = 11.0/768;
+        result = integrator.integrate(10000, f, min, max);
+        Assert.assertEquals(expected, result, 1.0e-16);
+
+        min = -1; max = 4; expected = 2048/3.0 - 78 + 1.0/48;
+        result = integrator.integrate(10000, f, min, max);
+        Assert.assertEquals(expected, result, 1.0e-16);
+    }
+Context: /org/apache/commons/math4/legacy/analysis/integration/IterativeLegendreGaussIntegrator
+Smell List: ['Duplicate_Assert', 'Magic_Number_Test']
+Smell Description List: ['Test Smell Type：Duplicate Assert\n\nFeature:\nA test method that contains more than one assertion statement with the same parameters.\n', 'Test Smell Type：Magic Number Test\n\nFeature:\nAn assertion method that contains a numeric literal as an argument.\n']
+Refactoring DSL: ['RefactorRule:\n  SmellType: Duplicate Assert\n  Description: "If the assertion logic is the same but tested with different inputs, convert the test to a parameterized test using JUnit 5\'s @CsvSource annotation. Otherwise, split the test into multiple separate methods, each containing a single assertion."\n  Steps:\n    - Step:\n        Description: "Check if there are multiple assertions testing the same condition"\n        Action: IdentifySameAssertions\n        Parameters:\n          SourcePattern: |\n\t          assert(expected, ...)\n\t          assert(expected, ...)\n    - Step:\n        Description: "Create new test methods if necessary to separate assertions for different inputs"\n        Action: SplitMethod\n        Parameters:\n          TargetType: Method\n\n    - Step:\n        Description: "Convert the test method to a parameterized test"\n        Action: ConvertToParameterizedTest\n        Parameters:\n          TargetType: Method\n    - Step:\n        Description: "Add @CsvSource annotation to declare parameterized values."\n        Action: AddAnnotation\n        Parameters:\n          TargetType: Method\n          Annotation: |\n            @CsvSource({\n              "{paramValues}"\n            })\n    - Step:\n        Description: "Refactor the test method to use parameterized values."\n        Action: RefactorMethod\n        Parameters:\n          SourcePattern: |\n            public void T() {\n              {originalStatements}\n            }\n          ReplacementPattern: |\n            public void T({parameterNames}) {\n              {refactoredStatements}\n            }\n  Example:\n    Before: |\n      @Test\n      public void T() {\n        assertEquals(expectedA, methodUnderTest(a));\n        assertEquals(expectedB, methodUnderTest(b));\n      }\n\n    After: |\n      @ParameterizedTest\n      @CsvSource({\n        "a, expectedA",\n        "b, expectedB"\n      })\n      public void T(String input, String expected) {\n        assertEquals(expected, methodUnderTest(input));\n      }\n', 'RefactorRule:\n  SmellType: Magic Number Test\n  Description: "Extract magic numbers and assign meaningful names to improve readability and maintainability."\n  Steps:\n    - Step:\n        Action: IdentifyMagicNumbers\n        Description: "Identify magic numbers in assertions"\n        Parameters:\n          TargetType: Method\n          SourcePattern: |\n            assertEquals({magicNumber}, {variable})\n    - Step:\n        Action: ExtractVariable\n        Description: "Extract magic number to a variable with meaningful name"\n        Parameters:\n          TargetType: Method\n          SourcePattern: |\n            assertEquals({magicNumber}, {variable})\n          ReplacementPattern: |\n            int {meaningfulName} = {magicNumber};\n            assertEquals({meaningfulName}, {variable})\n  Example:\n    Before: |\n      @Test\n      public void T() {\n          stmt\n          assertEquals(1, a)\n          stmt\'\n      }\n    After: |\n      @Test\n      public void T() {\n          int x = 1; // x: meaningful variable name\n          stmt\n          assertEquals(x, a)\n          stmt\'\n      }\n  Variables:\n    magicNumber: "1"\n    variable: "a"\n    meaningfulName: "x"\n']
+Checkpoints: ['[ ] All duplicate assertions have been refactored using JUnit 5 Parameterized Tests, where the lists of parameterizable values are declared in a specific annotation, and the test method is executed independently m times.\n', '[ ] All magic numbers in the test code have been extracted and assigned meaningful variable names.\n']
+
+Refactored Code: 
+ 
+import org.apache.commons.math4.legacy.analysis.UnivariateFunction;
+import org.apache.commons.math4.legacy.analysis.integration.IterativeLegendreGaussIntegrator;
+import org.apache.commons.math4.legacy.analysis.integration.BaseAbstractUnivariateIntegrator;
+import org.apache.commons.math4.legacy.analysis.function.QuinticFunction;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class QuinticFunctionIntegrationTest {
+
+    private static final int INTEGRATION_STEPS = 10000;
+    private static final double RELATIVE_ACCURACY = BaseAbstractUnivariateIntegrator.DEFAULT_RELATIVE_ACCURACY;
+    private static final double ABSOLUTE_ACCURACY = BaseAbstractUnivariateIntegrator.DEFAULT_ABSOLUTE_ACCURACY;
+    private static final int MIN_ITERATIONS_COUNT = BaseAbstractUnivariateIntegrator.DEFAULT_MIN_ITERATIONS_COUNT;
+    private static final int MAX_ITERATIONS_COUNT = 64;
+
+    private UnivariateIntegrator integrator = new IterativeLegendreGaussIntegrator(
+            3, RELATIVE_ACCURACY, ABSOLUTE_ACCURACY, MIN_ITERATIONS_COUNT, MAX_ITERATIONS_COUNT);
+
+    private UnivariateFunction function = new QuinticFunction();
+
+    @ParameterizedTest
+    @CsvSource({
+            "0, 1, -1.0/48",
+            "0, 0.5, 11.0/768",
+            "-1, 4, 2048/3.0 - 78 + 1.0/48"
+    })
+    public void testQuinticFunction(double min, double max, double expected) {
+        double result = integrator.integrate(INTEGRATION_STEPS, function, min, max);
+        assertEquals(expected, result, 1.0e-16);
+    }
+}
+
+

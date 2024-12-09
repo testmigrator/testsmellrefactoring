@@ -1,0 +1,26 @@
+asserts result: 
+ ```java
+import org.jsoup.nodes.Attribute;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class AttributeTest {
+
+    @Test
+    public void testHtmlWithSupplementaryCharacterInAttributeKey() {
+        String key = new String(Character.toChars(135361));
+        String value = "A" + key + "B";
+        Attribute attr = new Attribute(key, value);
+        assertEquals("HTML representation should match expected output", key + "=\"" + value + "\"", attr.html());
+    }
+
+    @Test
+    public void testToStringWithSupplementaryCharacterInAttributeKey() {
+        String key = new String(Character.toChars(135361));
+        String value = "A" + key + "B";
+        Attribute attr = new Attribute(key, value);
+        assertEquals("toString representation should match HTML representation", attr.html(), attr.toString());
+    }
+}
+```
+

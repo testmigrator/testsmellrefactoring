@@ -1,0 +1,21 @@
+asserts result: 
+ The functionality between the original test and the refactored test is not consistent. Here’s a brief overview of the reasons for the inconsistency:
+
+1. **Exception Handling**: 
+   - **Original Test**: The original test directly uses `assertThrows` to check that an `IllegalStateException` is thrown when calling `jsonWriter.endObject()` after starting two arrays.
+   - **Refactored Test**: The refactored test wraps the entire block in an `assertDoesNotThrow`, which is contradictory because it expects no exceptions to be thrown. This changes the behavior from expecting an exception to expecting no exception.
+
+2. **Assertion Messages**:
+   - **Original Test**: The original test does not provide a custom failure message for the assertion.
+   - **Refactored Test**: The refactored test adds custom failure messages for both the `assertThrows` and `assertDoesNotThrow` methods, which can be useful but changes the structure and intent of the test.
+
+3. **Test Naming**:
+   - **Original Test**: The test name is `testBadNestingArray`.
+   - **Refactored Test**: The test name is `testBadNestingArray_beginArrayEndObject`. While more descriptive, this change in naming could affect how the test is referenced or understood in a larger context.
+
+Given these points, the refactored test does not maintain the same functionality as the original test. The primary issue is the use of `assertDoesNotThrow`, which contradicts the expected behavior of the original test. 
+
+**Inconsistent Test**: `testBadNestingArray_beginArrayEndObject`
+
+**Reason**: The refactored test expects no exceptions to be thrown, while the original test expects an `IllegalStateException` to be thrown.
+

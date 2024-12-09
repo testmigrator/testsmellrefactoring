@@ -1,0 +1,38 @@
+asserts result: 
+ ```java
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Options;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.io.ByteArrayOutputStream;
+import java.io.PrintWriter;
+
+public class HelpFormatterTest {
+
+    @ParameterizedTest
+    @CsvSource({
+        "[-a], simple auto usage",
+        "[-a] [-b], simple auto usage with two options"
+    })
+    void testAutomaticUsage(String expectedOptions, String description) {
+        final HelpFormatter hf = new HelpFormatter();
+        final Options options = new Options();
+        final ByteArrayOutputStream out = new ByteArrayOutputStream();
+        final PrintWriter pw = new PrintWriter(out);
+
+        if (description.equals("simple auto usage")) {
+            options.addOption("a", false, "aaaa aaaa aaaa aaaa aaaa");
+        } else if (description.equals("simple auto usage with two options")) {
+            options.addOption("a", false, "aaaa aaaa aaaa aaaa aaaa")
+                   .addOption("b", false, "bbb");
+        }
+
+        hf.printUsage(pw, 60, "app", options);
+        pw.flush();
+        assertEquals("usage: app " + expectedOptions, out.toString().trim(), description);
+    }
+}
+```
+

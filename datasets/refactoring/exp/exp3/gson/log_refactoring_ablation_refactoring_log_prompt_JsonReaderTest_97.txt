@@ -1,0 +1,75 @@
+asserts result: 
+ ```java
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
+import com.google.gson.stream.Strictness;
+import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.io.StringReader;
+
+class JsonReaderTest {
+
+    @Test
+    public void testLenientMultipleTopLevelValues_Array() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("[] true {}"));
+        reader.setStrictness(Strictness.LENIENT);
+        reader.beginArray();
+        reader.endArray();
+        assertThat(reader.hasNext()).as("Expected array to be followed by another value").isTrue();
+    }
+
+    @Test
+    public void testLenientMultipleTopLevelValues_Boolean() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("[] true {}"));
+        reader.setStrictness(Strictness.LENIENT);
+        reader.beginArray();
+        reader.endArray();
+        boolean nextBoolean = reader.nextBoolean();
+        assertThat(nextBoolean).as("Expected next value to be true").isTrue();
+    }
+
+    @Test
+    public void testLenientMultipleTopLevelValues_Object() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("[] true {}"));
+        reader.setStrictness(Strictness.LENIENT);
+        reader.beginArray();
+        reader.endArray();
+        reader.nextBoolean(); // Consume the boolean value
+        reader.beginObject();
+        reader.endObject();
+        assertThat(reader.hasNext()).as("Expected object to be followed by the end of the document").isFalse();
+    }
+
+    @Test
+    public void testLenientMultipleTopLevelValues_EndDocument() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("[] true {}"));
+        reader.setStrictness(Strictness.LENIENT);
+        reader.beginArray();
+        reader.endArray();
+        reader.nextBoolean(); // Consume the boolean value
+        reader.beginObject();
+        reader.endObject();
+        JsonToken peekResult = reader.peek();
+        assertThat(peekResult).as("Expected the next token to be END_DOCUMENT").isEqualTo(JsonToken.END_DOCUMENT);
+    }
+
+    @Test
+    public void testLenientMultipleTopLevelValues_IOException() {
+        JsonReader reader = new JsonReader(new StringReader("[] true {}"));
+        reader.setStrictness(Strictness.LENIENT);
+        assertThrows(IOException.class, () -> {
+            reader.beginArray();
+            reader.endArray();
+            reader.nextBoolean(); // Consume the boolean value
+            reader.beginObject();
+            reader.endObject();
+            reader.nextName(); // This should throw an IOException as there are no more names
+        });
+    }
+}
+```
+

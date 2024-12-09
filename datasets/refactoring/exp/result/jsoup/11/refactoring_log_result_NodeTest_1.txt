@@ -1,0 +1,66 @@
+Input Parameters:
+Test Code:
+ @Test public void handlesBaseUri() {
+        Tag tag = Tag.valueOf("a");
+        Attributes attribs = new Attributes();
+        attribs.put("relHref", "/foo");
+        attribs.put("absHref", "http://bar/qux");
+
+        Element noBase = new Element(tag, "", attribs);
+        assertEquals("", noBase.absUrl("relHref")); // with no base, should NOT fallback to href attrib, whatever it is
+        assertEquals("http://bar/qux", noBase.absUrl("absHref")); // no base but valid attrib, return attrib
+
+        Element withBase = new Element(tag, "http://foo/", attribs);
+        assertEquals("http://foo/foo", withBase.absUrl("relHref")); // construct abs from base + rel
+        assertEquals("http://bar/qux", withBase.absUrl("absHref")); // href is abs, so returns that
+        assertEquals("", withBase.absUrl("noval"));
+
+        Element dodgyBase = new Element(tag, "wtf://no-such-protocol/", attribs);
+        assertEquals("http://bar/qux", dodgyBase.absUrl("absHref")); // base fails, but href good, so get that
+        assertEquals("", dodgyBase.absUrl("relHref")); // base fails, only rel href, so return nothing
+    }
+Context: /org/jsoup/nodes/Node
+Smell List: ['Assertion_Roulette', 'Eager_Test']
+Smell Description List: ['Test Smell Type：Assertion Roulette\n\nFeature:\nA test method contains more than one assertion statement without an explanation/message (parameter in the assertion method).\n', 'Test Smell Type：Eager Test\n\nFeature:\nA test method contains multiple calls to multiple production methods.\n']
+Refactoring DSL: ['RefactorRule:\n  SmellType: Assertion Roulette\n  Description: Add descriptive messages to assert statements to improve readability and maintainability.\n  Steps:\n    - Step:\n        Description: "Add descriptive message to each assert statement(except assertThat, assertThrows)."\n        Action: AddMessageToAssert\n        Parameters:\n          MessagePattern: "{assertionMessage}"\n  Example:\n    Before: |\n      @Test\n      public void T() {\n        stmt\n        assert_1\n        ...\n        assert_n\n        stmt\'\n      }\n    After: |\n      @Test\n      public void T() {\n        stmt\n        assert_1(..., "Descriptive message for assert statement")\n        ...\n        assert_n(..., "Descriptive message for assert statement")\n        stmt\'\n      }\n    Variables:\n      assertionMessage: "Descriptive message for assert statement"\n', 'RefactorRule:\n  SmellType: Eager Test\n  Description: "Refactor test methods to group related assertions logically and extract reusable setup logic into private methods."\n  Steps:\n    - Step1:\n        Description: "Extract shared setup logic into a reusable, private method and ensure it is used across all relevant tests."\n        Action: ExtractSetupMethod\n        Parameters:\n          Condition: "If multiple tests share the same setup logic."\n          MethodNamePattern: setupTest{OriginalMethodName}\n    - Step2:\n        Description: "Group related assertions into cohesive sub-tests while retaining necessary setup logic."\n        Action: GroupAssertions\n        Parameters:\n          GroupBy: LogicalConcern\n    - Step3:\n        Description: "Create new test methods for each cohesive group of assertions and ensure readability."\n        Action: CreateTestMethods\n        Parameters:\n          IncludeSetup: True\n          NamePattern: test{OriginalMethodName}_{Concern}\n  Example:\n    Before: |\n      @Test\n      public void testExample() {\n          setup();\n          assertEquals(1, methodA());\n          assertTrue(methodB());\n      }\n    After: |\n      private void setupTestExample() {\n          setup();\n      }\n\n      @Test\n      public void testExample_MethodA() {\n          setupTestExample();\n          assertEquals(1, methodA());\n      }\n\n      @Test\n      public void testExample_MethodB() {\n          setupTestExample();\n          assertTrue(methodB());\n      }\n  Variables:\n    OriginalMethodName: The name of the original test method.\n    LogicalConcern: The logical aspect tested (e.g., a specific API, validation, or behavior).\n']
+Checkpoints: ['[ ] All assert statements have been added with clear explanatory messages.\n', '[ ] All eager tests have been split into separate tests, each focusing on verifying a single API.\n']
+
+Refactored Code: 
+ 
+private Tag tag;
+private Attributes attribs;
+
+@BeforeEach
+void setup() {
+    tag = Tag.valueOf("a");
+    attribs = new Attributes();
+    attribs.put("relHref", "/foo");
+    attribs.put("absHref", "http://bar/qux");
+}
+
+@Test
+public void testHandlesBaseUri_NoBase() {
+    Element noBase = new Element(tag, "", attribs);
+
+    assertEquals("", noBase.absUrl("relHref"), "With no base, 'relHref' should not fallback to href attribute");
+    assertEquals("http://bar/qux", noBase.absUrl("absHref"), "With no base, 'absHref' should return the absolute URL from the attribute");
+}
+
+@Test
+public void testHandlesBaseUri_WithBase() {
+    Element withBase = new Element(tag, "http://foo/", attribs);
+
+    assertEquals("http://foo/foo", withBase.absUrl("relHref"), "With base URL, 'relHref' should construct an absolute URL from base + relative path");
+    assertEquals("http://bar/qux", withBase.absUrl("absHref"), "With base URL, 'absHref' should return the absolute URL from the attribute");
+    assertEquals("", withBase.absUrl("noval"), "With base URL, non-existent attribute 'noval' should return an empty string");
+}
+
+@Test
+public void testHandlesBaseUri_DodgyBase() {
+    Element dodgyBase = new Element(tag, "wtf://no-such-protocol/", attribs);
+
+    assertEquals("http://bar/qux", dodgyBase.absUrl("absHref"), "With invalid base URL, 'absHref' should return the absolute URL from the attribute");
+    assertEquals("", dodgyBase.absUrl("relHref"), "With invalid base URL, 'relHref' should return an empty string");
+}
+
+

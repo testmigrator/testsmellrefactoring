@@ -1,0 +1,46 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class ElementTest {
+
+    private static final String HTML = "<div id=1>Hello <p>there <b>now</b></p></div>";
+    private static final String EXPECTED_TEXT = "Hello there now";
+    private static final String EXPECTED_PARAGRAPH_TEXT = "there now";
+    private static final String NEW_TEXT = "Gone";
+    private static final int EXPECTED_PARAGRAPH_COUNT = 0;
+
+    @Test
+    public void testDocumentText() {
+        Document doc = Jsoup.parse(HTML);
+        assertEquals("The document text should be 'Hello there now'", EXPECTED_TEXT, doc.text());
+    }
+
+    @Test
+    public void testParagraphText() {
+        Document doc = Jsoup.parse(HTML);
+        assertEquals("The paragraph text should be 'there now'", EXPECTED_PARAGRAPH_TEXT, doc.select("p").get(0).text());
+    }
+
+    @Test
+    public void testSetText() {
+        Document doc = Jsoup.parse(HTML);
+        Element div = doc.getElementById("1");
+        div.text(NEW_TEXT);
+        assertEquals("The div text should be set to 'Gone'", NEW_TEXT, div.text());
+    }
+
+    @Test
+    public void testParagraphRemoval() {
+        Document doc = Jsoup.parse(HTML);
+        Element div = doc.getElementById("1");
+        div.text(NEW_TEXT);
+        assertEquals("The document should not contain any paragraphs after setting the div text", EXPECTED_PARAGRAPH_COUNT, doc.select("p").size());
+    }
+}
+```
+

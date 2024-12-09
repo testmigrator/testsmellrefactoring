@@ -1,0 +1,5 @@
+asserts result: 
+ Yes
+
+The functionality between the original test and the refactored version is consistent. The refactored version splits the setup and assertion into two methods but maintains the same logic and expected outcome. The `setupTestPrintSortedUsageWithNullComparator` method initializes the options, sets up the `HelpFormatter`, and prints the usage to a `StringWriter`. The `testPrintSortedUsageWithNullComparator_Output` method then asserts that the output matches the expected string, which is the same as what the original test did.
+

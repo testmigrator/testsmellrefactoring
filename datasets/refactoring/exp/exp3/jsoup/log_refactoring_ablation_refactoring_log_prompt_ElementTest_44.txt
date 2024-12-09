@@ -1,0 +1,81 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Attributes;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import static org.junit.jupiter.api.Assertions.*;
+
+class ElementDatasetTest {
+
+    private static final Document DOC = Jsoup.parse("<div id=1 data-name=jsoup class=new data-package=jar>Hello</div><p id=2>Hello</p>");
+    private static final Element DIV = DOC.select("div").first();
+    private static final Element P = DOC.select("p").first();
+
+    @Test
+    void testInitialDatasetSize() {
+        Map<String, String> dataset = DIV.dataset();
+        assertEquals(2, dataset.size(), "Initial dataset size should be 2");
+    }
+
+    @Test
+    void testInitialDatasetValues() {
+        Map<String, String> dataset = DIV.dataset();
+        assertEquals("jsoup", dataset.get("name"), "Initial dataset name should be 'jsoup'");
+        assertEquals("jar", dataset.get("package"), "Initial dataset package should be 'jar'");
+    }
+
+    @Test
+    void testUpdateDataset() {
+        Map<String, String> dataset = DIV.dataset();
+        dataset.put("name", "jsoup updated");
+        dataset.put("language", "java");
+        dataset.remove("package");
+
+        assertEquals(2, dataset.size(), "Updated dataset size should be 2");
+        assertEquals("jsoup updated", dataset.get("name"), "Updated dataset name should be 'jsoup updated'");
+        assertEquals("java", dataset.get("language"), "Updated dataset language should be 'java'");
+    }
+
+    @Test
+    void testAttributesAfterUpdate() {
+        Map<String, String> dataset = DIV.dataset();
+        Attributes attributes = DIV.attributes();
+
+        dataset.put("name", "jsoup updated");
+        dataset.put("language", "java");
+        dataset.remove("package");
+
+        assertEquals(4, attributes.size(), "Attributes size after update should be 4");
+        assertEquals("jsoup updated", attributes.get("data-name"), "Attribute data-name should be 'jsoup updated'");
+        assertEquals("java", attributes.get("data-language"), "Attribute data-language should be 'java'");
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "food, bacon",
+        "", "null"
+    })
+    void testAddAndRetrieveDataAttributes(String key, String expectedValue) {
+        Attributes attributes = DIV.attributes();
+        attributes.put("data-" + key, expectedValue);
+
+        Map<String, String> dataset = DIV.dataset();
+        if (expectedValue.equals("null")) {
+            assertNull(dataset.get(key), "Dataset value for empty key should be null");
+        } else {
+            assertEquals(expectedValue, dataset.get(key), "Dataset value for key '" + key + "' should be '" + expectedValue + "'");
+        }
+    }
+
+    @Test
+    void testEmptyPElementDataset() {
+        Map<String, String> dataset = P.dataset();
+        assertEquals(0, dataset.size(), "P element dataset size should be 0");
+    }
+}
+```
+

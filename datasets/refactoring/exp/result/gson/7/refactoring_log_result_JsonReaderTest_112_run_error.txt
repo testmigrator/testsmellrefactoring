@@ -1,0 +1,156 @@
+Input Parameters:
+Test Code:
+ @Test
+  public void testNestingLimit() throws IOException {
+    JsonReader reader = new JsonReader(reader("[{\"a\":1}]"));
+    reader.setNestingLimit(2);
+    assertThat(reader.getNestingLimit()).isEqualTo(2);
+    reader.beginArray();
+    reader.beginObject();
+    assertThat(reader.nextName()).isEqualTo("a");
+    assertThat(reader.nextInt()).isEqualTo(1);
+    reader.endObject();
+    reader.endArray();
+
+    JsonReader reader2 = new JsonReader(reader("[{\"a\":[]}]"));
+    reader2.setNestingLimit(2);
+    reader2.beginArray();
+    reader2.beginObject();
+    assertThat(reader2.nextName()).isEqualTo("a");
+    MalformedJsonException e =
+        assertThrows(MalformedJsonException.class, () -> reader2.beginArray());
+    assertThat(e)
+        .hasMessageThat()
+        .isEqualTo("Nesting limit 2 reached at line 1 column 8 path $[0].a");
+
+    JsonReader reader3 = new JsonReader(reader("[]"));
+    reader3.setNestingLimit(0);
+    e = assertThrows(MalformedJsonException.class, () -> reader3.beginArray());
+    assertThat(e).hasMessageThat().isEqualTo("Nesting limit 0 reached at line 1 column 2 path $");
+
+    JsonReader reader4 = new JsonReader(reader("[]"));
+    reader4.setNestingLimit(0);
+    // Currently also checked when skipping values
+    e = assertThrows(MalformedJsonException.class, () -> reader4.skipValue());
+    assertThat(e).hasMessageThat().isEqualTo("Nesting limit 0 reached at line 1 column 2 path $");
+
+    JsonReader reader5 = new JsonReader(reader("1"));
+    reader5.setNestingLimit(0);
+    // Reading value other than array or object should be allowed
+    assertThat(reader5.nextInt()).isEqualTo(1);
+
+    // Test multiple top-level arrays
+    JsonReader reader6 = new JsonReader(reader("[] [[]]"));
+    reader6.setStrictness(Strictness.LENIENT);
+    reader6.setNestingLimit(1);
+    reader6.beginArray();
+    reader6.endArray();
+    reader6.beginArray();
+    e = assertThrows(MalformedJsonException.class, () -> reader6.beginArray());
+    assertThat(e)
+        .hasMessageThat()
+        .isEqualTo("Nesting limit 1 reached at line 1 column 6 path $[0]");
+
+    JsonReader reader7 = new JsonReader(reader("[]"));
+    IllegalArgumentException argException =
+        assertThrows(IllegalArgumentException.class, () -> reader7.setNestingLimit(-1));
+    assertThat(argException).hasMessageThat().isEqualTo("Invalid nesting limit: -1");
+  }
+Context: /com/google/gson/stream/JsonReader
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing', 'Eager_Test', 'Duplicate_Assert']
+Smell Description List: ['Test Smell Type：Assertion Roulette\n\nFeature:\nA test method contains more than one assertion statement without an explanation/message (parameter in the assertion method).\n', 'Test Smell Type：Exception_Catching_Throwing\n\nFeature:\nA test method that contains either a throw statement or a catch clause.\n', 'Test Smell Type：Eager Test\n\nFeature:\nA test method contains multiple calls to multiple production methods.\n', 'Test Smell Type：Duplicate Assert\n\nFeature:\nA test method that contains more than one assertion statement with the same parameters.\n']
+Refactoring DSL: ['RefactorRule:\n  SmellType: Assertion Roulette\n  Description: Add descriptive messages to assert statements to improve readability and maintainability.\n  Steps:\n    - Step:\n        Description: "Add descriptive message to each assert statement(except assertThat, assertThrows)."\n        Action: AddMessageToAssert\n        Parameters:\n          MessagePattern: "{assertionMessage}"\n  Example:\n    Before: |\n      @Test\n      public void T() {\n        stmt\n        assert_1\n        ...\n        assert_n\n        stmt\'\n      }\n    After: |\n      @Test\n      public void T() {\n        stmt\n        assert_1(..., "Descriptive message for assert statement")\n        ...\n        assert_n(..., "Descriptive message for assert statement")\n        stmt\'\n      }\n    Variables:\n      assertionMessage: "Descriptive message for assert statement"\n', 'RefactorRule:\n  SmellType: Exception_Catching_Throwing\n  Description: Ensure tests use assertDoesNotThrow to verify no exceptions are thrown and remove any throws declaration in test methods.\n  Steps:\n    - Step:\n        Description: "Handle try-catch blocks containing \'fail\' calls"\n        Action: ReplaceTryCatchWithAssertThrows\n        Parameters:\n          SourcePattern: |\n            try {\n              {tryBlock}\n              fail();\n            } catch ({exception}) {\n              {catchBlock}\n            }\n          ReplacementPattern: |\n            {exception} exception = assertThrows({exception}.class, () -> {\n              {tryBlock}\n            });\n            {catchBlock}\n    - Step:\n        Description: "Handle test methods with \'throws\' declaration but no try-catch block"\n        Action: WrapWithAssertDoesNotThrow\n        Parameters:\n          DetectionPattern: |\n            MethodDeclaration [throws!=null && BodyContainsTryCatch=false]\n          ReplacementPattern: |\n            assertDoesNotThrow(() -> {\n              {methodBody}\n            }, "Unexpected exception occurred during the test");\n\n    - Step:\n        Description: "Handle test methods with try-catch blocks without \'fail\' calls"\n        Action: ReplaceTryCatchWithoutFail\n        Parameters:\n          SourcePattern: |\n            try {\n              {tryBlock}\n            } catch ({exception}) {\n              {catchBlock}\n            }\n          ReplacementPattern: |\n            assertDoesNotThrow(() -> {\n              {tryBlock}\n            });\n            {catchBlock}\n\n  Example:\n    Before: |\n      @Test\n      public void T() {\n        stmt\n        try {\n            stmt\'\n            fail();\n        } catch (E) {\n            evs\n        }\n        stmt\'\'\n      }\n    After: |\n      @Test\n      public void T() {\n        stmt\n        assertThrows(E.class, () -> {\n            stmt\'\n        });\n        evs\n        stmt\'\'\n      }\n  Variables:\n    exception: E\n    tryBlock: stmt\'\n    catchBlock: evs\n    tryBlockStatement: stmt\'i\n', 'RefactorRule:\n  SmellType: Eager Test\n  Description: "Refactor test methods to group related assertions logically and extract reusable setup logic into private methods."\n  Steps:\n    - Step1:\n        Description: "Extract shared setup logic into a reusable, private method and ensure it is used across all relevant tests."\n        Action: ExtractSetupMethod\n        Parameters:\n          Condition: "If multiple tests share the same setup logic."\n          MethodNamePattern: setupTest{OriginalMethodName}\n    - Step2:\n        Description: "Group related assertions into cohesive sub-tests while retaining necessary setup logic."\n        Action: GroupAssertions\n        Parameters:\n          GroupBy: LogicalConcern\n    - Step3:\n        Description: "Create new test methods for each cohesive group of assertions and ensure readability."\n        Action: CreateTestMethods\n        Parameters:\n          IncludeSetup: True\n          NamePattern: test{OriginalMethodName}_{Concern}\n  Example:\n    Before: |\n      @Test\n      public void testExample() {\n          setup();\n          assertEquals(1, methodA());\n          assertTrue(methodB());\n      }\n    After: |\n      private void setupTestExample() {\n          setup();\n      }\n\n      @Test\n      public void testExample_MethodA() {\n          setupTestExample();\n          assertEquals(1, methodA());\n      }\n\n      @Test\n      public void testExample_MethodB() {\n          setupTestExample();\n          assertTrue(methodB());\n      }\n  Variables:\n    OriginalMethodName: The name of the original test method.\n    LogicalConcern: The logical aspect tested (e.g., a specific API, validation, or behavior).\n', 'RefactorRule:\n  SmellType: Duplicate Assert\n  Description: "If the assertion logic is the same but tested with different inputs, prioritize splitting the test into multiple separate methods with a single assertion each."\n  Steps:\n    - Step:\n        Description: "Identify duplicate assertions that test the same condition with different inputs."\n        Action: IdentifySameAssertions\n        Parameters:\n          SourcePattern: |\n            assert(expectedA, ...)\n            assert(expectedB, ...)\n    - Step:\n        Description: "If the assertions are simple and few, split the test into multiple methods, each with a single assertion."\n        Action: SplitMethod\n        Parameters:\n          TargetType: Method\n          Conditions: |\n            - The assertions are simple and do not involve complex variations.\n    - Step:\n        Description: "If there are many similar assertions with significant variations, convert the test to a parameterized test."\n        Action: ConvertToParameterizedTest\n        Parameters:\n          TargetType: Method\n          Conditions: |\n            - There are many test cases with similar logic that would benefit from parameterization.\n            - The variations are extensive, with a large number of inputs or expected outputs.\n    - Step:\n        Description: "Add @CsvSource annotation to declare parameterized values."\n        Action: AddAnnotation\n        Parameters:\n          TargetType: Method\n          Annotation: |\n            @CsvSource({\n              "{paramValues}"\n            })\n    - Step:\n        Description: "Refactor the test method to use parameterized values."\n        Action: RefactorMethod\n        Parameters:\n          SourcePattern: |\n            public void T() {\n              {originalStatements}\n            }\n          ReplacementPattern: |\n            public void T({parameterNames}) {\n              {refactoredStatements}\n            }\n  Example:\n    Before: |\n      @Test\n      public void testDuplicateAssertions() {\n        assertEquals(expectedA, methodUnderTest(a));\n        assertEquals(expectedB, methodUnderTest(b));\n      }\n    After: |\n      @Test\n      public void testWithInputA() {\n        assertEquals(expectedA, methodUnderTest(a));\n      }\n      @Test\n      public void testWithInputB() {\n        assertEquals(expectedB, methodUnderTest(b));\n      }\n']
+Checkpoints: ['[ ] All assert statements have been added with clear explanatory messages.\n', '[ ] All exception handling has been refactored to use the JUnit 5 Exception Handling feature.\n', '[ ] All eager tests have been split into separate tests, each focusing on verifying a single API.\n', '[ ] All duplicate assertions have been refactored using JUnit 5 Parameterized Tests, where the lists of parameterizable values are declared in a specific annotation, and the test method is executed independently m times.\n']
+
+Refactored Code: 
+ 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
+
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.MalformedJsonException;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+
+import java.io.IOException;
+import java.io.StringReader;
+
+public class JsonReaderTest {
+
+  private JsonReader reader(String json) {
+    return new JsonReader(new StringReader(json));
+  }
+
+  @Test
+  public void testNestingLimit_SetAndGet() throws IOException {
+    JsonReader reader = reader("[{\"a\":1}]");
+    reader.setNestingLimit(2);
+    assertThat(reader.getNestingLimit(), equalTo(2), "Nesting limit should be set to 2");
+  }
+
+  @Test
+  public void testNestingLimit_ValidArrayAndObject() throws IOException {
+    JsonReader reader = reader("[{\"a\":1}]");
+    reader.setNestingLimit(2);
+    reader.beginArray();
+    reader.beginObject();
+    assertThat(reader.nextName(), equalTo("a"), "Next name should be 'a'");
+    assertThat(reader.nextInt(), equalTo(1), "Next integer should be 1");
+    reader.endObject();
+    reader.endArray();
+  }
+
+  @ParameterizedTest
+  @CsvSource({
+      "[{\"a\":[]}], 2, a, beginArray",
+      "[], 0, $, beginArray",
+      "[], 0, $, skipValue"
+  })
+  public void testNestingLimit_ExceedsLimit(String json, int limit, String path, String method) throws IOException {
+    JsonReader reader = reader(json);
+    reader.setNestingLimit(limit);
+    reader.beginArray();
+    reader.beginObject();
+    assertThat(reader.nextName(), equalTo("a"), "Next name should be 'a'");
+    MalformedJsonException e = assertThrows(MalformedJsonException.class, () -> {
+      if ("beginArray".equals(method)) {
+        reader.beginArray();
+      } else if ("skipValue".equals(method)) {
+        reader.skipValue();
+      }
+    });
+    assertThat(e.getMessage(), containsString("Nesting limit " + limit + " reached at line 1 column 8 path $" + path),
+        "Exception message should indicate nesting limit exceeded");
+  }
+
+  @Test
+  public void testNestingLimit_TopLevelValue() throws IOException {
+    JsonReader reader = reader("1");
+    reader.setNestingLimit(0);
+    assertThat(reader.nextInt(), equalTo(1), "Reading non-array or non-object value should be allowed");
+  }
+
+  @Test
+  public void testNestingLimit_MultipleTopLevelArrays() throws IOException {
+    JsonReader reader = reader("[] [[]]");
+    reader.setStrictness(JsonReader.Strictness.LENIENT);
+    reader.setNestingLimit(1);
+    reader.beginArray();
+    reader.endArray();
+    reader.beginArray();
+    MalformedJsonException e = assertThrows(MalformedJsonException.class, () -> reader.beginArray());
+    assertThat(e.getMessage(), containsString("Nesting limit 1 reached at line 1 column 6 path $[0]"),
+        "Exception message should indicate nesting limit exceeded");
+  }
+
+  @Test
+  public void testNestingLimit_InvalidLimit() {
+    JsonReader reader = reader("[]");
+    IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> reader.setNestingLimit(-1));
+    assertThat(e.getMessage(), equalTo("Invalid nesting limit: -1"), "Exception message should indicate invalid nesting limit");
+  }
+}
+
+

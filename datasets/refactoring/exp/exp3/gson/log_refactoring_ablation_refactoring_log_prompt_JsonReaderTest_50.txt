@@ -1,0 +1,59 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
+import com.google.gson.stream.JsonReader.Strictness;
+
+import org.junit.jupiter.api.Test;
+
+public class JsonReaderTest {
+
+    @Test
+    public void testPeekingUnquotedStringsPrefixedWithBooleans_peekString() throws Exception {
+        JsonReader reader = new JsonReader(new StringReader("[truey]"));
+        reader.setStrictness(Strictness.LENIENT);
+        reader.beginArray();
+
+        // Verify that the next token is a STRING
+        assertEquals(JsonToken.STRING, reader.peek(), "Expected the next token to be a STRING");
+    }
+
+    @Test
+    public void testPeekingUnquotedStringsPrefixedWithBooleans_nextBooleanThrowsException() throws Exception {
+        JsonReader reader = new JsonReader(new StringReader("[truey]"));
+        reader.setStrictness(Strictness.LENIENT);
+        reader.beginArray();
+
+        // Verify that calling nextBoolean() throws an IllegalStateException
+        var e = assertThrows(IllegalStateException.class, () -> reader.nextBoolean(),
+                "Expected nextBoolean() to throw an IllegalStateException when the next token is a STRING");
+        assertTrue(e.getMessage().contains("Expected: a boolean but was: STRING at line 1 column 2 path $[0]"),
+                "Expected the exception message to indicate an unexpected structure error");
+    }
+
+    @Test
+    public void testPeekingUnquotedStringsPrefixedWithBooleans_nextString() throws Exception {
+        JsonReader reader = new JsonReader(new StringReader("[truey]"));
+        reader.setStrictness(Strictness.LENIENT);
+        reader.beginArray();
+
+        // Verify that the next string is "truey"
+        assertEquals("truey", reader.nextString(), "Expected the next string to be 'truey'");
+    }
+
+    @Test
+    public void testPeekingUnquotedStringsPrefixedWithBooleans_endArray() throws Exception {
+        JsonReader reader = new JsonReader(new StringReader("[truey]"));
+        reader.setStrictness(Strictness.LENIENT);
+        reader.beginArray();
+        reader.nextString();
+
+        // Verify that the array ends correctly
+        reader.endArray();
+    }
+}
+```
+

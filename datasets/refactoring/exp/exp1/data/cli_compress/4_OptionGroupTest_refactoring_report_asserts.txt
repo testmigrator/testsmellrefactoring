@@ -1,0 +1,12 @@
+total tests: 3
+total asserts: 10
+assertNotNull(exception.getOptionGroup(), "Option group should not be null");
+assertTrue(exception.getOptionGroup().isSelected(), "Option group should be selected");
+assertEquals("f", exception.getOptionGroup().getSelected(), "Selected option should be 'f'");
+assertEquals("d", exception.getOption().getOpt(), "Option should be 'd'");
+assertNotNull(exception.getOptionGroup(), "Option group should not be null");
+assertTrue(exception.getOptionGroup().isSelected(), "Option group should be selected");
+assertEquals("f", exception.getOptionGroup().getSelected(), "Incorrect selected option");
+assertEquals("d", exception.getOption().getOpt(), "Incorrect option");
+assertTrue(cl.hasOption("f"), "Expected option 'f' to be present");
+assertFalse(cl.hasOption("d"), "Expected option 'd' to not be present");

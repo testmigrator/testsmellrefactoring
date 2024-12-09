@@ -1,0 +1,42 @@
+asserts result: 
+ ```java
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class LinearProblemTest {
+
+    private static final double TOLERANCE = 1e-7;
+    private static final double EPSILON = 1e-7;
+    private static final double EXPECTED_RMS = 0;
+    private static final int[] EXPECTED_POINT = {3, 4, -1, -2, 1 + EPSILON, 1 - EPSILON};
+
+    @Test
+    public void testTwoSets() {
+        double[][] matrix = {
+            {2, 1, 0, 4, 0, 0},
+            {-4, -2, 3, -7, 0, 0},
+            {4, 1, -2, 8, 0, 0},
+            {0, -3, -12, -1, 0, 0},
+            {0, 0, 0, 0, EPSILON, 1},
+            {0, 0, 0, 0, 1, 1}
+        };
+        double[] constants = {2, -9, 2, 2, 1 + EPSILON * EPSILON, 2};
+
+        LinearProblem problem = new LinearProblem(matrix, constants);
+        Optimum optimum = optimizer.optimize(problem.getBuilder().build());
+
+        assertEquals(EXPECTED_RMS, optimum.getRMS(), TOLERANCE);
+        assertArrayEquals(EXPECTED_POINT, optimum.getPoint(), TOLERANCE);
+    }
+
+    private void assertArrayEquals(double[] expected, double[] actual, double delta) {
+        if (expected.length != actual.length) {
+            throw new AssertionError("Array lengths differ: " + expected.length + " != " + actual.length);
+        }
+        for (int i = 0; i < expected.length; i++) {
+            assertEquals(expected[i], actual[i], delta);
+        }
+    }
+}
+```
+

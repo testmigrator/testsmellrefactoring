@@ -1,0 +1,78 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+
+import java.io.IOException;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class NewAttributeBandsTest {
+
+    private MockNewAttributeBands newAttributeBands;
+    private List layoutElements;
+    private Callable firstCallable;
+    private Callable secondCallable;
+    private Callable thirdCallable;
+    private List thirdBody;
+    private Call call;
+
+    @BeforeEach
+    void setUp() {
+        newAttributeBands = null;
+        layoutElements = null;
+        firstCallable = null;
+        secondCallable = null;
+        thirdCallable = null;
+        thirdBody = null;
+        call = null;
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "[NH[(1)]][KIH][(-1)], 2, true, false, false",
+            "[NH[(1)]][KIH][(-2)], 1, false, true, false",
+            "[NH[(1)]][KIH][(0)], 0, false, false, true"
+    })
+    void testLayoutWithBackwardsCall(String layoutString, int expectedCallIndex, boolean firstBackwards, boolean secondBackwards, boolean thirdBackwards) throws IOException, Pack200Exception {
+        newAttributeBands = new MockNewAttributeBands(new MockSegment(), new AttributeLayout("test", AttributeLayout.CONTEXT_METHOD, layoutString, 20));
+        layoutElements = newAttributeBands.getLayoutElements();
+        assertEquals(3, layoutElements.size(), "Layout elements size should be 3");
+
+        firstCallable = (Callable) layoutElements.get(0);
+        secondCallable = (Callable) layoutElements.get(1);
+        thirdCallable = (Callable) layoutElements.get(2);
+
+        thirdBody = thirdCallable.getBody();
+        assertEquals(1, thirdBody.size(), "Third body size should be 1");
+        call = (Call) thirdBody.get(0);
+
+        switch (expectedCallIndex) {
+            case 0:
+                assertEquals(firstCallable, call.getCallable(), "First callable should be called");
+                assertTrue(firstCallable.isBackwardsCallable(), "First callable should be backwards callable");
+                assertFalse(secondCallable.isBackwardsCallable(), "Second callable should not be backwards callable");
+                assertFalse(thirdCallable.isBackwardsCallable(), "Third callable should not be backwards callable");
+                break;
+            case 1:
+                assertEquals(secondCallable, call.getCallable(), "Second callable should be called");
+                assertFalse(firstCallable.isBackwardsCallable(), "First callable should not be backwards callable");
+                assertTrue(secondCallable.isBackwardsCallable(), "Second callable should be backwards callable");
+                assertFalse(thirdCallable.isBackwardsCallable(), "Third callable should not be backwards callable");
+                break;
+            case 2:
+                assertEquals(thirdCallable, call.getCallable(), "Third callable should be called");
+                assertFalse(firstCallable.isBackwardsCallable(), "First callable should not be backwards callable");
+                assertFalse(secondCallable.isBackwardsCallable(), "Second callable should not be backwards callable");
+                assertTrue(thirdCallable.isBackwardsCallable(), "Third callable should be backwards callable");
+                break;
+            default:
+                fail("Unexpected call index: " + expectedCallIndex);
+        }
+    }
+}
+```
+

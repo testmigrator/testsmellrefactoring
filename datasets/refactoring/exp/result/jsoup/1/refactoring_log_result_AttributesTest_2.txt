@@ -1,0 +1,99 @@
+Input Parameters:
+Test Code:
+ @Test
+    public void testIteratorRemovable() {
+        Attributes a = new Attributes();
+        a.put("Tot", "a&p");
+        a.put("Hello", "There");
+        a.put("data-name", "Jsoup");
+        assertTrue(a.hasKey("Tot"));
+
+        Iterator<Attribute> iterator = a.iterator();
+        Attribute attr = iterator.next();
+        assertEquals("Tot", attr.getKey());
+        iterator.remove();
+        assertEquals(2, a.size());
+        attr = iterator.next();
+        assertEquals("Hello", attr.getKey());
+        assertEquals("There", attr.getValue());
+
+        // make sure that's flowing to the underlying attributes object
+        assertEquals(2, a.size());
+        assertEquals("There", a.get("Hello"));
+        assertFalse(a.hasKey("Tot"));
+    }
+Context: /org/jsoup/nodes/Attributes
+Smell List: ['Assertion_Roulette', 'Eager_Test', 'Duplicate_Assert', 'Magic_Number_Test']
+Smell Description List: ['Test Smell Type：Assertion Roulette\n\nFeature:\nA test method contains more than one assertion statement without an explanation/message (parameter in the assertion method).\n', 'Test Smell Type：Eager Test\n\nFeature:\nA test method contains multiple calls to multiple production methods.\n', 'Test Smell Type：Duplicate Assert\n\nFeature:\nA test method that contains more than one assertion statement with the same parameters.\n', 'Test Smell Type：Magic Number Test\n\nFeature:\nAn assertion method that contains a numeric literal as an argument.\n']
+Refactoring DSL: ['RefactorRule:\n  SmellType: Assertion Roulette\n  Description: Add descriptive messages to assert statements to improve readability and maintainability.\n  Steps:\n    - Step:\n        Description: "Add descriptive message to each assert statement(except assertThat, assertThrows)."\n        Action: AddMessageToAssert\n        Parameters:\n          MessagePattern: "{assertionMessage}"\n  Example:\n    Before: |\n      @Test\n      public void T() {\n        stmt\n        assert_1\n        ...\n        assert_n\n        stmt\'\n      }\n    After: |\n      @Test\n      public void T() {\n        stmt\n        assert_1(..., "Descriptive message for assert statement")\n        ...\n        assert_n(..., "Descriptive message for assert statement")\n        stmt\'\n      }\n    Variables:\n      assertionMessage: "Descriptive message for assert statement"\n', 'RefactorRule:\n  SmellType: Eager Test\n  Description: "Refactor test methods to group related assertions logically and extract reusable setup logic into private methods."\n  Steps:\n    - Step1:\n        Description: "Extract shared setup logic into a reusable, private method and ensure it is used across all relevant tests."\n        Action: ExtractSetupMethod\n        Parameters:\n          Condition: "If multiple tests share the same setup logic."\n          MethodNamePattern: setupTest{OriginalMethodName}\n    - Step2:\n        Description: "Group related assertions into cohesive sub-tests while retaining necessary setup logic."\n        Action: GroupAssertions\n        Parameters:\n          GroupBy: LogicalConcern\n    - Step3:\n        Description: "Create new test methods for each cohesive group of assertions and ensure readability."\n        Action: CreateTestMethods\n        Parameters:\n          IncludeSetup: True\n          NamePattern: test{OriginalMethodName}_{Concern}\n  Example:\n    Before: |\n      @Test\n      public void testExample() {\n          setup();\n          assertEquals(1, methodA());\n          assertTrue(methodB());\n      }\n    After: |\n      private void setupTestExample() {\n          setup();\n      }\n\n      @Test\n      public void testExample_MethodA() {\n          setupTestExample();\n          assertEquals(1, methodA());\n      }\n\n      @Test\n      public void testExample_MethodB() {\n          setupTestExample();\n          assertTrue(methodB());\n      }\n  Variables:\n    OriginalMethodName: The name of the original test method.\n    LogicalConcern: The logical aspect tested (e.g., a specific API, validation, or behavior).\n', 'RefactorRule:\n  SmellType: Duplicate Assert\n  Description: "If the assertion logic is the same but tested with different inputs, prioritize splitting the test into multiple separate methods with a single assertion each."\n  Steps:\n    - Step:\n        Description: "Identify duplicate assertions that test the same condition with different inputs."\n        Action: IdentifySameAssertions\n        Parameters:\n          SourcePattern: |\n            assert(expectedA, ...)\n            assert(expectedB, ...)\n    - Step:\n        Description: "If the assertions are simple and few, split the test into multiple methods, each with a single assertion."\n        Action: SplitMethod\n        Parameters:\n          TargetType: Method\n          Conditions: |\n            - The assertions are simple and do not involve complex variations.\n    - Step:\n        Description: "If there are many similar assertions with significant variations, convert the test to a parameterized test."\n        Action: ConvertToParameterizedTest\n        Parameters:\n          TargetType: Method\n          Conditions: |\n            - There are many test cases with similar logic that would benefit from parameterization.\n            - The variations are extensive, with a large number of inputs or expected outputs.\n    - Step:\n        Description: "Add @CsvSource annotation to declare parameterized values."\n        Action: AddAnnotation\n        Parameters:\n          TargetType: Method\n          Annotation: |\n            @CsvSource({\n              "{paramValues}"\n            })\n    - Step:\n        Description: "Refactor the test method to use parameterized values."\n        Action: RefactorMethod\n        Parameters:\n          SourcePattern: |\n            public void T() {\n              {originalStatements}\n            }\n          ReplacementPattern: |\n            public void T({parameterNames}) {\n              {refactoredStatements}\n            }\n  Example:\n    Before: |\n      @Test\n      public void testDuplicateAssertions() {\n        assertEquals(expectedA, methodUnderTest(a));\n        assertEquals(expectedB, methodUnderTest(b));\n      }\n    After: |\n      @Test\n      public void testWithInputA() {\n        assertEquals(expectedA, methodUnderTest(a));\n      }\n      @Test\n      public void testWithInputB() {\n        assertEquals(expectedB, methodUnderTest(b));\n      }\n', 'RefactorRule:\n  SmellType: Magic Number Test\n  Description: "Extract magic numbers and assign meaningful names to improve readability and maintainability."\n  Steps:\n    - Step:\n        Action: IdentifyMagicNumbers\n        Description: "Identify magic numbers in assertions"\n        Parameters:\n          TargetType: Method\n          SourcePattern: |\n            assertEquals({magicNumber}, {variable})\n    - Step:\n        Action: ExtractVariable\n        Description: "Extract magic number to a variable with meaningful name"\n        Parameters:\n          TargetType: Method\n          SourcePattern: |\n            assertEquals({magicNumber}, {variable})\n          ReplacementPattern: |\n            int {meaningfulName} = {magicNumber};\n            assertEquals({meaningfulName}, {variable})\n  Example:\n    Before: |\n      @Test\n      public void T() {\n          stmt\n          assertEquals(1, a)\n          stmt\'\n      }\n    After: |\n      @Test\n      public void T() {\n          int x = 1; // x: meaningful variable name\n          stmt\n          assertEquals(x, a)\n          stmt\'\n      }\n  Variables:\n    magicNumber: "1"\n    variable: "a"\n    meaningfulName: "x"\n']
+Checkpoints: ['[ ] All assert statements have been added with clear explanatory messages.\n', '[ ] All eager tests have been split into separate tests, each focusing on verifying a single API.\n', '[ ] All duplicate assertions have been refactored using JUnit 5 Parameterized Tests, where the lists of parameterizable values are declared in a specific annotation, and the test method is executed independently m times.\n', '[ ] All magic numbers in the test code have been extracted and assigned meaningful variable names.\n']
+
+Refactored Code: 
+ 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+public class AttributesTest {
+
+    private Attributes attributes;
+
+    @BeforeEach
+    public void setup() {
+        attributes = new Attributes();
+        attributes.put("Tot", "a&p");
+        attributes.put("Hello", "There");
+        attributes.put("data-name", "Jsoup");
+    }
+
+    @Test
+    public void testIteratorRemovable_initialState() {
+        assertTrue(attributes.hasKey("Tot"), "Attributes should contain key 'Tot'");
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "Tot, a&p",
+        "Hello, There",
+        "data-name, Jsoup"
+    })
+    public void testIteratorRemovable_initialAttributes(String key, String value) {
+        assertEquals(value, attributes.get(key), "Attribute '" + key + "' should have value '" + value + "'");
+    }
+
+    @Test
+    public void testIteratorRemovable_removeFirstElement() {
+        Iterator<Attribute> iterator = attributes.iterator();
+        Attribute attr = iterator.next();
+        assertEquals("Tot", attr.getKey(), "First attribute key should be 'Tot'");
+        iterator.remove();
+        assertEquals(2, attributes.size(), "Attributes size should be 2 after removing 'Tot'");
+    }
+
+    @Test
+    public void testIteratorRemovable_checkRemainingElements() {
+        Iterator<Attribute> iterator = attributes.iterator();
+        iterator.next();
+        iterator.remove();
+        Attribute attr = iterator.next();
+        assertEquals("Hello", attr.getKey(), "Next attribute key should be 'Hello'");
+        assertEquals("There", attr.getValue(), "Attribute 'Hello' should have value 'There'");
+    }
+
+    @Test
+    public void testIteratorRemovable_finalState() {
+        Iterator<Attribute> iterator = attributes.iterator();
+        iterator.next();
+        iterator.remove();
+        assertEquals(2, attributes.size(), "Attributes size should be 2 after removing 'Tot'");
+        assertEquals("There", attributes.get("Hello"), "Attribute 'Hello' should still have value 'There'");
+        assertFalse(attributes.hasKey("Tot"), "Attributes should not contain key 'Tot'");
+    }
+}
+
+

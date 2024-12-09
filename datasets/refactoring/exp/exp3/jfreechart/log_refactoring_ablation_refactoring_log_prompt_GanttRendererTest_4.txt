@@ -1,0 +1,27 @@
+asserts result: 
+ ```java
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class GanttRendererTest {
+
+    @Test
+    public void testCompletePaintSerialization() {
+        GanttRenderer r1 = new GanttRenderer();
+        r1.setCompletePaint(new GradientPaint(1.0f, 2.0f, Color.RED, 3.0f, 4.0f, Color.BLUE));
+        GanttRenderer r2 = TestUtils.serialised(r1);
+        assertEquals(r1.getCompletePaint(), r2.getCompletePaint());
+        TestUtils.checkIndependence(r1, r2);
+    }
+
+    @Test
+    public void testIncompletePaintSerialization() {
+        GanttRenderer r1 = new GanttRenderer();
+        r1.setIncompletePaint(new GradientPaint(4.0f, 3.0f, Color.RED, 2.0f, 1.0f, Color.BLUE));
+        GanttRenderer r2 = TestUtils.serialised(r1);
+        assertEquals(r1.getIncompletePaint(), r2.getIncompletePaint());
+        TestUtils.checkIndependence(r1, r2);
+    }
+}
+```
+

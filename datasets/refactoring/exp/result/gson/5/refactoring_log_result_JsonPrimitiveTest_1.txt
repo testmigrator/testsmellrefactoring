@@ -1,0 +1,28 @@
+Input Parameters:
+Test Code:
+ @SuppressWarnings("unused")
+  @Test
+  public void testNulls() {
+    assertThrows(NullPointerException.class, () -> new JsonPrimitive((Boolean) null));
+    assertThrows(NullPointerException.class, () -> new JsonPrimitive((Number) null));
+    assertThrows(NullPointerException.class, () -> new JsonPrimitive((String) null));
+    assertThrows(NullPointerException.class, () -> new JsonPrimitive((Character) null));
+  }
+Context: /com/google/gson/JsonPrimitive
+Smell List: ['Assertion_Roulette']
+Smell Description List: ['Test Smell Type：Assertion Roulette\n\nFeature:\nA test method contains more than one assertion statement without an explanation/message (parameter in the assertion method).\n']
+Refactoring DSL: ['RefactorRule:\n  SmellType: Assertion Roulette\n  Description: Add descriptive messages to assert statements to improve readability and maintainability.\n  Steps:\n    - Step:\n        Description: "Add descriptive message to each assert statement(except assertThat, assertThrows)."\n        Action: AddMessageToAssert\n        Parameters:\n          MessagePattern: "{assertionMessage}"\n  Example:\n    Before: |\n      @Test\n      public void T() {\n        stmt\n        assert_1\n        ...\n        assert_n\n        stmt\'\n      }\n    After: |\n      @Test\n      public void T() {\n        stmt\n        assert_1(..., "Descriptive message for assert statement")\n        ...\n        assert_n(..., "Descriptive message for assert statement")\n        stmt\'\n      }\n    Variables:\n      assertionMessage: "Descriptive message for assert statement"\n']
+Checkpoints: ['[ ] All assert statements have been added with clear explanatory messages.\n']
+
+Refactored Code: 
+ 
+@SuppressWarnings("unused")
+@Test
+public void testNulls() {
+    assertThrows(NullPointerException.class, () -> new JsonPrimitive((Boolean) null), "Expected NullPointerException when creating JsonPrimitive with null Boolean");
+    assertThrows(NullPointerException.class, () -> new JsonPrimitive((Number) null), "Expected NullPointerException when creating JsonPrimitive with null Number");
+    assertThrows(NullPointerException.class, () -> new JsonPrimitive((String) null), "Expected NullPointerException when creating JsonPrimitive with null String");
+    assertThrows(NullPointerException.class, () -> new JsonPrimitive((Character) null), "Expected NullPointerException when creating JsonPrimitive with null Character");
+}
+
+

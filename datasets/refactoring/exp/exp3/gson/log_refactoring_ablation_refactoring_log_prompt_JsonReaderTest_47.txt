@@ -1,0 +1,78 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+
+import java.io.IOException;
+import java.io.StringReader;
+
+class JsonReaderTest {
+
+    private JsonReader reader;
+
+    @BeforeEach
+    void setUp() throws IOException {
+        String json = "[0,0,0,1,1,1,-1,-1,-1,-9223372036854775808,9223372036854775807]";
+        reader = new JsonReader(new StringReader(json));
+        reader.beginArray();
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "nextLong, 0",
+        "nextInt, 0",
+        "nextDouble, 0.0",
+        "nextLong, 1",
+        "nextInt, 1",
+        "nextDouble, 1.0",
+        "nextLong, -1",
+        "nextInt, -1",
+        "nextDouble, -1.0"
+    })
+    void testBasicValues(String methodName, Object expectedValue) throws IOException {
+        switch (methodName) {
+            case "nextLong":
+                assertEquals(expectedValue, reader.nextLong(), "Expected long value does not match");
+                break;
+            case "nextInt":
+                assertEquals(expectedValue, reader.nextInt(), "Expected int value does not match");
+                break;
+            case "nextDouble":
+                assertEquals(expectedValue, reader.nextDouble(), "Expected double value does not match");
+                break;
+            default:
+                fail("Unknown method name: " + methodName);
+        }
+    }
+
+    @Test
+    void testIntOverflow() throws IOException {
+        assertThrows(NumberFormatException.class, () -> reader.nextInt(), "Expected NumberFormatException for int overflow");
+    }
+
+    @Test
+    void testMinLongValue() throws IOException {
+        assertEquals(Long.MIN_VALUE, reader.nextLong(), "Expected Long.MIN_VALUE does not match");
+    }
+
+    @Test
+    void testMaxLongValue() throws IOException {
+        assertThrows(NumberFormatException.class, () -> reader.nextInt(), "Expected NumberFormatException for int overflow after Long.MIN_VALUE");
+        assertEquals(Long.MAX_VALUE, reader.nextLong(), "Expected Long.MAX_VALUE does not match");
+    }
+
+    @Test
+    void testEndOfDocument() throws IOException {
+        reader.endArray();
+        assertEquals(JsonToken.END_DOCUMENT, reader.peek(), "Expected END_DOCUMENT token");
+    }
+}
+```
+

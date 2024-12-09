@@ -1,0 +1,5 @@
+asserts result: 
+ Yes
+
+The refactored tests maintain the same functionality as the original test. Each attribute (`a1`, `a2`, `a3`) is initialized in the `setupHasValueTest` method, and the individual test methods (`testHasValue_A1`, `testHasValue_A2`, `testHasValue_A3`) check the same conditions as the original `hasValue` test. The assertions are also consistent, ensuring that the behavior of the `hasDeclaredValue` method is tested in the same way.
+

@@ -1,0 +1,34 @@
+asserts result: 
+ - `assertEquals(" href=\\"images/abc.png\\"", generator.generateURLFragment("images/abc.png"), "Relative path should generate correct URL fragment");` - yes
+- `assertEquals(" href=\\"http://www.jfree.org/images/abc.png\\"", generator.generateURLFragment("http://www.jfree.org/images/abc.png"), "Absolute path should generate correct URL fragment");` - yes
+- `assertEquals(r2, r1, "Default state should be equal");` - yes
+- `assertEquals(r1, r2, "Default state should be equal");` - yes
+- `assertNotEquals(r1, r2, "Render as percentages should make them not equal");` - yes
+- `assertEquals(r1, r2, "Setting render as percentages to true should make them equal");` - yes
+- `assertEquals("r1 and r2 should be equal", r1, r2);` - yes
+- `assertEquals("Hash codes of r1 and r2 should be equal", h1, h2);` - yes
+- `assertNotSame(r1, r2, "Cloned objects should not be the same instance");` - yes
+- `assertSame(r1.getClass(), r2.getClass(), "Cloned object should be of the same class as the original");` - yes
+- `assertEquals(r1, r2, "Cloned object should be equal to the original");` - yes
+- `assertEquals("", ImageMapUtils.htmlEscape(""), "HTML escape of empty string should return an empty string");` - yes
+- `assertEquals("abc", ImageMapUtils.htmlEscape("abc"), "HTML escape of plain text 'abc' should return 'abc'");` - yes
+- `assertEquals("&amp;", ImageMapUtils.htmlEscape("&"), "HTML escape of '&' should return '&amp;'");` - yes
+- `assertEquals("&quot;", ImageMapUtils.htmlEscape("\""), "HTML escape of '\"' should return '&quot;'");` - yes
+- `assertEquals("&lt;", ImageMapUtils.htmlEscape("<"), "HTML escape of '<' should return '&lt;'");` - yes
+- `assertEquals("&gt;", ImageMapUtils.htmlEscape(">"), "HTML escape of '>' should return '&gt;'");` - yes
+- `assertEquals("&#39;", ImageMapUtils.htmlEscape("\'"), "HTML escape of ''' should return '&#39;'");` - yes
+- `assertEquals("&#092;abc", ImageMapUtils.htmlEscape("\\abc"), "HTML escape of '\\abc' should return '&#092;abc'");` - yes
+- `assertEquals("abc\\n", ImageMapUtils.htmlEscape("abc\n"), "HTML escape of 'abc\\n' should return 'abc\\n'");` - yes
+- `assertEquals("", ImageMapUtils.javascriptEscape(""), "Expected empty string to remain empty after escaping.");` - yes
+- `assertEquals("abc", ImageMapUtils.javascriptEscape("abc"), "Expected 'abc' to remain the same after escaping.");` - yes
+- `assertEquals("\\\\\'", ImageMapUtils.javascriptEscape("\'"), "Expected single quote to be escaped as '\\\\\''.");` - yes
+- `assertEquals("\\\\\"", ImageMapUtils.javascriptEscape("\""), "Expected double quote to be escaped as '\\\\\"'.");` - yes
+- `assertEquals("\\\\\\\\", ImageMapUtils.javascriptEscape("\\"), "Expected backslash to be escaped as '\\\\\\\\'.");` - yes
+- `assertEquals(p1, p2, "Objects p1 and p2 should be equal");` - yes
+- `assertEquals(h1, h2, "Hash codes of p1 and p2 should be equal");` - yes
+- `assertFalse(p1 instanceof Cloneable, "StandardBarPainter should not implement Cloneable");` - yes
+- `assertFalse(p1 instanceof PublicCloneable, "StandardBarPainter should not implement PublicCloneable");` - yes
+- `assertEquals(g1, g2, "g1 and g2 should be equal");` - yes
+
+All provided assert statements meet the specified criteria. The messages are semantically clear and correctly express the purpose of each assert statement.
+

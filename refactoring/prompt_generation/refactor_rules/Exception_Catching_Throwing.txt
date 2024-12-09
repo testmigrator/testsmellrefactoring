@@ -1,24 +1,11 @@
 RefactorRule:
   SmellType: Exception_Catching_Throwing
-  Description: "Refactor test to use JUnit 5 Exception Handling feature."
+  Description: Ensure tests use assertDoesNotThrow to verify no exceptions are thrown and remove any throws declaration in test methods.
   Steps:
-    - Step1:
-        Description: "Identify try-catch blocks handling exceptions"
-        Action: IdentifyTryCatch
+    - Step:
+        Description: "Handle try-catch blocks containing 'fail' calls"
+        Action: ReplaceTryCatchWithAssertThrows
         Parameters:
-          TargetType: Method
-          SourcePattern: |
-            try {
-              {tryBlock}
-              fail();
-            } catch ({exception}) {
-              {catchBlock}
-            }
-    - Step2:
-        Description: "Replace try-catch block with assertThrows"
-        Action: ReplaceWithAssertThrows
-        Parameters:
-          TargetType: Method
           SourcePattern: |
             try {
               {tryBlock}
@@ -27,11 +14,37 @@ RefactorRule:
               {catchBlock}
             }
           ReplacementPattern: |
-            assertThrows({exception}.class, () -> {
+            {exception} exception = assertThrows({exception}.class, () -> {
               {tryBlock}
             });
             {catchBlock}
-            If test don't contains assertThrow or try/catch statement, then use 'Assertions.assertDoesNotThrow(() -> {});',
+    - Step:
+        Description: "Handle test methods with 'throws' declaration but no try-catch block"
+        Action: WrapWithAssertDoesNotThrow
+        Parameters:
+          DetectionPattern: |
+            MethodDeclaration [throws!=null && BodyContainsTryCatch=false]
+          ReplacementPattern: |
+            assertDoesNotThrow(() -> {
+              {methodBody}
+            }, "Unexpected exception occurred during the test");
+
+    - Step:
+        Description: "Handle test methods with try-catch blocks without 'fail' calls"
+        Action: ReplaceTryCatchWithoutFail
+        Parameters:
+          SourcePattern: |
+            try {
+              {tryBlock}
+            } catch ({exception}) {
+              {catchBlock}
+            }
+          ReplacementPattern: |
+            assertDoesNotThrow(() -> {
+              {tryBlock}
+            });
+            {catchBlock}
+
   Example:
     Before: |
       @Test
@@ -56,7 +69,7 @@ RefactorRule:
         stmt''
       }
   Variables:
-    exception: "E"
-    tryBlock: "stmt'"
-    catchBlock: "evs"
-    tryBlockStatement: "stmt'i"
+    exception: E
+    tryBlock: stmt'
+    catchBlock: evs
+    tryBlockStatement: stmt'i

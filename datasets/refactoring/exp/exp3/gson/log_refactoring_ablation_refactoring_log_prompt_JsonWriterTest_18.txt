@@ -1,0 +1,66 @@
+asserts result: 
+ ```java
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import com.google.gson.stream.JsonWriter;
+import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.io.StringWriter;
+
+class JsonWriterTest {
+
+    @Test
+    public void testBeginObject() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.beginObject();
+        assertThat(stringWriter.toString()).isEqualTo("{");
+    }
+
+    @Test
+    public void testName() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.beginObject();
+        jsonWriter.name("a");
+        assertThat(stringWriter.toString()).isEqualTo("{\"a\"");
+    }
+
+    @Test
+    public void testValueWithNull() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.beginObject();
+        jsonWriter.name("a");
+        jsonWriter.value((String) null);
+        assertThat(stringWriter.toString()).isEqualTo("{\"a\":null");
+    }
+
+    @Test
+    public void testEndObject() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.beginObject();
+        jsonWriter.name("a");
+        jsonWriter.value((String) null);
+        jsonWriter.endObject();
+        assertThat(stringWriter.toString()).isEqualTo("{\"a\":null}");
+    }
+
+    @Test
+    public void testExceptionHandling() {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        assertThrows(IOException.class, () -> {
+            jsonWriter.beginObject();
+            jsonWriter.name("a");
+            jsonWriter.value((String) null);
+            jsonWriter.endObject();
+            jsonWriter.endObject(); // This should throw an IOException
+        });
+    }
+}
+```
+

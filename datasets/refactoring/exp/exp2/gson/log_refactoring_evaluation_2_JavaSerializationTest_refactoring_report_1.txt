@@ -1,0 +1,10 @@
+asserts result: 
+ Yes
+
+The functionality between the original test and the refactored test is consistent. The refactored test wraps the assertions in an `assertDoesNotThrow` block, which ensures that no exceptions are thrown during the execution of the lambda. This does not change the core functionality of the test, which still checks:
+
+1. That the serialized map is equal to the original map.
+2. That the iteration order of the keys in the serialized map matches the original map.
+
+Additionally, the refactored test includes more descriptive failure messages, which can help in debugging but do not affect the functional correctness of the test.
+

@@ -1,0 +1,61 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
+import com.google.gson.stream.Strictness;
+
+import java.io.IOException;
+import java.io.StringReader;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
+
+public class JsonReaderTest {
+
+    @Test
+    public void testSkipObjectNameSingleQuoted_PeekToken() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("{'a': 1}"));
+        reader.setStrictness(Strictness.LENIENT);
+        reader.beginObject();
+        reader.skipValue();
+        assertEquals(JsonToken.NUMBER, reader.peek(), "Expected the next token to be a NUMBER");
+    }
+
+    @Test
+    public void testSkipObjectNameSingleQuoted_GetPath() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("{'a': 1}"));
+        reader.setStrictness(Strictness.LENIENT);
+        reader.beginObject();
+        reader.skipValue();
+        assertEquals("$.<skipped>", reader.getPath(), "Expected the path to be $.<skipped>");
+    }
+
+    @Test
+    public void testSkipObjectNameSingleQuoted_ReadInt() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("{'a': 1}"));
+        reader.setStrictness(Strictness.LENIENT);
+        reader.beginObject();
+        reader.skipValue();
+        assertEquals(1, reader.nextInt(), "Expected the integer value to be 1");
+    }
+
+    @Test
+    public void testSkipObjectNameSingleQuoted_ExceptionHandling() {
+        JsonReader reader = mock(JsonReader.class);
+        when(reader.nextInt()).thenThrow(new IOException("Mocked exception"));
+
+        Executable executable = () -> {
+            reader.setStrictness(Strictness.LENIENT);
+            reader.beginObject();
+            reader.skipValue();
+            reader.nextInt();
+        };
+
+        assertThrows(IOException.class, executable, "Expected an IOException to be thrown");
+    }
+}
+```
+

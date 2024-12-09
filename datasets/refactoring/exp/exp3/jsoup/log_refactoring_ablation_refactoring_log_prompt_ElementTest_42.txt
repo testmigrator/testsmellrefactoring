@@ -1,0 +1,27 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import static org.junit.Assert.assertEquals;
+
+public class ElementTest {
+
+    @Test
+    public void testWrapWithClassHead() {
+        Document doc = Jsoup.parse("<div><p>Hello</p></div>");
+        Element p = doc.select("p").first();
+        p.wrap("<div class='head'></div>");
+        assertEquals("<div><div class=\"head\"><p>Hello</p></div></div>", TextUtil.stripNewlines(doc.body().html()));
+    }
+
+    @Test
+    public void testAppendParagraphWithTextThere() {
+        Document doc = Jsoup.parse("<div><div class='head'><p>Hello</p></div></div>");
+        Element headDiv = doc.select("div.head").first();
+        headDiv.append("<p>There!</p>");
+        assertEquals("<div><div class=\"head\"><p>Hello</p><p>There!</p></div></div>", TextUtil.stripNewlines(doc.body().html()));
+    }
+}
+```
+

@@ -1,0 +1,32 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import org.jsoup.Connection;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.junit.jupiter.api.Test;
+
+public class ConnectionResponseTest {
+
+    private String echoUrl = "http://example.com";
+
+    @Test
+    public void bodyAndBytesAvailableBeforeParse() {
+        assertDoesNotThrow(() -> {
+            Connection.Response res = Jsoup.connect(echoUrl).execute();
+
+            String body = res.body();
+            assertTrue(body.contains("Environment"), "Body should contain 'Environment'");
+
+            byte[] bytes = res.bodyAsBytes();
+            assertTrue(bytes.length > 100, "Bytes length should be greater than 100");
+
+            Document doc = res.parse();
+            assertTrue(doc.title().contains("Environment"), "Document title should contain 'Environment'");
+        }, "Exception should not be thrown during the test execution");
+    }
+}
+```
+

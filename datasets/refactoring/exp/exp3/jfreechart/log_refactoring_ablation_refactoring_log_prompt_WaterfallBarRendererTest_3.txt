@@ -1,0 +1,57 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.assertions.AssertionConsumer;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+class WaterfallBarRendererTest {
+
+    private WaterfallBarRenderer r1;
+    private WaterfallBarRenderer r2;
+
+    @BeforeEach
+    void setUp() throws CloneNotSupportedException {
+        r1 = new WaterfallBarRenderer();
+        r1.setFirstBarPaint(new GradientPaint(1.0f, 2.0f, Color.RED, 3.0f, 4.0f, Color.DARK_GRAY));
+        r2 = CloneUtils.clone(r1);
+    }
+
+    @Test
+    void testCloningInstancesAreDifferent() {
+        assertNotSame(r1, r2, "The cloned instances should be different objects");
+    }
+
+    @Test
+    void testCloningClassesAreEqual() {
+        assertEquals(r1.getClass(), r2.getClass(), "The cloned instances should be of the same class");
+    }
+
+    @Test
+    void testCloningEquality() {
+        assertEquals(r1, r2, "The cloned instances should be equal");
+    }
+
+    @Test
+    void testCloningIndependence() {
+        r1.setFirstBarPaint(Color.YELLOW);
+        assertNotEquals(r1, r2, "The first instance should not equal the second after modification");
+
+        r2.setFirstBarPaint(Color.YELLOW);
+        assertEquals(r1, r2, "The instances should be equal again after setting the same paint");
+    }
+
+    @Test
+    void testCloningIndependenceCheck() {
+        TestUtils.checkIndependence(r1, r2);
+    }
+}
+```
+
+This refactored code addresses the identified code smells as follows:
+- **Assertion Roulette**: Each assertion now includes a clear message explaining the purpose of the assertion.
+- **Exception_Catching_Throwing**: The setup method is used to handle cloning, and exceptions are managed there, keeping the test methods clean.
+- **Eager Test**: The original test method has been split into multiple test methods, each focusing on a specific aspect of the cloning behavior.
+- **Duplicate Assert**: The duplicate assertions have been separated into distinct test methods, ensuring that each test method verifies a single aspect of the behavior.
+

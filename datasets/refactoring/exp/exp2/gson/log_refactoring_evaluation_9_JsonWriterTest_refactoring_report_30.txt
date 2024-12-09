@@ -1,0 +1,5 @@
+asserts result: 
+ Yes
+
+The refactored code maintains the same functionality as the original test. The only difference is that the writing of doubles to the `JsonWriter` has been moved to a separate method `writeDoubles`, which is then called within the test method. This change does not affect the outcome of the test, as the same sequence of operations is performed on the `JsonWriter` and the final assertion remains unchanged. The use of `assertDoesNotThrow` in the `writeDoubles` method ensures that any unexpected exceptions are caught and reported, which is consistent with the original test's behavior of implicitly expecting no exceptions to occur.
+

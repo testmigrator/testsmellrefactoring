@@ -1,0 +1,28 @@
+asserts result: 
+ ```java
+import org.apache.commons.compress.archivers.ArchiveException;
+import org.apache.commons.compress.utils.IOUtils;
+import org.junit.jupiter.api.Test;
+
+import java.io.InputStream;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+public class ArchiveStreamFactoryTest {
+
+    @Test
+    public void testIgnoreZeroByteEntryInTarDetect() {
+        assertThrows(ArchiveException.class, () -> {
+            try (InputStream in = createBufferedInputStream("org/apache/commons/compress/COMPRESS-644/ARW05UP.ICO")) {
+                // Expecting null as the detection should fail for zero-byte entries
+                assertNull(ArchiveStreamFactory.detect(in), "Expected null when detecting archive format for zero-byte entry");
+            }
+        }, "Expected ArchiveException when trying to detect archive format for zero-byte entry");
+    }
+
+    private InputStream createBufferedInputStream(String resourcePath) {
+        return IOUtils.toBufferedInputStream(getClass().getResourceAsStream(resourcePath));
+    }
+}
+```
+

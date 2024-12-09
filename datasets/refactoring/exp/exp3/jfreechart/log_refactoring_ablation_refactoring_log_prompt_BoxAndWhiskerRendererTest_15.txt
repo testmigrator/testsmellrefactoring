@@ -1,0 +1,25 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+
+public class BoxAndWhiskerRendererTest {
+
+    @Test
+    public void testDrawWithNullMinOutlier() {
+        assertDoesNotThrow(() -> {
+            DefaultBoxAndWhiskerCategoryDataset<String, String> dataset
+                = new DefaultBoxAndWhiskerCategoryDataset<>();
+            dataset.add(new BoxAndWhiskerItem(1.0, 2.0, 3.0, 4.0, 0.5, 4.5,
+                null, 5.5, null), "S1", "C1");
+            CategoryPlot<String, String> plot = new CategoryPlot<>(dataset,
+                new CategoryAxis("Category"), new NumberAxis("Value"),
+                new BoxAndWhiskerRenderer());
+            ChartRenderingInfo info = new ChartRenderingInfo();
+            JFreeChart chart = new JFreeChart(plot);
+            chart.createBufferedImage(300, 200, info);
+        });
+    }
+}
+```
+

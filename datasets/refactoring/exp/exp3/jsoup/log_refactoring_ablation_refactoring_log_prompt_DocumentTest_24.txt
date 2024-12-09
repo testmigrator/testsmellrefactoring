@@ -1,0 +1,39 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.XmlDeclaration;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class DocumentTest {
+
+    @Test
+    public void testMetaCharsetUpdateXmlDisabledNoChanges() {
+        // Arrange
+        final Document doc = createXmlDocument("dontTouch", "dontTouch", true);
+
+        final Document expectedDoc = Jsoup.parse("<?xml version=\"dontTouch\" encoding=\"dontTouch\"?>\n" +
+                "<root>\n" +
+                " node\n" +
+                "</root>", "", Parser.xmlParser());
+
+        // Act
+        XmlDeclaration selectedNode = (XmlDeclaration) doc.childNode(0);
+
+        // Assert
+        assertEquals("XML document should match expected output", expectedDoc, doc);
+        assertEquals("Encoding attribute should be 'dontTouch'", "dontTouch", selectedNode.attr("encoding"));
+        assertEquals("Version attribute should be 'dontTouch'", "dontTouch", selectedNode.attr("version"));
+    }
+
+    private Document createXmlDocument(String version, String encoding, boolean disabled) {
+        // Mock implementation or actual implementation based on the context
+        return Jsoup.parse("<?xml version=\"" + version + "\" encoding=\"" + encoding + "\"?>\n" +
+                "<root>\n" +
+                " node\n" +
+                "</root>", "", Parser.xmlParser());
+    }
+}
+```
+

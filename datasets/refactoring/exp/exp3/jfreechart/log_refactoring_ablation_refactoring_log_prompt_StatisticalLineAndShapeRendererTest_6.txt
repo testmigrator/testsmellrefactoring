@@ -1,0 +1,61 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
+class StatisticalLineAndShapeRendererTest {
+
+    private StatisticalLineAndShapeRenderer renderer;
+    private DefaultStatisticalCategoryDataset<String, String> dataset;
+
+    @BeforeEach
+    void setUp() {
+        renderer = new StatisticalLineAndShapeRenderer();
+        dataset = new DefaultStatisticalCategoryDataset<>();
+    }
+
+    @Test
+    void testFindRangeBoundsWithNullDataset() {
+        assertNull(renderer.findRangeBounds(null), "Should return null when dataset is null");
+    }
+
+    @Test
+    void testFindRangeBoundsWithEmptyDataset() {
+        assertNull(renderer.findRangeBounds(dataset), "Should return null when dataset is empty");
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "1.0, 0.5, R1, C1, 0.5, 1.5",
+        "-2.0, 0.2, R1, C2, -2.2, 1.5",
+        "null, null, R1, C3, -2.2, 1.5",
+        "5.0, 1.0, R2, C3, -2.2, 6.0"
+    })
+    void testFindRangeBoundsWithNonEmptyDataset(Double value, Double stdDev, String rowKey, String columnKey, double expectedLowerBound, double expectedUpperBound) {
+        if (value != null && stdDev != null) {
+            dataset.add(value, stdDev, rowKey, columnKey);
+        } else {
+            dataset.add(null, null, rowKey, columnKey);
+        }
+        assertEquals(new Range(expectedLowerBound, expectedUpperBound), renderer.findRangeBounds(dataset),
+                "Range bounds should be correct after adding data points");
+    }
+
+    @Test
+    void testFindRangeBoundsWithSeriesVisibility() {
+        dataset.add(1.0, 0.5, "R1", "C1");
+        dataset.add(-2.0, 0.2, "R1", "C2");
+        dataset.add(5.0, 1.0, "R2", "C3");
+
+        renderer.setSeriesVisible(1, Boolean.FALSE);
+        assertEquals(new Range(-2.2, 1.5), renderer.findRangeBounds(dataset),
+                "Range bounds should exclude invisible series");
+    }
+}
+```
+

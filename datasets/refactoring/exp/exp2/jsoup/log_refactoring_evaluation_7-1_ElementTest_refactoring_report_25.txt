@@ -1,0 +1,5 @@
+asserts result: 
+ Yes
+
+The refactored tests maintain the same functionality as the original test. Each part of the original test has been split into separate test methods, each focusing on a specific aspect of the `setText` method. The setup for each test is centralized in the `setupTestSetText` method, ensuring that the initial document state is consistent across all tests. The assertions and their logic remain intact, preserving the original test's intent and behavior.
+

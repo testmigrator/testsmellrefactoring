@@ -1,0 +1,5 @@
+asserts result: 
+ Yes
+
+The functionality between the original and refactored test code is consistent. The only changes introduced in the refactored version are the addition of failure messages to the `assertThat` statements, which do not alter the behavior or the outcome of the tests. These messages will be displayed if the assertions fail, providing more context about why the test failed, but they do not change the logic or the expected results of the test cases.
+

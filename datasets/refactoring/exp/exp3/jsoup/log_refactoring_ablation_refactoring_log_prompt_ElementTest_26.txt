@@ -1,0 +1,47 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Disabled;
+
+public class ElementTest {
+
+    private static final String HTML_BEFORE = "<html><head></head><body><div id=\"1\"><p>Hello</p></div></body></html>";
+    private static final String HTML_AFTER = "<html><head></head><body><div id=\"1\"><p>Hello</p><p>there</p><p class=\"second\">now</p></div></body></html>";
+
+    @Test
+    public void testAddNewElementHtmlStructure() {
+        Document doc = Jsoup.parse(HTML_BEFORE);
+        Element div = doc.getElementById("1");
+        div.appendElement("p").text("there");
+        div.appendElement("P").attr("CLASS", "second").text("now");
+
+        String actualHtml = TextUtil.stripNewlines(doc.html());
+        assertEquals(HTML_AFTER, actualHtml, "The HTML structure after adding new elements should match the expected output.");
+    }
+
+    @Test
+    public void testSiblingIndexAfterAddingElements() {
+        Document doc = Jsoup.parse(HTML_BEFORE);
+        Element div = doc.getElementById("1");
+        div.appendElement("p").text("there");
+        div.appendElement("P").attr("CLASS", "second").text("now");
+
+        Elements ps = doc.select("p");
+        for (int i = 0; i < ps.size(); i++) {
+            assertEquals(i, ps.get(i).siblingIndex(), "The sibling index of the paragraph element should be " + i);
+        }
+    }
+
+    @Disabled
+    private boolean isReindexChildrenShortCircuitEnabled() {
+        // This method can be used to enable or disable the test based on some condition
+        return true;
+    }
+}
+```
+

@@ -1,0 +1,85 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.api.Assertions;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+public class ArchiveChangeSetTest {
+
+    private Path inputPath;
+    private Path result;
+    private static final String ARCHIVE_EXTENSION = ".zip";
+
+    @BeforeEach
+    public void setUp() throws IOException {
+        inputPath = createArchive("zip");
+        result = Files.createTempFile("test", ARCHIVE_EXTENSION);
+    }
+
+    @AfterEach
+    public void tearDown() throws IOException {
+        forceDelete(inputPath);
+        forceDelete(result);
+    }
+
+    @ParameterizedTest
+    @MethodSource("org.apache.commons.compress.changes.TestFixtures#getOutputArchiveNames")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public void testAddAlreadyExistingWithReplaceFalse(final String archiverName) {
+        try (InputStream inputStream = Files.newInputStream(inputPath);
+             ArchiveInputStream archiveInputStream = factory.createArchiveInputStream(archiverName, inputStream);
+             OutputStream newOutputStream = Files.newOutputStream(result);
+             ArchiveOutputStream archiveOutputStream = factory.createArchiveOutputStream(archiverName, newOutputStream);
+             InputStream csInputStream = Files.newInputStream(getPath("test.txt"))) {
+
+            setLongFileMode(archiveOutputStream);
+            final ChangeSet changeSet = new ChangeSet();
+            final ArchiveEntry entry = new ZipArchiveEntry("testdata/test1.xml");
+            changeSet.add(entry, csInputStream, false);
+            final ChangeSetResults results = new ChangeSetPerformer(changeSet).perform(archiveInputStream, archiveOutputStream);
+
+            Assertions.assertTrue(results.getAddedFromStream().contains("testdata/test1.xml"), "Expected 'testdata/test1.xml' to be added from stream");
+            Assertions.assertTrue(results.getAddedFromChangeSet().isEmpty(), "Expected no entries to be added from change set");
+            Assertions.assertTrue(results.getDeleted().isEmpty(), "Expected no entries to be deleted");
+
+        } catch (Exception e) {
+            Assertions.fail("Unexpected exception occurred: " + e.getMessage());
+        }
+    }
+
+    private void checkArchiveContent(Path archivePath, List<String> expectedContent) throws IOException {
+        // Implementation of the method to check the content of the archive
+    }
+
+    private void forceDelete(Path path) throws IOException {
+        // Implementation of the method to forcefully delete a file
+    }
+
+    private Path createArchive(String archiverName) throws IOException {
+        // Implementation of the method to create an archive
+        return null;
+    }
+
+    private void setLongFileMode(ArchiveOutputStream archiveOutputStream) {
+        // Implementation of the method to set long file mode
+    }
+
+    private Path getPath(String fileName) {
+        // Implementation of the method to get the path of a file
+        return null;
+    }
+
+    private ArchiveInputStreamFactory factory = new ArchiveInputStreamFactory(); // Assuming this is a valid factory instance
+}
+```
+

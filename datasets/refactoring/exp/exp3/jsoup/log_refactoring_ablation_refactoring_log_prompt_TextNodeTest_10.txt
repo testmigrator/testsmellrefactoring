@@ -1,0 +1,68 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Node;
+import org.jsoup.nodes.TextNode;
+import org.jsoup.util.StringUtil;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIf;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class TextNodeTest {
+
+    private Document parseDocument() {
+        return Jsoup.parse("<div>One <p>Two <p>Three");
+    }
+
+    @EnabledIf("isFirstTextNodePresent")
+    @Test
+    public void testFirstTextNodeIsPresent() {
+        Document doc = parseDocument();
+        boolean foundFirst = false;
+        for (Element el : doc.getAllElements()) {
+            for (Node node : el.childNodes()) {
+                if (node instanceof TextNode) {
+                    TextNode textNode = (TextNode) node;
+                    assertFalse(StringUtil.isBlank(textNode.text()), "Text node should not be blank");
+                    if (!foundFirst) {
+                        foundFirst = true;
+                        assertEquals("One ", textNode.text(), "First text node should be 'One '");
+                        assertEquals("One ", textNode.getWholeText(), "First text node whole text should be 'One '");
+                    }
+                }
+            }
+        }
+        assertTrue(foundFirst, "First text node should be found");
+    }
+
+    @Test
+    public void testAllTextNodesAreNotBlank() {
+        Document doc = parseDocument();
+        for (Element el : doc.getAllElements()) {
+            for (Node node : el.childNodes()) {
+                if (node instanceof TextNode) {
+                    TextNode textNode = (TextNode) node;
+                    assertFalse(StringUtil.isBlank(textNode.text()), "Text node should not be blank");
+                }
+            }
+        }
+    }
+
+    private boolean isFirstTextNodePresent() {
+        Document doc = parseDocument();
+        for (Element el : doc.getAllElements()) {
+            for (Node node : el.childNodes()) {
+                if (node instanceof TextNode) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+}
+```
+

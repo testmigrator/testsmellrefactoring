@@ -1,0 +1,44 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import com.google.gson.stream.JsonWriter;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import org.junit.jupiter.api.Test;
+
+class JsonWriterTest {
+
+    @Test
+    public void testWriteBigInteger() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        assertDoesNotThrow(() -> {
+            jsonWriter.beginArray();
+            jsonWriter.value(new BigInteger("0"));
+            jsonWriter.value(new BigInteger("9223372036854775808"));
+            jsonWriter.value(new BigInteger("-9223372036854775809"));
+            jsonWriter.endArray();
+            jsonWriter.close();
+        });
+        assertEquals("[0,9223372036854775808,-9223372036854775809]", stringWriter.toString());
+    }
+
+    @Test
+    public void testWriteBigDecimal() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        assertDoesNotThrow(() -> {
+            jsonWriter.beginArray();
+            jsonWriter.value(new BigDecimal("3.141592653589793238462643383"));
+            jsonWriter.endArray();
+            jsonWriter.close();
+        });
+        assertEquals("[3.141592653589793238462643383]", stringWriter.toString());
+    }
+}
+```
+

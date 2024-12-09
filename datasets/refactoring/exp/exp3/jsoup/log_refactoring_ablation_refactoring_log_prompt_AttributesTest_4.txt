@@ -1,0 +1,38 @@
+asserts result: 
+ ```java
+import org.jsoup.nodes.Attributes;
+import org.jsoup.nodes.Attribute;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class AttributesTest {
+
+    private static final int EXPECTED_ATTRIBUTE_COUNT = 3;
+
+    @Test
+    public void testIteratorHasNext() {
+        Attributes attributes = createAttributesWithThreeElements();
+
+        int seen = 0;
+        for (Attribute attribute : attributes) {
+            seen++;
+            assertAttributeValue(seen, attribute);
+        }
+        assertEquals(EXPECTED_ATTRIBUTE_COUNT, seen, "The number of attributes seen should match the expected count.");
+    }
+
+    private Attributes createAttributesWithThreeElements() {
+        Attributes attributes = new Attributes();
+        attributes.put("Tot", "1");
+        attributes.put("Hello", "2");
+        attributes.put("data-name", "3");
+        return attributes;
+    }
+
+    private void assertAttributeValue(int expectedValue, Attribute attribute) {
+        assertEquals(String.valueOf(expectedValue), attribute.getValue(), 
+            "The value of the attribute should match the expected value: " + expectedValue);
+    }
+}
+```
+

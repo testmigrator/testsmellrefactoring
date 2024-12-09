@@ -1,0 +1,11 @@
+asserts result: 
+ Yes
+
+The functionality between the original test and the refactored tests is consistent. The refactored version splits the original test into two separate tests but maintains the same logic and assertions:
+
+1. **testSizeWithRegularAttributes**: This test checks that the size of the `Attributes` object is 2 after adding two regular attributes, which matches the first part of the original test.
+
+2. **testSizeWithInternalAttributes**: This test checks that the size of the `Attributes` object remains 2 even after adding two internal attributes, which matches the second part of the original test.
+
+Both the original and refactored tests ensure that the size of the `Attributes` object does not change when internal attributes are added, maintaining the same behavior and assertions.
+

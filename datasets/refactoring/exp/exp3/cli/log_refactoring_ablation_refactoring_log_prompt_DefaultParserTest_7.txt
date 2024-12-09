@@ -1,0 +1,44 @@
+asserts result: 
+ ```java
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.Options;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.assertions.AssertionFailedError;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+class DefaultParserTest {
+
+    private DefaultParser parser;
+    private Options options;
+
+    @BeforeEach
+    void setUp() {
+        parser = DefaultParser.builder().setStripLeadingAndTrailingQuotes(true).build();
+        options = new Options(); // Assuming options are set up here
+    }
+
+    @Test
+    void testLongOptionWithEqualsQuoteHandlingWithStrip() {
+        final String[] args = {"--bfile=\"quoted string\""};
+
+        CommandLine cl = parser.parse(options, args);
+
+        assertEquals("quoted string", cl.getOptionValue("bfile"), "Confirm --bfile=\"arg\" strips quotes");
+    }
+
+    @Test
+    void testLongOptionWithEqualsQuoteHandlingWithStripThrowsExceptionOnInvalidInput() {
+        final String[] invalidArgs = {"--bfile=invalid\"string"};
+
+        assertThrows(AssertionFailedError.class, () -> {
+            CommandLine cl = parser.parse(options, invalidArgs);
+            assertEquals("invalid\"string", cl.getOptionValue("bfile"), "Confirm --bfile=\"arg\" does not strip quotes");
+        });
+    }
+}
+```
+

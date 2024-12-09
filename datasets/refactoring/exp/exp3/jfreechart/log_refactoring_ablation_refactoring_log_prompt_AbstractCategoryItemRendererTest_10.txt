@@ -1,0 +1,51 @@
+asserts result: 
+ ```java
+import org.jfree.chart.renderer.category.AbstractCategoryItemRenderer;
+import org.jfree.chart.renderer.category.LineAndShapeRenderer;
+import org.jfree.data.category.DefaultCategoryDataset;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class AbstractCategoryItemRendererTest {
+
+    private AbstractCategoryItemRenderer renderer;
+
+    @BeforeEach
+    void setUp() {
+        renderer = new LineAndShapeRenderer();
+    }
+
+    @Test
+    void testFindRangeBoundsWithNullDataset() {
+        assertNull(renderer.findRangeBounds(null), "Expected null range when dataset is null");
+    }
+
+    @Test
+    void testFindRangeBoundsWithEmptyDataset() {
+        DefaultCategoryDataset<String, String> dataset = new DefaultCategoryDataset<>();
+        assertNull(renderer.findRangeBounds(dataset), "Expected null range when dataset is empty");
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "1.0, 1.0, 1.0",
+            "-2.0, -2.0, 1.0",
+            "null, -2.0, 1.0"
+    })
+    void testFindRangeBoundsWithValues(Double value, double expectedLowerBound, double expectedUpperBound) {
+        DefaultCategoryDataset<String, String> dataset = new DefaultCategoryDataset<>();
+        dataset.addValue(1.0, "R1", "C1");
+        dataset.addValue(-2.0, "R1", "C2");
+        if (value != null) {
+            dataset.addValue(value, "R1", "C3");
+        }
+        Range expectedRange = new Range(expectedLowerBound, expectedUpperBound);
+        assertEquals(expectedRange, renderer.findRangeBounds(dataset), "Range bounds should match the expected range");
+    }
+}
+```
+

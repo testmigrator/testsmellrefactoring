@@ -1,0 +1,26 @@
+asserts result: 
+ ```java
+import org.apache.commons.cli.TypeHandler;
+import org.apache.commons.cli.PatternOptionBuilder;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.assertions.AssertionUtils;
+
+import java.io.FileInputStream;
+
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+class TypeHandlerTest {
+
+    @Test
+    public void testCreateValueExistingFile() {
+        assertDoesNotThrow(() -> {
+            try (FileInputStream result = TypeHandler.createValue("src/test/resources/org/apache/commons/cli/existing-readable.file",
+                    PatternOptionBuilder.EXISTING_FILE_VALUE)) {
+                assertNotNull(result);
+            }
+        });
+    }
+}
+```
+

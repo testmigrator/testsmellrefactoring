@@ -1,0 +1,37 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+
+import com.google.gson.stream.JsonWriter;
+import org.junit.jupiter.api.Test;
+import java.io.IOException;
+import java.io.StringWriter;
+
+class JsonWriterTest {
+
+    @Test
+    public void testBeginArrayDoesNotThrowException() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        assertThrows(IOException.class, () -> jsonWriter.beginArray());
+    }
+
+    @Test
+    public void testEndArrayDoesNotThrowException() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        assertThrows(IOException.class, () -> jsonWriter.endArray());
+    }
+
+    @Test
+    public void testEmptyArrayProducesCorrectOutput() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.beginArray();
+        jsonWriter.endArray();
+        assertThat(stringWriter.toString()).isEqualTo("[]");
+    }
+}
+```
+

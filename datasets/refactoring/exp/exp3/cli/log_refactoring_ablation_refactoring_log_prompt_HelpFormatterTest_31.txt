@@ -1,0 +1,54 @@
+asserts result: 
+ ```java
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.Option;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class HelpFormatterTest {
+
+    @Test
+    public void testUsageWithLongOptSeparatorForAge() {
+        final Options options = new Options();
+        options.addOption(Option.builder().longOpt("age").desc("the age").hasArg().build());
+
+        final HelpFormatter formatter = new HelpFormatter();
+        formatter.setLongOptSeparator("=");
+
+        final StringWriter out = new StringWriter();
+        formatter.printUsage(new PrintWriter(out), 80, "create", options);
+
+        assertEquals("usage: create [--age=<arg>]", out.toString().trim());
+    }
+
+    @Test
+    public void testUsageWithLongOptSeparatorForFile() {
+        final Options options = new Options();
+        options.addOption("f", true, "the file");
+
+        final HelpFormatter formatter = new HelpFormatter();
+        formatter.setLongOptSeparator("=");
+
+        final StringWriter out = new StringWriter();
+        formatter.printUsage(new PrintWriter(out), 80, "create", options);
+
+        assertEquals("usage: create [-f <arg>]", out.toString().trim());
+    }
+
+    @Test
+    public void testUsageWithLongOptSeparatorForSize() {
+        final Options options = new Options();
+        options.addOption(Option.builder("s").longOpt("size").desc("the size").hasArg().argName("SIZE").build());
+
+        final HelpFormatter formatter = new HelpFormatter();
+        formatter.setLongOptSeparator("=");
+
+        final StringWriter out = new StringWriter();
+        formatter.printUsage(new PrintWriter(out), 80, "create", options);
+
+        assertEquals("usage: create [-s <SIZE>]", out.toString().trim());
+    }
+}
+```
+

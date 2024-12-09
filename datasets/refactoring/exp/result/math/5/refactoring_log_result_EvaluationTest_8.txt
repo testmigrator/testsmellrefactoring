@@ -1,0 +1,87 @@
+Input Parameters:
+Test Code:
+ @Test
+    public void testLazyEvaluationPrecondition() {
+        final RealVector dummy = new ArrayRealVector(new double[] { 0 });
+
+        // "ValueAndJacobianFunction" is required but we implement only
+        // "MultivariateJacobianFunction".
+        final MultivariateJacobianFunction m1 = new MultivariateJacobianFunction() {
+                @Override
+                public Pair<RealVector, RealMatrix> value(RealVector notUsed) {
+                    return new Pair<>(null, null);
+                }
+            };
+
+        try {
+            // Should throw.
+            LeastSquaresFactory.create(m1, dummy, dummy, null, null, 0, 0, true, null);
+            Assert.fail("Expecting MathIllegalStateException");
+        } catch (MathIllegalStateException e) {
+            // Expected.
+        }
+
+        final MultivariateJacobianFunction m2 = new ValueAndJacobianFunction() {
+                @Override
+                public Pair<RealVector, RealMatrix> value(RealVector notUsed) {
+                    return new Pair<>(null, null);
+                }
+                @Override
+                public RealVector computeValue(final double[] params) {
+                    return null;
+                }
+                @Override
+                public RealMatrix computeJacobian(final double[] params) {
+                    return null;
+                }
+            };
+
+        // Should pass.
+        LeastSquaresFactory.create(m2, dummy, dummy, null, null, 0, 0, true, null);
+    }
+Context: 
+Smell List: ['Exception_Catching_Throwing']
+Smell Description List: ['Test Smell Type：Exception_Catching_Throwing\n\nFeature:\nA test method that contains either a throw statement or a catch clause.\n']
+Refactoring DSL: ['RefactorRule:\n  SmellType: Exception_Catching_Throwing\n  Description: Ensure tests use assertDoesNotThrow to verify no exceptions are thrown and remove any throws declaration in test methods.\n  Steps:\n    - Step:\n        Description: "Handle try-catch blocks containing \'fail\' calls"\n        Action: ReplaceTryCatchWithAssertThrows\n        Parameters:\n          SourcePattern: |\n            try {\n              {tryBlock}\n              fail();\n            } catch ({exception}) {\n              {catchBlock}\n            }\n          ReplacementPattern: |\n            {exception} exception = assertThrows({exception}.class, () -> {\n              {tryBlock}\n            });\n            {catchBlock}\n    - Step:\n        Description: "Handle test methods with \'throws\' declaration but no try-catch block"\n        Action: WrapWithAssertDoesNotThrow\n        Parameters:\n          DetectionPattern: |\n            MethodDeclaration [throws!=null && BodyContainsTryCatch=false]\n          ReplacementPattern: |\n            assertDoesNotThrow(() -> {\n              {methodBody}\n            }, "Unexpected exception occurred during the test");\n\n    - Step:\n        Description: "Handle test methods with try-catch blocks without \'fail\' calls"\n        Action: ReplaceTryCatchWithoutFail\n        Parameters:\n          SourcePattern: |\n            try {\n              {tryBlock}\n            } catch ({exception}) {\n              {catchBlock}\n            }\n          ReplacementPattern: |\n            assertDoesNotThrow(() -> {\n              {tryBlock}\n            });\n            {catchBlock}\n\n  Example:\n    Before: |\n      @Test\n      public void T() {\n        stmt\n        try {\n            stmt\'\n            fail();\n        } catch (E) {\n            evs\n        }\n        stmt\'\'\n      }\n    After: |\n      @Test\n      public void T() {\n        stmt\n        assertThrows(E.class, () -> {\n            stmt\'\n        });\n        evs\n        stmt\'\'\n      }\n  Variables:\n    exception: E\n    tryBlock: stmt\'\n    catchBlock: evs\n    tryBlockStatement: stmt\'i\n']
+Checkpoints: ['[ ] All exception handling has been refactored to use the JUnit 5 Exception Handling feature.\n']
+
+Refactored Code: 
+ 
+@Test
+public void testLazyEvaluationPrecondition() {
+    final RealVector dummy = new ArrayRealVector(new double[] { 0 });
+
+    final MultivariateJacobianFunction m1 = new MultivariateJacobianFunction() {
+        @Override
+        public Pair<RealVector, RealMatrix> value(RealVector notUsed) {
+            return new Pair<>(null, null);
+        }
+    };
+
+    MathIllegalStateException exception = assertThrows(MathIllegalStateException.class, () -> {
+        LeastSquaresFactory.create(m1, dummy, dummy, null, null, 0, 0, true, null);
+    });
+
+    final MultivariateJacobianFunction m2 = new ValueAndJacobianFunction() {
+        @Override
+        public Pair<RealVector, RealMatrix> value(RealVector notUsed) {
+            return new Pair<>(null, null);
+        }
+
+        @Override
+        public RealVector computeValue(final double[] params) {
+            return null;
+        }
+
+        @Override
+        public RealMatrix computeJacobian(final double[] params) {
+            return null;
+        }
+    };
+
+    assertDoesNotThrow(() -> {
+        LeastSquaresFactory.create(m2, dummy, dummy, null, null, 0, 0, true, null);
+    }, "Unexpected exception occurred during the test");
+}
+
+

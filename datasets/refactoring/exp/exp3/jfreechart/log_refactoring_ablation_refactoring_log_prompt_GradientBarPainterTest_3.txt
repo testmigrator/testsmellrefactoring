@@ -1,0 +1,16 @@
+asserts result: 
+ ```java
+import org.junit.Test;
+import static org.junit.Assert.assertFalse;
+
+public class GradientBarPainterTest {
+
+    @Test
+    public void testCloning() {
+        GradientBarPainter p1 = new GradientBarPainter(0.1, 0.2, 0.3);
+        assertFalse("GradientBarPainter should not implement Cloneable", p1 instanceof Cloneable);
+        assertFalse("GradientBarPainter should not implement PublicCloneable", p1 instanceof PublicCloneable);
+    }
+}
+```
+

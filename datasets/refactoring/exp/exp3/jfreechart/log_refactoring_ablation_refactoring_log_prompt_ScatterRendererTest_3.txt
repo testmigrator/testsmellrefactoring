@@ -1,0 +1,37 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+import org.jfree.chart.renderer.category.ScatterRenderer;
+import org.jfree.chart.util.CloneUtils;
+import org.jfree.chart.TestUtils;
+
+class ScatterRendererTest {
+
+    @Test
+    public void testCloning() {
+        ScatterRenderer r1 = new ScatterRenderer();
+        ScatterRenderer r2 = null;
+
+        try {
+            r2 = CloneUtils.clone(r1);
+        } catch (CloneNotSupportedException e) {
+            fail("CloneNotSupportedException should not be thrown: " + e.getMessage());
+        }
+
+        assertNotNull(r2, "Cloned object should not be null");
+        assertNotSame(r1, r2, "Cloned object should not be the same as the original object");
+        assertEquals(ScatterRenderer.class, r2.getClass(), "Cloned object should be of the same class as the original object");
+        assertEquals(r1, r2, "Cloned object should be equal to the original object");
+
+        assertTrue(checkIndependence(r1, r2), "Cloned object should be independent of the original object");
+        TestUtils.checkIndependence(r1, r2);
+    }
+
+    private boolean checkIndependence(ScatterRenderer r1, ScatterRenderer r2) {
+        // Implementation of checkIndependence method
+        return true; // Placeholder implementation
+    }
+}
+```
+

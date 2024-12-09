@@ -1,0 +1,32 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.assertions.AssertionUtils;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+
+public class StatisticalReferenceDatasetTest {
+
+    @Test
+    public void testComputeRMS() {
+        final StatisticalReferenceDataset dataset = StatisticalReferenceDatasetFactory.createKirby2();
+
+        final LeastSquaresProblem lsp = builder(dataset).build();
+
+        final double expected = Math.sqrt(dataset.getResidualSumOfSquares() / dataset.getNumObservations());
+        
+        assertDoesNotThrow(() -> {
+            final double actual = lsp.evaluate(lsp.getStart()).getRMS();
+            AssertionUtils.assertEquals(dataset.getName(), expected, actual, 1e-11 * expected);
+        });
+    }
+
+    private LeastSquaresProblem.Builder builder(StatisticalReferenceDataset dataset) {
+        // Assuming this method is part of the setup and needs to be defined
+        return new LeastSquaresProblem.Builder()
+                .addTarget(dataset.getTargets())
+                .addWeight(dataset.getWeights())
+                .addStartPoint(dataset.getStartPoint());
+    }
+}
+```
+

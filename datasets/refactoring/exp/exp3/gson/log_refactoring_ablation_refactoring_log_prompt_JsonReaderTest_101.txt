@@ -1,0 +1,60 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
+import com.google.gson.stream.Strictness;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.io.Reader;
+
+class JsonReaderTest {
+
+    private JsonReader reader;
+
+    @BeforeEach
+    void setUp() {
+        Reader mockReader = mock(Reader.class);
+        try {
+            reader = new JsonReader(mockReader);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    void testLenientNonExecutePrefixBeginArray() throws IOException {
+        reader = new JsonReader(reader(")]}'\n []"));
+        reader.setStrictness(Strictness.LENIENT);
+        assertDoesNotThrow(() -> reader.beginArray());
+    }
+
+    @Test
+    void testLenientNonExecutePrefixEndArray() throws IOException {
+        reader = new JsonReader(reader(")]}'\n []"));
+        reader.setStrictness(Strictness.LENIENT);
+        reader.beginArray();
+        assertDoesNotThrow(() -> reader.endArray());
+    }
+
+    @Test
+    void testLenientNonExecutePrefixPeek() throws IOException {
+        reader = new JsonReader(reader(")]}'\n []"));
+        reader.setStrictness(Strictness.LENIENT);
+        reader.beginArray();
+        reader.endArray();
+        assertEquals(JsonToken.END_DOCUMENT, reader.peek());
+    }
+
+    private Reader reader(String content) {
+        return () -> content.charAt(0);
+    }
+}
+```
+

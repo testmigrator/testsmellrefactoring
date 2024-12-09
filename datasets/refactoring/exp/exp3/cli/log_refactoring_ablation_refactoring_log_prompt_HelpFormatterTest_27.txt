@@ -1,0 +1,25 @@
+asserts result: 
+ ```java
+import org.apache.commons.cli.HelpFormatter;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class HelpFormatterTest {
+
+    private static final String EOL = System.lineSeparator();
+
+    @Test
+    public void testRenderWrappedTextSingleLinePadded() {
+        // single line padded text
+        final int width = 12;
+        final int padding = 4;
+        final String text = "This is a test.";
+        final String expected = "This is a" + EOL + "    test.";
+
+        final StringBuilder sb = new StringBuilder();
+        new HelpFormatter().renderWrappedText(sb, width, padding, text);
+        assertEquals(expected, sb.toString());
+    }
+}
+```
+

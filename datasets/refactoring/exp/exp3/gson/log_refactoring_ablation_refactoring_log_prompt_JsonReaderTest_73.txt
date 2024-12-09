@@ -1,0 +1,49 @@
+asserts result: 
+ ```java
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
+import com.google.gson.stream.Strictness;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+
+import java.io.IOException;
+import java.io.StringReader;
+
+class JsonReaderTest {
+
+    private JsonReader reader;
+
+    @BeforeEach
+    void setUp() {
+        reader = new JsonReader(new StringReader(""));
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "[// comment \\n true], //",
+        "[# comment \\n true], #",
+        "[/* comment */ true], /* */"
+    })
+    void testLenientComments(String json, String commentType) throws IOException {
+        reader = new JsonReader(new StringReader(json));
+        reader.setStrictness(Strictness.LENIENT);
+        reader.beginArray();
+        assertThat(reader.nextBoolean(), "Failed for comment type: " + commentType).isTrue();
+    }
+
+    @Test
+    void testExceptionHandling() {
+        assertThrows(IOException.class, () -> {
+            reader = new JsonReader(new StringReader("[invalid json]"));
+            reader.setStrictness(Strictness.LENIENT);
+            reader.beginArray();
+        }, "Expected an IOException to be thrown for invalid JSON");
+    }
+}
+```
+

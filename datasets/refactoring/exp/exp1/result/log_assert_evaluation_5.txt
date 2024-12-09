@@ -1,0 +1,34 @@
+asserts result: 
+ - `assertNotSame(r1, r2, "The cloned object should not be the same instance as the original");` - yes
+- `assertSame(r1.getClass(), r2.getClass(), "The cloned object should be of the same class as the original");` - yes
+- `assertEquals(r1, r2, "The cloned object should be equal to the original");` - yes
+- `assertEquals("t1 and t2 should be equal", t1, t2);` - yes
+- `assertEquals("Hash codes of t1 and t2 should be equal", h1, h2);` - yes
+- `assertNotSame(t1, t2, "t1 and t2 should be different instances");` - yes
+- `assertSame(t1.getClass(), t2.getClass(), "t1 and t2 should have the same class");` - yes
+- `assertEquals(t1, t2, "t1 and t2 should be equal after cloning");` - yes
+- `assertNotEquals(t1, t2, "t1 and t2 should not be equal after modifying t1's bounds");` - yes
+- `assertEquals(t1, t2, "t1 and t2 should be equal again after setting t2's bounds to match t1");` - yes
+- `assertEquals(t1, t2, "Serialized and deserialized LegendTitle objects should be equal");` - yes
+- `assertEquals(t2.getSources()[0], plot, "The source of the deserialized LegendTitle should be the original plot");` - yes
+- `assertNotSame(r1, r2, "r1 and r2 should not be the same object");` - yes
+- `assertSame(r1.getClass(), r2.getClass(), "r1 and r2 should be of the same class");` - yes
+- `assertEquals(r1, r2, "r1 and r2 should be equal");` - yes
+- `assertNotSame(r1, r2, "r1 and r2 should not be the same object");` - yes (redundant but semantically clear)
+- `assertSame(r1.getClass(), r2.getClass(), "r1 and r2 should be of the same class");` - yes (redundant but semantically clear)
+- `assertEquals(r1, r2, "r1 and r2 should be equal");` - yes (redundant but semantically clear)
+- `assertNotSame(r1, r2, "r1 and r2 should be different instances");` - yes
+- `assertSame(r1.getClass(), r2.getClass(), "r1 and r2 should be of the same class");` - yes
+- `assertEquals(r1, r2, "r1 and r2 should be equal");` - yes
+- `assertNotSame(r1.getLegendItemLabelGenerator(), r2.getLegendItemLabelGenerator(), "Generators should be different instances after cloning");` - yes
+- `assertNotSame(r1, r2, "r1 and r2 should be different instances");` - yes (redundant but semantically clear)
+- `assertSame(r1.getClass(), r2.getClass(), "r1 and r2 should be of the same class");` - yes (redundant but semantically clear)
+- `assertEquals(r1, r2, "r1 and r2 should be equal");` - yes (redundant but semantically clear)
+- `assertNotSame(r1.getLegendItemToolTipGenerator(), r2.getLegendItemToolTipGenerator(), "The legend item tool tip generators should be different instances");` - yes
+- `assertNotSame(r1, r2, "r1 and r2 should be different instances");` - yes (redundant but semantically clear)
+- `assertSame(r1.getClass(), r2.getClass(), "r1 and r2 should be of the same class");` - yes (redundant but semantically clear)
+- `assertEquals(r1, r2, "r1 and r2 should be equal");` - yes (redundant but semantically clear)
+- `assertEquals("Expected r1 and r2 to be equal", r1, r2);` - yes
+
+All provided assertions meet the specified criteria. However, there are several redundant assertions that could be simplified or removed to improve readability and maintainability of the test code.
+

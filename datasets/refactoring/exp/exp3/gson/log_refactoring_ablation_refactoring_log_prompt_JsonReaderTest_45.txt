@@ -1,0 +1,81 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
+import com.google.gson.stream.Strictness;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+
+import java.io.IOException;
+import java.io.StringReader;
+
+public class JsonReaderTest {
+
+    private JsonReader reader;
+
+    @BeforeEach
+    public void setUp() throws IOException {
+        String json = "[\"NaN\", \"-Infinity\", \"Infinity\"]";
+        reader = new JsonReader(new StringReader(json));
+        reader.setStrictness(Strictness.LENIENT);
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "NaN, Double.NaN",
+        "-Infinity, -Infinity",
+        "Infinity, Infinity"
+    })
+    public void testLenientQuotedNonFiniteDoubles(String input, double expected) throws IOException {
+        reader.beginArray();
+        while (reader.hasNext()) {
+            if (input.equals("NaN")) {
+                assertTrue(Double.isNaN(reader.nextDouble()), "Expected NaN but got " + reader.nextDouble());
+            } else {
+                assertEquals(expected, reader.nextDouble(), "Expected " + expected + " but got " + reader.nextDouble());
+            }
+            reader.nextNull(); // Skip the null value after the number
+        }
+        reader.endArray();
+    }
+
+    @Test
+    public void testBeginArray() throws IOException {
+        reader.beginArray();
+        assertAll(
+            () -> assertEquals(JsonToken.BEGIN_ARRAY, reader.peek(), "Expected BEGIN_ARRAY token"),
+            () -> assertTrue(reader.hasNext(), "Expected array to have elements")
+        );
+    }
+
+    @Test
+    public void testEndArray() throws IOException {
+        reader.beginArray();
+        while (reader.hasNext()) {
+            reader.skipValue();
+        }
+        reader.endArray();
+        assertAll(
+            () -> assertEquals(JsonToken.END_ARRAY, reader.peek(), "Expected END_ARRAY token"),
+            () -> assertFalse(reader.hasNext(), "Expected no more elements after END_ARRAY")
+        );
+    }
+
+    @Test
+    public void testIOExceptionHandling() {
+        assertThrows(IOException.class, () -> {
+            reader = new JsonReader(null); // Simulate an IOException by passing a null reader
+            reader.beginArray();
+        }, "Expected IOException to be thrown when using a null reader");
+    }
+}
+```
+

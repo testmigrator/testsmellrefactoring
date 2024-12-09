@@ -1,0 +1,5 @@
+asserts result: 
+ Yes
+
+The refactored tests maintain the same functionality as the original test. The original single test method has been broken down into multiple methods, each focusing on a specific aspect of the test, but all the assertions and the logic flow remain consistent with the original. The setup is now handled by a separate `setupTestTextBean` method, which initializes the document and elements used across the tests, ensuring that each test starts from the same initial state. This refactoring improves readability and maintainability without altering the intended behavior of the tests.
+

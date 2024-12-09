@@ -1,0 +1,14 @@
+asserts result: 
+ The functionality between the original test and the refactored test is consistent.
+
+**Reasoning:**
+- Both tests aim to verify that the `JsonReader` correctly identifies a non-digit exponent in a string as a `STRING` token when the strictness is set to `LENIENT`.
+- The original test uses `assertThat(reader.peek()).isEqualTo(STRING)` to check the token type.
+- The refactored test uses `assertDoesNotThrow` to ensure no unexpected exceptions are thrown and then checks the token type with `assertThat(reader.peek()).isEqualTo(JsonToken.STRING)`.
+- The use of `assertDoesNotThrow` in the refactored test adds an additional layer of validation to ensure that no exceptions are thrown, but this does not change the core functionality of the test.
+
+Therefore, the refactored test maintains the same functional behavior as the original test. 
+
+**Answer:**
+yes
+

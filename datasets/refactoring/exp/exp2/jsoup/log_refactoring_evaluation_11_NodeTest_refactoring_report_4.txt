@@ -1,0 +1,10 @@
+asserts result: 
+ Yes
+
+The functionality between the original test and the refactored tests is consistent. The refactored code splits the original test into two separate tests, each focusing on a specific aspect of the functionality:
+
+1. `testHandlesAbsOnImage_AbsSrcAttribute` checks that the `abs:src` attribute is correctly resolved to an absolute URL.
+2. `testHandlesAbsOnImage_AbsUrlMethod` checks that the `absUrl` method returns the same value as the `attr` method for the absolute URL of the image `src` attribute.
+
+Both refactored tests use the same setup method (`setupHandlesAbsOnImage`) to parse the HTML document, ensuring that the initial conditions are the same as in the original test. The assertions in the refactored tests are equivalent to those in the original test, maintaining the same functional behavior.
+

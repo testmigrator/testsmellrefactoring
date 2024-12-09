@@ -1,0 +1,46 @@
+asserts result: 
+ ```java
+import org.jsoup.nodes.Attributes;
+import org.jsoup.nodes.Attribute;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
+import static org.junit.jupiter.api.Assertions.*;
+import java.util.Iterator;
+
+class AttributesTest {
+
+    private static final String KEY_ONE = "One";
+    private static final String VALUE_ONE = "One";
+    private static final String INTERNAL_KEY_BASE_URI = Attributes.internalKey("baseUri");
+    private static final String VALUE_BASE_URI = "example.com";
+    private static final String KEY_TWO = "Two";
+    private static final String VALUE_TWO = "Two";
+    private static final String INTERNAL_KEY_ANOTHER = Attributes.internalKey("another");
+    private static final String VALUE_ANOTHER = "example.com";
+    private static final int EXPECTED_ATTRIBUTE_COUNT = 2;
+
+    @Test
+    @DisplayName("Test iterator skips internal attributes")
+    void testIteratorSkipsInternal() {
+        Attributes attributes = new Attributes();
+        attributes.put(KEY_ONE, VALUE_ONE);
+        attributes.put(INTERNAL_KEY_BASE_URI, VALUE_BASE_URI);
+        attributes.put(KEY_TWO, VALUE_TWO);
+        attributes.put(INTERNAL_KEY_ANOTHER, VALUE_ANOTHER);
+
+        Iterator<Attribute> iterator = attributes.iterator();
+        assertTrue(iterator.hasNext(), "Expected iterator to have next element");
+        assertEquals(KEY_ONE, iterator.next().getKey(), "Expected first key to be 'One'");
+        assertTrue(iterator.hasNext(), "Expected iterator to have next element");
+        assertEquals(KEY_TWO, iterator.next().getKey(), "Expected second key to be 'Two'");
+        assertFalse(iterator.hasNext(), "Expected no more elements in iterator");
+
+        int seen = 0;
+        for (Attribute attribute : attributes) {
+            seen++;
+        }
+        assertEquals(EXPECTED_ATTRIBUTE_COUNT, seen, "Expected to see 2 attributes");
+    }
+}
+```
+

@@ -1,0 +1,41 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.junit.jupiter.api.Test;
+
+public class JsoupTest {
+
+    private final String echoUrl = "http://example.com/echo";
+    private final String browserUa = "Mozilla/5.0";
+
+    @Test
+    public void sendsRequestBodyWithUrlParams() throws IOException {
+        final String body = "{key:value}";
+        try {
+            Document doc = Jsoup.connect(echoUrl)
+                    .requestBody(body)
+                    .data("uname", "Jsoup", "uname", "Jonathan", "百", "度一下")
+                    .header("Content-Type", "text/plain") // todo - if user sets content-type, we should append postcharset
+                    .userAgent(browserUa)
+                    .post();
+
+            assertEquals("POST", ihVal("Method", doc), "HTTP method should be POST");
+            assertEquals("uname=Jsoup&uname=Jonathan&%E7%99%BE=%E5%BA%A6%E4%B8%80%E4%B8%8B", ihVal("Query String", doc), "Query string should match expected value");
+            assertEquals(body, ihVal("Post Data", doc), "Post data should match the request body");
+        } catch (IOException e) {
+            assertThrows(IOException.class, () -> {
+                throw new IOException("Failed to connect to the server", e);
+            });
+        }
+    }
+
+    private String ihVal(String key, Document doc) {
+        return doc.select("pre").text().split("\n")[0].split(": ")[1];
+    }
+}
+```
+

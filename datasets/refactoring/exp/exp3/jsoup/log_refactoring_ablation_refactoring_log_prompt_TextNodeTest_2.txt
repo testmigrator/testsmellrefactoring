@@ -1,0 +1,51 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.nodes.TextNode;
+import static org.junit.Assert.assertEquals;
+
+public class TextNodeTest {
+
+    @Test
+    public void testSpanTextContent() {
+        Document doc = Jsoup.parse("<p>One <span>two &amp;</span> three &amp;</p>");
+        Element span = doc.select("span").first();
+        assertEquals("Span text content should be 'two &'", "two &", span.text());
+        TextNode spanText = (TextNode) span.childNode(0);
+        assertEquals("Span text node content should be 'two &'", "two &", spanText.text());
+    }
+
+    @Test
+    public void testParagraphTextContent() {
+        Document doc = Jsoup.parse("<p>One <span>two &amp;</span> three &amp;</p>");
+        Element p = doc.select("p").first();
+        TextNode tn = (TextNode) p.childNode(2);
+        assertEquals("Paragraph text node content should be ' three &'", " three &", tn.text());
+    }
+
+    @Test
+    public void testTextNodeModification() {
+        Document doc = Jsoup.parse("<p>One <span>two &amp;</span> three &amp;</p>");
+        Element p = doc.select("p").first();
+        TextNode tn = (TextNode) p.childNode(2);
+        tn.text(" POW!");
+        assertEquals("Paragraph HTML after text modification should be 'One <span>two &amp;</span> POW!'", 
+                     "One <span>two &amp;</span> POW!", TextUtil.stripNewlines(p.html()));
+    }
+
+    @Test
+    public void testTextNodeAttributeModification() {
+        Document doc = Jsoup.parse("<p>One <span>two &amp;</span> three &amp;</p>");
+        Element p = doc.select("p").first();
+        TextNode tn = (TextNode) p.childNode(2);
+        tn.attr(tn.nodeName(), "kablam &");
+        assertEquals("Text node content after attribute modification should be 'kablam &'", 
+                     "kablam &", tn.text());
+        assertEquals("Paragraph HTML after attribute modification should be 'One <span>two &amp;</span>kablam &amp;'", 
+                     "One <span>two &amp;</span>kablam &amp;", TextUtil.stripNewlines(p.html()));
+    }
+}
+```
+

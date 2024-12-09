@@ -1,0 +1,4 @@
+asserts result: 
+
+- All assert statements meet the criteria for having semantically clear messages and correctly expressing the purpose of the assert statement. Therefore, the response for these is: “yes”.
+

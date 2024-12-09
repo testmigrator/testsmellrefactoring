@@ -1,0 +1,19 @@
+asserts result: 
+ ```java
+import org.junit.Test;
+import static org.junit.Assert.*;
+
+public class NodeTest {
+
+    @Test
+    public void testCommentIsNotXmlDeclaration() {
+        assertFalse("Comment should not be considered as XML declaration", comment.isXmlDeclaration());
+    }
+
+    @Test
+    public void testDeclIsXmlDeclaration() {
+        assertTrue("Declaration should be considered as XML declaration", decl.isXmlDeclaration());
+    }
+}
+```
+

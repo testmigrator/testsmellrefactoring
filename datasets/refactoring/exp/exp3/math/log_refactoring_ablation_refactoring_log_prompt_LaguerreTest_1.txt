@@ -1,0 +1,38 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIf;
+import org.apache.commons.math3.analysis.UnivariateFunction;
+import org.apache.commons.math3.analysis.integration.GaussIntegrator;
+import org.apache.commons.math3.special.Gamma;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class GammaTest {
+
+    private static final double TOLERANCE = 1e-13;
+    private static final int INTEGRATION_POINTS = 7;
+    private static final int START_VALUE = 2;
+    private static final int END_VALUE = 10;
+    private static final int STEP_VALUE = 1;
+
+    private final GaussIntegrator factory = new GaussIntegrator.Factory().laguerre(INTEGRATION_POINTS);
+
+    @Test
+    @EnabledIf("isInRange")
+    public void testGamma() {
+        for (int i = START_VALUE; i < END_VALUE; i += STEP_VALUE) {
+            final double t = i;
+
+            UnivariateFunction f = x -> JdkMath.pow(x, t - 1);
+
+            double s = factory.integrate(f);
+            assertEquals(1.0, Gamma.value(t) / s, TOLERANCE);
+        }
+    }
+
+    private boolean isInRange() {
+        return START_VALUE >= 2 && END_VALUE <= 10;
+    }
+}
+```
+

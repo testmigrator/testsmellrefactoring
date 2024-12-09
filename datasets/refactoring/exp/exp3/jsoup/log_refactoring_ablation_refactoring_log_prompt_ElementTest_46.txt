@@ -1,0 +1,81 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.junit.Test;
+import static org.junit.Assert.*;
+
+public class ElementTest {
+
+    private static final String ORIGINAL_HTML = "<div><p>One<p><span>Two</div>";
+    private static final int EXPECTED_SIBLING_INDEX_CLONE = 0;
+    private static final int EXPECTED_SIBLING_INDEX_P = 1;
+    private static final String APPENDED_CONTENT = "<span>Three";
+    private static final String EXPECTED_CLONE_OUTER_HTML = "<p><span>Two</span><span>Three</span></p>";
+    private static final String EXPECTED_DOC_BODY_HTML_AFTER_CLONE = "<div><p>One</p><p><span>Two</span></p></div>";
+    private static final String EXPECTED_DOC_BODY_HTML_AFTER_APPEND = "<div><p>One</p><p><span>Two</span></p></div><p><span>Two</span><span>Three</span></p>";
+
+    @Test
+    public void testCloneOrphaned() {
+        Document doc = Jsoup.parse(ORIGINAL_HTML);
+        Element p = doc.select("p").get(1);
+        Element clone = p.clone();
+
+        assertNull("Clone should not have a parent initially", clone.parent());
+    }
+
+    @Test
+    public void testCloneSiblingIndex() {
+        Document doc = Jsoup.parse(ORIGINAL_HTML);
+        Element p = doc.select("p").get(1);
+        Element clone = p.clone();
+
+        assertEquals("Clone sibling index should be 0", EXPECTED_SIBLING_INDEX_CLONE, clone.siblingIndex());
+        assertEquals("Original element sibling index should be 1", EXPECTED_SIBLING_INDEX_P, p.siblingIndex());
+    }
+
+    @Test
+    public void testCloneParent() {
+        Document doc = Jsoup.parse(ORIGINAL_HTML);
+        Element p = doc.select("p").get(1);
+        Element clone = p.clone();
+
+        assertNotNull("Original element should have a parent", p.parent());
+    }
+
+    @Test
+    public void testCloneAppendContent() {
+        Document doc = Jsoup.parse(ORIGINAL_HTML);
+        Element p = doc.select("p").get(1);
+        Element clone = p.clone();
+
+        clone.append(APPENDED_CONTENT);
+        assertEquals("Clone outer HTML should include appended content", EXPECTED_CLONE_OUTER_HTML, TextUtil.stripNewlines(clone.outerHtml()));
+    }
+
+    @Test
+    public void testCloneDoesNotModifyOriginalDoc() {
+        Document doc = Jsoup.parse(ORIGINAL_HTML);
+        Element p = doc.select("p").get(1);
+        Element clone = p.clone();
+
+        clone.append(APPENDED_CONTENT);
+        assertEquals("Original document body should not be modified", EXPECTED_DOC_BODY_HTML_AFTER_CLONE, TextUtil.stripNewlines(doc.body().html()));
+    }
+
+    @Test
+    public void testCloneAppendToDoc() {
+        Document doc = Jsoup.parse(ORIGINAL_HTML);
+        Element p = doc.select("p").get(1);
+        Element clone = p.clone();
+
+        clone.append(APPENDED_CONTENT);
+        doc.body().appendChild(clone);
+
+        assertNotNull("Clone should have a parent after appending to document", clone.parent());
+        assertEquals("Document body should include cloned element", EXPECTED_DOC_BODY_HTML_AFTER_APPEND, TextUtil.stripNewlines(doc.body().html()));
+    }
+}
+```
+

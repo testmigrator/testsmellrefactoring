@@ -1,0 +1,4 @@
+total tests: 1
+total asserts: 2
+assertThrows(JsonSyntaxException.class, parser::hasNext, "Expected JsonSyntaxException when checking hasNext on malformed input");
+assertThrows(JsonSyntaxException.class, parser::next, "Expected JsonSyntaxException when calling next on malformed input");

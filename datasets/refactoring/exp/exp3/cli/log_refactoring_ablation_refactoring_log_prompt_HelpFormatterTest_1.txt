@@ -1,0 +1,74 @@
+asserts result: 
+ ```java
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class HelpFormatterTest {
+
+    private final String ARG_NAME = "argname";
+    private final int DESC_PADDING = 3;
+    private final int LEFT_PADDING = 7;
+    private final String LONG_OPT_PREFIX = "~~";
+    private final String NEW_LINE = "\n";
+    private final String OPT_PREFIX = "~";
+    private final String SYNTAX_PREFIX = "-> ";
+    private final int WIDTH = 80;
+
+    @Test
+    public void testSetAndGetArgName() {
+        HelpFormatter formatter = new HelpFormatter();
+        formatter.setArgName(ARG_NAME);
+        assertEquals(ARG_NAME, formatter.getArgName());
+    }
+
+    @Test
+    public void testSetAndGetDescPadding() {
+        HelpFormatter formatter = new HelpFormatter();
+        formatter.setDescPadding(DESC_PADDING);
+        assertEquals(DESC_PADDING, formatter.getDescPadding());
+    }
+
+    @Test
+    public void testSetAndGetLeftPadding() {
+        HelpFormatter formatter = new HelpFormatter();
+        formatter.setLeftPadding(LEFT_PADDING);
+        assertEquals(LEFT_PADDING, formatter.getLeftPadding());
+    }
+
+    @Test
+    public void testSetAndGetLongOptPrefix() {
+        HelpFormatter formatter = new HelpFormatter();
+        formatter.setLongOptPrefix(LONG_OPT_PREFIX);
+        assertEquals(LONG_OPT_PREFIX, formatter.getLongOptPrefix());
+    }
+
+    @Test
+    public void testSetAndGetNewLine() {
+        HelpFormatter formatter = new HelpFormatter();
+        formatter.setNewLine(NEW_LINE);
+        assertEquals(NEW_LINE, formatter.getNewLine());
+    }
+
+    @Test
+    public void testSetAndGetOptPrefix() {
+        HelpFormatter formatter = new HelpFormatter();
+        formatter.setOptPrefix(OPT_PREFIX);
+        assertEquals(OPT_PREFIX, formatter.getOptPrefix());
+    }
+
+    @Test
+    public void testSetAndGetSyntaxPrefix() {
+        HelpFormatter formatter = new HelpFormatter();
+        formatter.setSyntaxPrefix(SYNTAX_PREFIX);
+        assertEquals(SYNTAX_PREFIX, formatter.getSyntaxPrefix());
+    }
+
+    @Test
+    public void testSetGetWidth() {
+        HelpFormatter formatter = new HelpFormatter();
+        formatter.setWidth(WIDTH);
+        assertEquals(WIDTH, formatter.getWidth());
+    }
+}
+```
+

@@ -1,0 +1,5 @@
+asserts result: 
+ yes
+
+The refactored test maintains the same functionality as the original test. The only difference is that the refactored version uses `assertDoesNotThrow` to ensure that no exceptions are thrown during the execution of the lambda expression, which includes the original logic. This change does not alter the core behavior of the test, which is to verify that the document's title contains "Environment Variables".
+

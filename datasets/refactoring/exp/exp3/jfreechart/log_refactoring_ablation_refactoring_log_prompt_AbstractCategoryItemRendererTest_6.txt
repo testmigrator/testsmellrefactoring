@@ -1,0 +1,31 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+
+public class BarRendererTest {
+
+    @ParameterizedTest
+    @CsvSource({
+        "defaultItemLabelGenerator",
+        "seriesItemLabelGenerator"
+    })
+    public void testCloning(String generatorType) throws CloneNotSupportedException {
+        BarRenderer r1 = new BarRenderer();
+        if ("defaultItemLabelGenerator".equals(generatorType)) {
+            r1.setDefaultItemLabelGenerator(new IntervalCategoryItemLabelGenerator());
+        } else if ("seriesItemLabelGenerator".equals(generatorType)) {
+            r1.setSeriesItemLabelGenerator(0, new IntervalCategoryItemLabelGenerator());
+        }
+
+        BarRenderer r2 = (BarRenderer) r1.clone();
+
+        assertNotSame(r1, r2, "Cloned objects should not be the same instance");
+        assertEquals(r1.getClass(), r2.getClass(), "Cloned objects should be of the same class");
+        assertEquals(r1, r2, "Cloned objects should be equal");
+    }
+}
+```
+

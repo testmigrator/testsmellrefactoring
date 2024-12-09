@@ -1,0 +1,33 @@
+asserts result: 
+ ```java
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.MissingOptionException;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.PatternOptionBuilder;
+import org.apache.commons.cli.PosixParser;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+public class PatternOptionBuilderTest {
+
+    private static final String REQUIRED_OPTION = "n";
+    private static final int EXPECTED_MISSING_OPTIONS_SIZE = 1;
+
+    @Test
+    public void testRequiredOption() {
+        final Options options = PatternOptionBuilder.parsePattern("!n%m%");
+        final CommandLineParser parser = new PosixParser();
+
+        MissingOptionException exception = assertThrows(MissingOptionException.class, () -> {
+            parser.parse(options, new String[] {""});
+        });
+
+        assertEquals(EXPECTED_MISSING_OPTIONS_SIZE, exception.getMissingOptions().size(), 
+                     "The number of missing options should be " + EXPECTED_MISSING_OPTIONS_SIZE);
+        assertTrue(exception.getMissingOptions().contains(REQUIRED_OPTION), 
+                   "The missing option should include " + REQUIRED_OPTION);
+    }
+}
+```
+

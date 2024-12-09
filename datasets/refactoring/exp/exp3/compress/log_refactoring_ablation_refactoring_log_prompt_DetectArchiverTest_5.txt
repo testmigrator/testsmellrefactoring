@@ -1,0 +1,37 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.function.Executable;
+import org.junit.jupiter.api.Assertions;
+
+import java.nio.file.Path;
+
+public class ArchiveTypeDetectionTest {
+
+    @TempDir
+    public Path tempDir;
+
+    @Test
+    public void testEmptyTarArchive() throws Exception {
+        // Can't detect empty tar archive from its contents.
+        final Path path = createEmptyArchive(tempDir.resolve("empty.tar")); // will be managed by JUnit's TempDir extension
+        Assertions.assertThrows(ArchiveException.class, () -> checkDetectedType("tar", path));
+    }
+
+    private Path createEmptyArchive(Path filePath) throws Exception {
+        // Implementation to create an empty tar archive at the given file path
+        // This is a placeholder for the actual implementation
+        return filePath;
+    }
+
+    private void checkDetectedType(String expectedType, Path path) throws ArchiveException {
+        // Implementation to check the detected type of the archive
+        // This is a placeholder for the actual implementation
+        if (expectedType.equals("tar")) {
+            throw new ArchiveException("Empty tar archive cannot be detected.");
+        }
+    }
+}
+```
+

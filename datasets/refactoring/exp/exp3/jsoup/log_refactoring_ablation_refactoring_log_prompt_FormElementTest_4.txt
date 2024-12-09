@@ -1,0 +1,47 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.FormElement;
+import org.jsoup.helper.HttpConnection;
+import org.junit.Test;
+import static org.junit.Assert.*;
+
+public class FormElementTest {
+
+    @Test
+    public void testCreatesSubmitableGetConnection() {
+        String html = "<form action='/search'><input name='q'></form>";
+        Document doc = Jsoup.parse(html, "http://example.com/");
+        doc.select("[name=q]").attr("value", "jsoup");
+
+        FormElement form = (FormElement) doc.select("form").first();
+        Connection con = form.submit();
+
+        assertEquals("Expected GET method for connection", Connection.Method.GET, con.request().method());
+        assertEquals("Expected URL for connection", "http://example.com/search", con.request().url().toExternalForm());
+        List<Connection.KeyVal> dataList = con.request().data();
+        assertEquals("Expected data list size", 1, dataList.size());
+        assertEquals("Expected key-value pair in data list", "q", dataList.get(0).key());
+        assertEquals("Expected value for key 'q'", "jsoup", dataList.get(0).value());
+    }
+
+    @Test
+    public void testCreatesSubmitablePostConnection() {
+        String html = "<form action='/search' method='post'><input name='q'></form>";
+        Document doc = Jsoup.parse(html, "http://example.com/");
+        doc.select("[name=q]").attr("value", "jsoup");
+
+        FormElement form = (FormElement) doc.select("form").first();
+        Connection con = form.submit();
+
+        assertEquals("Expected POST method for connection", Connection.Method.POST, con.request().method());
+        assertEquals("Expected URL for connection", "http://example.com/search", con.request().url().toExternalForm());
+        List<Connection.KeyVal> dataList = con.request().data();
+        assertEquals("Expected data list size", 1, dataList.size());
+        assertEquals("Expected key-value pair in data list", "q", dataList.get(0).key());
+        assertEquals("Expected value for key 'q'", "jsoup", dataList.get(0).value());
+    }
+}
+```
+

@@ -1,0 +1,10 @@
+asserts result: 
+ Yes
+
+The refactored code maintains the same functionality as the original test. It has been split into two separate tests for better clarity and organization:
+
+1. `testChildThrowsIndexOutOfBoundsOnMissing_Setup` checks the initial conditions (number of children and the text of the first child) to ensure the setup is correct.
+2. `testChildThrowsIndexOutOfBoundsOnMissing_Exception` specifically tests that an `IndexOutOfBoundsException` is thrown when trying to access a non-existent child element.
+
+Both tests together cover the same scenarios as the original single test, ensuring consistency in functionality.
+

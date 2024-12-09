@@ -1,0 +1,63 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import org.junit.jupiter.api.Test;
+
+public class JsonReaderTest {
+
+    @Test
+    public void testMalformedNumbers() {
+        assertThrows(NumberFormatException.class, () -> assertNotANumber("-"));
+        assertThrows(NumberFormatException.class, () -> assertNotANumber("."));
+
+        // plus sign is not allowed for integer part
+        assertThrows(NumberFormatException.class, () -> assertNotANumber("+1"));
+
+        // leading 0 is not allowed for integer part
+        assertThrows(NumberFormatException.class, () -> assertNotANumber("00"));
+        assertThrows(NumberFormatException.class, () -> assertNotANumber("01"));
+
+        // exponent lacks digit
+        assertThrows(NumberFormatException.class, () -> assertNotANumber("e"));
+        assertThrows(NumberFormatException.class, () -> assertNotANumber("0e"));
+        assertThrows(NumberFormatException.class, () -> assertNotANumber(".e"));
+        assertThrows(NumberFormatException.class, () -> assertNotANumber("0.e"));
+        assertThrows(NumberFormatException.class, () -> assertNotANumber("-.0e"));
+
+        // no integer
+        assertThrows(NumberFormatException.class, () -> assertNotANumber("e1"));
+        assertThrows(NumberFormatException.class, () -> assertNotANumber(".e1"));
+        assertThrows(NumberFormatException.class, () -> assertNotANumber("-e1"));
+
+        // trailing characters
+        assertThrows(NumberFormatException.class, () -> assertNotANumber("1x"));
+        assertThrows(NumberFormatException.class, () -> assertNotANumber("1.1x"));
+        assertThrows(NumberFormatException.class, () -> assertNotANumber("1e1x"));
+        assertThrows(NumberFormatException.class, () -> assertNotANumber("1ex"));
+        assertThrows(NumberFormatException.class, () -> assertNotANumber("1.1ex"));
+        assertThrows(NumberFormatException.class, () -> assertNotANumber("1.1e1x"));
+
+        // fraction has no digit
+        assertThrows(NumberFormatException.class, () -> assertNotANumber("0."));
+        assertThrows(NumberFormatException.class, () -> assertNotANumber("-0."));
+        assertThrows(NumberFormatException.class, () -> assertNotANumber("0.e1"));
+        assertThrows(NumberFormatException.class, () -> assertNotANumber("-0.e1"));
+
+        // no leading digit
+        assertThrows(NumberFormatException.class, () -> assertNotANumber(".0"));
+        assertThrows(NumberFormatException.class, () -> assertNotANumber("-.0"));
+        assertThrows(NumberFormatException.class, () -> assertNotANumber(".0e1"));
+        assertThrows(NumberFormatException.class, () -> assertNotANumber("-.0e1"));
+    }
+
+    private void assertNotANumber(String number) {
+        try {
+            Double.parseDouble(number);
+        } catch (NumberFormatException e) {
+            throw e;
+        }
+    }
+}
+```
+

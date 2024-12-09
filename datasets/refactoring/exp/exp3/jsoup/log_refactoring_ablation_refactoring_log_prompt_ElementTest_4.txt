@@ -1,0 +1,25 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class DocumentTest {
+
+    private static final String reference = "<html><body><p>Hello World</p><p>Another element</p></body></html>";
+
+    @Test
+    public void testGetTextFromDocument() {
+        Document doc = Jsoup.parse(reference);
+        assertEquals("Verify the entire text content of the document", "Hello World Another element", doc.text());
+    }
+
+    @Test
+    public void testGetTextFromParagraphElement() {
+        Document doc = Jsoup.parse(reference);
+        assertEquals("Verify the text content of the second paragraph element", "Another element", doc.getElementsByTag("p").get(1).text());
+    }
+}
+```
+

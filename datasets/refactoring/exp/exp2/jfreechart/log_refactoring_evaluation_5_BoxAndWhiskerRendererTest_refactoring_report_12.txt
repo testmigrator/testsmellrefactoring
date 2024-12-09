@@ -1,0 +1,5 @@
+asserts result: 
+ Yes
+
+The refactored test `testDrawWithNullMinRegular` maintains the same functionality as the original test. The primary change is the use of `assertDoesNotThrow` to verify that no exception is thrown during the execution of the block of code, which is equivalent to the original try-catch mechanism used to set `success` to `true` if no exception occurs. Both versions of the test aim to ensure that the operation completes without throwing an exception.
+

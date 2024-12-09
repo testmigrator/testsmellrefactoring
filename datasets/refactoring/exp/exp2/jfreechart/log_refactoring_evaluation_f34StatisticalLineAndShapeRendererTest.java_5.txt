@@ -1,0 +1,5 @@
+asserts result: 
+ Yes
+
+The refactored tests maintain the same functionality as the original test. Each of the original assertions has been split into separate test methods, but the conditions being tested and the expected outcomes remain consistent. The use of a helper method `setupRenderer` does not alter the behavior or the results of the tests.
+

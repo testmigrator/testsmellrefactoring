@@ -1,0 +1,10 @@
+total tests: 3
+total asserts: 8
+assertEquals(r1, r2, "Two default renderers should be equal");
+assertNotEquals(r1, r2, "Renderers should not be equal after changing series filled state");
+assertEquals(r1, r2, "Renderers should be equal after setting the same series filled state");
+assertNotSame(r1, r2, "The cloned instances should be different objects");
+assertSame(r1.getClass(), r2.getClass(), "The cloned instances should be of the same class");
+assertEquals(r1, r2, "The initial state of the cloned instance should be equal to the original");
+assertNotEquals(r1, r2, "Changing the state of the original instance should affect equality with the clone");
+assertEquals(r1, r2, "Changing the state of both the original and the clone should result in equal instances");

@@ -1,0 +1,33 @@
+asserts result: 
+ ```java
+import org.jsoup.nodes.Entities;
+import org.jsoup.nodes.OutputSettings;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+
+public class EntitiesTest {
+
+    @Test
+    public void testEscapeSupplementaryBaseMode() {
+        String text = "\uD835\uDD59";
+        String escapedAscii = Entities.escape(text, new OutputSettings().charset("ascii").escapeMode(Entities.EscapeMode.base));
+        assertEquals("Escaping supplementary character in base mode should produce numeric entity", "&#x1d559;", escapedAscii);
+    }
+
+    @Test
+    public void testEscapeSupplementaryExtendedModeAscii() {
+        String text = "\uD835\uDD59";
+        String escapedAsciiFull = Entities.escape(text, new OutputSettings().charset("ascii").escapeMode(Entities.EscapeMode.extended));
+        assertEquals("Escaping supplementary character in extended mode with ASCII charset should produce named entity", "&hopf;", escapedAsciiFull);
+    }
+
+    @Test
+    public void testEscapeSupplementaryExtendedModeUtf8() {
+        String text = "\uD835\uDD59";
+        String escapedUtf = Entities.escape(text, new OutputSettings().charset("UTF-8").escapeMode(Entities.EscapeMode.extended));
+        assertEquals("Escaping supplementary character in extended mode with UTF-8 charset should return the original character", text, escapedUtf);
+    }
+}
+```
+

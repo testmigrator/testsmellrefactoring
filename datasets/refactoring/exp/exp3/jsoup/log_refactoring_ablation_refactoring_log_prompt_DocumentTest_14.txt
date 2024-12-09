@@ -1,0 +1,55 @@
+asserts result: 
+ ```java
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.helper.Validate;
+import java.nio.charset.Charset;
+import static org.junit.Assert.assertEquals;
+
+public class DocumentTest {
+
+    private static final String CHARSET_ISO_8859 = "ISO-8859-1";
+
+    @Test
+    public void testMetaCharsetUpdateToIso8859() {
+        // Arrange
+        Document doc = createHtmlDocument("changeThis");
+        doc.updateMetaCharsetElement(true);
+        doc.charset(Charset.forName(CHARSET_ISO_8859));
+
+        // Act
+        Element metaElement = doc.select("meta[charset]").first();
+
+        // Assert
+        assertEquals("The document charset should be updated to ISO-8859-1", CHARSET_ISO_8859, doc.charset().name());
+        assertEquals("The meta element charset attribute should be set to ISO-8859-1", CHARSET_ISO_8859, metaElement.attr("charset"));
+        assertEquals("The document output settings charset should match the document charset", doc.charset(), doc.outputSettings().charset());
+    }
+
+    @Test
+    public void testDocumentToStringAfterCharsetUpdate() {
+        // Arrange
+        Document doc = createHtmlDocument("changeThis");
+        doc.updateMetaCharsetElement(true);
+        doc.charset(Charset.forName(CHARSET_ISO_8859));
+
+        // Act
+        String actualHtml = doc.toString();
+        String expectedHtml = "<html>\n" +
+                " <head>\n" +
+                "  <meta charset=\"" + CHARSET_ISO_8859 + "\">\n" +
+                " </head>\n" +
+                " <body></body>\n" +
+                "</html>";
+
+        // Assert
+        assertEquals("The document HTML string should match the expected HTML after updating the charset", expectedHtml, actualHtml);
+    }
+
+    private Document createHtmlDocument(String title) {
+        // This is a placeholder for the actual implementation
+        return new Document(title);
+    }
+}
+```
+

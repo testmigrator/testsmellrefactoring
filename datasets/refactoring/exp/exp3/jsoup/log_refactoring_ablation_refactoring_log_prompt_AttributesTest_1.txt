@@ -1,0 +1,73 @@
+asserts result: 
+ ```java
+import org.jsoup.nodes.Attributes;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+class AttributesTest {
+
+    private static final int EXPECTED_ATTRIBUTE_COUNT = 3;
+    private static final String TOT_KEY = "Tot";
+    private static final String TOT_VALUE = "a&p";
+    private static final String HELLO_KEY = "Hello";
+    private static final String HELLO_VALUE = "There";
+    private static final String DATA_NAME_KEY = "data-name";
+    private static final String DATA_NAME_VALUE = "Jsoup";
+    private static final String CASE_INSENSITIVE_TOT_KEY = "tot";
+    private static final String HTML_STRING = " Tot=\"a&amp;p\" Hello=\"There\" data-name=\"Jsoup\"";
+
+    @Test
+    public void testAttributesSize() {
+        Attributes a = createAttributes();
+        assertEquals(EXPECTED_ATTRIBUTE_COUNT, a.size(), "Attributes size should be 3");
+    }
+
+    @Test
+    public void testHasKey() {
+        Attributes a = createAttributes();
+        assertTrue(a.hasKey(TOT_KEY), "Attributes should contain key 'Tot'");
+        assertTrue(a.hasKey(HELLO_KEY), "Attributes should contain key 'Hello'");
+        assertTrue(a.hasKey(DATA_NAME_KEY), "Attributes should contain key 'data-name'");
+        assertFalse(a.hasKey(CASE_INSENSITIVE_TOT_KEY), "Attributes should not contain key 'tot' (case-sensitive)");
+        assertTrue(a.hasKeyIgnoreCase(CASE_INSENSITIVE_TOT_KEY), "Attributes should contain key 'tot' (case-insensitive)");
+    }
+
+    @Test
+    public void testGetIgnoreCase() {
+        Attributes a = createAttributes();
+        assertEquals(HELLO_VALUE, a.getIgnoreCase(HELLO_KEY.toLowerCase()), "Attributes should return 'There' for key 'hello' (case-insensitive)");
+    }
+
+    @Test
+    public void testDataSet() {
+        Attributes a = createAttributes();
+        Map<String, String> dataset = a.dataset();
+        assertEquals(1, dataset.size(), "Dataset size should be 1");
+        assertEquals(DATA_NAME_VALUE, dataset.get("name"), "Dataset should contain 'name' with value 'Jsoup'");
+    }
+
+    @Test
+    public void testGet() {
+        Attributes a = createAttributes();
+        assertEquals("", a.get(CASE_INSENSITIVE_TOT_KEY), "Attributes should return empty string for non-existent key 'tot'");
+        assertEquals(TOT_VALUE, a.get(TOT_KEY), "Attributes should return 'a&p' for key 'Tot'");
+        assertEquals(TOT_VALUE, a.getIgnoreCase(CASE_INSENSITIVE_TOT_KEY), "Attributes should return 'a&p' for key 'tot' (case-insensitive)");
+    }
+
+    @Test
+    public void testHtml() {
+        Attributes a = createAttributes();
+        assertEquals(HTML_STRING, a.html(), "Attributes HTML representation should match expected string");
+        assertEquals(HTML_STRING, a.toString(), "Attributes toString representation should match expected string");
+    }
+
+    private Attributes createAttributes() {
+        Attributes a = new Attributes();
+        a.put(TOT_KEY, TOT_VALUE);
+        a.put(HELLO_KEY, HELLO_VALUE);
+        a.put(DATA_NAME_KEY, DATA_NAME_VALUE);
+        return a;
+    }
+}
+```
+

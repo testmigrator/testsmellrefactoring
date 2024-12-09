@@ -1,36 +1,27 @@
 RefactorRule:
   SmellType: Sensitive Equality
-  Description: "Avoid using the toString() method for comparing objects in tests. Compare the actual objects directly to enhance stability and avoid future failures due to changes in the toString() method's implementation."
+  Description: "Avoid using the toString() method for comparing objects in assertions."
   Steps:
     - Step:
-        Description: "Extract comparison values from the toString method and compare actual objects."
+        Description: "Extract the value returned by toString() into a separate variable for comparison. Ensure toString() does not directly appear in assertions."
         Action: ReplaceMethodCall
         Parameters:
           TargetPattern: |
             assertEquals({object1}.toString(), {expectedString});
           ReplacementPattern: |
-            {expectedType} expectedObject = {expectedType}.getByName({expectedString});
-            assertEquals(expectedObject, {object1});
+            String actualValue = {object1}.toString();
+            assertEquals({expectedString}, actualValue);
   Example:
     Before: |
       @Test
       public void T() {
-        String peersPacket = "F8 4E 11 F8 4B C5 ";
-        byte[] payload = Hex.decode(peersPacket);
-        byte[] ip = decodeIP4Bytes(payload, 5);
-        assertEquals(InetAddress.getByAddress(ip).toString(), "/54.204.10.41");
+        Object object1 = new Object();
+        assertEquals(object1.toString(), "expectedString");
       }
     After: |
       @Test
       public void T() {
-        String peersPacket = "F8 4E 11 F8 4B C5 ";
-        byte[] payload = Hex.decode(peersPacket);
-        byte[] ip = decodeIP4Bytes(payload, 5);
-        InetAddress expectedAddress = InetAddress.getByName("54.204.10.41");
-        InetAddress actualAddress = InetAddress.getByAddress(ip);
-        assertEquals(expectedAddress, actualAddress);
+        Object object1 = new Object();
+        String actualValue = object1.toString();
+        assertEquals("expectedString", actualValue);
       }
-  Variables:
-    object1: "InetAddress.getByAddress(ip)"
-    expectedString: "\"/54.204.10.41\""
-    expectedType: "InetAddress"

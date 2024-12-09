@@ -1,0 +1,8 @@
+total tests: 1
+total asserts: 6
+assertEquals(expectedCount, actualCount, "Expected 6 even numbers in combined arrays");
+assertEquals(expectedCount, actualCount, "Expected 5 even numbers in single array");
+assertEquals(expectedCount, actualCount, "Expected 5 even numbers in single dimension array");
+assertEquals(expectedCount, actualCount, "Expected 3 occurrences of 5 in combined arrays");
+assertEquals(expectedCount, actualCount, "Expected 2 occurrences of 5 in single array");
+assertEquals(expectedCount, actualCount, "Expected 2 occurrences of 5 in single dimension array");

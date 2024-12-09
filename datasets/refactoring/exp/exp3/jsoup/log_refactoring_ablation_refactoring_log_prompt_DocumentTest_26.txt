@@ -1,0 +1,59 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
+
+import java.nio.charset.StandardCharsets;
+
+public class DocumentTest {
+
+    @Test
+    public void testParseHtml() {
+        String html = "<p>Alrighty then it's not \uD83D\uDCA9. <span>Next</span></p>"; // 💩
+        Document doc = Jsoup.parse(html);
+        Elements p = doc.select("p");
+
+        Assertions.assertEquals(html, p.outerHtml(), "HTML should match the original input");
+    }
+
+    @Test
+    public void testOutputSettingsCharset() throws InterruptedException {
+        String html = "<p>Alrighty then it's not \uD83D\uDCA9. <span>Next</span></p>"; // 💩
+        Document doc = Jsoup.parse(html);
+        Elements p = doc.select("p");
+
+        final String[] out = new String[1];
+        Thread thread = new Thread(() -> {
+            out[0] = p.outerHtml();
+            doc.outputSettings().charset(StandardCharsets.US_ASCII);
+        });
+        thread.start();
+        thread.join();
+
+        Assertions.assertEquals(StandardCharsets.US_ASCII, doc.outputSettings().charset(), "Output charset should be US_ASCII");
+    }
+
+    @Test
+    public void testAsciiConversion() throws InterruptedException {
+        String html = "<p>Alrighty then it's not \uD83D\uDCA9. <span>Next</span></p>"; // 💩
+        String asci = "<p>Alrighty then it's not &#x1f4a9;. <span>Next</span></p>";
+        Document doc = Jsoup.parse(html);
+        Elements p = doc.select("p");
+
+        final String[] out = new String[1];
+        Thread thread = new Thread(() -> {
+            out[0] = p.outerHtml();
+            doc.outputSettings().charset(StandardCharsets.US_ASCII);
+        });
+        thread.start();
+        thread.join();
+
+        Assertions.assertEquals(asci, p.outerHtml(), "ASCII conversion should match expected output");
+    }
+}
+```
+

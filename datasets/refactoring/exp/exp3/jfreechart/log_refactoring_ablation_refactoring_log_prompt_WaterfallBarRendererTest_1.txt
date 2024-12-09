@@ -1,0 +1,92 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+
+class WaterfallBarRendererTest {
+
+    private WaterfallBarRenderer r1;
+    private WaterfallBarRenderer r2;
+
+    @BeforeEach
+    void setUp() {
+        r1 = new WaterfallBarRenderer();
+        r2 = new WaterfallBarRenderer();
+    }
+
+    @Test
+    void testDefaultEquality() {
+        assertEquals(r1, r2, "Default instances should be equal");
+    }
+
+    @ParameterizedTest(name = "Testing {0} with color {1}")
+    @CsvSource({
+            "firstBarPaint, CYAN",
+            "lastBarPaint, GREEN",
+            "positiveBarPaint, BLUE",
+            "negativeBarPaint, RED"
+    })
+    void testPropertyEquality(String property, String color) {
+        Color paint = Color.valueOf(color);
+        switch (property) {
+            case "firstBarPaint":
+                r1.setFirstBarPaint(paint);
+                r2.setFirstBarPaint(paint);
+                break;
+            case "lastBarPaint":
+                r1.setLastBarPaint(paint);
+                r2.setLastBarPaint(paint);
+                break;
+            case "positiveBarPaint":
+                r1.setPositiveBarPaint(paint);
+                r2.setPositiveBarPaint(paint);
+                break;
+            case "negativeBarPaint":
+                r1.setNegativeBarPaint(paint);
+                r2.setNegativeBarPaint(paint);
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown property: " + property);
+        }
+        assertEquals(r1, r2, "Instances should be equal after setting " + property);
+    }
+
+    @ParameterizedTest(name = "Testing {0} with different colors")
+    @CsvSource({
+            "firstBarPaint, CYAN, MAGENTA",
+            "lastBarPaint, GREEN, YELLOW",
+            "positiveBarPaint, BLUE, ORANGE",
+            "negativeBarPaint, RED, PINK"
+    })
+    void testPropertyInequality(String property, String color1, String color2) {
+        Color paint1 = Color.valueOf(color1);
+        Color paint2 = Color.valueOf(color2);
+        switch (property) {
+            case "firstBarPaint":
+                r1.setFirstBarPaint(paint1);
+                r2.setFirstBarPaint(paint2);
+                break;
+            case "lastBarPaint":
+                r1.setLastBarPaint(paint1);
+                r2.setLastBarPaint(paint2);
+                break;
+            case "positiveBarPaint":
+                r1.setPositiveBarPaint(paint1);
+                r2.setPositiveBarPaint(paint2);
+                break;
+            case "negativeBarPaint":
+                r1.setNegativeBarPaint(paint1);
+                r2.setNegativeBarPaint(paint2);
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown property: " + property);
+        }
+        assertNotEquals(r1, r2, "Instances should not be equal after setting different " + property);
+    }
+}
+```
+

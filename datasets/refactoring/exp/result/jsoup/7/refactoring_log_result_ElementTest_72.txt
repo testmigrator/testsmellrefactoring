@@ -1,0 +1,127 @@
+Input Parameters:
+Test Code:
+ @Test public void testShadowElementsAreUpdated() {
+        String html = "<div><p><a>One</a></p><p><a>Two</a></p>Three</div><span>Four</span><foo></foo><img>";
+        Document doc = Jsoup.parse(html);
+        Element div = doc.select("div").first();
+        Elements els = div.children();
+        List<Node> nodes = div.childNodes();
+
+        assertEquals(2, els.size()); // the two Ps
+        assertEquals(3, nodes.size()); // the "Three" textnode
+
+        Element p3 = new Element("p").text("P3");
+        Element p4 = new Element("p").text("P4");
+        div.insertChildren(1, p3);
+        div.insertChildren(3, p4);
+        Elements els2 = div.children();
+
+        // first els should not have changed
+        assertEquals(2, els.size());
+        assertEquals(4, els2.size());
+
+        assertEquals("<p><a>One</a></p>\n" +
+            "<p>P3</p>\n" +
+            "<p><a>Two</a></p>\n" +
+            "<p>P4</p>Three", div.html());
+        assertEquals("P3", els2.get(1).text());
+        assertEquals("P4", els2.get(3).text());
+
+        p3.after("<span>Another</span");
+
+        Elements els3 = div.children();
+        assertEquals(5, els3.size());
+        assertEquals("span", els3.get(2).tagName());
+        assertEquals("Another", els3.get(2).text());
+
+        assertEquals("<p><a>One</a></p>\n" +
+            "<p>P3</p><span>Another</span>\n" +
+            "<p><a>Two</a></p>\n" +
+            "<p>P4</p>Three", div.html());
+    }
+Context: /org/jsoup/nodes/Element
+Smell List: ['Assertion_Roulette', 'Eager_Test', 'Duplicate_Assert', 'Magic_Number_Test']
+Smell Description List: ['Test Smell Type：Assertion Roulette\n\nFeature:\nA test method contains more than one assertion statement without an explanation/message (parameter in the assertion method).\n', 'Test Smell Type：Eager Test\n\nFeature:\nA test method contains multiple calls to multiple production methods.\n', 'Test Smell Type：Duplicate Assert\n\nFeature:\nA test method that contains more than one assertion statement with the same parameters.\n', 'Test Smell Type：Magic Number Test\n\nFeature:\nAn assertion method that contains a numeric literal as an argument.\n']
+Refactoring DSL: ['RefactorRule:\n  SmellType: Assertion Roulette\n  Description: Add descriptive messages to assert statements to improve readability and maintainability.\n  Steps:\n    - Step:\n        Description: "Add descriptive message to each assert statement(except assertThat, assertThrows)."\n        Action: AddMessageToAssert\n        Parameters:\n          MessagePattern: "{assertionMessage}"\n  Example:\n    Before: |\n      @Test\n      public void T() {\n        stmt\n        assert_1\n        ...\n        assert_n\n        stmt\'\n      }\n    After: |\n      @Test\n      public void T() {\n        stmt\n        assert_1(..., "Descriptive message for assert statement")\n        ...\n        assert_n(..., "Descriptive message for assert statement")\n        stmt\'\n      }\n    Variables:\n      assertionMessage: "Descriptive message for assert statement"\n', 'RefactorRule:\n  SmellType: Eager Test\n  Description: "Refactor test methods to group related assertions logically and extract reusable setup logic into private methods."\n  Steps:\n    - Step1:\n        Description: "Extract shared setup logic into a reusable, private method and ensure it is used across all relevant tests."\n        Action: ExtractSetupMethod\n        Parameters:\n          Condition: "If multiple tests share the same setup logic."\n          MethodNamePattern: setupTest{OriginalMethodName}\n    - Step2:\n        Description: "Group related assertions into cohesive sub-tests while retaining necessary setup logic."\n        Action: GroupAssertions\n        Parameters:\n          GroupBy: LogicalConcern\n    - Step3:\n        Description: "Create new test methods for each cohesive group of assertions and ensure readability."\n        Action: CreateTestMethods\n        Parameters:\n          IncludeSetup: True\n          NamePattern: test{OriginalMethodName}_{Concern}\n  Example:\n    Before: |\n      @Test\n      public void testExample() {\n          setup();\n          assertEquals(1, methodA());\n          assertTrue(methodB());\n      }\n    After: |\n      private void setupTestExample() {\n          setup();\n      }\n\n      @Test\n      public void testExample_MethodA() {\n          setupTestExample();\n          assertEquals(1, methodA());\n      }\n\n      @Test\n      public void testExample_MethodB() {\n          setupTestExample();\n          assertTrue(methodB());\n      }\n  Variables:\n    OriginalMethodName: The name of the original test method.\n    LogicalConcern: The logical aspect tested (e.g., a specific API, validation, or behavior).\n', 'RefactorRule:\n  SmellType: Duplicate Assert\n  Description: "If the assertion logic is the same but tested with different inputs, prioritize splitting the test into multiple separate methods with a single assertion each."\n  Steps:\n    - Step:\n        Description: "Identify duplicate assertions that test the same condition with different inputs."\n        Action: IdentifySameAssertions\n        Parameters:\n          SourcePattern: |\n            assert(expectedA, ...)\n            assert(expectedB, ...)\n    - Step:\n        Description: "If the assertions are simple and few, split the test into multiple methods, each with a single assertion."\n        Action: SplitMethod\n        Parameters:\n          TargetType: Method\n          Conditions: |\n            - The assertions are simple and do not involve complex variations.\n    - Step:\n        Description: "If there are many similar assertions with significant variations, convert the test to a parameterized test."\n        Action: ConvertToParameterizedTest\n        Parameters:\n          TargetType: Method\n          Conditions: |\n            - There are many test cases with similar logic that would benefit from parameterization.\n            - The variations are extensive, with a large number of inputs or expected outputs.\n    - Step:\n        Description: "Add @CsvSource annotation to declare parameterized values."\n        Action: AddAnnotation\n        Parameters:\n          TargetType: Method\n          Annotation: |\n            @CsvSource({\n              "{paramValues}"\n            })\n    - Step:\n        Description: "Refactor the test method to use parameterized values."\n        Action: RefactorMethod\n        Parameters:\n          SourcePattern: |\n            public void T() {\n              {originalStatements}\n            }\n          ReplacementPattern: |\n            public void T({parameterNames}) {\n              {refactoredStatements}\n            }\n  Example:\n    Before: |\n      @Test\n      public void testDuplicateAssertions() {\n        assertEquals(expectedA, methodUnderTest(a));\n        assertEquals(expectedB, methodUnderTest(b));\n      }\n    After: |\n      @Test\n      public void testWithInputA() {\n        assertEquals(expectedA, methodUnderTest(a));\n      }\n      @Test\n      public void testWithInputB() {\n        assertEquals(expectedB, methodUnderTest(b));\n      }\n', 'RefactorRule:\n  SmellType: Magic Number Test\n  Description: "Extract magic numbers and assign meaningful names to improve readability and maintainability."\n  Steps:\n    - Step:\n        Action: IdentifyMagicNumbers\n        Description: "Identify magic numbers in assertions"\n        Parameters:\n          TargetType: Method\n          SourcePattern: |\n            assertEquals({magicNumber}, {variable})\n    - Step:\n        Action: ExtractVariable\n        Description: "Extract magic number to a variable with meaningful name"\n        Parameters:\n          TargetType: Method\n          SourcePattern: |\n            assertEquals({magicNumber}, {variable})\n          ReplacementPattern: |\n            int {meaningfulName} = {magicNumber};\n            assertEquals({meaningfulName}, {variable})\n  Example:\n    Before: |\n      @Test\n      public void T() {\n          stmt\n          assertEquals(1, a)\n          stmt\'\n      }\n    After: |\n      @Test\n      public void T() {\n          int x = 1; // x: meaningful variable name\n          stmt\n          assertEquals(x, a)\n          stmt\'\n      }\n  Variables:\n    magicNumber: "1"\n    variable: "a"\n    meaningfulName: "x"\n']
+Checkpoints: ['[ ] All assert statements have been added with clear explanatory messages.\n', '[ ] All eager tests have been split into separate tests, each focusing on verifying a single API.\n', '[ ] All duplicate assertions have been refactored using JUnit 5 Parameterized Tests, where the lists of parameterizable values are declared in a specific annotation, and the test method is executed independently m times.\n', '[ ] All magic numbers in the test code have been extracted and assigned meaningful variable names.\n']
+
+Refactored Code: 
+ 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Node;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class ElementTest {
+
+    private Document doc;
+    private Element div;
+
+    @BeforeEach
+    public void setupTestShadowElementsAreUpdated() {
+        String html = "<div><p><a>One</a></p><p><a>Two</a></p>Three</div><span>Four</span><foo></foo><img>";
+        doc = Jsoup.parse(html);
+        div = doc.select("div").first();
+    }
+
+    @Test
+    public void testInitialChildrenAndNodes() {
+        Elements els = div.children();
+        List<Node> nodes = div.childNodes();
+
+        assertEquals(2, els.size(), "Initial children size should be 2");
+        assertEquals(3, nodes.size(), "Initial nodes size should be 3");
+    }
+
+    @Test
+    public void testInsertChildren() {
+        Element p3 = new Element("p").text("P3");
+        Element p4 = new Element("p").text("P4");
+        div.insertChildren(1, p3);
+        div.insertChildren(3, p4);
+
+        Elements els2 = div.children();
+
+        assertEquals(2, div.children().size(), "Initial children size should not change after insertion");
+        assertEquals(4, els2.size(), "Children size should be 4 after insertion");
+
+        assertEquals("<p><a>One</a></p>\n" +
+                "<p>P3</p>\n" +
+                "<p><a>Two</a></p>\n" +
+                "<p>P4</p>Three", div.html(), "HTML should match expected output after insertion");
+        assertEquals("P3", els2.get(1).text(), "Second child should be P3");
+        assertEquals("P4", els2.get(3).text(), "Fourth child should be P4");
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "2, span, Another",
+            "5, p, P4"
+    })
+    public void testAfterMethod(int index, String tagName, String text) {
+        Element p3 = new Element("p").text("P3");
+        div.insertChildren(1, p3);
+        p3.after("<span>Another</span>");
+
+        Elements els3 = div.children();
+
+        assertEquals(5, els3.size(), "Children size should be 5 after adding span");
+        assertEquals(tagName, els3.get(index).tagName(), "Tag name at index " + index + " should be " + tagName);
+        assertEquals(text, els3.get(index).text(), "Text at index " + index + " should be " + text);
+
+        assertEquals("<p><a>One</a></p>\n" +
+                "<p>P3</p><span>Another</span>\n" +
+                "<p><a>Two</a></p>\n" +
+                "<p>P4</p>Three", div.html(), "HTML should match expected output after adding span");
+    }
+}
+
+

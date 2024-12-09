@@ -1,0 +1,42 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIf;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class CircleFittingTest {
+
+    private static final double TOLERANCE = 1e-6;
+    private static final double EXPECTED_X = -0.1517383071957963;
+    private static final double EXPECTED_Y = 0.2074999736353867;
+    private static final double EXPECTED_RMS = 0.04268731682389561;
+    private static final double RMS_TOLERANCE = 1e-8;
+    private static final double WEIGHT_VALUE = 2;
+
+    @Test
+    @EnabledIf("isCircleFittingGoodInit")
+    public void testCircleFittingGoodInit() {
+        CircleVectorial circle = new CircleVectorial();
+        double[][] points = circlePoints;
+        double[] weights = new double[points.length];
+        Arrays.fill(weights, WEIGHT_VALUE);
+        for (int i = 0; i < points.length; ++i) {
+            circle.addPoint(points[i][0], points[i][1]);
+        }
+        final double[] start = {0, 0};
+
+        Optimum optimum = optimizer.optimize(
+                builder(circle).weight(new DiagonalMatrix(weights)).start(start).build());
+
+        assertEquals(EXPECTED_X, optimum.getPoint()[0], TOLERANCE);
+        assertEquals(EXPECTED_Y, optimum.getPoint()[1], TOLERANCE);
+        assertEquals(EXPECTED_RMS, optimum.getRMS(), RMS_TOLERANCE);
+    }
+
+    private boolean isCircleFittingGoodInit() {
+        // Implement the condition to enable or disable the test
+        return true; // Example condition, replace with actual condition if needed
+    }
+}
+```
+

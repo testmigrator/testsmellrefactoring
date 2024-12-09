@@ -1,0 +1,65 @@
+asserts result: 
+ ```java
+import org.jsoup.nodes.Attributes;
+import org.jsoup.nodes.Attribute;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class AttributesTest {
+
+    private static final String BASE_URI_KEY = "baseUri";
+    private static final String ANOTHER_KEY = "another";
+    private static final String ONE_KEY = "One";
+    private static final String TWO_KEY = "Two";
+    private static final String EXAMPLE_COM = "example.com";
+
+    @Test
+    public void testListSizeAfterSkippingInternalAttributes() {
+        // Arrange
+        Attributes a = new Attributes();
+        a.put(ONE_KEY, ONE_KEY);
+        a.put(Attributes.internalKey(BASE_URI_KEY), EXAMPLE_COM);
+        a.put(TWO_KEY, TWO_KEY);
+        a.put(Attributes.internalKey(ANOTHER_KEY), EXAMPLE_COM);
+
+        // Act
+        List<Attribute> attributes = a.asList();
+
+        // Assert
+        assertEquals("List size should be 2 after skipping internal attributes", 2, attributes.size());
+    }
+
+    @Test
+    public void testFirstAttributeKeyIsOne() {
+        // Arrange
+        Attributes a = new Attributes();
+        a.put(ONE_KEY, ONE_KEY);
+        a.put(Attributes.internalKey(BASE_URI_KEY), EXAMPLE_COM);
+        a.put(TWO_KEY, TWO_KEY);
+        a.put(Attributes.internalKey(ANOTHER_KEY), EXAMPLE_COM);
+
+        // Act
+        List<Attribute> attributes = a.asList();
+
+        // Assert
+        assertEquals("First attribute key should be 'One'", ONE_KEY, attributes.get(0).getKey());
+    }
+
+    @Test
+    public void testSecondAttributeKeyIsTwo() {
+        // Arrange
+        Attributes a = new Attributes();
+        a.put(ONE_KEY, ONE_KEY);
+        a.put(Attributes.internalKey(BASE_URI_KEY), EXAMPLE_COM);
+        a.put(TWO_KEY, TWO_KEY);
+        a.put(Attributes.internalKey(ANOTHER_KEY), EXAMPLE_COM);
+
+        // Act
+        List<Attribute> attributes = a.asList();
+
+        // Assert
+        assertEquals("Second attribute key should be 'Two'", TWO_KEY, attributes.get(1).getKey());
+    }
+}
+```
+

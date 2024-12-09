@@ -1,0 +1,60 @@
+asserts result: 
+ ```java
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import com.google.gson.stream.JsonWriter;
+import com.google.gson.stream.Strictness;
+import org.junit.jupiter.api.Test;
+
+class JsonWriterTest {
+
+    @Test
+    public void testSetLenientFalse_Strictness() throws IOException {
+        JsonWriter jsonWriter = new JsonWriter(new StringWriter());
+        jsonWriter.setLenient(false);
+        assertThat(jsonWriter.getStrictness()).isEqualTo(Strictness.LEGACY_STRICT);
+    }
+
+    @Test
+    public void testSetLenientFalse_WriteValue() throws IOException {
+        JsonWriter jsonWriter = new JsonWriter(new StringWriter());
+        jsonWriter.setLenient(false);
+        jsonWriter.value(false);
+    }
+
+    @Test
+    public void testSetLenientFalse_Close() throws IOException {
+        JsonWriter jsonWriter = new JsonWriter(new StringWriter());
+        jsonWriter.setLenient(false);
+        jsonWriter.close();
+    }
+
+    @Test
+    public void testSetLenientFalse_ThrowsIOExceptionOnWrite() {
+        JsonWriter jsonWriter = new JsonWriter(new StringWriter()) {
+            @Override
+            public JsonWriter value(boolean value) throws IOException {
+                throw new IOException("Simulated IOException");
+            }
+        };
+        jsonWriter.setLenient(false);
+
+        assertThrows(IOException.class, () -> jsonWriter.value(false));
+    }
+
+    @Test
+    public void testSetLenientFalse_ThrowsIOExceptionOnClose() {
+        JsonWriter jsonWriter = new JsonWriter(new StringWriter()) {
+            @Override
+            public JsonWriter close() throws IOException {
+                throw new IOException("Simulated IOException");
+            }
+        };
+        jsonWriter.setLenient(false);
+
+        assertThrows(IOException.class, jsonWriter::close);
+    }
+}
+```
+

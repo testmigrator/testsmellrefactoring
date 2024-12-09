@@ -1,0 +1,12 @@
+asserts result: 
+ Yes
+
+The refactored tests maintain the same functionality as the original test. The original test checks for the following:
+
+1. `r1` and `r2` are different instances.
+2. `r1` and `r2` are of the same class.
+3. `r1` and `r2` are equal.
+4. The `LegendItemToolTipGenerator` of `r1` and `r2` are different instances.
+
+The refactored tests split these checks into two separate methods but still perform all the same assertions. Therefore, the functionality is consistent.
+

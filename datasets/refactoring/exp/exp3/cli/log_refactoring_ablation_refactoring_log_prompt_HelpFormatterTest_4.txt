@@ -1,0 +1,28 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+
+public class HelpFormatterTest {
+
+    private final HelpFormatter hf = new HelpFormatter();
+    private final int maxWidth = 8;
+
+    @ParameterizedTest
+    @CsvSource({
+        "This is a test., 8, 0, 7",
+        "This is a test., 8, 8, -1",
+        "aaaa aa, 3, 0, 3",
+        "aaaaaa aaaaaa, 6, 0, 6",
+        "aaaaaa aaaaaa, 6, 7, -1",
+        "aaaaaa\n aaaaaa, 6, 0, 7",
+        "aaaaaa\t aaaaaa, 6, 0, 7"
+    })
+    public void testFindWrapPos(String text, int width, int start, int expected) {
+        assertEquals(expected, hf.findWrapPos(text, width, start), "wrap position");
+    }
+}
+```
+

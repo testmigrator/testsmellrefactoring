@@ -1,0 +1,6 @@
+total tests: 1
+total asserts: 4
+Assert.assertEquals("Integration with discontinuity should require many evaluations",MAX_X * VALUE, integrator.integrate(Integer.MAX_VALUE, f, -10, MAX_X), delta);
+Assert.assertTrue("Integration with discontinuity should require many evaluations",  integrator.getEvaluations() > MAX_EVALUATIONS);
+Assert.assertEquals("Splitting integration should provide accurate result",  MAX_X * VALUE, sum1 + sum2, delta);
+Assert.assertTrue("Splitting integration should be more efficient",  eval1 + eval2 < ALLOWED_EVALUATIONS);

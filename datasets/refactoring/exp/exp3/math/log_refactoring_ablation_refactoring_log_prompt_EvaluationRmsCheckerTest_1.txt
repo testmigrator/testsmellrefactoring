@@ -1,0 +1,62 @@
+asserts result: 
+ ```java
+import org.apache.commons.math4.legacy.fitting.leastsquares.EvaluationRmsChecker;
+import org.junit.Test;
+import static org.junit.Assert.*;
+
+public class EvaluationRmsCheckerTest {
+
+    private EvaluationRmsChecker checker = new EvaluationRmsChecker(0.1, 1);
+
+    @Test
+    public void testConverged_RelTolMatched() {
+        // Setup
+        Evaluation e200 = mockEvaluation(200);
+        Evaluation e210 = mockEvaluation(210);
+
+        // Action + Verify
+        assertTrue("Should converge when relative tolerance is matched", checker.converged(0, e200, e210));
+    }
+
+    @Test
+    public void testConverged_AbsTolMatched() {
+        // Setup
+        Evaluation e1 = mockEvaluation(1);
+        Evaluation e1_9 = mockEvaluation(1.9);
+
+        // Action + Verify
+        assertTrue("Should converge when absolute tolerance is matched", checker.converged(0, e1, e1_9));
+    }
+
+    @Test
+    public void testConverged_BothTolsMatched() {
+        // Setup
+        Evaluation e1 = mockEvaluation(1);
+        Evaluation e1_01 = mockEvaluation(1.01);
+
+        // Action + Verify
+        assertTrue("Should converge when both tolerances are matched", checker.converged(0, e1, e1_01));
+    }
+
+    @Test
+    public void testConverged_NeitherTolMatched() {
+        // Setup
+        Evaluation e200 = mockEvaluation(200);
+        Evaluation e300 = mockEvaluation(300);
+
+        // Action + Verify
+        assertFalse("Should not converge when neither tolerance is matched", checker.converged(0, e200, e300));
+    }
+
+    private Evaluation mockEvaluation(double value) {
+        // Mock implementation of Evaluation
+        return new Evaluation() {
+            @Override
+            public double getRMS() {
+                return value;
+            }
+        };
+    }
+}
+```
+

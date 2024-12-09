@@ -1,0 +1,6 @@
+total tests: 1
+total asserts: 4
+Assert.assertEquals("Amplitude should match", AMPLITUDE, fitted[0], TOLERANCE);
+Assert.assertEquals("Angular frequency should match", ANGULAR_FREQUENCY, fitted[1], TOLERANCE);
+Assert.assertEquals("Phase should match", PHASE, Angle.Rad.WITHIN_0_AND_2PI.applyAsDouble(fitted[2]), TOLERANCE);
+Assert.assertTrue("Values should be close enough", JdkMath.abs(f.value(x) - ff.value(x)) < TOLERANCE);

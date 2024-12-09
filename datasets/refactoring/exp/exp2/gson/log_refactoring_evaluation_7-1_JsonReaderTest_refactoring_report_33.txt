@@ -1,0 +1,13 @@
+asserts result: 
+ Yes
+
+The refactored test maintains the same functionality as the original test. Both tests:
+
+1. Create a JSON string `["NaN"]`.
+2. Initialize a `JsonReader` with this JSON string.
+3. Begin reading an array from the JSON.
+4. Assert that calling `nextDouble()` on the reader throws a `MalformedJsonException`.
+5. Verify that the exception message matches the expected error message.
+
+The only differences are in the way the assertions are structured and the addition of descriptive messages in the refactored version, which do not change the functional behavior of the test.
+

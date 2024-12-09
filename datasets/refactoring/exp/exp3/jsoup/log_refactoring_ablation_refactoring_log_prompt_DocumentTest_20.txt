@@ -1,0 +1,61 @@
+asserts result: 
+ ```java
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.XmlDeclaration;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class DocumentTest {
+
+    private static final String CHARSET_UTF8 = "UTF-8";
+    private static final String XML_VERSION = "1.0";
+    private static final String ROOT_CONTENT = " node\n";
+
+    @Test
+    public void testMetaCharsetUpdateXmlUtf8Charset() {
+        final Document doc = createXmlDocument(XML_VERSION, "changeThis", true);
+        doc.updateMetaCharsetElement(true);
+        doc.charset(Charset.forName(CHARSET_UTF8));
+
+        assertEquals("XML declaration should have the correct encoding attribute", CHARSET_UTF8, doc.charset().name());
+    }
+
+    @Test
+    public void testMetaCharsetUpdateXmlUtf8SelectedNode() {
+        final Document doc = createXmlDocument(XML_VERSION, "changeThis", true);
+        doc.updateMetaCharsetElement(true);
+        doc.charset(Charset.forName(CHARSET_UTF8));
+
+        XmlDeclaration selectedNode = (XmlDeclaration) doc.childNode(0);
+        assertEquals("Selected node should have the correct encoding attribute", CHARSET_UTF8, selectedNode.attr("encoding"));
+    }
+
+    @Test
+    public void testMetaCharsetUpdateXmlUtf8OutputSettings() {
+        final Document doc = createXmlDocument(XML_VERSION, "changeThis", true);
+        doc.updateMetaCharsetElement(true);
+        doc.charset(Charset.forName(CHARSET_UTF8));
+
+        assertEquals("Output settings should have the correct charset", doc.charset(), doc.outputSettings().charset());
+    }
+
+    @Test
+    public void testMetaCharsetUpdateXmlUtf8ToString() {
+        final Document doc = createXmlDocument(XML_VERSION, "changeThis", true);
+        doc.updateMetaCharsetElement(true);
+        doc.charset(Charset.forName(CHARSET_UTF8));
+
+        final String expectedXml = "<?xml version=\"" + XML_VERSION + "\" encoding=\"" + CHARSET_UTF8 + "\"?>\n" +
+                "<root>\n" +
+                ROOT_CONTENT +
+                "</root>";
+        assertEquals("Document should be correctly serialized to string", expectedXml, doc.toString());
+    }
+
+    private Document createXmlDocument(String version, String content, boolean includeMetaCharset) {
+        // Implementation of the method to create an XML document
+        return new Document("");
+    }
+}
+```
+

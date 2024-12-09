@@ -1,0 +1,49 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIf;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+public class NumbersCustomClassTest {
+
+    private StringWriter stringWriter;
+    private JsonWriter jsonWriter;
+
+    @BeforeEach
+    public void setUp() throws IOException {
+        stringWriter = new StringWriter();
+        jsonWriter = new JsonWriter(stringWriter);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "-0.0", "1.0", "1.7976931348623157E308", "4.9E-324", "0.0", "0.00", "-0.5",
+            "2.2250738585072014E-308", "3.141592653589793", "2.718281828459045", "0", "0.01",
+            "0e0", "1e+0", "1e-0", "1e0000", "1e00001", "1e+1"
+    })
+    @EnabledIf("isValidNumber")
+    public void testValidNumbers(String validNumber) throws IOException {
+        jsonWriter.value(new LazilyParsedNumber(validNumber));
+        jsonWriter.close();
+
+        assertThat(stringWriter.toString()).isEqualTo("\"" + validNumber + "\"");
+    }
+
+    @Test
+    public void testInvalidNumber() {
+        assertThrows(NumberFormatException.class, () -> new LazilyParsedNumber("invalid"));
+    }
+
+    private boolean isValidNumber() {
+        // This method can be used to define conditions under which the test should run
+        // For example, if certain environment variables or configurations are set
+        return true; // Always return true for this example
+    }
+}
+```
+

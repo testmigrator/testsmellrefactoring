@@ -1,0 +1,69 @@
+asserts result: 
+ ```java
+import org.apache.commons.math4.analysis.differentiation.DerivativeStructure;
+import org.apache.commons.math4.analysis.differentiation.UnivariateDifferentiableFunction;
+import org.apache.commons.math4.analysis.function.Identity;
+import org.apache.commons.math4.analysis.function.Constant;
+import org.apache.commons.math4.analysis.function.Minus;
+import org.apache.commons.math4.analysis.function.Inverse;
+import org.apache.commons.math4.analysis.function.Power;
+import org.apache.commons.math4.analysis.function.Log;
+import org.apache.commons.math4.analysis.FunctionUtils;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class FunctionUtilsTest {
+
+    private static final double EPS = 1e-10;
+
+    @ParameterizedTest
+    @CsvSource({
+        "Identity,Identity,Identity,1",
+        "Constant,Identity,0",
+        "Identity,Constant,0",
+        "Minus,-1",
+        "Minus,Minus,1",
+        "Inverse,Minus,Identity,0.25",
+        "Power,Power,108"
+    })
+    public void testComposeDifferentiable(String functionName1, String functionName2, String functionName3, double expected) {
+        UnivariateDifferentiableFunction f1 = getFunctionByName(functionName1);
+        UnivariateDifferentiableFunction f2 = getFunctionByName(functionName2);
+        UnivariateDifferentiableFunction f3 = getFunctionByName(functionName3);
+
+        UnivariateDifferentiableFunction composed = FunctionUtils.compose(f1, f2, f3);
+        double result = composed.value(new DerivativeStructure(1, 1, 0, 3)).getPartialDerivative(1);
+        assertEquals(expected, result, EPS);
+    }
+
+    @Test
+    public void testComposeLogPower() {
+        UnivariateDifferentiableFunction pow = new Power(2);
+        double a = 9876.54321;
+        UnivariateDifferentiableFunction log = new Log();
+        double expected = pow.value(new DerivativeStructure(1, 1, 0, a)).getPartialDerivative(1) / pow.value(a);
+        double result = FunctionUtils.compose(log, pow).value(new DerivativeStructure(1, 1, 0, a)).getPartialDerivative(1);
+        assertEquals(expected, result, EPS);
+    }
+
+    private UnivariateDifferentiableFunction getFunctionByName(String name) {
+        switch (name) {
+            case "Identity":
+                return new Identity();
+            case "Constant":
+                return new Constant(4);
+            case "Minus":
+                return new Minus();
+            case "Inverse":
+                return new Inverse();
+            case "Power":
+                return new Power(2);
+            default:
+                throw new IllegalArgumentException("Unknown function name: " + name);
+        }
+    }
+}
+```
+

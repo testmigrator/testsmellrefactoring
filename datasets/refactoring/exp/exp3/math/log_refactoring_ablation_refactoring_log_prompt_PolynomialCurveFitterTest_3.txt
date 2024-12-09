@@ -1,0 +1,54 @@
+asserts result: 
+ ```java
+import org.apache.commons.math4.legacy.fitting.PolynomialCurveFitter;
+import org.apache.commons.math4.legacy.fitting.WeightedObservedPoints;
+import org.apache.commons.math4.legacy.analysis.polynomials.PolynomialFunction;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIf;
+
+import java.util.Random;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+public class PolynomialCurveFitterTest {
+
+    private static final Random RANDOMIZER = new Random(53882150042L);
+
+    @Test
+    @EnabledIf("isTestValid")
+    public void testSmallError() {
+        double maxError = 0;
+        for (int degree = 0; degree < 10; ++degree) {
+            PolynomialFunction p = buildRandomPolynomial(degree, RANDOMIZER);
+            PolynomialCurveFitter fitter = PolynomialCurveFitter.create(degree);
+
+            WeightedObservedPoints obs = new WeightedObservedPoints();
+            for (double x = -1.0; x < 1.0; x += 0.01) {
+                obs.add(1.0, x, p.value(x) + 0.1 * RANDOMIZER.nextGaussian());
+            }
+
+            PolynomialFunction fitted = new PolynomialFunction(fitter.fit(obs.toList()));
+
+            for (double x = -1.0; x < 1.0; x += 0.01) {
+                double error = Math.abs(p.value(x) - fitted.value(x)) / (1.0 + Math.abs(p.value(x)));
+                assertTrue(Math.abs(error) < 0.1, "Error exceeds threshold for degree " + degree + " at x = " + x);
+                maxError = Math.max(maxError, error);
+            }
+        }
+        assertTrue(maxError > 0.01, "Maximum error should be greater than 0.01");
+    }
+
+    private boolean isTestValid() {
+        return true; // This method can be extended to add more complex conditions if needed
+    }
+
+    private PolynomialFunction buildRandomPolynomial(int degree, Random randomizer) {
+        double[] coefficients = new double[degree + 1];
+        for (int i = 0; i <= degree; i++) {
+            coefficients[i] = randomizer.nextDouble();
+        }
+        return new PolynomialFunction(coefficients);
+    }
+}
+```
+

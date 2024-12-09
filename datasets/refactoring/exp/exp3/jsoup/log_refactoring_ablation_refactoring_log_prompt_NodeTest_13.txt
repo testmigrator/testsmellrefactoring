@@ -1,0 +1,33 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Node;
+import org.jsoup.nodes.Tag;
+import org.junit.Test;
+import static org.junit.Assert.*;
+
+public class NodeTest {
+
+    @Test
+    public void testRootDocumentIsCorrect() {
+        Document doc = Jsoup.parse("<div><p>Hello");
+        Element p = doc.select("p").first();
+        Node root = p.root();
+        assertEquals("The root node should be the document itself", doc, root);
+        assertNull("The root node should not have a parent", root.parent());
+        assertEquals("The document's root should be the document itself", doc, doc.root());
+        assertEquals("The document's owner document should be the document itself", doc, doc.ownerDocument());
+    }
+
+    @Test
+    public void testStandaloneElementProperties() {
+        Element standAlone = new Element(Tag.valueOf("p"), "");
+        assertNull("A standalone element should not have a parent", standAlone.parent());
+        assertEquals("A standalone element should be its own root", standAlone, standAlone.root());
+        assertNull("A standalone element should not have an owner document", standAlone.ownerDocument());
+    }
+}
+```
+

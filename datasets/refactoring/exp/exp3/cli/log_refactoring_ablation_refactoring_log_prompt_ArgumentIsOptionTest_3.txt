@@ -1,0 +1,30 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+import picocli.CommandLine;
+
+class CommandLineParserTest {
+
+    private final CommandLine.Parser parser = new CommandLine.Parser();
+    private final CommandLine.Model.OptionSpec[] options = {}; // Define your options here
+
+    @Test
+    public void testOptionWithArgument() {
+        final String[] args = {"-attr", "p"};
+        final CommandLine cl = parser.parse(options, args);
+
+        assertFalse(cl.hasOption("p"), "Confirm -p is not set");
+        assertTrue(cl.hasOption("attr"), "Confirm -attr is set");
+        assertEquals("p", cl.getOptionValue("attr"), "Confirm arg of -attr");
+        assertEquals(0, cl.getArgs().length, "Confirm all arguments recognized");
+    }
+}
+```
+
+**Explanation of Refactoring Steps**:
+1. **Removed Exception Handling**: The original test method was annotated with `@Test` and declared to throw `Exception`. In JUnit 5, it's better to use specific assertions for expected exceptions rather than declaring the method to throw `Exception`. Since no specific exception handling was needed in this test, the `throws Exception` was removed.
+2. **Extracted Magic Numbers**: The number `0` in the assertion `assertEquals(0, cl.getArgs().length, "Confirm all arguments recognized");` is a magic number. It was left as is because it is a clear and common value indicating no additional arguments. However, if more context or clarity is needed, it can be replaced with a named constant.
+3. **Corrected Assertion Message**: The message in the first assertion was corrected from "Confirm -p is set" to "Confirm -p is not set" to accurately reflect the expected outcome.
+4. **Improved Readability**: The code was formatted for better readability and consistency.
+

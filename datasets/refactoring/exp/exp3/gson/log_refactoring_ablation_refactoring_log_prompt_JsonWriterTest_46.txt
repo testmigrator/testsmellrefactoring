@@ -1,0 +1,59 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+
+import com.google.gson.stream.JsonWriter;
+import org.junit.jupiter.api.Test;
+import java.io.IOException;
+import java.io.StringWriter;
+
+class JsonWriterTest {
+
+    @Test
+    public void testBeginAndEndObject() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.beginObject();
+        jsonWriter.endObject();
+        assertThat(stringWriter.toString()).isEqualTo("{}");
+    }
+
+    @Test
+    public void testWriteSingleNameValue() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.beginObject();
+        jsonWriter.name("a").value(true);
+        jsonWriter.endObject();
+        assertThat(stringWriter.toString()).isEqualTo("{\"a\":true}");
+    }
+
+    @Test
+    public void testWriteDuplicateNameValue() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.beginObject();
+        jsonWriter.name("a").value(true);
+        jsonWriter.name("a").value(false);
+        jsonWriter.endObject();
+        // JsonWriter doesn't attempt to detect duplicate names
+        assertThat(stringWriter.toString()).isEqualTo("{\"a\":true,\"a\":false}");
+    }
+
+    @Test
+    public void testIOExceptionOnWrite() {
+        assertThrows(IOException.class, () -> {
+            StringWriter stringWriter = new StringWriter() {
+                @Override
+                public void write(char[] cbuf, int off, int len) throws IOException {
+                    throw new IOException("Simulated IOException");
+                }
+            };
+            JsonWriter jsonWriter = new JsonWriter(stringWriter);
+            jsonWriter.beginObject();
+        });
+    }
+}
+```
+

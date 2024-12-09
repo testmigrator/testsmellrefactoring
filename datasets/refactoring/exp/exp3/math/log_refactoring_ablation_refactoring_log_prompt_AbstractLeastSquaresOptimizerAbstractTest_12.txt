@@ -1,0 +1,40 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
+import org.apache.commons.math3.exception.DimensionMismatchException;
+import org.apache.commons.math3.linear.DiagonalMatrix;
+
+public class OptimizerTest {
+
+    private static final double TOLERANCE = 1e-6;
+    private static final double EXPECTED_RMS = 0;
+    private static final double[] EXPECTED_POINT = {-1, 1};
+    private static final double[] TARGET = {1};
+    private static final double[] WEIGHTS = {1};
+
+    @Test
+    public void testInconsistentSizes2() {
+        try {
+            LinearProblem problem = new LinearProblem(new double[][]{{1, 0}, {0, 1}}, new double[]{-1, 1});
+            Optimum optimum = optimizer.optimize(problem.getBuilder().build());
+
+            assertEquals(EXPECTED_RMS, optimum.getRMS(), TOLERANCE);
+            assertArrayEquals(EXPECTED_POINT, optimum.getPoint(), TOLERANCE);
+
+            // TODO: Move to builder test
+            optimizer.optimize(
+                problem.getBuilder()
+                    .target(TARGET)
+                    .weight(new DiagonalMatrix(WEIGHTS))
+                    .build()
+            );
+
+            fail("Expected DimensionMismatchException to be thrown");
+        } catch (DimensionMismatchException e) {
+            // Expected
+        }
+    }
+}
+```
+

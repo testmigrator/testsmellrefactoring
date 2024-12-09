@@ -1,0 +1,22 @@
+asserts result: 
+ ```java
+import org.junit.Test;
+import static org.junit.Assert.*;
+
+public class InstantiableTest {
+
+    @Test
+    public void testInstantiableEquals() {
+        // Given: Two instances of Instantiable
+        Instantiable instance1 = new Instantiable();
+        Instantiable instance2 = new Instantiable();
+
+        // When: Comparing the two instances using equals method
+        boolean result = instance1.equals(instance2);
+
+        // Then: The result should be false as default equals compares object references
+        assertFalse(result);
+    }
+}
+```
+

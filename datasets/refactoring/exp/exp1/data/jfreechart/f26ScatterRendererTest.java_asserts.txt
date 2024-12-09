@@ -1,0 +1,8 @@
+total tests: 2
+total asserts: 6
+assertEquals("ScatterRenderers should be equal", r1, r2);
+assertEquals("Hash codes of ScatterRenderers should be equal", h1, h2);
+assertNotSame(r1, r2, "Cloned objects should not be the same instance");
+assertSame(r1.getClass(), r2.getClass(), "Cloned object should be of the same class as the original");
+assertEquals(r1, r2, "Cloned object should be equal to the original");
+assertTrue(checkIndependence(r1, r2), "Cloned objects should be independent");

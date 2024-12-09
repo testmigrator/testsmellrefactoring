@@ -1,0 +1,27 @@
+asserts result: 
+ ```java
+import static org.junit.Assert.assertEquals;
+
+import org.jfree.chart.renderer.category.StandardBarPainter;
+import org.junit.Test;
+
+public class StandardBarPainterTest {
+
+    @Test
+    public void testEquals() {
+        StandardBarPainter p1 = new StandardBarPainter();
+        StandardBarPainter p2 = new StandardBarPainter();
+        assertEquals("Two default StandardBarPainter instances should be equal", p1, p2);
+    }
+
+    @Test
+    public void testHashCode() {
+        StandardBarPainter p1 = new StandardBarPainter();
+        StandardBarPainter p2 = new StandardBarPainter();
+        int h1 = p1.hashCode();
+        int h2 = p2.hashCode();
+        assertEquals("Hash codes of two default StandardBarPainter instances should be equal", h1, h2);
+    }
+}
+```
+

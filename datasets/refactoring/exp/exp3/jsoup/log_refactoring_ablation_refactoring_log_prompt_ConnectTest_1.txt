@@ -1,0 +1,23 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.junit.jupiter.api.Test;
+
+public class UrlFetcherTest {
+
+    private String echoUrl = "http://example.com"; // Example URL, replace with actual URL
+
+    @Test
+    public void fetchUrl() {
+        assertDoesNotThrow(() -> {
+            Document doc = Jsoup.parse(new URL(echoUrl), 10 * 1000);
+            assertTrue(doc.title().contains("Environment Variables"));
+        }, "Fetching URL should not throw an exception");
+    }
+}
+```
+

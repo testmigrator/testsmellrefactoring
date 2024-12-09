@@ -1,0 +1,30 @@
+asserts result: 
+ ```java
+import static org.junit.Assert.assertThrows;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+
+import org.junit.Test;
+
+public class JsonReaderTest {
+
+    @Test
+    public void testStringWithLeadingSlash_PeekThrowsMalformedJsonException() {
+        // Arrange
+        JsonReader reader = new JsonReader(reader("/x"));
+        reader.setStrictness(Strictness.LENIENT);
+
+        // Act & Assert
+        var exception = assertThrows(MalformedJsonException.class, () -> reader.peek());
+        assertThat(exception.getMessage(), equalTo(
+            "Expected value at line 1 column 1 path $\n" +
+            "See https://github.com/google/gson/blob/main/Troubleshooting.md#malformed-json"
+        ));
+    }
+
+    private Reader reader(String content) {
+        return new StringReader(content);
+    }
+}
+```
+

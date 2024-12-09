@@ -1,0 +1,50 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Node;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+
+import java.util.List;
+
+public class ElementTest {
+
+    @ParameterizedTest
+    @CsvSource({
+        "6, IllegalArgumentException",
+        "-5, IllegalArgumentException",
+        "0, NullPointerException"
+    })
+    public void testInsertChildrenWithInvalidArguments(int index, Class<? extends Exception> expectedException) {
+        Document doc = Jsoup.parse("<div id=1>Text <p>One</p> Text <p>Two</p></div><div id=2></div>");
+        Element div1 = doc.select("div").get(0);
+        Element div2 = doc.select("div").get(1);
+        List<Node> children = div1.childNodes();
+
+        Assertions.assertThrows(expectedException, () -> {
+            if (expectedException == NullPointerException.class) {
+                div2.insertChildren(index, (Collection<? extends Node>) null);
+            } else {
+                div2.insertChildren(index, children);
+            }
+        }, "Expected " + expectedException.getSimpleName() + " to be thrown when index is " + index);
+    }
+
+    @Test
+    public void testInsertChildrenWithValidArguments() {
+        Document doc = Jsoup.parse("<div id=1>Text <p>One</p> Text <p>Two</p></div><div id=2></div>");
+        Element div1 = doc.select("div").get(0);
+        Element div2 = doc.select("div").get(1);
+        List<Node> children = div1.childNodes();
+
+        div2.insertChildren(0, children);
+
+        Assertions.assertEquals("Text One Text Two", div2.text(), "Children should be inserted correctly at index 0");
+    }
+}
+```
+

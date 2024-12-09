@@ -1,0 +1,19 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
+
+public class CircleFittingTest {
+
+    @Override
+    @Test
+    public void testCircleFittingBadInit() {
+        /*
+         * This test does not converge with this optimizer.
+         */
+        Executable executable = () -> super.testCircleFittingBadInit();
+        assertThrows(ConvergenceException.class, executable, "Expected ConvergenceException to be thrown");
+    }
+}
+```
+

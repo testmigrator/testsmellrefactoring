@@ -1,0 +1,28 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import static org.junit.Assert.assertEquals;
+import org.junit.Test;
+
+public class ElementTest {
+
+    @Test
+    public void testSetHtmlSingleParagraph() {
+        Document doc = Jsoup.parse("<div id=1><p>Hello</p></div>");
+        Element div = doc.getElementById("1");
+        div.html("<p>there</p>");
+        assertEquals("<p>there</p>", TextUtil.stripNewlines(div.html()));
+    }
+
+    @Test
+    public void testSetHtmlMultipleParagraphs() {
+        Document doc = Jsoup.parse("<div id=1><p>Hello</p></div>");
+        Element div = doc.getElementById("1");
+        div.html("<p>there</p><p>now</p>");
+        assertEquals("<p>there</p><p>now</p>", TextUtil.stripNewlines(div.html()));
+    }
+}
+```
+

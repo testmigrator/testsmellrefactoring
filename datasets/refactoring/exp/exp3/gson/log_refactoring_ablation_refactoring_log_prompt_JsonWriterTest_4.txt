@@ -1,0 +1,33 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import com.google.gson.stream.JsonWriter;
+import com.google.gson.stream.Strictness;
+import org.junit.jupiter.api.Test;
+
+class JsonWriterTest {
+
+    @Test
+    public void testSetStrictness() {
+        JsonWriter jsonWriter = new JsonWriter(new StringWriter());
+        jsonWriter.setStrictness(Strictness.STRICT);
+        assertEquals(Strictness.STRICT, jsonWriter.getStrictness());
+    }
+
+    @Test
+    public void testWriteValueWithStrictness() {
+        JsonWriter jsonWriter = new JsonWriter(new StringWriter());
+        jsonWriter.setStrictness(Strictness.STRICT);
+        assertDoesNotThrow(() -> jsonWriter.value(false));
+    }
+
+    @Test
+    public void testCloseJsonWriter() {
+        JsonWriter jsonWriter = new JsonWriter(new StringWriter());
+        assertDoesNotThrow(jsonWriter::close);
+    }
+}
+```
+

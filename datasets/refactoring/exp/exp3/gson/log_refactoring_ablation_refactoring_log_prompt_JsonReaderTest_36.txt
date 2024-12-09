@@ -1,0 +1,23 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+
+import org.junit.jupiter.api.Test;
+
+import com.google.gson.stream.JsonReader;
+import java.io.IOException;
+import java.io.StringReader;
+
+class JsonReaderTest {
+
+    @Test
+    public void testEscapeCharacterQuoteWithoutStrictMode() throws IOException {
+        String json = "\"\\'\"";
+        JsonReader reader = new JsonReader(new StringReader(json));
+        assertThat(reader.nextString(), equalTo("''"));
+    }
+}
+```
+

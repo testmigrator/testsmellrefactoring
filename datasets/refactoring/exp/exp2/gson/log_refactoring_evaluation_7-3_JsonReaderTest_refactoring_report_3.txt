@@ -1,0 +1,15 @@
+asserts result: 
+ Yes
+
+The refactored tests maintain the same functionality as the original test. The original test checks two things:
+
+1. It reads the first character and expects it to be `")"`.
+2. It then attempts to read the next string and expects a `MalformedJsonException` to be thrown with a specific error message.
+
+The refactored tests split these checks into two separate methods:
+
+1. `testLenientPartialNonExecutePrefix_ReadFirstCharacter` ensures that the first character is read correctly.
+2. `testLenientPartialNonExecutePrefix_ThrowsExceptionOnSecondRead` ensures that attempting to read the second string throws the expected `MalformedJsonException` with the correct error message.
+
+Both the original and refactored tests cover the same scenarios and verify the same conditions, so the functionality is consistent.
+

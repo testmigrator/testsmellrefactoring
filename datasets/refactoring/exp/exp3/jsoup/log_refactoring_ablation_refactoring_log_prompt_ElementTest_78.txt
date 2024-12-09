@@ -1,0 +1,41 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIf;
+
+public class ElementTest {
+
+    private static final String HTML = "<html><body><div><p>before1</p><p>before2</p><p>XXX</p><p>after1</p><p>after2</p></div></body></html>";
+
+    @Test
+    @EnabledIf("hasElementToTest")
+    public void testRemoveAfterIndex() {
+        Document doc2 = Jsoup.parse(HTML, "");
+        Element body = doc2.select("body").first();
+        Elements elems = body.select("p:matchesOwn(XXX)");
+        Element xElem = elems.first();
+        removeElementsAfterIndex(xElem);
+        assertEquals("<body><div><p>before1</p><p>before2</p><p>XXX</p></div></body>", TextUtil.stripNewlines(body.outerHtml()));
+    }
+
+    private boolean hasElementToTest() {
+        Document doc2 = Jsoup.parse(HTML, "");
+        Element body = doc2.select("body").first();
+        Elements elems = body.select("p:matchesOwn(XXX)");
+        return !elems.isEmpty();
+    }
+
+    private void removeElementsAfterIndex(Element element) {
+        Elements afterX = element.parent().getElementsByIndexGreaterThan(element.elementSiblingIndex());
+        for (Element p : afterX) {
+            p.remove();
+        }
+    }
+}
+```
+

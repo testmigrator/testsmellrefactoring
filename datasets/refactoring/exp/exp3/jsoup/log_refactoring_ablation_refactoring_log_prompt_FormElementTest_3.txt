@@ -1,0 +1,22 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.form.FormElement;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class FormElementTest {
+
+    @Test
+    public void testFormDataUsesFirstAttribute() {
+        String html = "<form><input name=test value=foo name=test2 value=bar>";
+        Document doc = Jsoup.parse(html);
+        FormElement form = (FormElement) doc.selectFirst("form");
+        assertEquals("test", form.formData().get(0).key());
+        assertEquals("foo", form.formData().get(0).value());
+    }
+}
+```
+

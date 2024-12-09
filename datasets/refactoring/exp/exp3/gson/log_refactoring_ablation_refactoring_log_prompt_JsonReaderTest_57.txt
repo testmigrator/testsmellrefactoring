@@ -1,0 +1,41 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.*;
+import static com.google.gson.stream.JsonToken.*;
+
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.Strictness;
+import org.junit.jupiter.api.Test;
+
+class JsonReaderTest {
+
+    @Test
+    public void testNegativeZero_BeginArray() throws Exception {
+        JsonReader reader = new JsonReader(reader("[-0]"));
+        reader.setStrictness(Strictness.LEGACY_STRICT);
+        reader.beginArray();
+        assertEquals(BEGIN_ARRAY, reader.peek(), "Expected BEGIN_ARRAY token after beginArray()");
+    }
+
+    @Test
+    public void testNegativeZero_PeekNumber() throws Exception {
+        JsonReader reader = new JsonReader(reader("[-0]"));
+        reader.setStrictness(Strictness.LEGACY_STRICT);
+        reader.beginArray();
+        assertEquals(NUMBER, reader.peek(), "Expected NUMBER token after peek()");
+    }
+
+    @Test
+    public void testNegativeZero_NextString() throws Exception {
+        JsonReader reader = new JsonReader(reader("[-0]"));
+        reader.setStrictness(Strictness.LEGACY_STRICT);
+        reader.beginArray();
+        assertEquals("-0", reader.nextString(), "Expected '-0' as the next string value");
+    }
+
+    private JsonReader reader(String content) {
+        return new JsonReader(new StringReader(content));
+    }
+}
+```
+

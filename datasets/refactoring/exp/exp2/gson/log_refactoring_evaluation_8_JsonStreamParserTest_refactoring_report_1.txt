@@ -1,0 +1,5 @@
+asserts result: 
+ Yes
+
+The refactored tests maintain the same functionality as the original test. The original test checks two strings sequentially, and the refactored tests do the same but split into two separate methods. Each refactored test method focuses on one specific string, ensuring that the functionality remains consistent. The addition of `withFailMessage` in the assertions does not change the core behavior of the tests; it only provides more detailed error messages if the tests fail.
+

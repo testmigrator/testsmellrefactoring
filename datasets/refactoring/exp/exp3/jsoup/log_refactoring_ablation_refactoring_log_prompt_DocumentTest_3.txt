@@ -1,0 +1,37 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Entities;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class DocumentTest {
+
+    @Test
+    public void testDefaultOutputEncoding() {
+        Document doc = Jsoup.parse("<p title=π>π & < > </p>");
+        // Verify default UTF-8 encoding
+        assertEquals("Default HTML output should be encoded in UTF-8", "<p title=\"π\">π &amp; &lt; &gt; </p>", doc.body().html());
+        assertEquals("Default charset should be UTF-8", "UTF-8", doc.outputSettings().charset().name());
+    }
+
+    @Test
+    public void testAsciiOutputEncoding() {
+        Document doc = Jsoup.parse("<p title=π>π & < > </p>");
+        doc.outputSettings().charset("ascii");
+        // Verify ASCII encoding with base escape mode
+        assertEquals("Base escape mode should use numeric entities for non-ASCII characters", Entities.EscapeMode.base, doc.outputSettings().escapeMode());
+        assertEquals("HTML output should use numeric entities for non-ASCII characters in ASCII mode", "<p title=\"&#x3c0;\">&#x3c0; &amp; &lt; &gt; </p>", doc.body().html());
+    }
+
+    @Test
+    public void testExtendedOutputEncoding() {
+        Document doc = Jsoup.parse("<p title=π>π & < > </p>");
+        doc.outputSettings().escapeMode(Entities.EscapeMode.extended);
+        // Verify extended escape mode
+        assertEquals("Extended escape mode should use named entities where possible", "<p title=\"&pi;\">&pi; &amp; &lt; &gt; </p>", doc.body().html());
+    }
+}
+```
+

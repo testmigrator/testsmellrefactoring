@@ -1,0 +1,62 @@
+asserts result: 
+ ```java
+import org.apache.commons.math4.analysis.function.Sin;
+import org.apache.commons.math4.analysis.function.Constant;
+import org.apache.commons.math4.analysis.function.Minus;
+import org.apache.commons.math4.analysis.function.Inverse;
+import org.apache.commons.math4.analysis.function.FunctionUtils;
+import org.apache.commons.math4.analysis.differentiation.DerivativeStructure;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class FunctionUtilsTest {
+
+    private static final double TEST_VALUE = 123.456;
+    private static final double EPSILON = 1e-10;
+
+    @Test
+    public void testInverseValue() {
+        UnivariateDifferentiableFunction inv = new Inverse();
+        double expectedValue = -1 / (TEST_VALUE * TEST_VALUE);
+        double actualValue = inv.value(new DerivativeStructure(1, 1, 0, TEST_VALUE)).getPartialDerivative(1);
+        assertEquals(expectedValue, actualValue, EPSILON);
+    }
+
+    @Test
+    public void testMinusValue() {
+        UnivariateDifferentiableFunction m = new Minus();
+        double expectedValue = -1;
+        double actualValue = m.value(new DerivativeStructure(1, 1, 0, TEST_VALUE)).getPartialDerivative(1);
+        assertEquals(expectedValue, actualValue, EPSILON);
+    }
+
+    @Test
+    public void testConstantValue() {
+        UnivariateDifferentiableFunction c = new Constant(4);
+        double expectedValue = 0; // The derivative of a constant is 0
+        double actualValue = c.value(new DerivativeStructure(1, 1, 0, TEST_VALUE)).getPartialDerivative(1);
+        assertEquals(expectedValue, actualValue, EPSILON);
+    }
+
+    @Test
+    public void testSinValue() {
+        UnivariateDifferentiableFunction sin = new Sin();
+        double expectedValue = Math.cos(TEST_VALUE);
+        double actualValue = sin.value(new DerivativeStructure(1, 1, 0, TEST_VALUE)).getPartialDerivative(1);
+        assertEquals(expectedValue, actualValue, EPSILON);
+    }
+
+    @Test
+    public void testAddDifferentiable() {
+        UnivariateDifferentiableFunction sin = new Sin();
+        UnivariateDifferentiableFunction c = new Constant(4);
+        UnivariateDifferentiableFunction m = new Minus();
+        UnivariateDifferentiableFunction inv = new Inverse();
+
+        double expectedValue = -1 / (TEST_VALUE * TEST_VALUE) - 1 + Math.cos(TEST_VALUE);
+        double actualValue = FunctionUtils.add(inv, m, c, sin).value(new DerivativeStructure(1, 1, 0, TEST_VALUE)).getPartialDerivative(1);
+        assertEquals(expectedValue, actualValue, EPSILON);
+    }
+}
+```
+

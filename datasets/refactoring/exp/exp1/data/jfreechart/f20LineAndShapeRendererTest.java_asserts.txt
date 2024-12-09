@@ -1,0 +1,11 @@
+total tests: 3
+total asserts: 9
+assertEquals("Expected r1 and r2 to be equal", r1, r2);
+assertEquals("Expected hash codes of r1 and r2 to be equal", h1, h2);
+assertNotSame(r1, r2, "Cloned objects should not be the same instance");
+assertSame(r1.getClass(), r2.getClass(), "Cloned object should have the same class as the original");
+assertEquals(r1, r2, "Cloned object should be equal to the original");
+assertTrue(checkIndependence(r1, r2), "Cloned object should be independent of the original");
+assertEquals(expectedLabel, li.getLabel(), "The label of the legend item should match the expected value.");
+assertEquals(expectedDatasetIndex, li.getDatasetIndex(), "The dataset index of the legend item should match the expected value.");
+assertEquals(expectedSeriesIndex, li.getSeriesIndex(), "The series index of the legend item should match the expected value.");

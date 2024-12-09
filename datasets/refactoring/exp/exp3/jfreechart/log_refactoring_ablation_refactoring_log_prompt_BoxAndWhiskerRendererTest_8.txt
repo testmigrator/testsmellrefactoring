@@ -1,0 +1,48 @@
+asserts result: 
+ ```java
+@Test
+public void testGetLegendItemSeriesIndex() {
+    // Define meaningful variable names for magic numbers
+    final double value1 = 21.0;
+    final double value2 = 22.0;
+    final double value3 = 23.0;
+    final double value4 = 24.0;
+    final double value5 = 25.0;
+
+    final String rowKey1 = "R1";
+    final String rowKey2 = "R2";
+    final String rowKey3 = "R3";
+    final String rowKey4 = "R4";
+    final String rowKey5 = "R5";
+
+    final String columnKey = "C1";
+
+    final int datasetIndex = 1;
+    final int seriesIndex = 2;
+
+    // Create datasets
+    DefaultCategoryDataset<String, String> dataset0 = new DefaultCategoryDataset<>();
+    dataset0.addValue(value1, rowKey1, columnKey);
+    dataset0.addValue(value2, rowKey2, columnKey);
+
+    DefaultCategoryDataset<String, String> dataset1 = new DefaultCategoryDataset<>();
+    dataset1.addValue(value3, rowKey3, columnKey);
+    dataset1.addValue(value4, rowKey4, columnKey);
+    dataset1.addValue(value5, rowKey5, columnKey);
+
+    // Create renderer and plot
+    BoxAndWhiskerRenderer renderer = new BoxAndWhiskerRenderer();
+    CategoryPlot<String, String> plot = new CategoryPlot<>(dataset0, new CategoryAxis("x"), new NumberAxis("y"), renderer);
+    plot.setDataset(datasetIndex, dataset1);
+
+    // Create chart (not used in the test, but included for completeness)
+    /*JFreeChart chart =*/ new JFreeChart(plot);
+
+    // Get legend item and perform assertions with clear messages
+    LegendItem legendItem = renderer.getLegendItem(datasetIndex, seriesIndex);
+    assertEquals("Label should be R5", rowKey5, legendItem.getLabel());
+    assertEquals("Dataset index should be 1", datasetIndex, legendItem.getDatasetIndex());
+    assertEquals("Series index should be 2", seriesIndex, legendItem.getSeriesIndex());
+}
+```
+

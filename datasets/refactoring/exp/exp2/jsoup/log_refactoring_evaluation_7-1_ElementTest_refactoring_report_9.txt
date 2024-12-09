@@ -1,0 +1,5 @@
+asserts result: 
+ Yes
+
+The refactored test maintains the same functionality as the original test. The changes primarily involve restructuring the test to use JUnit 5's `@ParameterizedTest` and `@CsvSource` to handle multiple test cases more efficiently. Each test case in the `@CsvSource` corresponds to one of the original test cases, and the `setupDocument` method initializes the `document` object for each test case. The assertions in the refactored test are equivalent to those in the original test, ensuring that the `wholeText()` method produces the expected output for each input HTML string.
+

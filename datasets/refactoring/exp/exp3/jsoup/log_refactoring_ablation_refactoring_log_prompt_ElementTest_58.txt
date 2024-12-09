@@ -1,0 +1,61 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Node;
+import org.jsoup.nodes.TextNode;
+import org.jsoup.nodes.Tag;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import org.junit.Test;
+
+public class ElementTest {
+
+    private static final String HTML = "<div id=1>Text1 <p>One</p> Text2 <p>Two</p></div><div id=2>Text3 <p>Three</p></div>";
+    private static final int INITIAL_CHILD_NODES_SIZE = 2;
+    private static final int EXPECTED_CHILD_NODES_SIZE_AFTER_INSERTION = 4;
+    private static final int EXPECTED_SIBLING_INDEX_LAST = 3;
+    private static final int EXPECTED_CHILD_NODES_SIZE_AFTER_SECOND_INSERTION = 7;
+    private static final int EXPECTED_SIBLING_INDEX_SPAN1 = 3;
+    private static final int EXPECTED_SIBLING_INDEX_SPAN2 = 4;
+    private static final int EXPECTED_SIBLING_INDEX_TEXT4 = 5;
+
+    @Test
+    public void testInsertChildrenAtNegativeOne() {
+        Document doc = Jsoup.parse(HTML);
+        Element div1 = doc.select("div").get(0);
+        Elements p1s = div1.select("p");
+        Element div2 = doc.select("div").get(1);
+
+        assertEquals("Initial child node size of div2", INITIAL_CHILD_NODES_SIZE, div2.childNodeSize());
+        div2.insertChildren(-1, p1s);
+        assertEquals("Child node size of div1 after insertion", INITIAL_CHILD_NODES_SIZE, div1.childNodeSize());
+        assertEquals("Child node size of div2 after insertion", EXPECTED_CHILD_NODES_SIZE_AFTER_INSERTION, div2.childNodeSize());
+        assertEquals("Sibling index of the last element in div2", EXPECTED_SIBLING_INDEX_LAST, p1s.get(1).siblingIndex());
+    }
+
+    @Test
+    public void testInsertChildrenAtNegativeTwo() {
+        Document doc = Jsoup.parse(HTML);
+        Element div2 = doc.select("div").get(1);
+
+        List<Node> els = new ArrayList<>();
+        Element el1 = new Element(Tag.valueOf("span"), "").text("Span1");
+        Element el2 = new Element(Tag.valueOf("span"), "").text("Span2");
+        TextNode tn1 = new TextNode("Text4");
+        els.add(el1);
+        els.add(el2);
+        els.add(tn1);
+
+        assertNull("Parent of el1 before insertion", el1.parent());
+        div2.insertChildren(-2, els);
+        assertEquals("Parent of el1 after insertion", div2, el1.parent());
+        assertEquals("Child node size of div2 after second insertion", EXPECTED_CHILD_NODES_SIZE_AFTER_SECOND_INSERTION, div2.childNodeSize());
+        assertEquals("Sibling index of span1 in div2", EXPECTED_SIBLING_INDEX_SPAN1, el1.siblingIndex());
+        assertEquals("Sibling index of span2 in div2", EXPECTED_SIBLING_INDEX_SPAN2, el2.siblingIndex());
+        assertEquals("Sibling index of text4 in div2", EXPECTED_SIBLING_INDEX_TEXT4, tn1.siblingIndex());
+    }
+}
+```
+

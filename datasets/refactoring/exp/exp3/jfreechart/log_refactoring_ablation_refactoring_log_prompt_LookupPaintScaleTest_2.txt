@@ -1,0 +1,51 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
+import org.jfree.chart.renderer.LookupPaintScale;
+
+class LookupPaintScaleTest {
+
+    @Test
+    public void testCloningBasic() {
+        LookupPaintScale g1 = new LookupPaintScale();
+        LookupPaintScale g2 = CloneUtils.clone(g1);
+
+        assertNotSame(g1, g2, "Cloned objects should not be the same instance");
+        assertSame(g1.getClass(), g2.getClass(), "Cloned object should be of the same class");
+        assertEquals(g1, g2, "Cloned object should be equal to the original");
+
+        // Check independence
+        g1.add(0.5, Color.RED);
+        assertNotEquals(g1, g2, "Modifying the original should not affect the clone");
+        g2.add(0.5, Color.RED);
+        assertEquals(g1, g2, "After modifying both, they should be equal again");
+    }
+
+    @Test
+    public void testCloningWithGradientPaint() {
+        LookupPaintScale g1 = new LookupPaintScale(1.0, 2.0, new GradientPaint(1.0f, 2.0f, Color.RED, 3.0f, 4.0f, Color.GREEN));
+        g1.add(1.5, new GradientPaint(1.0f, 2.0f, Color.RED, 3.0f, 4.0f, Color.BLUE));
+
+        LookupPaintScale g2 = (LookupPaintScale) g1.clone();
+
+        assertNotSame(g1, g2, "Cloned objects should not be the same instance");
+        assertSame(g1.getClass(), g2.getClass(), "Cloned object should be of the same class");
+        assertEquals(g1, g2, "Cloned object should be equal to the original");
+
+        // Check independence
+        g1.add(0.5, Color.RED);
+        assertNotEquals(g1, g2, "Modifying the original should not affect the clone");
+        g2.add(0.5, Color.RED);
+        assertEquals(g1, g2, "After modifying both, they should be equal again");
+    }
+
+    @Test
+    public void testCloneExceptionHandling() {
+        LookupPaintScale g1 = new LookupPaintScale();
+        assertDoesNotThrow(() -> CloneUtils.clone(g1), "Cloning should not throw an exception");
+    }
+}
+```
+

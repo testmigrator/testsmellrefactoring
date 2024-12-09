@@ -1,0 +1,34 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import static org.junit.Assert.assertEquals;
+
+public class ElementTest {
+
+    @Test
+    public void testAppendRowToTable() {
+        Document doc = createDocumentWithSingleRow();
+        Element table = getTableBody(doc);
+        appendRow(table);
+
+        String expectedHtml = "<table><tbody><tr><td>1</td></tr><tr><td>2</td></tr></tbody></table>";
+        String actualHtml = TextUtil.stripNewlines(doc.body().html());
+        assertEquals(expectedHtml, actualHtml);
+    }
+
+    private Document createDocumentWithSingleRow() {
+        return Jsoup.parse("<table><tr><td>1</td></tr></table>");
+    }
+
+    private Element getTableBody(Document doc) {
+        return doc.select("tbody").first();
+    }
+
+    private void appendRow(Element table) {
+        table.append("<tr><td>2</td></tr>");
+    }
+}
+```
+

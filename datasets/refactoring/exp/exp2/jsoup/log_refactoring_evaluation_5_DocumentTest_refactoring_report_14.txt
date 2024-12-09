@@ -1,0 +1,12 @@
+asserts result: 
+ Yes
+
+The refactored tests maintain the same functionality as the original test. The original test was a monolithic method that checked multiple aspects of the `Document` object after updating the charset. The refactored version splits this into separate methods, each focusing on a specific aspect:
+
+1. **testMetaCharsetUpdateIso8859_HtmlStructure**: Checks if the HTML structure matches the expected output.
+2. **testMetaCharsetUpdateIso8859_Charset**: Verifies that the document's charset is correctly updated.
+3. **testMetaCharsetUpdateIso8859_MetaElement**: Ensures that the `meta` element's `charset` attribute is set correctly.
+4. **testMetaCharsetUpdateIso8859_OutputSettings**: Confirms that the output settings' charset matches the document's charset.
+
+Each of these tests uses the `setupTestMetaCharsetUpdateIso8859` method to prepare the `Document` object, ensuring that the setup is consistent across all tests. This refactoring improves readability and maintainability without altering the functionality.
+

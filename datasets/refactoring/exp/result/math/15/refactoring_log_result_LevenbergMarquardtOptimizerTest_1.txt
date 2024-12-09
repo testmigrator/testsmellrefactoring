@@ -1,0 +1,59 @@
+Input Parameters:
+Test Code:
+ @Override
+    @Test
+    public void testNonInvertible() {
+        try{
+            /*
+             * Overrides the method from parent class, since the default singularity
+             * threshold (1e-14) does not trigger the expected exception.
+             */
+            LinearProblem problem = new LinearProblem(new double[][] {
+                    {  1, 2, -3 },
+                    {  2, 1,  3 },
+                    { -3, 0, -9 }
+            }, new double[] { 1, 1, 1 });
+
+            final Optimum optimum = optimizer.optimize(
+                    problem.getBuilder().maxIterations(20).build());
+
+            //TODO check that it is a bad fit? Why the extra conditions?
+            Assert.assertTrue(JdkMath.sqrt(problem.getTarget().length) * optimum.getRMS() > 0.6);
+
+            optimum.getCovariances(1.5e-14);
+
+            fail(optimizer);
+        }catch (SingularMatrixException e){
+            //expected
+        }
+    }
+Context: /org/apache/commons/math4/legacy/fitting/leastsquares/LevenbergMarquardtOptimizer
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing']
+Smell Description List: ['Test Smell Type：Assertion Roulette\n\nFeature:\nA test method contains more than one assertion statement without an explanation/message (parameter in the assertion method).\n', 'Test Smell Type：Exception_Catching_Throwing\n\nFeature:\nA test method that contains either a throw statement or a catch clause.\n']
+Refactoring DSL: ['RefactorRule:\n  SmellType: Assertion Roulette\n  Description: Add descriptive messages to assert statements to improve readability and maintainability.\n  Steps:\n    - Step:\n        Description: "Add descriptive message to each assert statement(except assertThat, assertThrows)."\n        Action: AddMessageToAssert\n        Parameters:\n          MessagePattern: "{assertionMessage}"\n  Example:\n    Before: |\n      @Test\n      public void T() {\n        stmt\n        assert_1\n        ...\n        assert_n\n        stmt\'\n      }\n    After: |\n      @Test\n      public void T() {\n        stmt\n        assert_1(..., "Descriptive message for assert statement")\n        ...\n        assert_n(..., "Descriptive message for assert statement")\n        stmt\'\n      }\n    Variables:\n      assertionMessage: "Descriptive message for assert statement"\n', 'RefactorRule:\n  SmellType: Exception_Catching_Throwing\n  Description: Ensure tests use assertDoesNotThrow to verify no exceptions are thrown and remove any throws declaration in test methods.\n  Steps:\n    - Step:\n        Description: "Handle try-catch blocks containing \'fail\' calls"\n        Action: ReplaceTryCatchWithAssertThrows\n        Parameters:\n          SourcePattern: |\n            try {\n              {tryBlock}\n              fail();\n            } catch ({exception}) {\n              {catchBlock}\n            }\n          ReplacementPattern: |\n            {exception} exception = assertThrows({exception}.class, () -> {\n              {tryBlock}\n            });\n            {catchBlock}\n    - Step:\n        Description: "Handle test methods with \'throws\' declaration but no try-catch block"\n        Action: WrapWithAssertDoesNotThrow\n        Parameters:\n          DetectionPattern: |\n            MethodDeclaration [throws!=null && BodyContainsTryCatch=false]\n          ReplacementPattern: |\n            assertDoesNotThrow(() -> {\n              {methodBody}\n            }, "Unexpected exception occurred during the test");\n\n    - Step:\n        Description: "Handle test methods with try-catch blocks without \'fail\' calls"\n        Action: ReplaceTryCatchWithoutFail\n        Parameters:\n          SourcePattern: |\n            try {\n              {tryBlock}\n            } catch ({exception}) {\n              {catchBlock}\n            }\n          ReplacementPattern: |\n            assertDoesNotThrow(() -> {\n              {tryBlock}\n            });\n            {catchBlock}\n\n  Example:\n    Before: |\n      @Test\n      public void T() {\n        stmt\n        try {\n            stmt\'\n            fail();\n        } catch (E) {\n            evs\n        }\n        stmt\'\'\n      }\n    After: |\n      @Test\n      public void T() {\n        stmt\n        assertThrows(E.class, () -> {\n            stmt\'\n        });\n        evs\n        stmt\'\'\n      }\n  Variables:\n    exception: E\n    tryBlock: stmt\'\n    catchBlock: evs\n    tryBlockStatement: stmt\'i\n']
+Checkpoints: ['[ ] All assert statements have been added with clear explanatory messages.\n', '[ ] All exception handling has been refactored to use the JUnit 5 Exception Handling feature.\n']
+
+Refactored Code: 
+ 
+@Override
+@Test
+public void testNonInvertible() {
+    LinearProblem problem = new LinearProblem(new double[][] {
+            {  1, 2, -3 },
+            {  2, 1,  3 },
+            { -3, 0, -9 }
+    }, new double[] { 1, 1, 1 });
+
+    SingularMatrixException exception = assertThrows(SingularMatrixException.class, () -> {
+        final Optimum optimum = optimizer.optimize(
+                problem.getBuilder().maxIterations(20).build());
+
+        // Check that it is a bad fit
+        assertTrue("The RMS value should indicate a bad fit", 
+                   JdkMath.sqrt(problem.getTarget().length) * optimum.getRMS() > 0.6);
+
+        optimum.getCovariances(1.5e-14);
+    });
+}
+
+

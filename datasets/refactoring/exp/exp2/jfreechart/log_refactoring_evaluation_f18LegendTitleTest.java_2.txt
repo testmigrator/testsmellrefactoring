@@ -1,0 +1,12 @@
+asserts result: 
+ Yes
+
+The refactored tests maintain the same functionality as the original test. The original test `testCloning` has been broken down into four separate tests that each focus on a specific aspect of the cloning process:
+
+1. **testCloning_InstancesAreDifferent**: Ensures that `t1` and `t2` are different instances.
+2. **testCloning_ClassesAreEqual**: Ensures that `t1` and `t2` are of the same class.
+3. **testCloning_InitialEquality**: Ensures that `t1` and `t2` are equal immediately after cloning.
+4. **testCloning_Independence**: Ensures that `t1` and `t2` are independent objects, meaning changes to one do not affect the other.
+
+Each of these tests corresponds to a part of the original test, and together they cover all the checks performed in the original test. Therefore, the functionality is consistent.
+

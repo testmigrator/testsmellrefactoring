@@ -1,0 +1,56 @@
+asserts result: 
+ ```java
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
+import org.junit.jupiter.api.Test;
+
+class JsonReaderTest {
+
+    @Test
+    public void testBooleans_beginArray() throws Exception {
+        JsonReader reader = new JsonReader(new StringReader("[true,false]"));
+        reader.beginArray();
+        assertThat(reader.hasNext()).as("Expected array to start").isTrue();
+    }
+
+    @Test
+    public void testBooleans_nextBoolean_true() throws Exception {
+        JsonReader reader = new JsonReader(new StringReader("[true,false]"));
+        reader.beginArray();
+        assertThat(reader.nextBoolean()).as("First boolean should be true").isTrue();
+    }
+
+    @Test
+    public void testBooleans_nextBoolean_false() throws Exception {
+        JsonReader reader = new JsonReader(new StringReader("[true,false]"));
+        reader.beginArray();
+        reader.nextBoolean(); // Consume the first boolean
+        assertThat(reader.nextBoolean()).as("Second boolean should be false").isFalse();
+    }
+
+    @Test
+    public void testBooleans_endArray() throws Exception {
+        JsonReader reader = new JsonReader(new StringReader("[true,false]"));
+        reader.beginArray();
+        reader.nextBoolean();
+        reader.nextBoolean();
+        reader.endArray();
+        assertThat(reader.peek()).as("Expected end of document after ending array").isEqualTo(JsonToken.END_DOCUMENT);
+    }
+
+    @Test
+    public void testBooleans_exceptionHandling() {
+        JsonReader reader = new JsonReader(new StringReader("[true,false"));
+        assertThrows(IllegalStateException.class, () -> {
+            reader.beginArray();
+            reader.nextBoolean();
+            reader.nextBoolean();
+            reader.endArray();
+        });
+    }
+}
+```
+

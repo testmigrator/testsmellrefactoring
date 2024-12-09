@@ -1,0 +1,10 @@
+asserts result: 
+ Yes
+
+The functionality between the original test and the refactored test is consistent. The only changes made in the refactored version are:
+
+1. The expected usage string is assigned to a variable `expectedUsage`.
+2. The actual output from the `StringWriter` is assigned to a variable `actualUsage`.
+
+These changes do not alter the behavior or the outcome of the test. The assertion at the end still checks that the actual output matches the expected usage string, ensuring the test remains functionally equivalent to the original.
+

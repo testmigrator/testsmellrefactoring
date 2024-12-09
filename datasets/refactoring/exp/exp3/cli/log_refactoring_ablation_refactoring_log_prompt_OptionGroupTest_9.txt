@@ -1,0 +1,31 @@
+asserts result: 
+ ```java
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+class CommandLineParserTest {
+
+    private final CommandLineParser parser = new DefaultParser();
+    private final Options options = new Options();
+
+    @Test
+    void testTwoValidLongOptions() throws ParseException {
+        final String[] args = {"--revision", "--file"};
+
+        CommandLine cl = parser.parse(options, args);
+
+        assertTrue(cl.hasOption("revision"), "Confirm --revision is set");
+        assertTrue(cl.hasOption("file"), "Confirm --file is set");
+        assertFalse(cl.hasOption("d"), "Confirm -d is NOT set");
+        assertFalse(cl.hasOption("s"), "Confirm -s is NOT set");
+        assertFalse(cl.hasOption("c"), "Confirm -c is NOT set");
+        assertTrue(cl.getArgList().isEmpty(), "Confirm no extra args");
+    }
+}
+```
+

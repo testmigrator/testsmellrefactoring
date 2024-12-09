@@ -1,0 +1,25 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import org.junit.jupiter.api.Test;
+
+import com.google.gson.stream.JsonReader;
+
+public class JsonReaderTest {
+
+    @Test
+    public void testNullLiteralIsNotAString() throws Exception {
+        JsonReader reader = new JsonReader(new java.io.StringReader("[null]"));
+        reader.beginArray();
+
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> {
+            reader.nextString();
+        });
+
+        assertEquals("Expected: a string but was: NULL at line 1 column 6 path $[0]", exception.getMessage());
+    }
+}
+```
+

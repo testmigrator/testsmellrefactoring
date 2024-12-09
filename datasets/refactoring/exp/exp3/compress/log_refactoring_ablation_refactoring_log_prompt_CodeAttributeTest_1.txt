@@ -1,0 +1,53 @@
+asserts result: 
+ ```java
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class CodeAttributeTest {
+
+    private static final int MAX_STACK = 3;
+    private static final int MAX_LOCALS = 2;
+    private static final byte[] CODE_PACKED = mixedByteArray; // Assuming mixedByteArray is defined elsewhere
+    private static final int INITIAL_LENGTH = 29;
+    private static final int LENGTH_AFTER_ADDING_ATTRIBUTE = 37;
+
+    @Test
+    public void testInitialLength() {
+        final OperandManager operandManager = new MockOperandManager();
+        operandManager.setSegment(segment);
+        operandManager.setCurrentClass("java/lang/Foo");
+
+        final MockCodeAttribute attribute = new MockCodeAttribute(
+            MAX_STACK,
+            MAX_LOCALS,
+            CODE_PACKED,
+            segment,
+            operandManager,
+            new ArrayList<>()
+        );
+
+        assertEquals("Initial length should be " + INITIAL_LENGTH, INITIAL_LENGTH, attribute.getLength());
+    }
+
+    @Test
+    public void testLengthAfterAddingAttribute() {
+        final OperandManager operandManager = new MockOperandManager();
+        operandManager.setSegment(segment);
+        operandManager.setCurrentClass("java/lang/Foo");
+
+        final MockCodeAttribute attribute = new MockCodeAttribute(
+            MAX_STACK,
+            MAX_LOCALS,
+            CODE_PACKED,
+            segment,
+            operandManager,
+            new ArrayList<>()
+        );
+
+        attribute.attributes.add(new LocalVariableTableAttribute(0, null, null, null, null, null));
+
+        assertEquals("Length after adding attribute should be " + LENGTH_AFTER_ADDING_ATTRIBUTE, LENGTH_AFTER_ADDING_ATTRIBUTE, attribute.getLength());
+    }
+}
+```
+

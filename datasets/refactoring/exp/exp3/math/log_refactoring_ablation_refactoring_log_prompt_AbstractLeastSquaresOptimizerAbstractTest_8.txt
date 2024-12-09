@@ -1,0 +1,23 @@
+asserts result: 
+ ```java
+@Test
+public void testMoreEstimatedParametersSimple() {
+    // Define meaningful constants for magic numbers
+    final double[][] coefficients = {
+        {3, 2, 0, 0},
+        {0, 1, -1, 1},
+        {2, 0, 1, 0}
+    };
+    final double[] constants = {7, 3, 5};
+    final double[] initialGuess = {7, 6, 5, 4};
+    final double tolerance = 1e-6; // Tolerance for RMS comparison
+
+    LinearProblem problem = new LinearProblem(coefficients, constants);
+
+    Optimum optimum = optimizer
+        .optimize(problem.getBuilder().start(initialGuess).build());
+
+    Assert.assertEquals(0, optimum.getRMS(), tolerance);
+}
+```
+

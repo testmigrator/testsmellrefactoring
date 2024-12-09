@@ -1,0 +1,23 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
+
+class StatisticalLineAndShapeRendererTest {
+
+    @Test
+    public void testCloning() {
+        StatisticalLineAndShapeRenderer r1 = new StatisticalLineAndShapeRenderer();
+        
+        assertDoesNotThrow(() -> {
+            StatisticalLineAndShapeRenderer r2 = CloneUtils.clone(r1);
+            assertNotSame(r1, r2, "Cloned object should be a different instance");
+            assertEquals(r1.getClass(), r2.getClass(), "Cloned object should be of the same class");
+            assertEquals(r1, r2, "Cloned object should be equal to the original object");
+            TestUtils.checkIndependence(r1, r2, "Cloned object should be independent of the original object");
+        }, "Cloning should not throw an exception");
+    }
+}
+```
+

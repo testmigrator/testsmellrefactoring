@@ -1,0 +1,13 @@
+total tests: 1
+total asserts: 11
+assertNotNull(DEFAULT_CONFIG_SET, "DEFAULT_CONFIG_SET should not be null");
+assertNotNull(OPTION_CREDENTIALS, "OPTION_CREDENTIALS should not be null");
+assertNotNull(OPTION_HELP, "OPTION_HELP should not be null");
+assertNotNull(OPTION_RECURSE, "OPTION_RECURSE should not be null");
+assertNotNull(OPTION_SOLRURL, "OPTION_SOLRURL should not be null");
+assertNotNull(OPTION_SOLRURL_DEPRECATED, "OPTION_SOLRURL_DEPRECATED should not be null");
+assertNotNull(OPTION_VERBOSE, "OPTION_VERBOSE should not be null");
+assertNotNull(OPTION_ZKHOST, "OPTION_ZKHOST should not be null");
+assertNotNull(OPTION_ZKHOST_DEPRECATED, "OPTION_ZKHOST_DEPRECATED should not be null");
+assertNotNull(ZK_HOST, "ZK_HOST should not be null");
+assertNotNull(getDefaultSolrUrl(), "getDefaultSolrUrl() should not return null");

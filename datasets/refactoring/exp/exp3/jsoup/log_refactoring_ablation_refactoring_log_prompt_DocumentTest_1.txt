@@ -1,0 +1,35 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import static org.junit.Assert.assertEquals;
+
+public class DocumentTest {
+
+    private static final String ORIGINAL_HTML = "<p>Hello</p>";
+    private static final String REPLACED_TEXT = "Replaced";
+    private static final int EXPECTED_HEAD_SIZE = 1;
+
+    @Test
+    public void setTextPreservesDocumentText() {
+        Document doc = Jsoup.parse(ORIGINAL_HTML);
+        doc.text(REPLACED_TEXT);
+        assertEquals("Document text should be replaced", REPLACED_TEXT, doc.text());
+    }
+
+    @Test
+    public void setTextPreservesBodyText() {
+        Document doc = Jsoup.parse(ORIGINAL_HTML);
+        doc.text(REPLACED_TEXT);
+        assertEquals("Body text should be replaced", REPLACED_TEXT, doc.body().text());
+    }
+
+    @Test
+    public void setTextPreservesHeadElement() {
+        Document doc = Jsoup.parse(ORIGINAL_HTML);
+        doc.text(REPLACED_TEXT);
+        assertEquals("Head element should still exist", EXPECTED_HEAD_SIZE, doc.select("head").size());
+    }
+}
+```
+

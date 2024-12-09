@@ -1,0 +1,55 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.*;
+import static com.google.common.truth.Truth.assertThat;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
+
+import java.io.IOException;
+import java.io.StringReader;
+
+class JsonReaderTest {
+
+    @Test
+    public void testPeekNumber() throws IOException {
+        double d = -92233720368547758080d;
+        JsonReader reader = new JsonReader(new StringReader("[-92233720368547758080]"));
+        reader.setStrictness(Strictness.LENIENT);
+        reader.beginArray();
+
+        // Verify that the next token is a number
+        assertThat(reader.peek()).isEqualTo(JsonToken.NUMBER)
+            .withFailMessage("Expected the next token to be a number");
+    }
+
+    @Test
+    public void testNextLongThrowsNumberFormatException() throws IOException {
+        double d = -92233720368547758080d;
+        JsonReader reader = new JsonReader(new StringReader("[-92233720368547758080]"));
+        reader.setStrictness(Strictness.LENIENT);
+        reader.beginArray();
+        reader.peek(); // Consume the peek operation
+
+        // Verify that calling nextLong() throws NumberFormatException
+        Executable executable = () -> reader.nextLong();
+        assertThrows(NumberFormatException.class, executable,
+            "Expected nextLong() to throw NumberFormatException when the value is out of long range");
+    }
+
+    @Test
+    public void testNextDouble() throws IOException {
+        double d = -92233720368547758080d;
+        JsonReader reader = new JsonReader(new StringReader("[-92233720368547758080]"));
+        reader.setStrictness(Strictness.LENIENT);
+        reader.beginArray();
+        reader.peek(); // Consume the peek operation
+
+        // Verify that the next double value is correct
+        double actual = reader.nextDouble();
+        assertThat(actual).isEqualTo(d)
+            .withFailMessage("Expected the next double value to be equal to the input value");
+    }
+}
+```
+

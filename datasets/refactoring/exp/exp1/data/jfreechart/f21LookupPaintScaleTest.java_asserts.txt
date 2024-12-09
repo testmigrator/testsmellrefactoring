@@ -1,0 +1,13 @@
+total tests: 2
+total asserts: 11
+assertNotSame(g1, g2, "g1 and g2 should be different instances");
+assertSame(g1.getClass(), g2.getClass(), "g1 and g2 should be of the same class");
+assertEquals(g1, g2, "g1 and g2 should be equal after cloning");
+assertNotEquals(g1, g2, "g1 and g2 should not be equal after modifying g1");
+assertEquals(g1, g2, "g1 and g2 should be equal after modifying both");
+assertNotSame(g1, g2, "g1 and g2 should be different instances");
+assertSame(g1.getClass(), g2.getClass(), "g1 and g2 should be of the same class");
+assertEquals(g1, g2, "g1 and g2 should be equal after cloning");
+assertEquals(LOWER_BOUND_VALUE, scale.getLowerBound(), EPSILON, "Lower bound should match the expected value");
+assertEquals(UPPER_BOUND_VALUE, scale.getUpperBound(), EPSILON, "Upper bound should match the expected value");
+assertEquals(Color.RED, scale.getDefaultPaint(), "Default paint should match the expected color");

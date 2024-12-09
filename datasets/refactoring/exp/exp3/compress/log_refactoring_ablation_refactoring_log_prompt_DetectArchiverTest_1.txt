@@ -1,0 +1,27 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.assertions.AssertionFailedError;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+public class ArchiveInputStreamTest {
+
+    @Test
+    public void testCOMPRESS_117() {
+        assertDoesNotThrow(() -> {
+            try (var tar = createArchiveInputStream("COMPRESS-117.tar")) {
+                assertNotNull(tar, "The archive input stream should not be null");
+                assertInstanceOf(TarArchiveInputStream.class, tar, "The archive input stream should be an instance of TarArchiveInputStream");
+            }
+        }, "Creating the archive input stream should not throw an exception");
+    }
+
+    private ArchiveInputStream<?> createArchiveInputStream(String filename) {
+        // Implementation of creating the archive input stream
+        return null; // Placeholder implementation
+    }
+}
+```
+

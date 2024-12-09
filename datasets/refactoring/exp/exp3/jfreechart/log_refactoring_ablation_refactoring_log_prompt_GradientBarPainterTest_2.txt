@@ -1,0 +1,25 @@
+asserts result: 
+ ```java
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class GradientBarPainterTest {
+
+    @Test
+    public void testEquals() {
+        GradientBarPainter p1 = new GradientBarPainter(0.1, 0.2, 0.3);
+        GradientBarPainter p2 = new GradientBarPainter(0.1, 0.2, 0.3);
+        assertEquals("p1 should be equal to p2", p1, p2);
+    }
+
+    @Test
+    public void testHashCode() {
+        GradientBarPainter p1 = new GradientBarPainter(0.1, 0.2, 0.3);
+        GradientBarPainter p2 = new GradientBarPainter(0.1, 0.2, 0.3);
+        int h1 = p1.hashCode();
+        int h2 = p2.hashCode();
+        assertEquals("Hash codes of p1 and p2 should be equal", h1, h2);
+    }
+}
+```
+

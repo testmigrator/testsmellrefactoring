@@ -1,0 +1,12 @@
+asserts result: 
+ Yes
+
+The refactored tests cover the same functionality as the original test, breaking down the single test into multiple focused tests. Each of the refactored tests checks specific aspects of the `clone` method:
+
+1. **testClone_ObjectIdentity**: Ensures that the cloned object is not the same instance as the original.
+2. **testClone_InitialContentEquality**: Verifies that the cloned object has the same initial content as the original.
+3. **testClone_ModifiedContentDifference**: Checks that modifying the cloned object's text changes its content, while the original object remains unchanged.
+4. **testClone_AttributesImpact**: Confirms that calling `attributes()` on the original object does not affect the cloned object, and that modifying the cloned object's text does not affect the original object.
+
+All these tests together ensure that the behavior of the `clone` method is consistent with the original test.
+

@@ -1,0 +1,67 @@
+Input Parameters:
+Test Code:
+ @Test
+    public void test1PercentError() {
+        final Random randomizer = new Random(64925784252L);
+        final double a = 0.2;
+        final double w = 3.4;
+        final double p = 4.1;
+        final HarmonicOscillator f = new HarmonicOscillator(a, w, p);
+
+        final WeightedObservedPoints points = new WeightedObservedPoints();
+        for (double x = 0.0; x < 10.0; x += 0.1) {
+            points.add(1, x, f.value(x) + 0.01 * randomizer.nextGaussian());
+        }
+
+        final SimpleCurveFitter fitter = HarmonicCurveFitter.create();
+        final double[] fitted = fitter.fit(points.toList());
+        Assert.assertEquals(a, fitted[0], 7.6e-4);
+        Assert.assertEquals(w, fitted[1], 2.7e-3);
+        Assert.assertEquals(p, Angle.Rad.WITHIN_0_AND_2PI.applyAsDouble(fitted[2]), 1.3e-2);
+    }
+Context: /org/apache/commons/math4/legacy/fitting/HarmonicCurveFitter
+Smell List: ['Conditional_Test_Logic', 'Magic_Number_Test']
+Smell Description List: ['Test Smell Type：Conditional Test Logic\n\nFeature:\nA test method that contains one or more control statements (i.e if, switch, conditional expression, for, foreach and while statement).\n', 'Test Smell Type：Magic Number Test\n\nFeature:\nAn assertion method that contains a numeric literal as an argument.\n']
+Refactoring DSL: ['RefactorRule:\n  SmellType: Conditional Test Logic\n  Description: "Remove control statements (if, switch, conditional expression, etc.) within the test method by extracting them into helper methods."\n  Steps:\n    - Step:\n        Description: "Extract control logic into a separate helper method"\n        Action: ExtractMethod\n        Parameters:\n          TargetType: Method\n          SourcePattern: |\n            if ({condition}) {\n                {stmt}\n            }\n          ExtractedMethod: |\n            private boolean isConditionMet() {\n                return {condition};\n            }\n    - Step:\n        Description: "Replace conditional logic with a call to the helper method"\n        Action: ReplaceConditional\n        Parameters:\n          SourcePattern: |\n            if ({condition}) {\n                {stmt}\n            }\n          ReplacementPattern: |\n            if (isConditionMet()) {\n                {stmt}\n            }\n  Example:\n    Before: |\n      @Test\n      public void T() {\n          if (someCondition()) {\n              executeLogic();\n          }\n      }\n    After: |\n      private boolean isConditionMet() {\n          return someCondition();\n      }\n      @Test\n      public void T() {\n          if (isConditionMet()) {\n              executeLogic();\n          }\n      }\n', 'RefactorRule:\n  SmellType: Magic Number Test\n  Description: "Extract magic numbers and assign meaningful names to improve readability and maintainability."\n  Steps:\n    - Step:\n        Action: IdentifyMagicNumbers\n        Description: "Identify magic numbers in assertions"\n        Parameters:\n          TargetType: Method\n          SourcePattern: |\n            assertEquals({magicNumber}, {variable})\n    - Step:\n        Action: ExtractVariable\n        Description: "Extract magic number to a variable with meaningful name"\n        Parameters:\n          TargetType: Method\n          SourcePattern: |\n            assertEquals({magicNumber}, {variable})\n          ReplacementPattern: |\n            int {meaningfulName} = {magicNumber};\n            assertEquals({meaningfulName}, {variable})\n  Example:\n    Before: |\n      @Test\n      public void T() {\n          stmt\n          assertEquals(1, a)\n          stmt\'\n      }\n    After: |\n      @Test\n      public void T() {\n          int x = 1; // x: meaningful variable name\n          stmt\n          assertEquals(x, a)\n          stmt\'\n      }\n  Variables:\n    magicNumber: "1"\n    variable: "a"\n    meaningfulName: "x"\n']
+Checkpoints: ['[ ] All conditional test logic has been refactored to use JUnit 5’s conditional test execution feature, with the condition verified in an external method assigned via the @EnabledIf annotation.\n', '[ ] All magic numbers in the test code have been extracted and assigned meaningful variable names.\n']
+
+Refactored Code: 
+ 
+import org.apache.commons.math4.legacy.fitting.HarmonicCurveFitter;
+import org.apache.commons.math4.legacy.fitting.HarmonicOscillator;
+import org.apache.commons.math4.legacy.fitting.SimpleCurveFitter;
+import org.apache.commons.math4.legacy.fitting.WeightedObservedPoints;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIf;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class HarmonicCurveFitterTest {
+
+    private static final long SEED = 64925784252L;
+    private static final double AMPLITUDE = 0.2;
+    private static final double ANGULAR_FREQUENCY = 3.4;
+    private static final double PHASE = 4.1;
+    private static final double MAX_AMPLITUDE_ERROR = 7.6e-4;
+    private static final double MAX_ANGULAR_FREQUENCY_ERROR = 2.7e-3;
+    private static final double MAX_PHASE_ERROR = 1.3e-2;
+
+    @Test
+    public void test1PercentError() {
+        final Random randomizer = new Random(SEED);
+        final HarmonicOscillator f = new HarmonicOscillator(AMPLITUDE, ANGULAR_FREQUENCY, PHASE);
+
+        final WeightedObservedPoints points = new WeightedObservedPoints();
+        for (double x = 0.0; x < 10.0; x += 0.1) {
+            points.add(1, x, f.value(x) + 0.01 * randomizer.nextGaussian());
+        }
+
+        final SimpleCurveFitter fitter = HarmonicCurveFitter.create();
+        final double[] fitted = fitter.fit(points.toList());
+        Assert.assertEquals(AMPLITUDE, fitted[0], MAX_AMPLITUDE_ERROR);
+        Assert.assertEquals(ANGULAR_FREQUENCY, fitted[1], MAX_ANGULAR_FREQUENCY_ERROR);
+        Assert.assertEquals(PHASE, Angle.Rad.WITHIN_0_AND_2PI.applyAsDouble(fitted[2]), MAX_PHASE_ERROR);
+    }
+}
+
+

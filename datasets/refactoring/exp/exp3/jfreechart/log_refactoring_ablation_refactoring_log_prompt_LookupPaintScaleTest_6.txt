@@ -1,0 +1,94 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+
+public class LookupPaintScaleTest {
+
+    private static final double MIN_VALUE = 0.0;
+    private static final double MAX_VALUE = 100.0;
+    private static final Color DEFAULT_COLOR = Color.BLACK;
+    private static final Color BLUE = Color.BLUE;
+    private static final Color RED = Color.RED;
+    private static final Color GREEN = Color.GREEN;
+    private static final Color YELLOW = Color.YELLOW;
+
+    private LookupPaintScale scale;
+
+    @BeforeEach
+    public void setUp() {
+        scale = new LookupPaintScale(MIN_VALUE, MAX_VALUE, DEFAULT_COLOR);
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "-1.0, BLACK",
+        "0.0, BLACK",
+        "50.0, BLACK",
+        "100.0, BLACK",
+        "101.0, BLACK"
+    })
+    public void testInitialScale(double value, String expectedColor) {
+        assertEquals(Color.valueOf(expectedColor), scale.getPaint(value), "Initial scale should return default color for all values");
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "-1.0, BLACK",
+        "0.0, BLACK",
+        "50.0, BLUE",
+        "100.0, BLUE",
+        "101.0, BLACK"
+    })
+    public void testAddBlue(double value, String expectedColor) {
+        scale.add(50.0, BLUE);
+        assertEquals(Color.valueOf(expectedColor), scale.getPaint(value), "Scale should return blue for values >= 50 after adding blue at 50");
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "-1.0, BLACK",
+        "0.0, BLACK",
+        "50.0, RED",
+        "100.0, RED",
+        "101.0, BLACK"
+    })
+    public void testAddRed(double value, String expectedColor) {
+        scale.add(50.0, RED);
+        assertEquals(Color.valueOf(expectedColor), scale.getPaint(value), "Scale should return red for values >= 50 after adding red at 50");
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "-1.0, BLACK",
+        "0.0, BLACK",
+        "25.0, GREEN",
+        "50.0, RED",
+        "100.0, RED",
+        "101.0, BLACK"
+    })
+    public void testAddGreen(double value, String expectedColor) {
+        scale.add(25.0, GREEN);
+        assertEquals(Color.valueOf(expectedColor), scale.getPaint(value), "Scale should return green for values >= 25 and < 50 after adding green at 25");
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "-1.0, BLACK",
+        "0.0, BLACK",
+        "25.0, GREEN",
+        "50.0, RED",
+        "75.0, YELLOW",
+        "100.0, YELLOW",
+        "101.0, BLACK"
+    })
+    public void testAddYellow(double value, String expectedColor) {
+        scale.add(75.0, YELLOW);
+        assertEquals(Color.valueOf(expectedColor), scale.getPaint(value), "Scale should return yellow for values >= 75 after adding yellow at 75");
+    }
+}
+```
+

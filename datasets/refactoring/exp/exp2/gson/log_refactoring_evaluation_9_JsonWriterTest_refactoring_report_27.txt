@@ -1,0 +1,5 @@
+asserts result: 
+ yes
+
+The refactored code maintains the same functionality as the original test. The only difference is that the setup part of the test has been moved to a separate method (`setupTestNonFiniteDoublesWhenLenient`), which is then called within the test method. This change does not alter the behavior or the outcome of the test. The assertion in the refactored test still checks that the `StringWriter` contains the expected JSON array string.
+

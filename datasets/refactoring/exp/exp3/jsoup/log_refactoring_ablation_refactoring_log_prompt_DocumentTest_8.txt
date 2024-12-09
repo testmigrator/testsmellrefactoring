@@ -1,0 +1,44 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Document.OutputSettings.Syntax;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class DocumentTest {
+
+    @Test
+    public void testHtmlSyntax() {
+        String h = "<!DOCTYPE html><body><img async checked='checked' src='&<>\"'>&lt;&gt;&amp;&quot;<foo />bar";
+        Document doc = Jsoup.parse(h);
+
+        doc.outputSettings().syntax(Syntax.html);
+        String expectedHtml = "<!doctype html>\n" +
+                "<html>\n" +
+                " <head></head>\n" +
+                " <body>\n" +
+                "  <img async checked src=\"&amp;<>&quot;\">&lt;&gt;&amp;\"<foo />bar\n" +
+                " </body>\n" +
+                "</html>";
+        assertEquals("HTML syntax output should match expected HTML", expectedHtml, doc.html());
+    }
+
+    @Test
+    public void testXmlSyntax() {
+        String h = "<!DOCTYPE html><body><img async checked='checked' src='&<>\"'>&lt;&gt;&amp;&quot;<foo />bar";
+        Document doc = Jsoup.parse(h);
+
+        doc.outputSettings().syntax(Document.OutputSettings.Syntax.xml);
+        String expectedXml = "<!DOCTYPE html>\n" +
+                "<html>\n" +
+                " <head></head>\n" +
+                " <body>\n" +
+                "  <img async=\"\" checked=\"checked\" src=\"&amp;<>&quot;\" />&lt;&gt;&amp;\"<foo />bar\n" +
+                " </body>\n" +
+                "</html>";
+        assertEquals("XML syntax output should match expected XML", expectedXml, doc.html());
+    }
+}
+```
+

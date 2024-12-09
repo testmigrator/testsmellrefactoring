@@ -1,0 +1,24 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
+
+class MinMaxCategoryRendererTest {
+
+    @Test
+    public void testCloning() {
+        MinMaxCategoryRenderer r1 = new MinMaxCategoryRenderer();
+
+        assertDoesNotThrow(() -> {
+            MinMaxCategoryRenderer r2 = CloneUtils.clone(r1);
+            assertNotNull(r2, "Cloned object should not be null");
+            assertNotSame(r1, r2, "Cloned object should be a different instance");
+            assertEquals(r1.getClass(), r2.getClass(), "Cloned object should have the same class");
+            assertEquals(r1, r2, "Cloned object should be equal to the original object");
+            TestUtils.checkIndependence(r1, r2, "Cloned object should be independent from the original object");
+        }, "Cloning should not throw CloneNotSupportedException");
+    }
+}
+```
+

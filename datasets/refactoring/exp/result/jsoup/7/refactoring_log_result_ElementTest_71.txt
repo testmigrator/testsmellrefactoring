@@ -1,0 +1,117 @@
+Input Parameters:
+Test Code:
+ @Test public void testChildrenElements() {
+        String html = "<div><p><a>One</a></p><p><a>Two</a></p>Three</div><span>Four</span><foo></foo><img>";
+        Document doc = Jsoup.parse(html);
+        Element div = doc.select("div").first();
+        Element p = doc.select("p").first();
+        Element span = doc.select("span").first();
+        Element foo = doc.select("foo").first();
+        Element img = doc.select("img").first();
+
+        Elements docChildren = div.children();
+        assertEquals(2, docChildren.size());
+        assertEquals("<p><a>One</a></p>", docChildren.get(0).outerHtml());
+        assertEquals("<p><a>Two</a></p>", docChildren.get(1).outerHtml());
+        assertEquals(3, div.childNodes().size());
+        assertEquals("Three", div.childNodes().get(2).outerHtml());
+
+        assertEquals(1, p.children().size());
+        assertEquals("One", p.children().text());
+
+        assertEquals(0, span.children().size());
+        assertEquals(1, span.childNodes().size());
+        assertEquals("Four", span.childNodes().get(0).outerHtml());
+
+        assertEquals(0, foo.children().size());
+        assertEquals(0, foo.childNodes().size());
+        assertEquals(0, img.children().size());
+        assertEquals(0, img.childNodes().size());
+    }
+Context: /org/jsoup/nodes/Element
+Smell List: ['Assertion_Roulette', 'Eager_Test', 'Magic_Number_Test']
+Smell Description List: ['Test Smell Type：Assertion Roulette\n\nFeature:\nA test method contains more than one assertion statement without an explanation/message (parameter in the assertion method).\n', 'Test Smell Type：Eager Test\n\nFeature:\nA test method contains multiple calls to multiple production methods.\n', 'Test Smell Type：Magic Number Test\n\nFeature:\nAn assertion method that contains a numeric literal as an argument.\n']
+Refactoring DSL: ['RefactorRule:\n  SmellType: Assertion Roulette\n  Description: Add descriptive messages to assert statements to improve readability and maintainability.\n  Steps:\n    - Step:\n        Description: "Add descriptive message to each assert statement(except assertThat, assertThrows)."\n        Action: AddMessageToAssert\n        Parameters:\n          MessagePattern: "{assertionMessage}"\n  Example:\n    Before: |\n      @Test\n      public void T() {\n        stmt\n        assert_1\n        ...\n        assert_n\n        stmt\'\n      }\n    After: |\n      @Test\n      public void T() {\n        stmt\n        assert_1(..., "Descriptive message for assert statement")\n        ...\n        assert_n(..., "Descriptive message for assert statement")\n        stmt\'\n      }\n    Variables:\n      assertionMessage: "Descriptive message for assert statement"\n', 'RefactorRule:\n  SmellType: Eager Test\n  Description: "Refactor test methods to group related assertions logically and extract reusable setup logic into private methods."\n  Steps:\n    - Step1:\n        Description: "Extract shared setup logic into a reusable, private method and ensure it is used across all relevant tests."\n        Action: ExtractSetupMethod\n        Parameters:\n          Condition: "If multiple tests share the same setup logic."\n          MethodNamePattern: setupTest{OriginalMethodName}\n    - Step2:\n        Description: "Group related assertions into cohesive sub-tests while retaining necessary setup logic."\n        Action: GroupAssertions\n        Parameters:\n          GroupBy: LogicalConcern\n    - Step3:\n        Description: "Create new test methods for each cohesive group of assertions and ensure readability."\n        Action: CreateTestMethods\n        Parameters:\n          IncludeSetup: True\n          NamePattern: test{OriginalMethodName}_{Concern}\n  Example:\n    Before: |\n      @Test\n      public void testExample() {\n          setup();\n          assertEquals(1, methodA());\n          assertTrue(methodB());\n      }\n    After: |\n      private void setupTestExample() {\n          setup();\n      }\n\n      @Test\n      public void testExample_MethodA() {\n          setupTestExample();\n          assertEquals(1, methodA());\n      }\n\n      @Test\n      public void testExample_MethodB() {\n          setupTestExample();\n          assertTrue(methodB());\n      }\n  Variables:\n    OriginalMethodName: The name of the original test method.\n    LogicalConcern: The logical aspect tested (e.g., a specific API, validation, or behavior).\n', 'RefactorRule:\n  SmellType: Magic Number Test\n  Description: "Extract magic numbers and assign meaningful names to improve readability and maintainability."\n  Steps:\n    - Step:\n        Action: IdentifyMagicNumbers\n        Description: "Identify magic numbers in assertions"\n        Parameters:\n          TargetType: Method\n          SourcePattern: |\n            assertEquals({magicNumber}, {variable})\n    - Step:\n        Action: ExtractVariable\n        Description: "Extract magic number to a variable with meaningful name"\n        Parameters:\n          TargetType: Method\n          SourcePattern: |\n            assertEquals({magicNumber}, {variable})\n          ReplacementPattern: |\n            int {meaningfulName} = {magicNumber};\n            assertEquals({meaningfulName}, {variable})\n  Example:\n    Before: |\n      @Test\n      public void T() {\n          stmt\n          assertEquals(1, a)\n          stmt\'\n      }\n    After: |\n      @Test\n      public void T() {\n          int x = 1; // x: meaningful variable name\n          stmt\n          assertEquals(x, a)\n          stmt\'\n      }\n  Variables:\n    magicNumber: "1"\n    variable: "a"\n    meaningfulName: "x"\n']
+Checkpoints: ['[ ] All assert statements have been added with clear explanatory messages.\n', '[ ] All eager tests have been split into separate tests, each focusing on verifying a single API.\n', '[ ] All magic numbers in the test code have been extracted and assigned meaningful variable names.\n']
+
+Refactored Code: 
+ 
+private Document setupTestChildrenElements() {
+    String html = "<div><p><a>One</a></p><p><a>Two</a></p>Three</div><span>Four</span><foo></foo><img>";
+    Document doc = Jsoup.parse(html);
+    return doc;
+}
+
+@Test
+public void testDivChildrenElements() {
+    Document doc = setupTestChildrenElements();
+    Element div = doc.select("div").first();
+
+    int expectedDivChildrenCount = 2;
+    assertEquals(expectedDivChildrenCount, div.children().size(), "Div should have 2 children elements");
+
+    String expectedFirstChildHtml = "<p><a>One</a></p>";
+    assertEquals(expectedFirstChildHtml, div.children().get(0).outerHtml(), "First child of div should match expected HTML");
+
+    String expectedSecondChildHtml = "<p><a>Two</a></p>";
+    assertEquals(expectedSecondChildHtml, div.children().get(1).outerHtml(), "Second child of div should match expected HTML");
+
+    int expectedDivChildNodesCount = 3;
+    assertEquals(expectedDivChildNodesCount, div.childNodes().size(), "Div should have 3 child nodes");
+
+    String expectedThirdChildNodeHtml = "Three";
+    assertEquals(expectedThirdChildNodeHtml, div.childNodes().get(2).outerHtml(), "Third child node of div should be 'Three'");
+}
+
+@Test
+public void testPChildrenElements() {
+    Document doc = setupTestChildrenElements();
+    Element p = doc.select("p").first();
+
+    int expectedPChildrenCount = 1;
+    assertEquals(expectedPChildrenCount, p.children().size(), "P should have 1 child element");
+
+    String expectedPChildrenText = "One";
+    assertEquals(expectedPChildrenText, p.children().text(), "P's child text should be 'One'");
+}
+
+@Test
+public void testSpanChildrenElements() {
+    Document doc = setupTestChildrenElements();
+    Element span = doc.select("span").first();
+
+    int expectedSpanChildrenCount = 0;
+    assertEquals(expectedSpanChildrenCount, span.children().size(), "Span should have no children elements");
+
+    int expectedSpanChildNodesCount = 1;
+    assertEquals(expectedSpanChildNodesCount, span.childNodes().size(), "Span should have 1 child node");
+
+    String expectedFirstChildNodeHtml = "Four";
+    assertEquals(expectedFirstChildNodeHtml, span.childNodes().get(0).outerHtml(), "First child node of span should be 'Four'");
+}
+
+@Test
+public void testFooChildrenElements() {
+    Document doc = setupTestChildrenElements();
+    Element foo = doc.select("foo").first();
+
+    int expectedFooChildrenCount = 0;
+    assertEquals(expectedFooChildrenCount, foo.children().size(), "Foo should have no children elements");
+
+    int expectedFooChildNodesCount = 0;
+    assertEquals(expectedFooChildNodesCount, foo.childNodes().size(), "Foo should have no child nodes");
+}
+
+@Test
+public void testImgChildrenElements() {
+    Document doc = setupTestChildrenElements();
+    Element img = doc.select("img").first();
+
+    int expectedImgChildrenCount = 0;
+    assertEquals(expectedImgChildrenCount, img.children().size(), "Img should have no children elements");
+
+    int expectedImgChildNodesCount = 0;
+    assertEquals(expectedImgChildNodesCount, img.childNodes().size(), "Img should have no child nodes");
+}
+
+

@@ -1,0 +1,50 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+
+import java.io.IOException;
+import java.io.StringWriter;
+
+import com.google.gson.stream.JsonWriter;
+
+class JsonWriterTest {
+
+    @ParameterizedTest
+    @ValueSource(strings = {"beginArray", "endArray", "beginObject", "endObject"})
+    public void testClosedWriterThrowsOnStructure(String methodName) throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter writer = new JsonWriter(stringWriter);
+        writer.beginArray();
+        writer.endArray();
+        writer.close();
+
+        String expectedMessage = "JsonWriter is closed.";
+        IllegalStateException e = assertThrows(IllegalStateException.class, () -> {
+            switch (methodName) {
+                case "beginArray":
+                    writer.beginArray();
+                    break;
+                case "endArray":
+                    writer.endArray();
+                    break;
+                case "beginObject":
+                    writer.beginObject();
+                    break;
+                case "endObject":
+                    writer.endObject();
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unknown method: " + methodName);
+            }
+        });
+        assertThat(e.getMessage(), equalTo(expectedMessage));
+    }
+}
+```
+

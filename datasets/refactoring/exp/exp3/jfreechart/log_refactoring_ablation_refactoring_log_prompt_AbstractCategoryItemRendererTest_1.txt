@@ -1,0 +1,64 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+
+import org.jfree.chart.renderer.category.BarRenderer;
+import org.jfree.chart.labels.StandardCategoryItemLabelGenerator;
+import org.jfree.chart.labels.StandardCategorySeriesLabelGenerator;
+import org.jfree.chart.labels.StandardCategoryToolTipGenerator;
+import org.jfree.chart.urls.StandardCategoryURLGenerator;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+
+import java.text.NumberFormat;
+
+class BarRendererTest {
+
+    private BarRenderer r1;
+    private BarRenderer r2;
+
+    @BeforeEach
+    void setUp() {
+        r1 = new BarRenderer();
+        r2 = new BarRenderer();
+    }
+
+    @Test
+    void testInitialEquality() {
+        assertEquals(r1, r2, "Initial state should be equal");
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "setSeriesToolTipGenerator, 1, new StandardCategoryToolTipGenerator(), new StandardCategoryToolTipGenerator()",
+        "setDefaultToolTipGenerator, , new StandardCategoryToolTipGenerator(\"{2}\", NumberFormat.getInstance()), new StandardCategoryToolTipGenerator(\"{2}\", NumberFormat.getInstance())",
+        "setSeriesItemLabelGenerator, 1, new StandardCategoryItemLabelGenerator(), new StandardCategoryItemLabelGenerator()",
+        "setDefaultItemLabelGenerator, , new StandardCategoryItemLabelGenerator(\"{2}\", NumberFormat.getInstance()), new StandardCategoryItemLabelGenerator(\"{2}\", NumberFormat.getInstance())",
+        "setSeriesItemURLGenerator, 1, new StandardCategoryURLGenerator(), new StandardCategoryURLGenerator()",
+        "setDefaultItemURLGenerator, , new StandardCategoryURLGenerator(\"abc.html\"), new StandardCategoryURLGenerator(\"abc.html\")",
+        "setLegendItemLabelGenerator, , new StandardCategorySeriesLabelGenerator(\"XYZ\"), new StandardCategorySeriesLabelGenerator(\"XYZ\")",
+        "setLegendItemToolTipGenerator, , new StandardCategorySeriesLabelGenerator(\"ToolTip\"), new StandardCategorySeriesLabelGenerator(\"ToolTip\")",
+        "setLegendItemURLGenerator, , new StandardCategorySeriesLabelGenerator(\"URL\"), new StandardCategorySeriesLabelGenerator(\"URL\")"
+    })
+    void testPropertyEquality(String methodName, String seriesIndex, String value1, String value2) throws Exception {
+        invokeMethod(r1, methodName, seriesIndex, value1);
+        assertNotEquals(r1, r2, "Objects should not be equal after setting property on r1");
+
+        invokeMethod(r2, methodName, seriesIndex, value2);
+        assertEquals(r1, r2, "Objects should be equal after setting the same property on both");
+    }
+
+    private void invokeMethod(BarRenderer renderer, String methodName, String seriesIndex, String value) throws Exception {
+        if (methodName.equals("setDefaultToolTipGenerator") || methodName.equals("setDefaultItemLabelGenerator") || methodName.equals("setDefaultItemURLGenerator")) {
+            renderer.getClass().getMethod(methodName, value.getClass()).invoke(renderer, value);
+        } else {
+            int index = seriesIndex.isEmpty() ? -1 : Integer.parseInt(seriesIndex);
+            renderer.getClass().getMethod(methodName, int.class, value.getClass()).invoke(renderer, index, value);
+        }
+    }
+}
+```
+

@@ -1,0 +1,45 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+import java.io.File;
+import java.io.IOException;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
+
+class WikiTest {
+
+    private File inputFile;
+
+    @TempDir
+    public File tempDir;
+
+    @BeforeEach
+    void setUp() throws IOException {
+        inputFile = new File(tempDir, "xwiki-1324.html");
+        assumeTrue(inputFile.exists(), "Input file does not exist: " + inputFile.getAbsolutePath());
+        // Assuming getFileAsString is a utility method to read file content as string
+        String htmlContent = getFileAsString(new File("/htmltests/xwiki-1324.html"));
+        org.apache.commons.io.FileUtils.writeStringToFile(inputFile, htmlContent, "UTF-8");
+    }
+
+    @Test
+    void testWikiFromString() throws IOException {
+        String html = getFileAsString(inputFile);
+        Document doc = Jsoup.parse(html);
+
+        assertEquals("XWiki Jetty HSQLDB 12.1-SNAPSHOT", doc.select("#xwikiplatformversion").text(),
+                "The XWiki platform version should match the expected value.");
+
+        String expectedHtml = "<a class=\"list-group-item\" data-id=\"userdirectory\" href=\"/xwiki/bin/admin/XWiki/XWikiPreferences?editor=globaladmin&amp;section=userdirectory\" title=\"Customize the user directory live table.\">User Directory</a>";
+        assertEquals(expectedHtml, doc.select("[data-id=userdirectory]").outerHtml(),
+                "The HTML for the User Directory link should match the expected value.");
+    }
+
+    private String getFileAsString(File file) throws IOException {
+        return org.apache.commons.io.FileUtils.readFileToString(file, "UTF-8");
+    }
+}
+```
+

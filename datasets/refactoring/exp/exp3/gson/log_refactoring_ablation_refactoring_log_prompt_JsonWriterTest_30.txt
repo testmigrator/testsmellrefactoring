@@ -1,0 +1,131 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import com.google.gson.stream.JsonWriter;
+import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.io.StringWriter;
+
+class JsonWriterTest {
+
+    @Test
+    public void testWriteNegativeZero() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.beginArray();
+        jsonWriter.value(-0.0);
+        jsonWriter.endArray();
+        jsonWriter.close();
+        assertEquals("[-0.0]", stringWriter.toString());
+    }
+
+    @Test
+    public void testWriteOne() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.beginArray();
+        jsonWriter.value(1.0);
+        jsonWriter.endArray();
+        jsonWriter.close();
+        assertEquals("[1.0]", stringWriter.toString());
+    }
+
+    @Test
+    public void testWriteMaxValue() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.beginArray();
+        jsonWriter.value(Double.MAX_VALUE);
+        jsonWriter.endArray();
+        jsonWriter.close();
+        assertEquals("[1.7976931348623157E308]", stringWriter.toString());
+    }
+
+    @Test
+    public void testWriteMinValue() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.beginArray();
+        jsonWriter.value(Double.MIN_VALUE);
+        jsonWriter.endArray();
+        jsonWriter.close();
+        assertEquals("[4.9E-324]", stringWriter.toString());
+    }
+
+    @Test
+    public void testWritePositiveZero() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.beginArray();
+        jsonWriter.value(0.0);
+        jsonWriter.endArray();
+        jsonWriter.close();
+        assertEquals("[0.0]", stringWriter.toString());
+    }
+
+    @Test
+    public void testWriteNegativeHalf() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.beginArray();
+        jsonWriter.value(-0.5);
+        jsonWriter.endArray();
+        jsonWriter.close();
+        assertEquals("[-0.5]", stringWriter.toString());
+    }
+
+    @Test
+    public void testWriteVerySmallNumber() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.beginArray();
+        jsonWriter.value(2.2250738585072014E-308);
+        jsonWriter.endArray();
+        jsonWriter.close();
+        assertEquals("[2.2250738585072014E-308]", stringWriter.toString());
+    }
+
+    @Test
+    public void testWritePi() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.beginArray();
+        jsonWriter.value(Math.PI);
+        jsonWriter.endArray();
+        jsonWriter.close();
+        assertEquals("[3.141592653589793]", stringWriter.toString());
+    }
+
+    @Test
+    public void testWriteE() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.beginArray();
+        jsonWriter.value(Math.E);
+        jsonWriter.endArray();
+        jsonWriter.close();
+        assertEquals("[2.718281828459045]", stringWriter.toString());
+    }
+
+    @Test
+    public void testIOExceptionOnClose() {
+        assertThrows(IOException.class, () -> {
+            StringWriter stringWriter = new StringWriter() {
+                @Override
+                public void close() throws IOException {
+                    throw new IOException("Simulated IOException");
+                }
+            };
+            JsonWriter jsonWriter = new JsonWriter(stringWriter);
+            jsonWriter.beginArray();
+            jsonWriter.value(1.0);
+            jsonWriter.endArray();
+            jsonWriter.close();
+        });
+    }
+}
+```
+

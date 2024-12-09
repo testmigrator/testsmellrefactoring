@@ -1,0 +1,43 @@
+asserts result: 
+ ```java
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.Options;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.assertions.AssertionUtils;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+class DefaultParserTest {
+
+    private DefaultParser parser;
+    private Options options;
+
+    @BeforeEach
+    public void setUp() {
+        parser = DefaultParser.builder().setStripLeadingAndTrailingQuotes(true).build();
+        options = new Options(); // Assuming options are set up here
+    }
+
+    @Test
+    public void testShortOptionQuoteHandlingWithStrip() {
+        final String[] args = {"-b", "\"quoted string\""};
+
+        CommandLine cl = parser.parse(options, args);
+
+        assertEquals("quoted string", cl.getOptionValue("b"), "Confirm -b \"arg\" strips quotes");
+    }
+
+    @Test
+    public void testParseThrowsExceptionOnInvalidOption() {
+        final String[] args = {"-x", "invalid option"};
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            parser.parse(options, args);
+        }, "Confirm parse throws exception on invalid option");
+    }
+}
+```
+

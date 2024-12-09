@@ -1,0 +1,59 @@
+asserts result: 
+ ```java
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.DeprecatedAttributes;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.assertions.AssertionConsumer;
+
+import java.util.HashSet;
+import java.util.Set;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class ParserTest {
+
+    private DefaultParser parser;
+
+    @Test
+    public void testDeprecatedOptionD1() throws ParseException {
+        final Set<Option> handler = new HashSet<>();
+        parser = DefaultParser.builder().setDeprecatedHandler(handler::add).build();
+        final Option opt1 = Option.builder().option("d1").deprecated().build();
+        final CommandLine cl = parser.parse(new Options().addOption(opt1), new String[]{"-d1"});
+
+        assertTrue(cl.hasOption(opt1.getOpt()), "Option d1 should be present");
+        assertTrue(handler.contains(opt1), "Deprecated handler should be triggered for option d1");
+    }
+
+    @Test
+    public void testDeprecatedOptionD2() throws ParseException {
+        final Set<Option> handler = new HashSet<>();
+        parser = DefaultParser.builder().setDeprecatedHandler(handler::add).build();
+        final Option opt2 = Option.builder().option("d2").deprecated(DeprecatedAttributes.builder()
+                .setForRemoval(true)
+                .setSince("1.0")
+                .setDescription("Do this instead.")
+                .build()).build();
+        final CommandLine cl = parser.parse(new Options().addOption(opt2), new String[]{"-d2"});
+
+        assertTrue(cl.hasOption(opt2.getOpt()), "Option d2 should be present");
+        assertTrue(handler.contains(opt2), "Deprecated handler should be triggered for option d2");
+    }
+
+    @Test
+    public void testNonDeprecatedOptionA() throws ParseException {
+        final Set<Option> handler = new HashSet<>();
+        parser = DefaultParser.builder().setDeprecatedHandler(handler::add).build();
+        final Option opt3 = Option.builder().option("a").build();
+        final CommandLine cl = parser.parse(new Options().addOption(opt3), new String[]{"-a"});
+
+        assertTrue(cl.hasOption(opt3.getOpt()), "Option a should be present");
+        assertFalse(handler.contains(opt3), "Deprecated handler should not be triggered for option a");
+    }
+}
+```
+

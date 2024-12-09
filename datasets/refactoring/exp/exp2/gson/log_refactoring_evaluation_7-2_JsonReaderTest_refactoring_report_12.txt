@@ -1,0 +1,11 @@
+asserts result: 
+ Yes
+
+The refactored tests maintain the same functionality as the original test. Each part of the original test has been broken down into separate tests, but they collectively cover the same behavior:
+
+1. `testPrematureEndOfInput_Name` checks that the next name is "a".
+2. `testPrematureEndOfInput_BooleanValue` checks that the next boolean value is true.
+3. `testPrematureEndOfInput_EndOfInputException` checks that an `EOFException` is thrown when attempting to read the next name after the boolean value.
+
+The setup method `setupTestPrematureEndOfInput` initializes the `JsonReader` and starts the object, ensuring that each test starts from the same state as the original test. Therefore, the functionality is consistent.
+

@@ -1,0 +1,242 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import com.google.gson.stream.JsonWriter;
+import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.io.StringWriter;
+
+class JsonWriterTest {
+
+    @Test
+    public void testArrayStartAndEnd() {
+        assertDoesNotThrow(() -> {
+            StringWriter stringWriter = new StringWriter();
+            JsonWriter jsonWriter = new JsonWriter(stringWriter);
+            jsonWriter.beginArray();
+            jsonWriter.endArray();
+            assertEquals("[\n]", stringWriter.toString());
+        });
+    }
+
+    @Test
+    public void testValueA() {
+        assertDoesNotThrow(() -> {
+            StringWriter stringWriter = new StringWriter();
+            JsonWriter jsonWriter = new JsonWriter(stringWriter);
+            jsonWriter.beginArray();
+            jsonWriter.value("a");
+            jsonWriter.endArray();
+            assertEquals("[\"a\"]", stringWriter.toString());
+        });
+    }
+
+    @Test
+    public void testValueAWithQuote() {
+        assertDoesNotThrow(() -> {
+            StringWriter stringWriter = new StringWriter();
+            JsonWriter jsonWriter = new JsonWriter(stringWriter);
+            jsonWriter.beginArray();
+            jsonWriter.value("a\"");
+            jsonWriter.endArray();
+            assertEquals("[\"a\\\"\"]", stringWriter.toString());
+        });
+    }
+
+    @Test
+    public void testValueQuote() {
+        assertDoesNotThrow(() -> {
+            StringWriter stringWriter = new StringWriter();
+            JsonWriter jsonWriter = new JsonWriter(stringWriter);
+            jsonWriter.beginArray();
+            jsonWriter.value("\"");
+            jsonWriter.endArray();
+            assertEquals("[\"\\\"\"]", stringWriter.toString());
+        });
+    }
+
+    @Test
+    public void testValueColon() {
+        assertDoesNotThrow(() -> {
+            StringWriter stringWriter = new StringWriter();
+            JsonWriter jsonWriter = new JsonWriter(stringWriter);
+            jsonWriter.beginArray();
+            jsonWriter.value(":");
+            jsonWriter.endArray();
+            assertEquals("[\":\"]", stringWriter.toString());
+        });
+    }
+
+    @Test
+    public void testValueComma() {
+        assertDoesNotThrow(() -> {
+            StringWriter stringWriter = new StringWriter();
+            JsonWriter jsonWriter = new JsonWriter(stringWriter);
+            jsonWriter.beginArray();
+            jsonWriter.value(",");
+            jsonWriter.endArray();
+            assertEquals("[\",\"]", stringWriter.toString());
+        });
+    }
+
+    @Test
+    public void testValueBackspace() {
+        assertDoesNotThrow(() -> {
+            StringWriter stringWriter = new StringWriter();
+            JsonWriter jsonWriter = new JsonWriter(stringWriter);
+            jsonWriter.beginArray();
+            jsonWriter.value("\b");
+            jsonWriter.endArray();
+            assertEquals("[\"\\b\"]", stringWriter.toString());
+        });
+    }
+
+    @Test
+    public void testValueFormFeed() {
+        assertDoesNotThrow(() -> {
+            StringWriter stringWriter = new StringWriter();
+            JsonWriter jsonWriter = new JsonWriter(stringWriter);
+            jsonWriter.beginArray();
+            jsonWriter.value("\f");
+            jsonWriter.endArray();
+            assertEquals("[\"\\f\"]", stringWriter.toString());
+        });
+    }
+
+    @Test
+    public void testValueNewline() {
+        assertDoesNotThrow(() -> {
+            StringWriter stringWriter = new StringWriter();
+            JsonWriter jsonWriter = new JsonWriter(stringWriter);
+            jsonWriter.beginArray();
+            jsonWriter.value("\n");
+            jsonWriter.endArray();
+            assertEquals("[\"\\n\"]", stringWriter.toString());
+        });
+    }
+
+    @Test
+    public void testValueCarriageReturn() {
+        assertDoesNotThrow(() -> {
+            StringWriter stringWriter = new StringWriter();
+            JsonWriter jsonWriter = new JsonWriter(stringWriter);
+            jsonWriter.beginArray();
+            jsonWriter.value("\r");
+            jsonWriter.endArray();
+            assertEquals("[\"\\r\"]", stringWriter.toString());
+        });
+    }
+
+    @Test
+    public void testValueTab() {
+        assertDoesNotThrow(() -> {
+            StringWriter stringWriter = new StringWriter();
+            JsonWriter jsonWriter = new JsonWriter(stringWriter);
+            jsonWriter.beginArray();
+            jsonWriter.value("\t");
+            jsonWriter.endArray();
+            assertEquals("[\"\\t\"]", stringWriter.toString());
+        });
+    }
+
+    @Test
+    public void testValueSpace() {
+        assertDoesNotThrow(() -> {
+            StringWriter stringWriter = new StringWriter();
+            JsonWriter jsonWriter = new JsonWriter(stringWriter);
+            jsonWriter.beginArray();
+            jsonWriter.value(" ");
+            jsonWriter.endArray();
+            assertEquals("[\" \"]", stringWriter.toString());
+        });
+    }
+
+    @Test
+    public void testValueBackslash() {
+        assertDoesNotThrow(() -> {
+            StringWriter stringWriter = new StringWriter();
+            JsonWriter jsonWriter = new JsonWriter(stringWriter);
+            jsonWriter.beginArray();
+            jsonWriter.value("\\");
+            jsonWriter.endArray();
+            assertEquals("[\"\\\\\"]", stringWriter.toString());
+        });
+    }
+
+    @Test
+    public void testValueLeftBrace() {
+        assertDoesNotThrow(() -> {
+            StringWriter stringWriter = new StringWriter();
+            JsonWriter jsonWriter = new JsonWriter(stringWriter);
+            jsonWriter.beginArray();
+            jsonWriter.value("{");
+            jsonWriter.endArray();
+            assertEquals("[\"{\"]", stringWriter.toString());
+        });
+    }
+
+    @Test
+    public void testValueRightBrace() {
+        assertDoesNotThrow(() -> {
+            StringWriter stringWriter = new StringWriter();
+            JsonWriter jsonWriter = new JsonWriter(stringWriter);
+            jsonWriter.beginArray();
+            jsonWriter.value("}");
+            jsonWriter.endArray();
+            assertEquals("[\"}\"]", stringWriter.toString());
+        });
+    }
+
+    @Test
+    public void testValueLeftBracket() {
+        assertDoesNotThrow(() -> {
+            StringWriter stringWriter = new StringWriter();
+            JsonWriter jsonWriter = new JsonWriter(stringWriter);
+            jsonWriter.beginArray();
+            jsonWriter.value("[");
+            jsonWriter.endArray();
+            assertEquals("[\"[\"]", stringWriter.toString());
+        });
+    }
+
+    @Test
+    public void testValueRightBracket() {
+        assertDoesNotThrow(() -> {
+            StringWriter stringWriter = new StringWriter();
+            JsonWriter jsonWriter = new JsonWriter(stringWriter);
+            jsonWriter.beginArray();
+            jsonWriter.value("]");
+            jsonWriter.endArray();
+            assertEquals("[\"]\"]", stringWriter.toString());
+        });
+    }
+
+    @Test
+    public void testValueNullCharacter() {
+        assertDoesNotThrow(() -> {
+            StringWriter stringWriter = new StringWriter();
+            JsonWriter jsonWriter = new JsonWriter(stringWriter);
+            jsonWriter.beginArray();
+            jsonWriter.value("\0");
+            jsonWriter.endArray();
+            assertEquals("[\"\\u0000\"]", stringWriter.toString());
+        });
+    }
+
+    @Test
+    public void testValueControlCharacter() {
+        assertDoesNotThrow(() -> {
+            StringWriter stringWriter = new StringWriter();
+            JsonWriter jsonWriter = new JsonWriter(stringWriter);
+            jsonWriter.beginArray();
+            jsonWriter.value("\u0019");
+            jsonWriter.endArray();
+            assertEquals("[\"\\u0019\"]", stringWriter.toString());
+        });
+    }
+}
+```
+

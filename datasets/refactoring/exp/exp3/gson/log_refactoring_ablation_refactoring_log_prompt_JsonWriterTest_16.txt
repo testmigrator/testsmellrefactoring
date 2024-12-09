@@ -1,0 +1,30 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+
+import com.google.gson.stream.JsonWriter;
+import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.io.StringWriter;
+
+class JsonWriterTest {
+
+    @Test
+    public void testBeginArrayTwiceThenEndObjectShouldThrowIllegalStateException() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.beginArray();
+        jsonWriter.beginArray();
+
+        var exception = assertThrows(IllegalStateException.class, () -> jsonWriter.endObject(),
+                "Expected IllegalStateException to be thrown when ending object after two beginArray calls");
+
+        assertThat(exception.getMessage(), equalTo("Nesting problem."),
+                "Expected message should match 'Nesting problem.'");
+    }
+}
+```
+

@@ -1,0 +1,89 @@
+Input Parameters:
+Test Code:
+ @Test
+    public void testIssue464() {
+        final double value = 0.2;
+        UnivariateFunction f = new UnivariateFunction() {
+            @Override
+            public double value(double x) {
+                return (x >= 0 && x <= 5) ? value : 0.0;
+            }
+        };
+        IterativeLegendreGaussIntegrator gauss
+            = new IterativeLegendreGaussIntegrator(5, 3, 100);
+
+        // due to the discontinuity, integration implies *many* calls
+        double maxX = 0.32462367623786328;
+        Assert.assertEquals(maxX * value, gauss.integrate(Integer.MAX_VALUE, f, -10, maxX), 1.0e-7);
+        Assert.assertTrue(gauss.getEvaluations() > 37000000);
+        Assert.assertTrue(gauss.getIterations() < 30);
+
+        // setting up limits prevents such large number of calls
+        try {
+            gauss.integrate(1000, f, -10, maxX);
+            Assert.fail("expected TooManyEvaluationsException");
+        } catch (TooManyEvaluationsException tmee) {
+            // expected
+            Assert.assertEquals(1000, tmee.getMax());
+        }
+
+        // integrating on the two sides should be simpler
+        double sum1 = gauss.integrate(1000, f, -10, 0);
+        int eval1   = gauss.getEvaluations();
+        double sum2 = gauss.integrate(1000, f, 0, maxX);
+        int eval2   = gauss.getEvaluations();
+        Assert.assertEquals(maxX * value, sum1 + sum2, 1.0e-7);
+        Assert.assertTrue(eval1 + eval2 < 200);
+    }
+Context: /org/apache/commons/math4/legacy/analysis/integration/IterativeLegendreGaussIntegrator
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing', 'Eager_Test', 'Duplicate_Assert', 'Magic_Number_Test']
+Smell Description List: ['Test Smell Type：Assertion Roulette\n\nFeature:\nA test method contains more than one assertion statement without an explanation/message (parameter in the assertion method).\n', 'Test Smell Type：Exception_Catching_Throwing\n\nFeature:\nA test method that contains either a throw statement or a catch clause.\n', 'Test Smell Type：Eager Test\n\nFeature:\nA test method contains multiple calls to multiple production methods.\n', 'Test Smell Type：Duplicate Assert\n\nFeature:\nA test method that contains more than one assertion statement with the same parameters.\n', 'Test Smell Type：Magic Number Test\n\nFeature:\nAn assertion method that contains a numeric literal as an argument.\n']
+Refactoring DSL: ['RefactorRule:\n  SmellType: Assertion Roulette\n  Description: Add descriptive messages to assert statements to improve readability and maintainability.\n  Steps:\n    - Step:\n        Description: "Add descriptive message to each assert statement(except assertThat, assertThrows)."\n        Action: AddMessageToAssert\n        Parameters:\n          MessagePattern: "{assertionMessage}"\n  Example:\n    Before: |\n      @Test\n      public void T() {\n        stmt\n        assert_1\n        ...\n        assert_n\n        stmt\'\n      }\n    After: |\n      @Test\n      public void T() {\n        stmt\n        assert_1(..., "Descriptive message for assert statement")\n        ...\n        assert_n(..., "Descriptive message for assert statement")\n        stmt\'\n      }\n    Variables:\n      assertionMessage: "Descriptive message for assert statement"\n', 'RefactorRule:\n  SmellType: Exception_Catching_Throwing\n  Description: Ensure tests use assertDoesNotThrow to verify no exceptions are thrown and remove any throws declaration in test methods.\n  Steps:\n    - Step:\n        Description: "Handle try-catch blocks containing \'fail\' calls"\n        Action: ReplaceTryCatchWithAssertThrows\n        Parameters:\n          SourcePattern: |\n            try {\n              {tryBlock}\n              fail();\n            } catch ({exception}) {\n              {catchBlock}\n            }\n          ReplacementPattern: |\n            {exception} exception = assertThrows({exception}.class, () -> {\n              {tryBlock}\n            });\n            {catchBlock}\n    - Step:\n        Description: "Handle test methods with \'throws\' declaration but no try-catch block"\n        Action: WrapWithAssertDoesNotThrow\n        Parameters:\n          DetectionPattern: |\n            MethodDeclaration [throws!=null && BodyContainsTryCatch=false]\n          ReplacementPattern: |\n            assertDoesNotThrow(() -> {\n              {methodBody}\n            }, "Unexpected exception occurred during the test");\n\n    - Step:\n        Description: "Handle test methods with try-catch blocks without \'fail\' calls"\n        Action: ReplaceTryCatchWithoutFail\n        Parameters:\n          SourcePattern: |\n            try {\n              {tryBlock}\n            } catch ({exception}) {\n              {catchBlock}\n            }\n          ReplacementPattern: |\n            assertDoesNotThrow(() -> {\n              {tryBlock}\n            });\n            {catchBlock}\n\n  Example:\n    Before: |\n      @Test\n      public void T() {\n        stmt\n        try {\n            stmt\'\n            fail();\n        } catch (E) {\n            evs\n        }\n        stmt\'\'\n      }\n    After: |\n      @Test\n      public void T() {\n        stmt\n        assertThrows(E.class, () -> {\n            stmt\'\n        });\n        evs\n        stmt\'\'\n      }\n  Variables:\n    exception: E\n    tryBlock: stmt\'\n    catchBlock: evs\n    tryBlockStatement: stmt\'i\n', 'RefactorRule:\n  SmellType: Eager Test\n  Description: "Refactor test methods to group related assertions logically and extract reusable setup logic into private methods."\n  Steps:\n    - Step1:\n        Description: "Extract shared setup logic into a reusable, private method and ensure it is used across all relevant tests."\n        Action: ExtractSetupMethod\n        Parameters:\n          Condition: "If multiple tests share the same setup logic."\n          MethodNamePattern: setupTest{OriginalMethodName}\n    - Step2:\n        Description: "Group related assertions into cohesive sub-tests while retaining necessary setup logic."\n        Action: GroupAssertions\n        Parameters:\n          GroupBy: LogicalConcern\n    - Step3:\n        Description: "Create new test methods for each cohesive group of assertions and ensure readability."\n        Action: CreateTestMethods\n        Parameters:\n          IncludeSetup: True\n          NamePattern: test{OriginalMethodName}_{Concern}\n  Example:\n    Before: |\n      @Test\n      public void testExample() {\n          setup();\n          assertEquals(1, methodA());\n          assertTrue(methodB());\n      }\n    After: |\n      private void setupTestExample() {\n          setup();\n      }\n\n      @Test\n      public void testExample_MethodA() {\n          setupTestExample();\n          assertEquals(1, methodA());\n      }\n\n      @Test\n      public void testExample_MethodB() {\n          setupTestExample();\n          assertTrue(methodB());\n      }\n  Variables:\n    OriginalMethodName: The name of the original test method.\n    LogicalConcern: The logical aspect tested (e.g., a specific API, validation, or behavior).\n', 'RefactorRule:\n  SmellType: Duplicate Assert\n  Description: "If the assertion logic is the same but tested with different inputs, convert the test to a parameterized test using JUnit 5\'s @CsvSource annotation. Otherwise, split the test into multiple separate methods, each containing a single assertion."\n  Steps:\n    - Step:\n        Description: "Check if there are multiple assertions testing the same condition"\n        Action: IdentifySameAssertions\n        Parameters:\n          SourcePattern: |\n\t          assert(expected, ...)\n\t          assert(expected, ...)\n    - Step:\n        Description: "Create new test methods if necessary to separate assertions for different inputs"\n        Action: SplitMethod\n        Parameters:\n          TargetType: Method\n\n    - Step:\n        Description: "Convert the test method to a parameterized test"\n        Action: ConvertToParameterizedTest\n        Parameters:\n          TargetType: Method\n    - Step:\n        Description: "Add @CsvSource annotation to declare parameterized values."\n        Action: AddAnnotation\n        Parameters:\n          TargetType: Method\n          Annotation: |\n            @CsvSource({\n              "{paramValues}"\n            })\n    - Step:\n        Description: "Refactor the test method to use parameterized values."\n        Action: RefactorMethod\n        Parameters:\n          SourcePattern: |\n            public void T() {\n              {originalStatements}\n            }\n          ReplacementPattern: |\n            public void T({parameterNames}) {\n              {refactoredStatements}\n            }\n  Example:\n    Before: |\n      @Test\n      public void T() {\n        assertEquals(expectedA, methodUnderTest(a));\n        assertEquals(expectedB, methodUnderTest(b));\n      }\n\n    After: |\n      @ParameterizedTest\n      @CsvSource({\n        "a, expectedA",\n        "b, expectedB"\n      })\n      public void T(String input, String expected) {\n        assertEquals(expected, methodUnderTest(input));\n      }\n', 'RefactorRule:\n  SmellType: Magic Number Test\n  Description: "Extract magic numbers and assign meaningful names to improve readability and maintainability."\n  Steps:\n    - Step:\n        Action: IdentifyMagicNumbers\n        Description: "Identify magic numbers in assertions"\n        Parameters:\n          TargetType: Method\n          SourcePattern: |\n            assertEquals({magicNumber}, {variable})\n    - Step:\n        Action: ExtractVariable\n        Description: "Extract magic number to a variable with meaningful name"\n        Parameters:\n          TargetType: Method\n          SourcePattern: |\n            assertEquals({magicNumber}, {variable})\n          ReplacementPattern: |\n            int {meaningfulName} = {magicNumber};\n            assertEquals({meaningfulName}, {variable})\n  Example:\n    Before: |\n      @Test\n      public void T() {\n          stmt\n          assertEquals(1, a)\n          stmt\'\n      }\n    After: |\n      @Test\n      public void T() {\n          int x = 1; // x: meaningful variable name\n          stmt\n          assertEquals(x, a)\n          stmt\'\n      }\n  Variables:\n    magicNumber: "1"\n    variable: "a"\n    meaningfulName: "x"\n']
+Checkpoints: ['[ ] All assert statements have been added with clear explanatory messages.\n', '[ ] All exception handling has been refactored to use the JUnit 5 Exception Handling feature.\n', '[ ] All eager tests have been split into separate tests, each focusing on verifying a single API.\n', '[ ] All duplicate assertions have been refactored using JUnit 5 Parameterized Tests, where the lists of parameterizable values are declared in a specific annotation, and the test method is executed independently m times.\n', '[ ] All magic numbers in the test code have been extracted and assigned meaningful variable names.\n']
+
+Refactored Code: 
+ 
+import org.apache.commons.math4.legacy.analysis.UnivariateFunction;
+import org.apache.commons.math4.legacy.analysis.integration.IterativeLegendreGaussIntegrator;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import static org.junit.jupiter.api.Assertions.*;
+
+public class TestIssue464 {
+
+    private static final double VALUE = 0.2;
+    private static final double MAX_X = 0.32462367623786328;
+    private static final int MAX_EVALUATIONS = 37000000;
+    private static final int ALLOWED_EVALUATIONS = 200;
+
+    @Test
+    public void testIntegrationWithDiscontinuity() {
+        UnivariateFunction f = x -> (x >= 0 && x <= 5) ? VALUE : 0.0;
+        IterativeLegendreGaussIntegrator integrator = new IterativeLegendreGaussIntegrator(5, 3, 100);
+
+        double delta = 1.0e-7;
+        Assert.assertEquals("Integration with discontinuity should require many evaluations",MAX_X * VALUE, integrator.integrate(Integer.MAX_VALUE, f, -10, MAX_X), delta);
+        Assert.assertTrue("Integration with discontinuity should require many evaluations",  integrator.getEvaluations() > MAX_EVALUATIONS);
+
+        assertThrows(TooManyEvaluationsException.class, () -> integrator.integrate(1000, f, -10, MAX_X),
+                "Expected TooManyEvaluationsException for exceeding allowed evaluations");
+    }
+
+    @Test
+    public void testSplitIntegration() {
+        UnivariateFunction f = x -> (x >= 0 && x <= 5) ? VALUE : 0.0;
+        IterativeLegendreGaussIntegrator integrator = new IterativeLegendreGaussIntegrator(5, 3, 100);
+
+        double sum1 = integrator.integrate(1000, f, -10, 0);
+        int eval1 = integrator.getEvaluations();
+        double sum2 = integrator.integrate(1000, f, 0, MAX_X);
+        int eval2 = integrator.getEvaluations();
+
+        double delta = 1.0e-7;
+        Assert.assertEquals("Splitting integration should provide accurate result",  MAX_X * VALUE, sum1 + sum2, delta);
+        Assert.assertTrue("Splitting integration should be more efficient",  eval1 + eval2 < ALLOWED_EVALUATIONS);
+    }
+}
+
+

@@ -1,0 +1,44 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.stream.Stream;
+
+public class HelpFormatterTest {
+
+    private static final String EOL = System.lineSeparator();
+
+    @ParameterizedTest
+    @MethodSource("provideArgumentsForTestHeaderStartingWithLineSeparator")
+    public void testHeaderStartingWithLineSeparator(int width, boolean showUsage, boolean showFooter, String expectedOutput) {
+        final Options options = new Options();
+        final String header = EOL + "Header";
+        final String footer = "Footer";
+        final Builder builder = HelpFormatter.builder();
+        StringWriter out = new StringWriter();
+        builder.setPrintWriter(new PrintWriter(out)).get().printHelp(width, "foobar", header, options, 2, 2, footer, showUsage);
+
+        assertEquals(expectedOutput, out.toString(), "The output should match the expected usage message");
+    }
+
+    private static Stream<Arguments> provideArgumentsForTestHeaderStartingWithLineSeparator() {
+        return Stream.of(
+            Arguments.of(80, true, true, "usage: foobar" + EOL + EOL + "Header" + EOL + EOL + "Footer" + EOL),
+            Arguments.of(0, true, true, "usage: foobar" + EOL + EOL + "Header" + EOL + EOL + "Footer" + EOL),
+            Arguments.of(80, false, false, "usage: foobar" + EOL + EOL)
+        );
+    }
+}
+```
+
+### Explanation:
+1. **Assertion Roulette**: Each assertion now includes a clear explanatory message.
+2. **Sensitive Equality**: The `toString()` method is still used because the test is specifically checking the string output of the `printHelp` method. This is appropriate in this context.
+3. **Eager Test**: The original test method was split into a parameterized test, where each combination of parameters is tested independently.
+4. **Duplicate Assert**: The duplicate assertions were refactored using JUnit 5 Parameterized Tests, ensuring that each test case is executed independently with different parameters.
+

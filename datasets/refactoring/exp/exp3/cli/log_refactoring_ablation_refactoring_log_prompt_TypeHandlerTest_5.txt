@@ -1,0 +1,30 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.assertions.AssertionUtils;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.file.Paths;
+
+class TypeHandlerTest {
+
+    @Test
+    public void testCreateURL() {
+        final URL file;
+        try {
+            file = Paths.get("").toAbsolutePath().toUri().toURL();
+        } catch (MalformedURLException e) {
+            throw new AssertionError("Failed to create URL from path", e);
+        }
+
+        assertDoesNotThrow(() -> TypeHandler.createURL(file.toString()));
+
+        URL createdURL = TypeHandler.createURL(file.toString());
+        assertEquals(file, createdURL);
+    }
+}
+```
+

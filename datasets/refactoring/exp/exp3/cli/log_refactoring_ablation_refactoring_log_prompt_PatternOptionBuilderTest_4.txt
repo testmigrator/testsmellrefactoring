@@ -1,0 +1,37 @@
+asserts result: 
+ ```java
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.PatternOptionBuilder;
+import org.apache.commons.cli.PosixParser;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
+public class NumberPatternTest {
+
+    private static final String NUMBER_PATTERN = "n%d%x%";
+    private static final String[] VALID_ARGS = {"-n", "1", "-d", "2.1", "-x", "3,5"};
+    private static final long EXPECTED_NUMBER_VALUE = 1L;
+    private static final double EXPECTED_DOUBLE_VALUE = 2.1;
+
+    @Test
+    public void testNumberPattern() {
+        final Options options = PatternOptionBuilder.parsePattern(NUMBER_PATTERN);
+        final CommandLineParser parser = new PosixParser();
+
+        // Test with valid arguments
+        final CommandLine line = Assertions.assertDoesNotThrow(() -> parser.parse(options, VALID_ARGS), "Parsing should not throw an exception");
+
+        Assertions.assertEquals(Long.class, line.getOptionObject("n").getClass(), "n object class should be Long");
+        Assertions.assertEquals(EXPECTED_NUMBER_VALUE, line.getOptionObject("n"), "n value should be 1");
+
+        Assertions.assertEquals(Double.class, line.getOptionObject("d").getClass(), "d object class should be Double");
+        Assertions.assertEquals(EXPECTED_DOUBLE_VALUE, line.getOptionObject("d"), "d value should be 2.1");
+
+        Assertions.assertNull(line.getOptionObject("x"), "x object should be null");
+    }
+}
+```
+

@@ -1,0 +1,45 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import com.google.gson.stream.JsonWriter;
+import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.io.StringWriter;
+
+class JsonWriterTest {
+
+    @Test
+    public void testJsonValueWithJsonObject() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+
+        assertDoesNotThrow(() -> {
+            jsonWriter.beginObject();
+            jsonWriter.name("a");
+            jsonWriter.jsonValue("{\"b\":true}");
+            jsonWriter.endObject();
+        });
+
+        assertEquals("{\"a\":{\"b\":true}}", stringWriter.toString());
+    }
+
+    @Test
+    public void testJsonValueWithPrimitive() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+
+        assertDoesNotThrow(() -> {
+            jsonWriter.beginObject();
+            jsonWriter.name("c");
+            jsonWriter.value(1);
+            jsonWriter.endObject();
+        });
+
+        assertEquals("{\"c\":1}", stringWriter.toString());
+    }
+}
+```
+

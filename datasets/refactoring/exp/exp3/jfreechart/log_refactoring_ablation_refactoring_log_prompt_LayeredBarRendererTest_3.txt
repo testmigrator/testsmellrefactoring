@@ -1,0 +1,32 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
+
+class LayeredBarRendererTest {
+
+    @Test
+    public void testCloning() {
+        LayeredBarRenderer r1 = new LayeredBarRenderer();
+        
+        // Assert that cloning does not throw an exception
+        assertDoesNotThrow(() -> {
+            LayeredBarRenderer r2 = CloneUtils.clone(r1);
+            
+            // Assert that r1 and r2 are different instances
+            assertNotSame(r1, r2, "r1 and r2 should be different instances");
+            
+            // Assert that r1 and r2 are of the same class
+            assertEquals(r1.getClass(), r2.getClass(), "r1 and r2 should be of the same class");
+            
+            // Assert that r1 and r2 are equal
+            assertEquals(r1, r2, "r1 and r2 should be equal");
+            
+            // Check independence of r1 and r2
+            TestUtils.checkIndependence(r1, r2);
+        });
+    }
+}
+```
+

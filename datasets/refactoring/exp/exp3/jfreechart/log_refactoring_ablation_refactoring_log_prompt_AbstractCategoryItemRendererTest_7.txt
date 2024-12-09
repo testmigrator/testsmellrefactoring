@@ -1,0 +1,44 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+import org.jfree.chart.renderer.category.BarRenderer;
+import org.jfree.chart.labels.StandardCategorySeriesLabelGenerator;
+
+public class BarRendererTest {
+
+    @Test
+    public void testCloning_GeneratorCloned() {
+        // Arrange
+        StandardCategorySeriesLabelGenerator generator = new StandardCategorySeriesLabelGenerator("Series {0}");
+        BarRenderer r1 = new BarRenderer();
+        r1.setLegendItemLabelGenerator(generator);
+
+        // Act
+        BarRenderer r2 = r1.clone();
+
+        // Assert
+        assertNotNull(r2, "Cloned renderer should not be null");
+        assertNotSame(r1, r2, "Cloned renderer should not be the same instance as the original");
+        assertEquals(r1.getClass(), r2.getClass(), "Cloned renderer should have the same class as the original");
+        assertEquals(r1, r2, "Cloned renderer should be equal to the original");
+
+        // Check that the generator has been cloned
+        assertNotSame(r1.getLegendItemLabelGenerator(), r2.getLegendItemLabelGenerator(), "Generators should not be the same instance after cloning");
+    }
+
+    @Test
+    public void testCloning_ThrowsCloneNotSupportedException() {
+        // Arrange
+        StandardCategorySeriesLabelGenerator generator = new StandardCategorySeriesLabelGenerator("Series {0}");
+        BarRenderer r1 = new BarRenderer();
+        r1.setLegendItemLabelGenerator(generator);
+
+        // Act & Assert
+        assertThrows(CloneNotSupportedException.class, () -> {
+            BarRenderer r2 = (BarRenderer) r1.clone();
+        }, "Cloning should throw CloneNotSupportedException if not supported");
+    }
+}
+```
+

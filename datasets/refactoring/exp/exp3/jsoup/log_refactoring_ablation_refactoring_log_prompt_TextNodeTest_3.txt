@@ -1,0 +1,54 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.nodes.TextNode;
+import org.junit.Test;
+import static org.junit.Assert.*;
+
+public class TextNodeTest {
+
+    @Test
+    public void testSplitTextReturnsCorrectFirstPart() {
+        Document doc = Jsoup.parse("<div>Hello there</div>");
+        Element div = doc.select("div").first();
+        TextNode tn = (TextNode) div.childNode(0);
+        TextNode tail = tn.splitText(6);
+
+        assertEquals("First part should be 'Hello '", "Hello ", tn.getWholeText());
+    }
+
+    @Test
+    public void testSplitTextReturnsCorrectSecondPart() {
+        Document doc = Jsoup.parse("<div>Hello there</div>");
+        Element div = doc.select("div").first();
+        TextNode tn = (TextNode) div.childNode(0);
+        TextNode tail = tn.splitText(6);
+
+        assertEquals("Second part should be 'there'", "there", tail.getWholeText());
+    }
+
+    @Test
+    public void testSplitTextUpdatesParentNodeText() {
+        Document doc = Jsoup.parse("<div>Hello there</div>");
+        Element div = doc.select("div").first();
+        TextNode tn = (TextNode) div.childNode(0);
+        TextNode tail = tn.splitText(6);
+        tail.text("there!");
+
+        assertEquals("Parent node text should be 'Hello there!'", "Hello there!", div.text());
+    }
+
+    @Test
+    public void testSplitTextPreservesParentNode() {
+        Document doc = Jsoup.parse("<div>Hello there</div>");
+        Element div = doc.select("div").first();
+        TextNode tn = (TextNode) div.childNode(0);
+        TextNode tail = tn.splitText(6);
+
+        assertTrue("Both parts should have the same parent node", tn.parent() == tail.parent());
+    }
+}
+```
+

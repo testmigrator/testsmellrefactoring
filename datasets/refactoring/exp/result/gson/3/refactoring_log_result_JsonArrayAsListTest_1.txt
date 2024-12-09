@@ -1,0 +1,41 @@
+Input Parameters:
+Test Code:
+ @Test
+  public void testGet() {
+    JsonArray a = new JsonArray();
+    a.add(1);
+
+    List<JsonElement> list = a.asList();
+    assertThat(list.get(0)).isEqualTo(new JsonPrimitive(1));
+
+    assertThrows(IndexOutOfBoundsException.class, () -> list.get(-1));
+    assertThrows(IndexOutOfBoundsException.class, () -> list.get(2));
+
+    a.add((JsonElement) null);
+    assertThat(list.get(1)).isEqualTo(JsonNull.INSTANCE);
+  }
+Context: 
+Smell List: ['Assertion_Roulette', 'Magic_Number_Test']
+Smell Description List: ['Test Smell Type：Assertion Roulette\n\nFeature:\nA test method contains more than one assertion statement without an explanation/message (parameter in the assertion method).\n', 'Test Smell Type：Magic Number Test\n\nFeature:\nAn assertion method that contains a numeric literal as an argument.\n']
+Refactoring DSL: ['RefactorRule:\n  SmellType: Assertion Roulette\n  Description: Add descriptive messages to assert statements to improve readability and maintainability.\n  Steps:\n    - Step:\n        Description: "Add descriptive message to each assert statement(except assertThat, assertThrows)."\n        Action: AddMessageToAssert\n        Parameters:\n          MessagePattern: "{assertionMessage}"\n  Example:\n    Before: |\n      @Test\n      public void T() {\n        stmt\n        assert_1\n        ...\n        assert_n\n        stmt\'\n      }\n    After: |\n      @Test\n      public void T() {\n        stmt\n        assert_1(..., "Descriptive message for assert statement")\n        ...\n        assert_n(..., "Descriptive message for assert statement")\n        stmt\'\n      }\n    Variables:\n      assertionMessage: "Descriptive message for assert statement"\n', 'RefactorRule:\n  SmellType: Magic Number Test\n  Description: "Extract magic numbers and assign meaningful names to improve readability and maintainability."\n  Steps:\n    - Step:\n        Action: IdentifyMagicNumbers\n        Description: "Identify magic numbers in assertions"\n        Parameters:\n          TargetType: Method\n          SourcePattern: |\n            assertEquals({magicNumber}, {variable})\n    - Step:\n        Action: ExtractVariable\n        Description: "Extract magic number to a variable with meaningful name"\n        Parameters:\n          TargetType: Method\n          SourcePattern: |\n            assertEquals({magicNumber}, {variable})\n          ReplacementPattern: |\n            int {meaningfulName} = {magicNumber};\n            assertEquals({meaningfulName}, {variable})\n  Example:\n    Before: |\n      @Test\n      public void T() {\n          stmt\n          assertEquals(1, a)\n          stmt\'\n      }\n    After: |\n      @Test\n      public void T() {\n          int x = 1; // x: meaningful variable name\n          stmt\n          assertEquals(x, a)\n          stmt\'\n      }\n  Variables:\n    magicNumber: "1"\n    variable: "a"\n    meaningfulName: "x"\n']
+Checkpoints: ['[ ] All assert statements have been added with clear explanatory messages.\n', '[ ] All magic numbers in the test code have been extracted and assigned meaningful variable names.\n']
+
+Refactored Code: 
+ 
+ @Test
+  public void testGet() {
+    JsonArray a = new JsonArray();
+    int firstElementValue = 1;
+    a.add(firstElementValue);
+
+    List<JsonElement> list = a.asList();
+    assertThat(list.get(0)).isEqualTo(new JsonPrimitive(firstElementValue)).withFailMessage("The first element should match the added value");
+
+    assertThrows("Getting element at negative index should throw IndexOutOfBoundsException", IndexOutOfBoundsException.class, () -> list.get(-1));
+    assertThrows("Getting element beyond the list size should throw IndexOutOfBoundsException", IndexOutOfBoundsException.class, () -> list.get(2));
+
+    a.add((JsonElement) null);
+    assertThat(list.get(1)).isEqualTo(JsonNull.INSTANCE).withFailMessage("The second element should be JsonNull after adding null");
+  }
+
+

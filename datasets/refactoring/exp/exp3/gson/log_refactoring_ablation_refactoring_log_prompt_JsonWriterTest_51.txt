@@ -1,0 +1,45 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+
+import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.io.StringWriter;
+import com.google.gson.stream.JsonWriter;
+
+class JsonWriterTest {
+
+    @Test
+    public void testClosedWriterThrowsOnBeginArray() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter writer = new JsonWriter(stringWriter);
+        writer.close();
+        var e = assertThrows(IllegalStateException.class, () -> writer.beginArray());
+        assertThat(e.getMessage(), equalTo("JsonWriter is closed."));
+    }
+
+    @Test
+    public void testClosedWriterThrowsOnEndArray() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter writer = new JsonWriter(stringWriter);
+        writer.close();
+        var e = assertThrows(IllegalStateException.class, () -> writer.endArray());
+        assertThat(e.getMessage(), equalTo("JsonWriter is closed."));
+    }
+
+    @Test
+    public void testClosedWriterThrowsOnValue() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter writer = new JsonWriter(stringWriter);
+        writer.beginArray();
+        writer.endArray();
+        writer.close();
+        var e = assertThrows(IllegalStateException.class, () -> writer.value("a"));
+        assertThat(e.getMessage(), equalTo("JsonWriter is closed."));
+    }
+}
+```
+

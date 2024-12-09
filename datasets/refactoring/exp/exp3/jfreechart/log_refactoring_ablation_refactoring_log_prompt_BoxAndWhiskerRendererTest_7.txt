@@ -1,0 +1,62 @@
+asserts result: 
+ ```java
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.CategoryAxis;
+import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.plot.CategoryPlot;
+import org.jfree.chart.renderer.category.BoxAndWhiskerRenderer;
+import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
+import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.Assert.*;
+
+public class BoxAndWhiskerRendererTest {
+
+    @Test
+    public void testGetLegendItemWhenSeriesVisibleInLegend() {
+        // Arrange
+        DefaultBoxAndWhiskerCategoryDataset<String, String> dataset = new DefaultBoxAndWhiskerCategoryDataset<>();
+        List<Double> values = new ArrayList<>();
+        values.add(1.10);
+        values.add(1.45);
+        values.add(1.33);
+        values.add(1.23);
+        dataset.add(values, "R1", "C1");
+        BoxAndWhiskerRenderer renderer = new BoxAndWhiskerRenderer();
+        CategoryPlot<String, String> plot = new CategoryPlot<>(dataset, new CategoryAxis("x"), new NumberAxis("y"), renderer);
+        new JFreeChart(plot);
+
+        // Act
+        LegendItem legendItem = renderer.getLegendItem(0, 0);
+
+        // Assert
+        assertNotNull("Legend item should be non-null when series is visible in legend", legendItem);
+    }
+
+    @Test
+    public void testGetLegendItemWhenSeriesNotVisibleInLegend() {
+        // Arrange
+        DefaultBoxAndWhiskerCategoryDataset<String, String> dataset = new DefaultBoxAndWhiskerCategoryDataset<>();
+        List<Double> values = new ArrayList<>();
+        values.add(1.10);
+        values.add(1.45);
+        values.add(1.33);
+        values.add(1.23);
+        dataset.add(values, "R1", "C1");
+        BoxAndWhiskerRenderer renderer = new BoxAndWhiskerRenderer();
+        CategoryPlot<String, String> plot = new CategoryPlot<>(dataset, new CategoryAxis("x"), new NumberAxis("y"), renderer);
+        new JFreeChart(plot);
+        renderer.setSeriesVisibleInLegend(0, Boolean.FALSE);
+
+        // Act
+        LegendItem legendItem = renderer.getLegendItem(0, 0);
+
+        // Assert
+        assertNull("Legend item should be null when series is not visible in legend", legendItem);
+    }
+}
+```
+

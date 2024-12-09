@@ -1,0 +1,47 @@
+asserts result: 
+ The assert statements provided generally meet the criteria specified. However, there are a few that do not fully comply:
+
+1. **"assertEquals(expected, actual, "No items in the series");"**
+   - **Reason:** The message does not clearly state what is being asserted. It only mentions the condition ("No items in the series") but does not specify what the expected outcome is or what the assertion is checking.
+
+2. **"assertEquals(expected, actual, "One item, range [0.0, 1.0]");"**
+   - **Reason:** Similar to the previous one, the message does not clearly state what is being asserted. It mentions the condition ("One item, range [0.0, 1.0]") but lacks clarity on the expected outcome.
+
+3. **"assertEquals(expected, actual, "One item, range [1.1, 2.0]");"**
+   - **Reason:** Same as above, the message does not clearly state what is being asserted.
+
+4. **"assertEquals(expected, actual, "Two items, range [0.1, 0.5]");"**
+   - **Reason:** Same as above, the message does not clearly state what is being asserted.
+
+5. **"assertEquals(expected, actual, "Two items, range [0.1, 1.0]");"**
+   - **Reason:** Same as above, the message does not clearly state what is being asserted.
+
+6. **"assertEquals(expected, actual, "Two items, range [1.1, 2.0]");"**
+   - **Reason:** Same as above, the message does not clearly state what is being asserted.
+
+7. **"assertEquals(expected, actual, "Two items, range [2.2, 3.0]");"**
+   - **Reason:** Same as above, the message does not clearly state what is being asserted.
+
+8. **"assertEquals(expected, actual, "Two items, range [3.3, 4.0]");"**
+   - **Reason:** Same as above, the message does not clearly state what is being asserted.
+
+9. **"assertEquals(expected, actual, "Three items, range [0.0, 1.0]");"**
+   - **Reason:** Same as above, the message does not clearly state what is being asserted.
+
+10. **"assertEquals(expected, actual, "Three items, range [1.0, 2.0]");"**
+    - **Reason:** Same as above, the message does not clearly state what is being asserted.
+
+11. **"assertEquals(expected, actual, "Three items, range [2.0, 3.0]");"**
+    - **Reason:** Same as above, the message does not clearly state what is being asserted.
+
+12. **"assertEquals(expected, actual, "Three items, range [3.0, 4.0]");"**
+    - **Reason:** Same as above, the message does not clearly state what is being asserted.
+
+13. **"assertEquals(expected, actual, "Four items, range [0.1, 0.5]");"**
+    - **Reason:** Same as above, the message does not clearly state what is being asserted.
+
+14. **"assertEquals(expected, actual, "Four items, range [0.1, 1.0]");"**
+    - **Reason:** Same as above, the message does not clearly state what is being asserted.
+
+For the remaining assert statements, the messages are semantically clear and correctly express the purpose of the assert statement. Therefore, they meet the criteria.
+

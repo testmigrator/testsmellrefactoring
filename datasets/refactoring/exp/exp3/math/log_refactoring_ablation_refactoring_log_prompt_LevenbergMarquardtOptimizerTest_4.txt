@@ -1,0 +1,28 @@
+asserts result: 
+ ```java
+@Test
+public void testEvaluationCount() {
+    // Setup
+    int expectedIterations = 1;
+    int expectedEvaluations = 2;
+
+    LeastSquaresProblem lsp = new LinearProblem(new double[][] {{1}}, new double[] {1})
+        .getBuilder()
+        .checker(new ConvergenceChecker<Evaluation>() {
+            @Override
+            public boolean converged(int iteration, Evaluation previous, Evaluation current) {
+                return true;
+            }
+        })
+        .build();
+
+    // Action
+    Optimum optimum = optimizer.optimize(lsp);
+
+    // Verify
+    // Check iterations and evaluations are not switched.
+    Assert.assertEquals("Expected number of iterations", expectedIterations, optimum.getIterations());
+    Assert.assertEquals("Expected number of evaluations", expectedEvaluations, optimum.getEvaluations());
+}
+```
+

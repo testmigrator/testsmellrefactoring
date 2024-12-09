@@ -1,0 +1,37 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+public class ElementTest {
+
+    @Test
+    public void testDivAcssSelector() {
+        Document doc = Jsoup.parse("<div id=\"id1\">A</div><div>B</div><div class=\"c1 c2\">C</div>");
+        Element divA = doc.select("div").get(0);
+        assertEquals("#id1", divA.cssSelector(), "CSS selector for divA should be #id1");
+        assertTrue(divA == doc.select(divA.cssSelector()).first(), "Selecting CSS selector for divA should return the same element");
+    }
+
+    @Test
+    public void testDivBcssSelector() {
+        Document doc = Jsoup.parse("<div id=\"id1\">A</div><div>B</div><div class=\"c1 c2\">C</div>");
+        Element divB = doc.select("div").get(1);
+        assertEquals("html > body > div:nth-child(2)", divB.cssSelector(), "CSS selector for divB should be html > body > div:nth-child(2)");
+        assertTrue(divB == doc.select(divB.cssSelector()).first(), "Selecting CSS selector for divB should return the same element");
+    }
+
+    @Test
+    public void testDivCcssSelector() {
+        Document doc = Jsoup.parse("<div id=\"id1\">A</div><div>B</div><div class=\"c1 c2\">C</div>");
+        Element divC = doc.select("div").get(2);
+        assertEquals("html > body > div.c1.c2", divC.cssSelector(), "CSS selector for divC should be html > body > div.c1.c2");
+        assertTrue(divC == doc.select(divC.cssSelector()).first(), "Selecting CSS selector for divC should return the same element");
+    }
+}
+```
+

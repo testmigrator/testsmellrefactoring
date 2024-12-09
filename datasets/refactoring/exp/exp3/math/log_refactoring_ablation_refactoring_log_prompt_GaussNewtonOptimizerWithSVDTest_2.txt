@@ -1,0 +1,23 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
+
+public class CircleFittingTest {
+
+    @Override
+    @Test
+    public void testCircleFittingBadInit() {
+        /*
+         * This test should verify that the optimizer converges to the wrong solution
+         * due to the state becoming too large, causing the convergence checker's
+         * relative tolerance test to pass.
+         */
+        Executable executable = () -> super.testCircleFittingBadInit();
+        assertThrows(AssertionError.class, executable, "Expected an AssertionError to be thrown");
+    }
+}
+```
+

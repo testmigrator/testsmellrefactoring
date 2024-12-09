@@ -1,0 +1,20 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import org.apache.commons.cli.TypeHandler;
+import org.junit.jupiter.api.Test;
+
+import java.util.Date;
+
+class TypeHandlerTest {
+
+    @Test
+    public void testCreateObject() {
+        assertThrows(ClassNotFoundException.class, () -> TypeHandler.createObject("invalidClassName"));
+        assertInstanceOf(Date.class, TypeHandler.createObject(Date.class.getName()));
+    }
+}
+```
+

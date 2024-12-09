@@ -1,0 +1,24 @@
+asserts result: 
+ ```java
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class ScatterRendererTest {
+
+    @Test
+    public void testHashCodeEquality() {
+        // Arrange
+        ScatterRenderer r1 = new ScatterRenderer();
+        ScatterRenderer r2 = new ScatterRenderer();
+
+        // Act
+        int h1 = r1.hashCode();
+        int h2 = r2.hashCode();
+
+        // Assert
+        assertEquals("r1 and r2 should be equal", r1, r2);
+        assertEquals("Hash codes of r1 and r2 should be equal", h1, h2);
+    }
+}
+```
+

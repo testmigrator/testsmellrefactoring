@@ -1,0 +1,140 @@
+asserts result: 
+ ```java
+import org.jfree.data.xy.DefaultXYDataset;
+import org.jfree.chart.renderer.RendererUtils;
+import static org.junit.Assert.assertEquals;
+import org.junit.Test;
+
+public class RendererUtilsTest {
+
+    private static final double EPSILON = 0.0001;
+
+    @Test
+    public void testFindLiveItemsLowerBound_NoItems() {
+        var dataset = createDescendingDataset();
+        dataset.addSeries("S1", new double[][] {{}, {}});
+        int expected = 0;
+        int actual = RendererUtils.findLiveItemsLowerBound(dataset, 0, 10.0, 11.0);
+        assertEquals("No items should return 0", expected, actual);
+    }
+
+    @Test
+    public void testFindLiveItemsLowerBound_OneItem() {
+        var dataset = createDescendingDataset();
+        dataset.addSeries("S2", new double[][] {{1.0}, {9.9}});
+        int expected1 = 0;
+        int actual1 = RendererUtils.findLiveItemsLowerBound(dataset, 1, 0.0, 1.0);
+        assertEquals("One item within range should return 0", expected1, actual1);
+
+        int expected2 = 0;
+        int actual2 = RendererUtils.findLiveItemsLowerBound(dataset, 1, 1.1, 2.0);
+        assertEquals("One item outside range should return 0", expected2, actual2);
+    }
+
+    @Test
+    public void testFindLiveItemsLowerBound_TwoItems() {
+        var dataset = createDescendingDataset();
+        dataset.addSeries("S3", new double[][] {{2.0, 1.0}, {9.9, 9.9}});
+        int expected1 = 1;
+        int actual1 = RendererUtils.findLiveItemsLowerBound(dataset, 2, 0.1, 0.5);
+        assertEquals("Two items, first within range should return 1", expected1, actual1);
+
+        int expected2 = 1;
+        int actual2 = RendererUtils.findLiveItemsLowerBound(dataset, 2, 0.1, 1.0);
+        assertEquals("Two items, first within range should return 1", expected2, actual2);
+
+        int expected3 = 0;
+        int actual3 = RendererUtils.findLiveItemsLowerBound(dataset, 2, 1.1, 2.0);
+        assertEquals("Two items, second within range should return 0", expected3, actual3);
+
+        int expected4 = 0;
+        int actual4 = RendererUtils.findLiveItemsLowerBound(dataset, 2, 2.2, 3.0);
+        assertEquals("Two items, both outside range should return 0", expected4, actual4);
+
+        int expected5 = 0;
+        int actual5 = RendererUtils.findLiveItemsLowerBound(dataset, 2, 3.3, 4.0);
+        assertEquals("Two items, both outside range should return 0", expected5, actual5);
+    }
+
+    @Test
+    public void testFindLiveItemsLowerBound_ThreeItems() {
+        var dataset = createDescendingDataset();
+        dataset.addSeries("S4", new double[][] {{3.0, 2.0, 1.0}, {9.9, 9.9, 9.9}});
+        int expected1 = 2;
+        int actual1 = RendererUtils.findLiveItemsLowerBound(dataset, 3, 0.0, 1.0);
+        assertEquals("Three items, third within range should return 2", expected1, actual1);
+
+        int expected2 = 1;
+        int actual2 = RendererUtils.findLiveItemsLowerBound(dataset, 3, 1.0, 2.0);
+        assertEquals("Three items, second within range should return 1", expected2, actual2);
+
+        int expected3 = 0;
+        int actual3 = RendererUtils.findLiveItemsLowerBound(dataset, 3, 2.0, 3.0);
+        assertEquals("Three items, first within range should return 0", expected3, actual3);
+
+        int expected4 = 0;
+        int actual4 = RendererUtils.findLiveItemsLowerBound(dataset, 3, 3.0, 4.0);
+        assertEquals("Three items, all outside range should return 0", expected4, actual4);
+    }
+
+    @Test
+    public void testFindLiveItemsLowerBound_FourItems() {
+        var dataset = createDescendingDataset();
+        dataset.addSeries("S5", new double[][] {{4.0, 3.0, 2.0, 1.0}, {9.9, 9.9, 9.9, 9.9}});
+        int expected1 = 3;
+        int actual1 = RendererUtils.findLiveItemsLowerBound(dataset, 4, 0.1, 0.5);
+        assertEquals("Four items, fourth within range should return 3", expected1, actual1);
+
+        int expected2 = 3;
+        int actual2 = RendererUtils.findLiveItemsLowerBound(dataset, 4, 0.1, 1.0);
+        assertEquals("Four items, fourth within range should return 3", expected2, actual2);
+
+        int expected3 = 2;
+        int actual3 = RendererUtils.findLiveItemsLowerBound(dataset, 4, 1.1, 2.0);
+        assertEquals("Four items, third within range should return 2", expected3, actual3);
+
+        int expected4 = 1;
+        int actual4 = RendererUtils.findLiveItemsLowerBound(dataset, 4, 2.2, 3.0);
+        assertEquals("Four items, second within range should return 1", expected4, actual4);
+
+        int expected5 = 0;
+        int actual5 = RendererUtils.findLiveItemsLowerBound(dataset, 4, 3.3, 4.0);
+        assertEquals("Four items, first within range should return 0", expected5, actual5);
+
+        int expected6 = 0;
+        int actual6 = RendererUtils.findLiveItemsLowerBound(dataset, 4, 4.4, 5.0);
+        assertEquals("Four items, all outside range should return 0", expected6, actual6);
+    }
+
+    @Test
+    public void testFindLiveItemsLowerBound_RepeatingItems() {
+        var dataset = createDescendingDataset();
+        dataset.addSeries("S6", new double[][] {{3.0, 2.0, 2.0, 2.0, 1.0}, {9.9, 9.9, 9.9, 9.9, 9.9}});
+        int expected1 = 0;
+        int actual1 = RendererUtils.findLiveItemsLowerBound(dataset, 5, 0.0, 3.0);
+        assertEquals("Repeating items, all outside range should return 0", expected1, actual1);
+
+        int expected2 = 1;
+        int actual2 = RendererUtils.findLiveItemsLowerBound(dataset, 5, 0.0, 2.0);
+        assertEquals("Repeating items, first within range should return 1", expected2, actual2);
+
+        int expected3 = 4;
+        int actual3 = RendererUtils.findLiveItemsLowerBound(dataset, 5, 0.0, 1.0);
+        assertEquals("Repeating items, last within range should return 4", expected3, actual3);
+
+        int expected4 = 4;
+        int actual4 = RendererUtils.findLiveItemsLowerBound(dataset, 5, 0.0, 0.5);
+        assertEquals("Repeating items, all outside range should return 4", expected4, actual4);
+    }
+
+    private DefaultXYDataset<String> createDescendingDataset() {
+        return new DefaultXYDataset<String>() {
+            @Override
+            public DomainOrder getDomainOrder() {
+                return DomainOrder.DESCENDING;
+            }
+        };
+    }
+}
+```
+

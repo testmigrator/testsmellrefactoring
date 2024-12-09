@@ -1,0 +1,31 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.TextNode;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class TextNodeTest {
+
+    @Test
+    public void testSupplementaryCharacterParsing() {
+        Document doc = parseDocumentWithSupplementaryCharacter();
+        TextNode textNode = getTextNodeFromDocument(doc);
+        assertTextContentMatches(textNode);
+    }
+
+    private Document parseDocumentWithSupplementaryCharacter() {
+        return Jsoup.parse(new String(Character.toChars(135361)));
+    }
+
+    private TextNode getTextNodeFromDocument(Document doc) {
+        return doc.body().textNodes().get(0);
+    }
+
+    private void assertTextContentMatches(TextNode textNode) {
+        assertEquals(new String(Character.toChars(135361)), textNode.outerHtml().trim());
+    }
+}
+```
+

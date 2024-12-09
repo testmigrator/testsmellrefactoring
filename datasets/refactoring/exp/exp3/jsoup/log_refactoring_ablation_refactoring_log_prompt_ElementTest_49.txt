@@ -1,0 +1,31 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class ElementTest {
+
+    private static final String TEST_HTML = "<div><i>Hello</i>";
+    private static final String EXPECTED_HTML = "<em>Hello</em>";
+    private static final int EXPECTED_I_TAG_COUNT = 0;
+    private static final int EXPECTED_EM_TAG_COUNT = 1;
+
+    @Test
+    public void testITagReplacedWithEmTag() {
+        Document doc = Jsoup.parse(TEST_HTML);
+        doc.select("i").first().tagName("em");
+
+        int iTagCount = doc.select("i").size();
+        assertEquals("i tag should no longer be present", EXPECTED_I_TAG_COUNT, iTagCount);
+
+        int emTagCount = doc.select("em").size();
+        assertEquals("em tag should be present", EXPECTED_EM_TAG_COUNT, emTagCount);
+
+        String divHtml = doc.select("div").first().html();
+        assertEquals("div should contain em tag with text", EXPECTED_HTML, divHtml);
+    }
+}
+```
+

@@ -1,0 +1,5 @@
+asserts result: 
+ yes
+
+The refactored tests maintain the same functionality as the original test. Each aspect of the original test (initial size, size after removal, and key presence) is covered in the refactored tests. The setup is moved to a separate method (`setupRemoveCaseSensitive`), but this does not change the behavior or the assertions made in the tests.
+

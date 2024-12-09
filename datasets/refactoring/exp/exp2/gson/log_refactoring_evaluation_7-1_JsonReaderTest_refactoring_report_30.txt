@@ -1,0 +1,14 @@
+asserts result: 
+ yes
+
+The refactored test maintains the same functionality as the original test. Both tests:
+- Create a JSON string with a truncated escape sequence.
+- Use `JsonReader` to parse the JSON string.
+- Begin an array using `reader.beginArray()`.
+- Assert that a `MalformedJsonException` is thrown when calling `reader.nextString()`.
+- Check that the exception message matches the expected message.
+
+The only differences are:
+- The refactored test uses a `StringReader` directly instead of a method `reader(json)`, but this does not affect the functionality.
+- The refactored test includes a more detailed message in the `assertThrows` method, which provides additional context if the test fails, but does not change the core behavior of the test.
+

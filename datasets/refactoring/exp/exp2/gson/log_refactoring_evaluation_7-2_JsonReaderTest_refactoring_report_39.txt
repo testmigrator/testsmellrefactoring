@@ -1,0 +1,5 @@
+asserts result: 
+ yes
+
+The refactored tests maintain the same functionality as the original test. Each case from the original test has been split into its own method, and the logic within each method remains consistent with the original. The assertions and expected exceptions are preserved, ensuring that the behavior tested is identical to the original implementation.
+

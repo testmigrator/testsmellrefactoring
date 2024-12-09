@@ -1,0 +1,5 @@
+asserts result: 
+ yes
+
+The refactored tests maintain the same functionality as the original test. Each assertion from the original test is preserved and logically equivalent in the refactored version. The only difference is the organization of the tests into separate methods for better clarity and maintainability.
+

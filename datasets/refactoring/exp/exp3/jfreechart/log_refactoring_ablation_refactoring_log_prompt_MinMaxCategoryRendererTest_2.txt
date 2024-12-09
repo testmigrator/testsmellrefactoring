@@ -1,0 +1,20 @@
+asserts result: 
+ ```java
+@Test
+public void testHashcode() {
+    // Create two instances of MinMaxCategoryRenderer
+    MinMaxCategoryRenderer r1 = new MinMaxCategoryRenderer();
+    MinMaxCategoryRenderer r2 = new MinMaxCategoryRenderer();
+
+    // Verify that the two instances are equal
+    assertEquals("The two instances should be equal", r1, r2);
+
+    // Calculate the hash codes of the two instances
+    int h1 = r1.hashCode();
+    int h2 = r2.hashCode();
+
+    // Verify that the hash codes of the two instances are equal
+    assertEquals("The hash codes of the two instances should be equal", h1, h2);
+}
+```
+

@@ -1,0 +1,27 @@
+asserts result: 
+ ```java
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.DocumentType;
+import org.junit.Test;
+
+public class DocumentTypeTest {
+
+    @Test
+    public void testDocumentTypeGet() {
+        String html = "\n\n<!-- comment -->  <!doctype html><p>One</p>";
+        Document doc = Jsoup.parse(html);
+        
+        // Verify that the document type is not null
+        DocumentType documentType = doc.documentType();
+        assertNotNull("Document type should not be null", documentType);
+        
+        // Verify that the document type name is 'html'
+        assertEquals("Document type name should be 'html'", "html", documentType.name());
+    }
+}
+```
+

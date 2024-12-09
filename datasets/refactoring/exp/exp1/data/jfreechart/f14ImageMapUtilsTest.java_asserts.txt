@@ -1,0 +1,16 @@
+total tests: 2
+total asserts: 14
+assertEquals("", ImageMapUtils.htmlEscape(""), "HTML escape of empty string should return an empty string");
+assertEquals("abc", ImageMapUtils.htmlEscape("abc"), "HTML escape of plain text 'abc' should return 'abc'");
+assertEquals("&amp;", ImageMapUtils.htmlEscape("&"), "HTML escape of '&' should return '&amp;'");
+assertEquals("&quot;", ImageMapUtils.htmlEscape("\""), "HTML escape of '\"' should return '&quot;'");
+assertEquals("&lt;", ImageMapUtils.htmlEscape("<"), "HTML escape of '<' should return '&lt;'");
+assertEquals("&gt;", ImageMapUtils.htmlEscape(">"), "HTML escape of '>' should return '&gt;'");
+assertEquals("&#39;", ImageMapUtils.htmlEscape("\'"), "HTML escape of ''' should return '&#39;'");
+assertEquals("&#092;abc", ImageMapUtils.htmlEscape("\\abc"), "HTML escape of '\\abc' should return '&#092;abc'");
+assertEquals("abc\n", ImageMapUtils.htmlEscape("abc\n"), "HTML escape of 'abc\\n' should return 'abc\\n'");
+assertEquals("", ImageMapUtils.javascriptEscape(""), "Expected empty string to remain empty after escaping.");
+assertEquals("abc", ImageMapUtils.javascriptEscape("abc"), "Expected 'abc' to remain the same after escaping.");
+assertEquals("\\\'", ImageMapUtils.javascriptEscape("\'"), "Expected single quote to be escaped as '\\\''.");
+assertEquals("\\\"", ImageMapUtils.javascriptEscape("\""), "Expected double quote to be escaped as '\\\"'.");
+assertEquals("\\\\", ImageMapUtils.javascriptEscape("\\"), "Expected backslash to be escaped as '\\\\'.");

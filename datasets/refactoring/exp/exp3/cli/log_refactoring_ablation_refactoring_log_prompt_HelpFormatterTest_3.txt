@@ -1,0 +1,34 @@
+asserts result: 
+ ```java
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.Option;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class HelpFormatterTest {
+
+    @Test
+    public void testDefaultArgNameUsage() {
+        final Option option = Option.builder("f").hasArg().required(true).build();
+        final Options options = new Options();
+        options.addOption(option);
+
+        final StringWriter out = new StringWriter();
+        final HelpFormatter formatter = new HelpFormatter();
+        formatter.setArgName("argument");
+        formatter.printUsage(new PrintWriter(out), 80, "app", options);
+
+        assertEquals("usage: app -f <argument>\n", out.toString());
+    }
+
+    @Test
+    public void testDefaultArgNameSet() {
+        final HelpFormatter formatter = new HelpFormatter();
+        formatter.setArgName("argument");
+
+        assertEquals("argument", formatter.getArgName());
+    }
+}
+```
+

@@ -1,0 +1,80 @@
+Input Parameters:
+Test Code:
+ @Test public void removeFormElement() {
+        String html = "<html>\n" +
+                "  <body> \n" +
+                "      <form action=\"/hello.php\" method=\"post\">\n" +
+                "      User:<input type=\"text\" name=\"user\" />\n" +
+                "      Password:<input type=\"password\" name=\"pass\" />\n" +
+                "      <input type=\"submit\" name=\"login\" value=\"login\" />\n" +
+                "   </form>\n" +
+                "  </body>\n" +
+                "</html>  ";
+        Document doc = Jsoup.parse(html);
+        FormElement form = (FormElement) doc.selectFirst("form");
+        Element pass = form.selectFirst("input[name=pass]");
+        pass.remove();
+
+        List<Connection.KeyVal> data = form.formData();
+        assertEquals(2, data.size());
+        assertEquals("user", data.get(0).key());
+        assertEquals("login", data.get(1).key());
+        assertEquals(null, doc.selectFirst("input[name=pass]"));
+    }
+Context: /org/jsoup/nodes/FormElement
+Smell List: ['Assertion_Roulette', 'Eager_Test', 'Magic_Number_Test']
+Smell Description List: ['Test Smell Type：Assertion Roulette\n\nFeature:\nA test method contains more than one assertion statement without an explanation/message (parameter in the assertion method).\n', 'Test Smell Type：Eager Test\n\nFeature:\nA test method contains multiple calls to multiple production methods.\n', 'Test Smell Type：Magic Number Test\n\nFeature:\nAn assertion method that contains a numeric literal as an argument.\n']
+Refactoring DSL: ['RefactorRule:\n  SmellType: Assertion Roulette\n  Description: Add descriptive messages to assert statements to improve readability and maintainability.\n  Steps:\n    - Step:\n        Description: "Add descriptive message to each assert statement(except assertThat, assertThrows)."\n        Action: AddMessageToAssert\n        Parameters:\n          MessagePattern: "{assertionMessage}"\n  Example:\n    Before: |\n      @Test\n      public void T() {\n        stmt\n        assert_1\n        ...\n        assert_n\n        stmt\'\n      }\n    After: |\n      @Test\n      public void T() {\n        stmt\n        assert_1(..., "Descriptive message for assert statement")\n        ...\n        assert_n(..., "Descriptive message for assert statement")\n        stmt\'\n      }\n    Variables:\n      assertionMessage: "Descriptive message for assert statement"\n', 'RefactorRule:\n  SmellType: Eager Test\n  Description: "Refactor test methods to group related assertions logically and extract reusable setup logic into private methods."\n  Steps:\n    - Step1:\n        Description: "Extract shared setup logic into a reusable, private method and ensure it is used across all relevant tests."\n        Action: ExtractSetupMethod\n        Parameters:\n          Condition: "If multiple tests share the same setup logic."\n          MethodNamePattern: setupTest{OriginalMethodName}\n    - Step2:\n        Description: "Group related assertions into cohesive sub-tests while retaining necessary setup logic."\n        Action: GroupAssertions\n        Parameters:\n          GroupBy: LogicalConcern\n    - Step3:\n        Description: "Create new test methods for each cohesive group of assertions and ensure readability."\n        Action: CreateTestMethods\n        Parameters:\n          IncludeSetup: True\n          NamePattern: test{OriginalMethodName}_{Concern}\n  Example:\n    Before: |\n      @Test\n      public void testExample() {\n          setup();\n          assertEquals(1, methodA());\n          assertTrue(methodB());\n      }\n    After: |\n      private void setupTestExample() {\n          setup();\n      }\n\n      @Test\n      public void testExample_MethodA() {\n          setupTestExample();\n          assertEquals(1, methodA());\n      }\n\n      @Test\n      public void testExample_MethodB() {\n          setupTestExample();\n          assertTrue(methodB());\n      }\n  Variables:\n    OriginalMethodName: The name of the original test method.\n    LogicalConcern: The logical aspect tested (e.g., a specific API, validation, or behavior).\n', 'RefactorRule:\n  SmellType: Magic Number Test\n  Description: "Extract magic numbers and assign meaningful names to improve readability and maintainability."\n  Steps:\n    - Step:\n        Action: IdentifyMagicNumbers\n        Description: "Identify magic numbers in assertions"\n        Parameters:\n          TargetType: Method\n          SourcePattern: |\n            assertEquals({magicNumber}, {variable})\n    - Step:\n        Action: ExtractVariable\n        Description: "Extract magic number to a variable with meaningful name"\n        Parameters:\n          TargetType: Method\n          SourcePattern: |\n            assertEquals({magicNumber}, {variable})\n          ReplacementPattern: |\n            int {meaningfulName} = {magicNumber};\n            assertEquals({meaningfulName}, {variable})\n  Example:\n    Before: |\n      @Test\n      public void T() {\n          stmt\n          assertEquals(1, a)\n          stmt\'\n      }\n    After: |\n      @Test\n      public void T() {\n          int x = 1; // x: meaningful variable name\n          stmt\n          assertEquals(x, a)\n          stmt\'\n      }\n  Variables:\n    magicNumber: "1"\n    variable: "a"\n    meaningfulName: "x"\n']
+Checkpoints: ['[ ] All assert statements have been added with clear explanatory messages.\n', '[ ] All eager tests have been split into separate tests, each focusing on verifying a single API.\n', '[ ] All magic numbers in the test code have been extracted and assigned meaningful variable names.\n']
+
+Refactored Code: 
+ 
+private Document setupRemoveFormElement() {
+    String html = "<html>\n" +
+            "  <body> \n" +
+            "      <form action=\"/hello.php\" method=\"post\">\n" +
+            "      User:<input type=\"text\" name=\"user\" />\n" +
+            "      Password:<input type=\"password\" name=\"pass\" />\n" +
+            "      <input type=\"submit\" name=\"login\" value=\"login\" />\n" +
+            "   </form>\n" +
+            "  </body>\n" +
+            "</html>  ";
+    Document doc = Jsoup.parse(html);
+    FormElement form = (FormElement) doc.selectFirst("form");
+    Element pass = form.selectFirst("input[name=pass]");
+    pass.remove();
+    return doc;
+}
+
+@Test
+public void testRemoveFormElement_FormDataSize() {
+    Document doc = setupRemoveFormElement();
+    FormElement form = (FormElement) doc.selectFirst("form");
+    List<Connection.KeyVal> data = form.formData();
+    int expectedFormDataSize = 2;
+    assertEquals(expectedFormDataSize, data.size(), "The form data size should be 2 after removing the password field");
+}
+
+@Test
+public void testRemoveFormElement_UserFieldKey() {
+    Document doc = setupRemoveFormElement();
+    FormElement form = (FormElement) doc.selectFirst("form");
+    List<Connection.KeyVal> data = form.formData();
+    assertEquals("user", data.get(0).key(), "The first key in form data should be 'user'");
+}
+
+@Test
+public void testRemoveFormElement_LoginFieldKey() {
+    Document doc = setupRemoveFormElement();
+    FormElement form = (FormElement) doc.selectFirst("form");
+    List<Connection.KeyVal> data = form.formData();
+    assertEquals("login", data.get(1).key(), "The second key in form data should be 'login'");
+}
+
+@Test
+public void testRemoveFormElement_PasswordFieldRemoved() {
+    Document doc = setupRemoveFormElement();
+    assertNull(doc.selectFirst("input[name=pass]"), "The password field should be removed from the document");
+}
+
+

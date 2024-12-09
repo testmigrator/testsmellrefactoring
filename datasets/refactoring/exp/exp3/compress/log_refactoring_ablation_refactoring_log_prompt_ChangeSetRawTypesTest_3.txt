@@ -1,0 +1,52 @@
+asserts result: 
+ ```java
+import org.apache.commons.compress.archivers.ArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
+
+import java.io.InputStream;
+import java.util.Set;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+class ChangeSetTest {
+
+    private static final String TEST_FILE_NAME = "test.txt";
+    private static final String TEST_FILE_NAME_2 = "test2.xml";
+    private static final int EXPECTED_CHANGE_SET_SIZE = 1;
+
+    @Test
+    public void testAddChangeTwice() {
+        try (InputStream inputStream = newInputStream(TEST_FILE_NAME);
+             InputStream inputStream2 = newInputStream(TEST_FILE_NAME_2)) {
+
+            final ArchiveEntry entry1 = new ZipArchiveEntry(TEST_FILE_NAME);
+            final ArchiveEntry entry2 = new ZipArchiveEntry(TEST_FILE_NAME);
+            final ChangeSet changeSet = new ChangeSet();
+
+            changeSet.add(entry1, inputStream);
+            changeSet.add(entry2, inputStream2);
+
+            final Set<Change> changes = changeSet.getChanges();
+            assertEquals(EXPECTED_CHANGE_SET_SIZE, changes.size(), "Expected change set size to be 1");
+
+            final Change change = changes.iterator().next();
+            final InputStream changeInputStream = change.getInputStream();
+            assertEquals(inputStream2, changeInputStream, "Expected input stream to match the second input stream");
+
+        } catch (Exception e) {
+            assertThrows(Exception.class, () -> {
+                throw e;
+            }, "Unexpected exception thrown during test execution");
+        }
+    }
+
+    private InputStream newInputStream(String fileName) {
+        // Implementation of newInputStream method
+        return getClass().getResourceAsStream(fileName);
+    }
+}
+```
+

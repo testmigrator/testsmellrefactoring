@@ -1,0 +1,5 @@
+asserts result: 
+ Yes
+
+The functionality between the original test and the refactored version is consistent. The refactored version separates the setup and assertion logic into a private method (`setupTestIndentOverwritesFormattingStyle`) and uses `assertDoesNotThrow` to ensure that no unexpected exceptions occur during the execution of the test. This change does not alter the behavior or the outcome of the test.
+

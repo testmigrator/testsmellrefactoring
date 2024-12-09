@@ -1,0 +1,38 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.junit.Test;
+
+import static org.junit.Assert.assertFalse;
+
+public class ElementTest {
+
+    @Test
+    public void testRemovingFirstClassAttributeWhenLastClassRemoved() {
+        Document doc = Jsoup.parse("<img class=\"one two\" />");
+        Element img = doc.select("img").first();
+        img.removeClass("one");
+        assertFalse(doc.body().html().contains("class=\"one\""));
+    }
+
+    @Test
+    public void testRemovingSecondClassAttributeWhenLastClassRemoved() {
+        Document doc = Jsoup.parse("<img class=\"one two\" />");
+        Element img = doc.select("img").first();
+        img.removeClass("two");
+        assertFalse(doc.body().html().contains("class=\"two\""));
+    }
+
+    @Test
+    public void testRemovingAllClassAttributesWhenLastClassRemoved() {
+        Document doc = Jsoup.parse("<img class=\"one two\" />");
+        Element img = doc.select("img").first();
+        img.removeClass("one");
+        img.removeClass("two");
+        assertFalse(doc.body().html().contains("class=\"\""));
+    }
+}
+```
+

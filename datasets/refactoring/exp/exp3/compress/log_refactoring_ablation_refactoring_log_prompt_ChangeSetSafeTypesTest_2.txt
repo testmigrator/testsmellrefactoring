@@ -1,0 +1,78 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.Assertions;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.zip.ZipArchiveInputStream;
+import java.util.zip.ZipArchiveOutputStream;
+import java.util.zip.ZipArchiveEntry;
+
+public class ArchiveTest {
+
+    @TempDir
+    public Path tempDir;
+
+    @Test
+    public void testAddAlreadyExistingWithReplaceTrue() {
+        final String archiverName = "zip";
+        final Path input = createArchive(archiverName);
+        final Path result = tempDir.resolve("test." + archiverName);
+        final Path file1 = getFile("test.txt").toPath();
+
+        Assertions.assertTrue(Files.exists(file1), "File does not exist");
+
+        try (
+            InputStream inputStream = Files.newInputStream(input);
+            ZipArchiveInputStream ais = createArchiveInputStream(archiverName, inputStream);
+            OutputStream outputStream = Files.newOutputStream(result);
+            ZipArchiveOutputStream out = createArchiveOutputStream(archiverName, outputStream);
+            InputStream csInputStream = Files.newInputStream(file1)
+        ) {
+            final ChangeSet<ZipArchiveEntry> changeSet = createChangeSet();
+            final ZipArchiveEntry entry = new ZipArchiveEntry("testdata/test1.xml");
+            changeSet.add(entry, csInputStream, true);
+            final ChangeSetResults results = new ChangeSetPerformer<>(changeSet).perform(ais, out);
+            Assertions.assertTrue(results.getAddedFromChangeSet().contains("testdata/test1.xml"), "Entry not added from change set");
+        } catch (IOException e) {
+            Assertions.fail("Unexpected IOException: " + e.getMessage());
+        }
+
+        checkArchiveContent(result, archiveList);
+    }
+
+    private Path createArchive(String archiverName) {
+        // Implementation for creating an archive
+        return null;
+    }
+
+    private File getFile(String fileName) {
+        // Implementation for getting a file
+        return null;
+    }
+
+    private ZipArchiveInputStream createArchiveInputStream(String archiverName, InputStream inputStream) {
+        // Implementation for creating an archive input stream
+        return null;
+    }
+
+    private ZipArchiveOutputStream createArchiveOutputStream(String archiverName, OutputStream outputStream) {
+        // Implementation for creating an archive output stream
+        return null;
+    }
+
+    private <T> ChangeSet<T> createChangeSet() {
+        // Implementation for creating a change set
+        return null;
+    }
+
+    private void checkArchiveContent(Path result, List<String> archiveList) {
+        // Implementation for checking archive content
+    }
+}
+```
+

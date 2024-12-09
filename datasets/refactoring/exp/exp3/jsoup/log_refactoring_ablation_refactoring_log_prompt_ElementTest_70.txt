@@ -1,0 +1,70 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
+public class ElementTest {
+
+    private String html = "<article>\n" +
+            "  <div id=div-01>Here is div-01\n" +
+            "    <div id=div-02>Here is div-02\n" +
+            "      <div id=div-03>Here is div-03</div>\n" +
+            "    </div>\n" +
+            "  </div>\n" +
+            "</article>";
+
+    @Test
+    public void testTextContent() {
+        Document doc = Jsoup.parse(html);
+        Element el = doc.selectFirst("#div-03");
+        assertEquals("Text content should be 'Here is div-03'", "Here is div-03", el.text());
+    }
+
+    @Test
+    public void testElementId() {
+        Document doc = Jsoup.parse(html);
+        Element el = doc.selectFirst("#div-03");
+        assertEquals("Element ID should be 'div-03'", "div-03", el.id());
+    }
+
+    @Test
+    public void testClosestWithSpecificId() {
+        Document doc = Jsoup.parse(html);
+        Element el = doc.selectFirst("#div-03");
+        assertEquals("Closest element with ID 'div-02' should be found", "div-02", el.closest("#div-02").id());
+    }
+
+    @Test
+    public void testClosestWithGeneralSelector() {
+        Document doc = Jsoup.parse(html);
+        Element el = doc.selectFirst("#div-03");
+        assertEquals("Closest 'div div' should be the element itself", el, el.closest("div div"));
+    }
+
+    @Test
+    public void testClosestWithParentSelector() {
+        Document doc = Jsoup.parse(html);
+        Element el = doc.selectFirst("#div-03");
+        assertEquals("Closest 'article > div' should have ID 'div-01'", "div-01", el.closest("article > div").id());
+    }
+
+    @Test
+    public void testClosestWithNotDivSelector() {
+        Document doc = Jsoup.parse(html);
+        Element el = doc.selectFirst("#div-03");
+        assertEquals("Closest ':not(div)' should have tag name 'article'", "article", el.closest(":not(div)").tagName());
+    }
+
+    @Test
+    public void testClosestWithNonExistingSelector() {
+        Document doc = Jsoup.parse(html);
+        Element el = doc.selectFirst("#div-03");
+        assertNull("Closest 'p' should return null", el.closest("p"));
+    }
+}
+```
+

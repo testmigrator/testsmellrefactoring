@@ -1,0 +1,30 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import org.junit.jupiter.api.Test;
+
+public class CircleVectorialTest {
+
+    @Test
+    public void testMaxEvaluations() {
+        CircleVectorial circle = new CircleVectorial();
+        circle.addPoint(30.0, 68.0);
+        circle.addPoint(50.0, -6.0);
+        circle.addPoint(110.0, -20.0);
+        circle.addPoint(35.0, 15.0);
+        circle.addPoint(45.0, 97.0);
+
+        LeastSquaresProblem lsp = builder(circle)
+                .checkerPair(new SimpleVectorValueChecker(1e-30, 1e-30))
+                .maxIterations(Integer.MAX_VALUE)
+                .start(new double[]{98.680, 47.345})
+                .build();
+
+        assertThrows(TooManyEvaluationsException.class, () -> {
+            optimizer.optimize(lsp);
+        });
+    }
+}
+```
+

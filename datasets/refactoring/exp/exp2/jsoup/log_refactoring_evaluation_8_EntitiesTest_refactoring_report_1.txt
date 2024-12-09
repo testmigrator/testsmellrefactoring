@@ -1,0 +1,5 @@
+asserts result: 
+ Yes
+
+The refactored tests maintain the same functionality as the original test. The refactoring introduces a helper method `setupEntities` to reduce redundancy and improve readability, while each specific test case now focuses on a particular escaping or unescaping scenario. All the assertions and the logic remain consistent with the original test, ensuring that the behavior of the tests has not changed.
+

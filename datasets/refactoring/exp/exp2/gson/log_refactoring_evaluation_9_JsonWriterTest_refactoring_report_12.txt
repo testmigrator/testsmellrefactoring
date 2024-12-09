@@ -1,0 +1,13 @@
+asserts result: 
+ The functionality between the original test and the refactored test is **not** consistent. 
+
+### Inconsistency Overview:
+- **Original Test**: The original test directly calls `jsonWriter.beginArray().endArray();` and then expects an `IllegalStateException` to be thrown when calling `jsonWriter.beginArray()` again. This is a straightforward test that checks if the JSON writer correctly enforces the rule that there can only be one top-level value.
+
+- **Refactored Test**: The refactored test wraps the entire sequence of operations inside an `assertDoesNotThrow` block. This means that the test will pass if no exception is thrown during the execution of the lambda expression. However, the lambda expression itself includes the assertion `assertThrows`, which is expected to throw an `IllegalStateException`. This creates a logical contradiction:
+  - If `jsonWriter.beginArray()` after `endArray()` throws an `IllegalStateException`, the `assertThrows` will pass, but the `assertDoesNotThrow` will fail because an exception was thrown.
+  - If `jsonWriter.beginArray()` does not throw an `IllegalStateException`, the `assertThrows` will fail, and the `assertDoesNotThrow` will pass, but the test will still fail due to the failed `assertThrows`.
+
+### Conclusion:
+The refactored test is logically inconsistent and will likely fail in scenarios where the original test would pass. Therefore, the functionality is not consistent between the two tests.
+

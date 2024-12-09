@@ -1,0 +1,38 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.MalformedJsonException;
+import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.io.StringReader;
+
+class JsonReaderTest {
+
+    @Test
+    public void testMissingValue_BeginsObject() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("{\"a\":}"));
+        reader.beginObject();
+        assertEquals("a", reader.nextName(), "Expected the next name to be 'a'");
+    }
+
+    @Test
+    public void testMissingValue_ThrowsMalformedJsonException() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("{\"a\":}"));
+        reader.beginObject();
+        reader.nextName();
+
+        MalformedJsonException e = assertThrows(MalformedJsonException.class, () -> reader.nextString());
+        assertEquals(
+            "Expected value at line 1 column 6 path $.a\n" +
+            "See https://github.com/google/gson/blob/main/Troubleshooting.md#malformed-json",
+            e.getMessage(),
+            "Expected the correct error message when the value is missing"
+        );
+    }
+}
+```
+

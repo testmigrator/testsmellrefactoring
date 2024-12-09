@@ -1,0 +1,32 @@
+asserts result: 
+ ```java
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class UnrecognizedOptionExceptionTest {
+
+    @Test
+    public void testConstructorSingleArgument() {
+        String message = "a";
+        UnrecognizedOptionException exception = new UnrecognizedOptionException(message);
+        assertEquals("Message should be 'a'", message, exception.getMessage());
+    }
+
+    @Test
+    public void testConstructorTwoArgumentsMessage() {
+        String message = "a";
+        String option = "b";
+        UnrecognizedOptionException exception = new UnrecognizedOptionException(message, option);
+        assertEquals("Message should be 'a'", message, exception.getMessage());
+    }
+
+    @Test
+    public void testConstructorTwoArgumentsOption() {
+        String message = "a";
+        String option = "b";
+        UnrecognizedOptionException exception = new UnrecognizedOptionException(message, option);
+        assertEquals("Option should be 'b'", option, exception.getOption());
+    }
+}
+```
+

@@ -1,0 +1,39 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import com.google.gson.stream.JsonReader;
+import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.io.StringReader;
+
+class JsonReaderTest {
+
+    @Test
+    public void testIntegerMismatchFailsWithExpectedException() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("[1.5]"));
+        reader.beginArray();
+
+        // Verify that attempting to read an integer from a floating-point value throws NumberFormatException
+        assertThrows(NumberFormatException.class, () -> reader.nextInt(), "Reading an integer from a floating-point value should throw NumberFormatException");
+        
+        reader.close();
+    }
+
+    @Test
+    public void testFloatingPointValueIsCorrectlyRead() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("[1.5]"));
+        reader.beginArray();
+
+        // Verify that the floating-point value is correctly read
+        double value = reader.nextDouble();
+        assertEquals(1.5d, value, "The floating-point value should be 1.5");
+
+        reader.endArray();
+        reader.close();
+    }
+}
+```
+

@@ -1,0 +1,40 @@
+Input Parameters:
+Test Code:
+ @Test public void escapesGtInXmlAttributesButNotInHtml() {
+        // https://github.com/jhy/jsoup/issues/528 - < is OK in HTML attribute values, but not in XML
+
+
+        String docHtml = "<a title='<p>One</p>'>One</a>";
+        Document doc = Jsoup.parse(docHtml);
+        Element element = doc.select("a").first();
+
+        doc.outputSettings().escapeMode(base);
+        assertEquals("<a title=\"<p>One</p>\">One</a>", element.outerHtml());
+
+        doc.outputSettings().escapeMode(xhtml);
+        assertEquals("<a title=\"&lt;p>One&lt;/p>\">One</a>", element.outerHtml());
+    }
+Context: /org/jsoup/nodes/Entities
+Smell List: ['Assertion_Roulette']
+Smell Description List: ['Test Smell Type：Assertion Roulette\n\nFeature:\nA test method contains more than one assertion statement without an explanation/message (parameter in the assertion method).\n']
+Refactoring DSL: ['RefactorRule:\n  SmellType: Assertion Roulette\n  Description: Add descriptive messages to assert statements to improve readability and maintainability.\n  Steps:\n    - Step:\n        Description: "Add descriptive message to each assert statement(except assertThat, assertThrows)."\n        Action: AddMessageToAssert\n        Parameters:\n          MessagePattern: "{assertionMessage}"\n  Example:\n    Before: |\n      @Test\n      public void T() {\n        stmt\n        assert_1\n        ...\n        assert_n\n        stmt\'\n      }\n    After: |\n      @Test\n      public void T() {\n        stmt\n        assert_1(..., "Descriptive message for assert statement")\n        ...\n        assert_n(..., "Descriptive message for assert statement")\n        stmt\'\n      }\n    Variables:\n      assertionMessage: "Descriptive message for assert statement"\n']
+Checkpoints: ['[ ] All assert statements have been added with clear explanatory messages.\n']
+
+Refactored Code: 
+ 
+@Test
+public void escapesGtInXmlAttributesButNotInHtml() {
+    // https://github.com/jhy/jsoup/issues/528 - < is OK in HTML attribute values, but not in XML
+
+    String docHtml = "<a title='<p>One</p>'>One</a>";
+    Document doc = Jsoup.parse(docHtml);
+    Element element = doc.select("a").first();
+
+    doc.outputSettings().escapeMode(Entities.EscapeMode.base);
+    assertEquals("<a title=\"<p>One</p>\">One</a>", element.outerHtml(), "HTML attribute value should not escape '<'");
+
+    doc.outputSettings().escapeMode(Entities.EscapeMode.xhtml);
+    assertEquals("<a title=\"&lt;p>One&lt;/p>\">One</a>", element.outerHtml(), "XML attribute value should escape '<'");
+}
+
+

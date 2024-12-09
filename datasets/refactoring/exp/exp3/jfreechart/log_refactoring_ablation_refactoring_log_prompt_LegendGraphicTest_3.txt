@@ -1,0 +1,35 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+import org.jfree.chart.legend.LegendGraphic;
+import java.awt.Color;
+import java.awt.Rectangle;
+import org.jfree.chart.util.CloneUtils;
+
+class LegendGraphicTest {
+
+    @Test
+    public void testCloning() {
+        Rectangle r = new Rectangle(1, 2, 3, 4);
+        LegendGraphic g1 = new LegendGraphic(r, Color.BLACK);
+        
+        LegendGraphic g2 = null;
+        try {
+            g2 = CloneUtils.clone(g1);
+        } catch (CloneNotSupportedException e) {
+            fail("CloneNotSupportedException should not be thrown", e);
+        }
+
+        assertNotNull(g2, "Cloned object should not be null");
+        assertNotSame(g1, g2, "Cloned object should be a different instance");
+        assertEquals(g1.getClass(), g2.getClass(), "Cloned object should be of the same class");
+        assertEquals(g1, g2, "Cloned object should be equal to the original");
+
+        // Check independence
+        r.setBounds(4, 3, 2, 1);
+        assertNotEquals(g1, g2, "Cloned object should be independent of the original");
+    }
+}
+```
+

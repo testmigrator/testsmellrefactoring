@@ -1,0 +1,34 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class ImageUrlTest {
+
+    @Test
+    public void testAbsoluteSrcAttribute() {
+        Document doc = Jsoup.parse("<p><img src=\"/rez/osi_logo.png\" /></p>", "https://jsoup.org/");
+        Element img = doc.select("img").first();
+        
+        String expectedAbsSrc = "https://jsoup.org/rez/osi_logo.png";
+        String actualAbsSrc = img.attr("abs:src");
+        
+        assertEquals("Absolute src attribute should match the expected URL", expectedAbsSrc, actualAbsSrc);
+    }
+
+    @Test
+    public void testAbsUrlMethod() {
+        Document doc = Jsoup.parse("<p><img src=\"/rez/osi_logo.png\" /></p>", "https://jsoup.org/");
+        Element img = doc.select("img").first();
+        
+        String expectedAbsSrc = "https://jsoup.org/rez/osi_logo.png";
+        String actualAbsSrc = img.absUrl("src");
+        
+        assertEquals("absUrl method should return the correct absolute URL", expectedAbsSrc, actualAbsSrc);
+    }
+}
+```
+

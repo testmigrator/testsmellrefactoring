@@ -1,0 +1,10 @@
+asserts result: 
+ ```java
+@Test
+public void testShortWithArg() {
+    assertTrue("Expected option 'b' to be present", cl.hasOption("b"));
+    assertNotNull("Expected option value for 'b' to be non-null", cl.getOptionValue("b"));
+    assertEquals("Expected option value for 'b' to be 'foo'", "foo", cl.getOptionValue("b"));
+}
+```
+

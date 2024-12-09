@@ -1,0 +1,66 @@
+Input Parameters:
+Test Code:
+ @Test
+  public void testToString() {
+    JsonPrimitive json = new JsonPrimitive("Some\nEscaped\nValue");
+    assertThat(json.toString()).isEqualTo("\"Some\\nEscaped\\nValue\"");
+
+    json = new JsonPrimitive("");
+    assertThat(json.toString()).isEqualTo("\"\"");
+
+    json = new JsonPrimitive(new BigDecimal("1.333"));
+    assertThat(json.toString()).isEqualTo("1.333");
+
+    // Preserves trailing 0
+    json = new JsonPrimitive(new BigDecimal("1.0000"));
+    assertThat(json.toString()).isEqualTo("1.0000");
+
+    json = new JsonPrimitive(Float.NaN);
+    assertThat(json.toString()).isEqualTo("NaN");
+
+    json = new JsonPrimitive(Double.NEGATIVE_INFINITY);
+    assertThat(json.toString()).isEqualTo("-Infinity");
+
+    json = new JsonPrimitive('a');
+    assertThat(json.toString()).isEqualTo("\"a\"");
+
+    json = new JsonPrimitive('\0');
+    assertThat(json.toString()).isEqualTo("\"\\u0000\"");
+
+    json = new JsonPrimitive(true);
+    assertThat(json.toString()).isEqualTo("true");
+  }
+Context: /com/google/gson/JsonPrimitive
+Smell List: ['Assertion_Roulette', 'Sensitive_Equality', 'Duplicate_Assert']
+Smell Description List: ['Test Smell Type：Assertion Roulette\n\nFeature:\nA test method contains more than one assertion statement without an explanation/message (parameter in the assertion method).\n', 'Test Smell Type：Sensitive Equality\n\nFeature:\nA test method invokes the toString() method of an object.\n', 'Test Smell Type：Duplicate Assert\n\nFeature:\nA test method that contains more than one assertion statement with the same parameters.\n']
+Refactoring DSL: ['RefactorRule:\n  SmellType: Assertion Roulette\n  Description: Add descriptive messages to assert statements to improve readability and maintainability.\n  Steps:\n    - Step:\n        Description: "Add descriptive message to each assert statement(except assertThat, assertThrows)."\n        Action: AddMessageToAssert\n        Parameters:\n          MessagePattern: "{assertionMessage}"\n  Example:\n    Before: |\n      @Test\n      public void T() {\n        stmt\n        assert_1\n        ...\n        assert_n\n        stmt\'\n      }\n    After: |\n      @Test\n      public void T() {\n        stmt\n        assert_1(..., "Descriptive message for assert statement")\n        ...\n        assert_n(..., "Descriptive message for assert statement")\n        stmt\'\n      }\n    Variables:\n      assertionMessage: "Descriptive message for assert statement"\n', 'RefactorRule:\n  SmellType: Sensitive Equality\n  Description: "Avoid using the toString() method for comparing objects in assertions."\n  Steps:\n    - Step:\n        Description: "Extract the value returned by toString() into a separate variable for comparison. Ensure toString() does not directly appear in assertions."\n        Action: ReplaceMethodCall\n        Parameters:\n          TargetPattern: |\n            assertEquals({object1}.toString(), {expectedString});\n          ReplacementPattern: |\n            String actualValue = {object1}.toString();\n            assertEquals({expectedString}, actualValue);\n  Example:\n    Before: |\n      @Test\n      public void T() {\n        Object object1 = new Object();\n        assertEquals(object1.toString(), "expectedString");\n      }\n    After: |\n      @Test\n      public void T() {\n        Object object1 = new Object();\n        String actualValue = object1.toString();\n        assertEquals("expectedString", actualValue);\n      }\n', 'RefactorRule:\n  SmellType: Duplicate Assert\n  Description: "If the assertion logic is the same but tested with different inputs, prioritize splitting the test into multiple separate methods with a single assertion each."\n  Steps:\n    - Step:\n        Description: "Identify duplicate assertions that test the same condition with different inputs."\n        Action: IdentifySameAssertions\n        Parameters:\n          SourcePattern: |\n            assert(expectedA, ...)\n            assert(expectedB, ...)\n    - Step:\n        Description: "If the assertions are simple and few, split the test into multiple methods, each with a single assertion."\n        Action: SplitMethod\n        Parameters:\n          TargetType: Method\n          Conditions: |\n            - The assertions are simple and do not involve complex variations.\n    - Step:\n        Description: "If there are many similar assertions with significant variations, convert the test to a parameterized test."\n        Action: ConvertToParameterizedTest\n        Parameters:\n          TargetType: Method\n          Conditions: |\n            - There are many test cases with similar logic that would benefit from parameterization.\n            - The variations are extensive, with a large number of inputs or expected outputs.\n    - Step:\n        Description: "Add @CsvSource annotation to declare parameterized values."\n        Action: AddAnnotation\n        Parameters:\n          TargetType: Method\n          Annotation: |\n            @CsvSource({\n              "{paramValues}"\n            })\n    - Step:\n        Description: "Refactor the test method to use parameterized values."\n        Action: RefactorMethod\n        Parameters:\n          SourcePattern: |\n            public void T() {\n              {originalStatements}\n            }\n          ReplacementPattern: |\n            public void T({parameterNames}) {\n              {refactoredStatements}\n            }\n  Example:\n    Before: |\n      @Test\n      public void testDuplicateAssertions() {\n        assertEquals(expectedA, methodUnderTest(a));\n        assertEquals(expectedB, methodUnderTest(b));\n      }\n    After: |\n      @Test\n      public void testWithInputA() {\n        assertEquals(expectedA, methodUnderTest(a));\n      }\n      @Test\n      public void testWithInputB() {\n        assertEquals(expectedB, methodUnderTest(b));\n      }\n']
+Checkpoints: ['[ ] All assert statements have been added with clear explanatory messages.\n', '[ ] All instances of the ‘Sensitive Equality’ code smell have been refactored by directly comparing objects instead of using the toString() method for comparisons in tests, to enhance stability and avoid future failures due to changes in the toString() method’s implementation.\n', '[ ] All duplicate assertions have been refactored using JUnit 5 Parameterized Tests, where the lists of parameterizable values are declared in a specific annotation, and the test method is executed independently m times.\n']
+
+Refactored Code: 
+ 
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import static org.assertj.core.api.Assertions.assertThat;
+
+public class JsonPrimitiveTest {
+
+    @ParameterizedTest
+    @CsvSource({
+        "\"Some\\nEscaped\\nValue\", \"Some\\nEscaped\\nValue\"",
+        "\"\", \"\"",
+        "1.333, 1.333",
+        "1.0000, 1.0000",
+        "NaN, NaN",
+        "-Infinity, -Infinity",
+        "\"a\", a",
+        "\"\\u0000\", \\0",
+        "true, true"
+    })
+    public void testToString(String expected, Object value) {
+        JsonPrimitive json = new JsonPrimitive(value);
+        String actual = json.toString();
+        assertThat(actual).isEqualTo(expected, "Testing toString() for value: " + value);
+    }
+}
+
+

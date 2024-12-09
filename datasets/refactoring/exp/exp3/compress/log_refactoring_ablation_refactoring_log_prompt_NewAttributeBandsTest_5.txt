@@ -1,0 +1,36 @@
+asserts result: 
+ ```java
+import org.apache.commons.compress.harmony.pack200.MockNewAttributeBands;
+import org.apache.commons.compress.harmony.pack200.AttributeLayout;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.api.Assertions;
+
+import java.io.IOException;
+import java.util.List;
+
+public class NewAttributeBandsTest {
+
+    private static final int EXPECTED_LAYOUT_ELEMENTS_SIZE = 1;
+
+    @ParameterizedTest
+    @ValueSource(strings = { "KIB", "KIH", "KII", "KINH", "KJH", "KDH", "KSH", "KQH", "RCH", "RSH", "RDH", "RFH", "RMH", "RIH", "RUH", "RQH", "RQNH", "RQNI" })
+    public void testReferenceLayouts(final String layout) {
+        try {
+            final MockNewAttributeBands newAttributeBands = new MockNewAttributeBands(new MockSegment(),
+                    new AttributeLayout("test", AttributeLayout.CONTEXT_CODE, layout, 26));
+            final List layoutElements = newAttributeBands.getLayoutElements();
+
+            Assertions.assertEquals(EXPECTED_LAYOUT_ELEMENTS_SIZE, layoutElements.size(), 
+                "Expected layout elements size to be " + EXPECTED_LAYOUT_ELEMENTS_SIZE + ", but was " + layoutElements.size());
+
+            final Reference element = (Reference) layoutElements.get(0);
+            Assertions.assertEquals(layout, element.getTag(), 
+                "Expected layout tag to be " + layout + ", but was " + element.getTag());
+        } catch (IOException | Pack200Exception e) {
+            Assertions.fail("Unexpected exception occurred: " + e.getMessage());
+        }
+    }
+}
+```
+

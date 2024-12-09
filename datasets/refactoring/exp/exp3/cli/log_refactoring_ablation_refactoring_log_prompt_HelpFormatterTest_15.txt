@@ -1,0 +1,37 @@
+asserts result: 
+ ```java
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.Option;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class HelpFormatterTest {
+
+    @Test
+    public void testPrintHelpWithSinceHeaderAndFooter() {
+        final Options options = new Options()
+                .addOption(Option.builder("W").longOpt("with-since").since("1.19.0").desc("Description for W").build())
+                .addOption(Option.builder("n").longOpt("no-since").desc("Description for n").build());
+
+        final HelpFormatter formatter = HelpFormatter.builder().setShowSince(true).get();
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try (PrintWriter pw = new PrintWriter(new OutputStreamWriter(baos))) {
+            formatter.printHelp(pw, 80, "Command syntax", "Header", options, 2, 5, "footer", false);
+        }
+
+        String actualOutput = baos.toString();
+        assertEquals("usage: Command syntax" + System.lineSeparator(), getLine(actualOutput, 0));
+        assertEquals("Header" + System.lineSeparator(), getLine(actualOutput, 1));
+        assertEquals("Options            Since   Description" + System.lineSeparator(), getLine(actualOutput, 2));
+        assertEquals("  -n,--no-since    -          Description for n" + System.lineSeparator(), getLine(actualOutput, 3));
+        assertEquals("  -W,--with-since  1.19.0     Description for W" + System.lineSeparator(), getLine(actualOutput, 4));
+        assertEquals("footer" + System.lineSeparator(), getLine(actualOutput, 5));
+    }
+
+    private String getLine(String output, int lineIndex) {
+        return output.split(System.lineSeparator())[lineIndex];
+    }
+}
+```
+

@@ -1,0 +1,5 @@
+asserts result: 
+ Yes
+
+The refactored tests maintain the same functionality as the original test. The original test checks both the text and HTML content of the paragraph element after removing the first child node. The refactored version splits these checks into two separate test methods, `testRemove_TextContent` and `testRemove_HtmlContent`, but they still perform the same assertions. The `setupTestRemove` method initializes the document and performs the node removal, ensuring that each test method starts from the same state as the original test. Therefore, the functionality is consistent.
+

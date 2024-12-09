@@ -1,0 +1,5 @@
+asserts result: 
+ Yes
+
+The functionality between the original test and the refactored test is consistent. The refactored test wraps the original test logic inside an `assertDoesNotThrow` method to ensure that no unexpected exceptions are thrown during the execution of the test. This does not change the core functionality of the test, which still checks if the computed cost matches the expected value within a specified tolerance.
+

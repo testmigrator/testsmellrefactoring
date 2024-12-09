@@ -1,0 +1,38 @@
+asserts result: 
+ ```java
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.PatternOptionBuilder;
+import org.apache.commons.cli.PosixParser;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.assertions.AssertionFailedError;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class PatternOptionBuilderTest {
+
+    @Test
+    void testUntypedPattern() {
+        final Options options = PatternOptionBuilder.parsePattern("abc");
+        final CommandLineParser parser = new PosixParser();
+
+        try {
+            final CommandLine line = parser.parse(options, new String[] {"-abc"});
+
+            assertTrue(line.hasOption('a'), "Option 'a' should be present");
+            assertNull(line.getOptionObject('a'), "Option 'a' should not have a value");
+
+            assertTrue(line.hasOption('b'), "Option 'b' should be present");
+            assertNull(line.getOptionObject('b'), "Option 'b' should not have a value");
+
+            assertTrue(line.hasOption('c'), "Option 'c' should be present");
+            assertNull(line.getOptionObject('c'), "Option 'c' should not have a value");
+        } catch (ParseException e) {
+            fail("Parsing should not throw an exception: " + e.getMessage());
+        }
+    }
+}
+```
+

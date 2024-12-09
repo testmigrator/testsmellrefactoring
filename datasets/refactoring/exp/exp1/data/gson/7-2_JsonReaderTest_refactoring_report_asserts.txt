@@ -1,0 +1,11 @@
+total tests: 3
+total asserts: 9
+assertTrue(reader.nextBoolean(), "Expected true for 'True'");
+assertTrue(reader.nextBoolean(), "Expected true for 'TruE'");
+assertFalse(reader.nextBoolean(), "Expected false for 'False'");
+assertFalse(reader.nextBoolean(), "Expected false for 'FALSe'");
+assertEquals(JsonToken.END_DOCUMENT, reader.peek(), "Expected END_DOCUMENT after processing all elements");
+assertEquals("a", reader.nextName(), "Expected name 'a' with '=' separator");
+assertEquals(true, reader.nextBoolean(), "Expected boolean value 'true' with '=' separator");
+assertEquals("a", reader.nextName(), "Expected name 'a' with '=>' separator");
+assertEquals(true, reader.nextBoolean(), "Expected boolean value 'true' with '=>' separator");

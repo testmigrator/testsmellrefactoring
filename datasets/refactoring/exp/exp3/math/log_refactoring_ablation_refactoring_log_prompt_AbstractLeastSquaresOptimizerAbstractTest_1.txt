@@ -1,0 +1,19 @@
+asserts result: 
+ ```java
+private static final double TOLERANCE = 1e-6;
+private static final double EXPECTED_RMS = 0.0;
+private static final double EXPECTED_POINT = 1.5;
+
+@Test
+public void testTrivial() {
+    LinearProblem problem = new LinearProblem(new double[][]{{2}}, new double[]{3});
+    LeastSquaresProblem ls = problem.getBuilder().build();
+
+    Optimum optimum = optimizer.optimize(ls);
+
+    Assert.assertEquals(EXPECTED_RMS, optimum.getRMS(), TOLERANCE);
+    assertEquals(EXPECTED_POINT, optimum.getPoint(), TOLERANCE);
+    Assert.assertEquals(0.0, optimum.getResiduals().getEntry(0), TOLERANCE);
+}
+```
+

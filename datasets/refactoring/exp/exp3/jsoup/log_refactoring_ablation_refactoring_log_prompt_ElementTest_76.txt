@@ -1,0 +1,74 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.junit.Test;
+import static org.junit.Assert.*;
+
+public class ElementTest {
+
+    @Test
+    public void testNormalizedTextDoesNotContainInvisibles() {
+        String escaped = "This&shy;is&#x200b;one&shy;long&shy;word";
+        String expectedNormalizedText = "Thisisonelongword";
+
+        Document doc = Jsoup.parse("<p>" + escaped);
+        Element p = doc.select("p").first();
+        doc.outputSettings().charset("ascii");
+
+        assertEquals("Normalized text should not contain invisible characters", expectedNormalizedText, p.text());
+    }
+
+    @Test
+    public void testOuterHtmlKeepsEscapedInvisibles() {
+        String escaped = "This&shy;is&#x200b;one&shy;long&shy;word";
+        String expectedOuterHtml = "<p>" + escaped + "</p>";
+
+        Document doc = Jsoup.parse("<p>" + escaped);
+        Element p = doc.select("p").first();
+        doc.outputSettings().charset("ascii");
+
+        assertEquals("Outer HTML should keep escaped invisible characters", expectedOuterHtml, p.outerHtml());
+    }
+
+    @Test
+    public void testTextNodesContainDecodedInvisibles() {
+        String escaped = "This&shy;is&#x200b;one&shy;long&shy;word";
+        String decoded = "This\u00ADis\u200Bone\u00ADlong\u00ADword";
+
+        Document doc = Jsoup.parse("<p>" + escaped);
+        Element p = doc.select("p").first();
+
+        assertEquals("Text nodes should contain decoded invisible characters", decoded, p.textNodes().get(0).getWholeText());
+    }
+
+    @Test
+    public void testElementContainsNormalizedText() {
+        String escaped = "This&shy;is&#x200b;one&shy;long&shy;word";
+        String expectedNormalizedText = "Thisisonelongword";
+
+        Document doc = Jsoup.parse("<p>" + escaped);
+        Element p = doc.select("p").first();
+        doc.outputSettings().charset("ascii");
+
+        Element matched = doc.select("p:contains(" + expectedNormalizedText + ")").first();
+        assertNotNull("Element should contain normalized text", matched);
+        assertEquals("Element should be a paragraph", "p", matched.nodeName());
+    }
+
+    @Test
+    public void testElementContainsOnlyNormalizedText() {
+        String escaped = "This&shy;is&#x200b;one&shy;long&shy;word";
+        String expectedNormalizedText = "Thisisonelongword";
+
+        Document doc = Jsoup.parse("<p>" + escaped);
+        Element p = doc.select("p").first();
+        doc.outputSettings().charset("ascii");
+
+        Element matched = doc.select("p").first();
+        assertTrue("Element should contain only normalized text", matched.is(":containsOwn(" + expectedNormalizedText + ")"));
+    }
+}
+```
+

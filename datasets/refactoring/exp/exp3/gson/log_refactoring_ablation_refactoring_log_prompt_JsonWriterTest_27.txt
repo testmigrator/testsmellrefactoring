@@ -1,0 +1,52 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import com.google.gson.stream.JsonWriter;
+import com.google.gson.stream.Strictness;
+import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.io.StringWriter;
+
+class JsonWriterTest {
+
+    @Test
+    public void testNonFiniteDoublesWhenLenient_NaN() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.setStrictness(Strictness.LENIENT);
+        jsonWriter.beginArray();
+        jsonWriter.value(Double.NaN);
+        jsonWriter.endArray();
+        assertDoesNotThrow(() -> jsonWriter.close());
+        assertEquals("[NaN]", stringWriter.toString());
+    }
+
+    @Test
+    public void testNonFiniteDoublesWhenLenient_NegativeInfinity() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.setStrictness(Strictness.LENIENT);
+        jsonWriter.beginArray();
+        jsonWriter.value(Double.NEGATIVE_INFINITY);
+        jsonWriter.endArray();
+        assertDoesNotThrow(() -> jsonWriter.close());
+        assertEquals("[-Infinity]", stringWriter.toString());
+    }
+
+    @Test
+    public void testNonFiniteDoublesWhenLenient_PositiveInfinity() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.setStrictness(Strictness.LENIENT);
+        jsonWriter.beginArray();
+        jsonWriter.value(Double.POSITIVE_INFINITY);
+        jsonWriter.endArray();
+        assertDoesNotThrow(() -> jsonWriter.close());
+        assertEquals("[Infinity]", stringWriter.toString());
+    }
+}
+```
+

@@ -1,0 +1,52 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import java.util.stream.Stream;
+
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+public class TypeHandlerTest {
+
+    private static Stream<Arguments> createValueTestParameters() {
+        return Stream.of(
+            Arguments.of("123", Integer.class, 123),
+            Arguments.of("true", Boolean.class, true),
+            Arguments.of("abc", Integer.class, NumberFormatException.class)
+        );
+    }
+
+    @ParameterizedTest(name = "{0} as {1}")
+    @MethodSource("createValueTestParameters")
+    public void testCreateValueSuccess(String str, Class<?> type, Object expected) {
+        if (expected instanceof Class<?> && Throwable.class.isAssignableFrom((Class<?>) expected)) {
+            return; // This case will be handled by the failure test
+        }
+        assertEquals(expected, TypeHandler.createValue(str, type), "Expected value does not match for type: " + type);
+    }
+
+    @ParameterizedTest(name = "{0} as {1}")
+    @MethodSource("createValueTestParameters")
+    public void testCreateValueFailure(String str, Class<?> type, Object expected) {
+        if (!(expected instanceof Class<?> && Throwable.class.isAssignableFrom((Class<?>) expected))) {
+            return; // This case will be handled by the success test
+        }
+        assertThrows((Class<Throwable>) expected, () -> TypeHandler.createValue(str, type), "Expected exception was not thrown for type: " + type);
+    }
+
+    @Test
+    @DisplayName("Test createValue with objectApiTest")
+    public void testCreateValueWithObjectApiTest() throws Exception {
+        Class<?> type = Integer.class;
+        Object objectApiTest = type; // KEEP this cast
+        assertEquals(123, TypeHandler.createValue("123", objectApiTest), "Expected value does not match for objectApiTest");
+    }
+}
+```
+

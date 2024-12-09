@@ -1,0 +1,30 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.MalformedJsonException;
+
+import org.junit.jupiter.api.Test;
+
+class JsonReaderTest {
+
+    @Test
+    public void testStrictSemicolonDelimitedNameValuePair_BeginObject() throws Exception {
+        JsonReader reader = new JsonReader(new StringReader("{\"a\":true;\"b\":true}"));
+        reader.beginObject();
+        assertEquals("a", reader.nextName(), "Expected name 'a' at line 1 column 6 path $.a");
+    }
+
+    @Test
+    public void testStrictSemicolonDelimitedNameValuePair_NextBoolean() throws Exception {
+        JsonReader reader = new JsonReader(new StringReader("{\"a\":true;\"b\":true}"));
+        reader.beginObject();
+        reader.nextName(); // Consume "a"
+        MalformedJsonException exception = assertThrows(MalformedJsonException.class, () -> reader.nextBoolean());
+        assertEquals("Unterminated object at line 1 column 6 path $.a", exception.getMessage(), "Expected MalformedJsonException message");
+    }
+}
+```
+

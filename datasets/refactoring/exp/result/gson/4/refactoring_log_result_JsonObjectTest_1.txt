@@ -1,0 +1,83 @@
+Input Parameters:
+Test Code:
+ @Test
+  public void testAddingAndRemovingObjectProperties() {
+    JsonObject jsonObj = new JsonObject();
+    String propertyName = "property";
+    assertThat(jsonObj.has(propertyName)).isFalse();
+    assertThat(jsonObj.get(propertyName)).isNull();
+
+    JsonPrimitive value = new JsonPrimitive("blah");
+    jsonObj.add(propertyName, value);
+    assertThat(jsonObj.get(propertyName)).isEqualTo(value);
+
+    JsonElement removedElement = jsonObj.remove(propertyName);
+    assertThat(removedElement).isEqualTo(value);
+    assertThat(jsonObj.has(propertyName)).isFalse();
+    assertThat(jsonObj.get(propertyName)).isNull();
+
+    assertThat(jsonObj.remove(propertyName)).isNull();
+  }
+Context: /com/google/gson/JsonObject
+Smell List: ['Assertion_Roulette', 'Eager_Test', 'Duplicate_Assert']
+Smell Description List: ['Test Smell Type：Assertion Roulette\n\nFeature:\nA test method contains more than one assertion statement without an explanation/message (parameter in the assertion method).\n', 'Test Smell Type：Eager Test\n\nFeature:\nA test method contains multiple calls to multiple production methods.\n', 'Test Smell Type：Duplicate Assert\n\nFeature:\nA test method that contains more than one assertion statement with the same parameters.\n']
+Refactoring DSL: ['RefactorRule:\n  SmellType: Assertion Roulette\n  Description: Add descriptive messages to assert statements to improve readability and maintainability.\n  Steps:\n    - Step:\n        Description: "Add descriptive message to each assert statement(except assertThat, assertThrows)."\n        Action: AddMessageToAssert\n        Parameters:\n          MessagePattern: "{assertionMessage}"\n  Example:\n    Before: |\n      @Test\n      public void T() {\n        stmt\n        assert_1\n        ...\n        assert_n\n        stmt\'\n      }\n    After: |\n      @Test\n      public void T() {\n        stmt\n        assert_1(..., "Descriptive message for assert statement")\n        ...\n        assert_n(..., "Descriptive message for assert statement")\n        stmt\'\n      }\n    Variables:\n      assertionMessage: "Descriptive message for assert statement"\n', 'RefactorRule:\n  SmellType: Eager Test\n  Description: "Refactor test methods to group related assertions logically and extract reusable setup logic into private methods."\n  Steps:\n    - Step1:\n        Description: "Extract shared setup logic into a reusable, private method and ensure it is used across all relevant tests."\n        Action: ExtractSetupMethod\n        Parameters:\n          Condition: "If multiple tests share the same setup logic."\n          MethodNamePattern: setupTest{OriginalMethodName}\n    - Step2:\n        Description: "Group related assertions into cohesive sub-tests while retaining necessary setup logic."\n        Action: GroupAssertions\n        Parameters:\n          GroupBy: LogicalConcern\n    - Step3:\n        Description: "Create new test methods for each cohesive group of assertions and ensure readability."\n        Action: CreateTestMethods\n        Parameters:\n          IncludeSetup: True\n          NamePattern: test{OriginalMethodName}_{Concern}\n  Example:\n    Before: |\n      @Test\n      public void testExample() {\n          setup();\n          assertEquals(1, methodA());\n          assertTrue(methodB());\n      }\n    After: |\n      private void setupTestExample() {\n          setup();\n      }\n\n      @Test\n      public void testExample_MethodA() {\n          setupTestExample();\n          assertEquals(1, methodA());\n      }\n\n      @Test\n      public void testExample_MethodB() {\n          setupTestExample();\n          assertTrue(methodB());\n      }\n  Variables:\n    OriginalMethodName: The name of the original test method.\n    LogicalConcern: The logical aspect tested (e.g., a specific API, validation, or behavior).\n', 'RefactorRule:\n  SmellType: Duplicate Assert\n  Description: "If the assertion logic is the same but tested with different inputs, convert the test to a parameterized test using JUnit 5\'s @CsvSource annotation. Otherwise, split the test into multiple separate methods, each containing a single assertion."\n  Steps:\n    - Step:\n        Description: "Check if there are multiple assertions testing the same condition"\n        Action: IdentifySameAssertions\n        Parameters:\n          SourcePattern: |\n\t          assert(expected, ...)\n\t          assert(expected, ...)\n    - Step:\n        Description: "Create new test methods if necessary to separate assertions for different inputs"\n        Action: SplitMethod\n        Parameters:\n          TargetType: Method\n\n    - Step:\n        Description: "Convert the test method to a parameterized test"\n        Action: ConvertToParameterizedTest\n        Parameters:\n          TargetType: Method\n    - Step:\n        Description: "Add @CsvSource annotation to declare parameterized values."\n        Action: AddAnnotation\n        Parameters:\n          TargetType: Method\n          Annotation: |\n            @CsvSource({\n              "{paramValues}"\n            })\n    - Step:\n        Description: "Refactor the test method to use parameterized values."\n        Action: RefactorMethod\n        Parameters:\n          SourcePattern: |\n            public void T() {\n              {originalStatements}\n            }\n          ReplacementPattern: |\n            public void T({parameterNames}) {\n              {refactoredStatements}\n            }\n  Example:\n    Before: |\n      @Test\n      public void T() {\n        assertEquals(expectedA, methodUnderTest(a));\n        assertEquals(expectedB, methodUnderTest(b));\n      }\n\n    After: |\n      @ParameterizedTest\n      @CsvSource({\n        "a, expectedA",\n        "b, expectedB"\n      })\n      public void T(String input, String expected) {\n        assertEquals(expected, methodUnderTest(input));\n      }\n']
+Checkpoints: ['[ ] All assert statements have been added with clear explanatory messages.\n', '[ ] All eager tests have been split into separate tests, each focusing on verifying a single API.\n', '[ ] All duplicate assertions have been refactored using JUnit 5 Parameterized Tests, where the lists of parameterizable values are declared in a specific annotation, and the test method is executed independently m times.\n']
+
+Refactored Code: 
+ 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+
+class JsonObjectTest {
+
+    @Test
+    public void testInitialJsonObjectState() {
+        JsonObject jsonObj = new JsonObject();
+        String propertyName = "property";
+
+        assertFalse(jsonObj.has(propertyName), "Property should not exist initially");
+        assertNull(jsonObj.get(propertyName), "Property value should be null initially");
+    }
+
+    @Test
+    public void testAddingProperty() {
+        JsonObject jsonObj = new JsonObject();
+        String propertyName = "property";
+        JsonPrimitive value = new JsonPrimitive("blah");
+
+        jsonObj.add(propertyName, value);
+
+        assertTrue(jsonObj.has(propertyName), "Property should exist after adding");
+        assertEquals(value, jsonObj.get(propertyName), "Property value should be correct");
+    }
+
+    @Test
+    public void testRemovingProperty() {
+        JsonObject jsonObj = new JsonObject();
+        String propertyName = "property";
+        JsonPrimitive value = new JsonPrimitive("blah");
+
+        jsonObj.add(propertyName, value);
+        JsonElement removedElement = jsonObj.remove(propertyName);
+
+        assertEquals(value, removedElement, "Removed element should be the added value");
+        assertFalse(jsonObj.has(propertyName), "Property should not exist after removal");
+        assertNull(jsonObj.get(propertyName), "Property value should be null after removal");
+    }
+
+    @Test
+    public void testRemovingNonexistentProperty() {
+        JsonObject jsonObj = new JsonObject();
+        String propertyName = "property";
+
+        assertNull(jsonObj.remove(propertyName), "Removing non-existent property should return null");
+    }
+}
+
+

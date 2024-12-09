@@ -1,0 +1,13 @@
+asserts result: 
+ Yes
+
+The refactored test maintains the same functionality as the original test. Both tests:
+
+1. Set up a JSON string with an invalid Unicode escape sequence.
+2. Create a `JsonReader` instance from the JSON string.
+3. Begin reading an array from the JSON.
+4. Assert that calling `nextString()` on the `JsonReader` throws a `MalformedJsonException`.
+5. Verify that the exception message matches the expected message.
+
+The changes in the refactored version are primarily stylistic and do not alter the behavior of the test. The addition of comments for clarity and the use of a lambda expression in `assertThrows` do not affect the test's functionality.
+

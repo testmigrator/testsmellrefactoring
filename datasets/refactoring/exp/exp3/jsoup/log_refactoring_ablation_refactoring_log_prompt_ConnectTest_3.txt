@@ -1,0 +1,43 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.junit.jupiter.api.Test;
+
+public class PostRequestTest {
+
+    private String echoUrl = "http://example.com/echo";
+
+    @Test
+    public void shouldPerformPostRequest() {
+        Document doc = null;
+        try {
+            doc = Jsoup.connect(echoUrl)
+                .data("uname", "Jsoup", "uname", "Jonathan", "百", "度一下")
+                .cookie("auth", "token")
+                .post();
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to perform POST request", e);
+        }
+
+        assertAll(
+            () -> assertEquals("POST", ihVal("Method", doc), "Method should be POST"),
+            () -> assertEquals("gzip", ihVal("Accept-Encoding", doc), "Accept-Encoding should be gzip"),
+            () -> assertEquals("auth=token", ihVal("Cookie", doc), "Cookie should be auth=token"),
+            () -> assertEquals("度一下", ihVal("百", doc), "Value for key '百' should be '度一下'"),
+            () -> assertEquals("Jsoup, Jonathan", ihVal("uname", doc), "Value for key 'uname' should be 'Jsoup, Jonathan'"),
+            () -> assertEquals("application/x-www-form-urlencoded; charset=UTF-8", ihVal("Content-Type", doc), "Content-Type should be application/x-www-form-urlencoded; charset=UTF-8")
+        );
+    }
+
+    private String ihVal(String key, Document doc) {
+        // Implementation of ihVal method
+        return doc.select("input[name=" + key + "]").val();
+    }
+}
+```
+

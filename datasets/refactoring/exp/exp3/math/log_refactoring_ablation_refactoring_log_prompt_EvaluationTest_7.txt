@@ -1,0 +1,58 @@
+asserts result: 
+ ```java
+import org.apache.commons.math3.linear.ArrayRealVector;
+import org.apache.commons.math3.linear.RealVector;
+import org.apache.commons.math3.fitting.leastsquares.LeastSquaresFactory;
+import org.apache.commons.math3.fitting.leastsquares.LeastSquaresProblem;
+import org.apache.commons.math3.fitting.leastsquares.Evaluation;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class LazyEvaluationTest {
+
+    private static RealVector dummyModel() {
+        return new ArrayRealVector(new double[] { 0 });
+    }
+
+    private static RealVector dummyJacobian() {
+        return new ArrayRealVector(new double[] { 0 });
+    }
+
+    @Test
+    public void testLazyEvaluationResiduals() {
+        final RealVector dummy = new ArrayRealVector(new double[] { 0 });
+
+        final LeastSquaresProblem p = LeastSquaresFactory.create(
+            LeastSquaresFactory.model(dummyModel(), dummyJacobian()),
+            dummy, dummy, null, null, 0, 0, true, null
+        );
+
+        // Should not throw because actual evaluation is deferred.
+        final Evaluation eval = p.evaluate(dummy);
+
+        Executable executable = () -> eval.getResiduals();
+        RuntimeException exception = assertThrows(RuntimeException.class, executable);
+        assertEquals("dummyModel", exception.getMessage(), "Expected exception message for residuals");
+    }
+
+    @Test
+    public void testLazyEvaluationJacobian() {
+        final RealVector dummy = new ArrayRealVector(new double[] { 0 });
+
+        final LeastSquaresProblem p = LeastSquaresFactory.create(
+            LeastSquaresFactory.model(dummyModel(), dummyJacobian()),
+            dummy, dummy, null, null, 0, 0, true, null
+        );
+
+        // Should not throw because actual evaluation is deferred.
+        final Evaluation eval = p.evaluate(dummy);
+
+        Executable executable = () -> eval.getJacobian();
+        RuntimeException exception = assertThrows(RuntimeException.class, executable);
+        assertEquals("dummyJacobian", exception.getMessage(), "Expected exception message for jacobian");
+    }
+}
+```
+

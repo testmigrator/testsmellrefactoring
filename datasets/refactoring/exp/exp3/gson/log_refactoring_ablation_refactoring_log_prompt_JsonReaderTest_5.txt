@@ -1,0 +1,26 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+
+import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import com.google.gson.stream.JsonReader;
+import java.io.StringReader;
+
+class JsonReaderTest {
+
+    @Test
+    public void testEscapedNewlineAllowedInDefaultMode() throws IOException {
+        String json = "\"\\\n\"";
+        JsonReader reader = new JsonReader(new StringReader(json));
+        
+        assertThrows(IOException.class, () -> {
+            assertThat(reader.nextString(), equalTo("\n"));
+        });
+    }
+}
+```
+

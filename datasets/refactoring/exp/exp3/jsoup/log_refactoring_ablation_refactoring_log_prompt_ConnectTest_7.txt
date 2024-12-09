@@ -1,0 +1,38 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.junit.jupiter.api.Test;
+
+public class DocumentTest {
+
+    private final String echoUrl = "http://example.com/echo";
+    private final String browserUa = "Mozilla/5.0";
+
+    @Test
+    public void sendsRequestBody() {
+        final String body = "{key:value}";
+
+        Document doc = assertDoesNotThrow(() -> {
+            return Jsoup.connect(echoUrl)
+                    .requestBody(body)
+                    .header("Content-Type", "text/plain")
+                    .userAgent(browserUa)
+                    .post();
+        }, "Failed to connect and send POST request");
+
+        assertEquals("POST", ihVal("Method", doc), "HTTP Method should be POST");
+        assertEquals("text/plain", ihVal("Content-Type", doc), "Content-Type header should be text/plain");
+        assertEquals(body, ihVal("Post Data", doc), "Request body should match the sent body");
+    }
+
+    private String ihVal(String key, Document doc) {
+        // Implementation of ihVal method
+        return doc.select("[name=" + key + "]").attr("value");
+    }
+}
+```
+

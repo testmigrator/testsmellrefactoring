@@ -1,0 +1,43 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+
+import com.google.gson.stream.JsonReader;
+import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.io.StringReader;
+
+class JsonReaderTest {
+
+    @Test
+    public void testBeginObjectEndOfDocument() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("{}"));
+        reader.beginObject();
+        reader.endObject();
+    }
+
+    @Test
+    public void testHasNextAfterEndOfObject() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("{}"));
+        reader.beginObject();
+        reader.endObject();
+        assertThat(reader.hasNext()).isFalse();
+    }
+
+    @Test
+    public void testBeginObjectThrowsExceptionOnInvalidJson() {
+        JsonReader reader = new JsonReader(new StringReader("invalid json"));
+        assertThrows(IOException.class, () -> reader.beginObject());
+    }
+
+    @Test
+    public void testEndObjectThrowsExceptionOnInvalidJson() {
+        JsonReader reader = new JsonReader(new StringReader("invalid json"));
+        reader.beginObject(); // This should throw an exception, but if it doesn't, the next line will
+        assertThrows(IOException.class, () -> reader.endObject());
+    }
+}
+```
+

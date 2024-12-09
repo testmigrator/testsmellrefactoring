@@ -1,0 +1,47 @@
+Input Parameters:
+Test Code:
+ @Test
+    public void testNormalDistributionWithLargeSigma() {
+        final double sigma = 1000;
+        final double mean = 0;
+        final double factor = 1 / (sigma * JdkMath.sqrt(2 * JdkMath.PI));
+        final UnivariateFunction normal = new Gaussian(factor, mean, sigma);
+
+        final double tol = 1e-2;
+        final IterativeLegendreGaussIntegrator integrator =
+            new IterativeLegendreGaussIntegrator(5, tol, tol);
+
+        final double a = -5000;
+        final double b = 5000;
+        final double s = integrator.integrate(60, normal, a, b);
+        Assert.assertEquals(1, s, 1e-5);
+    }
+Context: /org/apache/commons/math4/legacy/analysis/integration/IterativeLegendreGaussIntegrator
+Smell List: ['Magic_Number_Test']
+Smell Description List: ['Test Smell Type：Magic Number Test\n\nFeature:\nAn assertion method that contains a numeric literal as an argument.\n']
+Refactoring DSL: ['RefactorRule:\n  SmellType: Magic Number Test\n  Description: "Extract magic numbers and assign meaningful names to improve readability and maintainability."\n  Steps:\n    - Step:\n        Action: IdentifyMagicNumbers\n        Description: "Identify magic numbers in assertions"\n        Parameters:\n          TargetType: Method\n          SourcePattern: |\n            assertEquals({magicNumber}, {variable})\n    - Step:\n        Action: ExtractVariable\n        Description: "Extract magic number to a variable with meaningful name"\n        Parameters:\n          TargetType: Method\n          SourcePattern: |\n            assertEquals({magicNumber}, {variable})\n          ReplacementPattern: |\n            int {meaningfulName} = {magicNumber};\n            assertEquals({meaningfulName}, {variable})\n  Example:\n    Before: |\n      @Test\n      public void T() {\n          stmt\n          assertEquals(1, a)\n          stmt\'\n      }\n    After: |\n      @Test\n      public void T() {\n          int x = 1; // x: meaningful variable name\n          stmt\n          assertEquals(x, a)\n          stmt\'\n      }\n  Variables:\n    magicNumber: "1"\n    variable: "a"\n    meaningfulName: "x"\n']
+Checkpoints: ['[ ] All magic numbers in the test code have been extracted and assigned meaningful variable names.\n']
+
+Refactored Code: 
+ 
+@Test
+public void testNormalDistributionWithLargeSigma() {
+    final double sigma = 1000;
+    final double mean = 0;
+    final double factor = 1 / (sigma * JdkMath.sqrt(2 * JdkMath.PI));
+    final UnivariateFunction normal = new Gaussian(factor, mean, sigma);
+
+    final double tolerance = 1e-2;
+    final IterativeLegendreGaussIntegrator integrator =
+        new IterativeLegendreGaussIntegrator(5, tolerance, tolerance);
+
+    final double lowerBound = -5000;
+    final double upperBound = 5000;
+    final double expectedIntegralValue = 1;
+    final double epsilon = 1e-5;
+
+    final double s = integrator.integrate(60, normal, lowerBound, upperBound);
+    Assert.assertEquals(expectedIntegralValue, s, epsilon);
+}
+
+

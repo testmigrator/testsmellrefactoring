@@ -1,0 +1,87 @@
+asserts result: 
+ ```java
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.junit.Test;
+
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.Arrays;
+
+import static org.junit.Assert.assertEquals;
+
+public class HelpFormatterTest {
+
+    @Test
+    public void testHelpMessageWithAllOptions() {
+        // Arrange
+        final Options options = createOptions();
+        final HelpFormatter formatter = new HelpFormatter();
+        final String eol = System.lineSeparator();
+        final StringWriter out = new StringWriter();
+
+        // Act
+        formatter.printHelp(new PrintWriter(out), 80, "commandline", "header", options, 2, 2, "footer", true);
+
+        // Assert
+        final String expectedOutput = buildExpectedHelpMessage(eol);
+        assertEquals(expectedOutput, out.toString());
+    }
+
+    private Options createOptions() {
+        return new Options()
+                .addOption(new Option("h", "help", false, "print this message"))
+                .addOption(new Option("v", "version", false, "print version information"))
+                .addOption(new Option("n", "new", false, "Create NLT cache entries only for new items"))
+                .addOption(new Option("t", "tracker", false, "Create NLT cache entries only for tracker items"))
+                .addOption(Option.builder("l")
+                        .longOpt("limit")
+                        .hasArg()
+                        .valueSeparator()
+                        .desc("Set time limit for execution, in minutes")
+                        .build())
+                .addOption(Option.builder("a")
+                        .longOpt("age")
+                        .hasArg()
+                        .valueSeparator()
+                        .desc("Age (in days) of cache item before being recomputed")
+                        .build())
+                .addOption(Option.builder("s")
+                        .longOpt("server")
+                        .hasArg()
+                        .valueSeparator()
+                        .desc("The NLT server address")
+                        .build())
+                .addOption(Option.builder("r")
+                        .longOpt("results")
+                        .hasArg()
+                        .valueSeparator()
+                        .desc("Number of results per item")
+                        .build())
+                .addOption(Option.builder()
+                        .longOpt("config")
+                        .hasArg()
+                        .valueSeparator()
+                        .desc("Use the specified configuration file")
+                        .build());
+    }
+
+    private String buildExpectedHelpMessage(String eol) {
+        return "usage: commandline [-a <arg>] [--config <arg>] [-h] [-l <arg>] [-n] [-r <arg>]" + eol +
+               "       [-s <arg>] [-t] [-v]" + eol +
+               "header" + eol +
+               "  -a,--age <arg>      Age (in days) of cache item before being recomputed" + eol +
+               "     --config <arg>   Use the specified configuration file" + eol +
+               "  -h,--help           print this message" + eol +
+               "  -l,--limit <arg>    Set time limit for execution, in minutes" + eol +
+               "  -n,--new            Create NLT cache entries only for new items" + eol +
+               "  -r,--results <arg>  Number of results per item" + eol +
+               "  -s,--server <arg>   The NLT server address" + eol +
+               "  -t,--tracker        Create NLT cache entries only for tracker items" + eol +
+               "  -v,--version        print version information" + eol +
+               "footer" + eol;
+    }
+}
+```
+

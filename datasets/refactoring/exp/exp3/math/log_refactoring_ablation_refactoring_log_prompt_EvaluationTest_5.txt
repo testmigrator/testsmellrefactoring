@@ -1,0 +1,51 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIf;
+import org.junit.jupiter.api.function.Executable;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+@EnabledIf("isDatasetAvailable")
+public class StatisticalReferenceDatasetTest {
+
+    private static final String DATASET_NAME = "Kirby2";
+
+    @Test
+    public void testComputeSigma() {
+        StatisticalReferenceDataset dataset = StatisticalReferenceDatasetFactory.createKirby2();
+        LeastSquaresProblem lsp = builder(dataset).build();
+        double[] expected = dataset.getParametersStandardDeviations();
+        Evaluation evaluation = lsp.evaluate(lsp.getStart());
+        double cost = evaluation.getCost();
+        RealVector sig = evaluation.getSigma(1e-14);
+        int dof = lsp.getObservationSize() - lsp.getParameterSize();
+
+        assertAll(
+            () -> assertThrows(IOException.class, this::loadDataset),
+            () -> {
+                for (int i = 0; i < sig.getDimension(); i++) {
+                    double actual = JdkMath.sqrt(cost * cost / dof) * sig.getEntry(i);
+                    assertEquals(expected[i], actual, 1e-6 * expected[i], 
+                        () -> dataset.getName() + ", parameter #" + i);
+                }
+            }
+        );
+    }
+
+    private boolean isDatasetAvailable() {
+        try {
+            StatisticalReferenceDatasetFactory.createKirby2();
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
+    }
+
+    private void loadDataset() throws IOException {
+        StatisticalReferenceDatasetFactory.createKirby2();
+    }
+}
+```
+

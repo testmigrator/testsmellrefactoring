@@ -1,0 +1,50 @@
+asserts result: 
+ ```java
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
+import com.google.gson.stream.MalformedJsonException;
+import com.google.gson.stream.Strictness;
+import org.junit.jupiter.api.Test;
+
+class JsonReaderTest {
+
+    @Test
+    public void testLenientSemicolonDelimitedNameValuePair_ReadsFirstNameValuePair() throws Exception {
+        JsonReader reader = new JsonReader(new StringReader("{\"a\":true;\"b\":true}"));
+        reader.setStrictness(Strictness.LENIENT);
+        reader.beginObject();
+
+        assertThat(reader.nextName()).isEqualTo("a", "Expected first name to be 'a'");
+        assertThat(reader.nextBoolean()).isTrue("Expected value of 'a' to be true");
+    }
+
+    @Test
+    public void testLenientSemicolonDelimitedNameValuePair_ReadsSecondNameValuePair() throws Exception {
+        JsonReader reader = new JsonReader(new StringReader("{\"a\":true;\"b\":true}"));
+        reader.setStrictness(Strictness.LENIENT);
+        reader.beginObject();
+
+        reader.nextName(); // Skip first name
+        reader.nextBoolean(); // Skip first value
+
+        assertThat(reader.nextName()).isEqualTo("b", "Expected second name to be 'b'");
+    }
+
+    @Test
+    public void testLenientSemicolonDelimitedNameValuePair_HandlesMalformedJson() {
+        JsonReader reader = new JsonReader(new StringReader("{\"a\":true;\"b\":true"));
+        reader.setStrictness(Strictness.LENIENT);
+
+        assertThrows(MalformedJsonException.class, () -> {
+            reader.beginObject();
+            reader.nextName();
+            reader.nextBoolean();
+            reader.nextName();
+        }, "Expected MalformedJsonException to be thrown for incomplete JSON");
+    }
+}
+```
+

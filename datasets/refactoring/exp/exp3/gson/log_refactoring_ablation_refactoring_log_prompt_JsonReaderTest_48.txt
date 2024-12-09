@@ -1,0 +1,76 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.MalformedJsonException;
+import org.junit.jupiter.api.Test;
+
+public class JsonReaderTest {
+
+    private String reader(String content) {
+        return content;
+    }
+
+    private void assertStrictError(MalformedJsonException e, String expectedLocation) {
+        assertEquals(expectedLocation, e.getLocation());
+    }
+
+    @Test
+    public void testPeekWithOctalPrefix() {
+        String number = "01";
+        String expectedLocation = "line 1 column 1 path $";
+
+        MalformedJsonException e = assertThrows(MalformedJsonException.class, () -> {
+            new JsonReader(reader(number)).peek();
+        });
+        assertStrictError(e, expectedLocation);
+    }
+
+    @Test
+    public void testNextIntWithOctalPrefix() {
+        String number = "01";
+        String expectedLocation = "line 1 column 1 path $";
+
+        MalformedJsonException e = assertThrows(MalformedJsonException.class, () -> {
+            new JsonReader(reader(number)).nextInt();
+        });
+        assertStrictError(e, expectedLocation);
+    }
+
+    @Test
+    public void testNextLongWithOctalPrefix() {
+        String number = "01";
+        String expectedLocation = "line 1 column 1 path $";
+
+        MalformedJsonException e = assertThrows(MalformedJsonException.class, () -> {
+            new JsonReader(reader(number)).nextLong();
+        });
+        assertStrictError(e, expectedLocation);
+    }
+
+    @Test
+    public void testNextDoubleWithOctalPrefix() {
+        String number = "01";
+        String expectedLocation = "line 1 column 1 path $";
+
+        MalformedJsonException e = assertThrows(MalformedJsonException.class, () -> {
+            new JsonReader(reader(number)).nextDouble();
+        });
+        assertStrictError(e, expectedLocation);
+    }
+
+    @Test
+    public void testNextStringWithOctalPrefix() {
+        String number = "01";
+        String expectedLocation = "line 1 column 1 path $";
+
+        MalformedJsonException e = assertThrows(MalformedJsonException.class, () -> {
+            new JsonReader(reader(number)).nextString();
+        });
+        assertStrictError(e, expectedLocation);
+    }
+}
+```
+

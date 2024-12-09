@@ -1,0 +1,5 @@
+asserts result: 
+ Yes
+
+The refactored tests maintain the same functionality as the original test. The original test checks both the text and HTML content of the element after prepending text. The refactored version separates these checks into two distinct tests but still performs the same assertions. The `setupTestPrependText` method ensures that the document and element are set up correctly and the text is prepended before each assertion is made. Therefore, the functionality is consistent.
+

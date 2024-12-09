@@ -1,0 +1,24 @@
+asserts result: 
+ ```java
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class AreaRendererTest {
+
+    @Test
+    public void testHashCodeEquality() {
+        // Arrange
+        AreaRenderer r1 = new AreaRenderer();
+        AreaRenderer r2 = new AreaRenderer();
+
+        // Act
+        int h1 = r1.hashCode();
+        int h2 = r2.hashCode();
+
+        // Assert
+        assertEquals("r1 and r2 should be equal", r1, r2);
+        assertEquals("Hash codes of r1 and r2 should be equal", h1, h2);
+    }
+}
+```
+

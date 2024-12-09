@@ -1,0 +1,41 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class ElementTest {
+
+    private static final String HTML_CONTENT = "<div><abc:def id=1>Hello</abc:def></div>";
+    private static final String TAG_NAME = "abc:def";
+    private static final int EXPECTED_ELEMENT_COUNT = 1;
+    private static final String EXPECTED_ID = "1";
+
+    @Test
+    public void testGetNamespacedElementsByTagSize() {
+        Document doc = Jsoup.parse(HTML_CONTENT);
+        Elements elements = doc.getElementsByTag(TAG_NAME);
+        assertEquals("Expected number of elements with tag '" + TAG_NAME + "'", EXPECTED_ELEMENT_COUNT, elements.size());
+    }
+
+    @Test
+    public void testGetNamespacedElementById() {
+        Document doc = Jsoup.parse(HTML_CONTENT);
+        Elements elements = doc.getElementsByTag(TAG_NAME);
+        Element element = elements.first();
+        assertEquals("Expected ID of the first element", EXPECTED_ID, element.id());
+    }
+
+    @Test
+    public void testGetNamespacedElementTagName() {
+        Document doc = Jsoup.parse(HTML_CONTENT);
+        Elements elements = doc.getElementsByTag(TAG_NAME);
+        Element element = elements.first();
+        assertEquals("Expected tag name of the first element", TAG_NAME, element.tagName());
+    }
+}
+```
+

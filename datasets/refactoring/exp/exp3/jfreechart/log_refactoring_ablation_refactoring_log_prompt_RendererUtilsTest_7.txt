@@ -1,0 +1,55 @@
+asserts result: 
+ ```java
+import static org.junit.Assert.assertEquals;
+
+public class RendererUtilsTest {
+
+    private static final double START_X = 0.0;
+    private static final double END_X = 20.0;
+    private static final int EXPECTED_LOWER_BOUND = 1;
+    private static final int EXPECTED_UPPER_BOUND = 2;
+    private static final String SERIES_NAME = "S1";
+    private static final double[] X_VALUES = {0.0, 21.0, 2.0, 23.0};
+    private static final double Y_VALUE = 0.0;
+
+    @Test
+    public void testFindLiveItemsLowerBound() {
+        XYSeries<String> series = createSeries();
+        XYSeriesCollection<String> dataset = new XYSeriesCollection<>();
+        dataset.addSeries(series);
+
+        int lowerBound = RendererUtils.findLiveItemsLowerBound(dataset, 0, START_X, END_X);
+        assertEquals("Lower bound should be 1", EXPECTED_LOWER_BOUND, lowerBound);
+    }
+
+    @Test
+    public void testFindLiveItemsUpperBound() {
+        XYSeries<String> series = createSeries();
+        XYSeriesCollection<String> dataset = new XYSeriesCollection<>();
+        dataset.addSeries(series);
+
+        int upperBound = RendererUtils.findLiveItemsUpperBound(dataset, 0, START_X, END_X);
+        assertEquals("Upper bound should be 2", EXPECTED_UPPER_BOUND, upperBound);
+    }
+
+    @Test
+    public void testFindLiveItems() {
+        XYSeries<String> series = createSeries();
+        XYSeriesCollection<String> dataset = new XYSeriesCollection<>();
+        dataset.addSeries(series);
+
+        int[] bounds = RendererUtils.findLiveItems(dataset, 0, START_X, END_X);
+        assertEquals("Lower bound should be 1", EXPECTED_LOWER_BOUND, bounds[0]);
+        assertEquals("Upper bound should be 2", EXPECTED_UPPER_BOUND, bounds[1]);
+    }
+
+    private XYSeries<String> createSeries() {
+        XYSeries<String> series = new XYSeries<>(SERIES_NAME, false);
+        for (double xValue : X_VALUES) {
+            series.add(xValue, Y_VALUE);
+        }
+        return series;
+    }
+}
+```
+

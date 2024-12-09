@@ -1,0 +1,55 @@
+asserts result: 
+ ```java
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.MalformedJsonException;
+import org.junit.jupiter.api.Test;
+
+public class JsonReaderTest {
+
+    @Test
+    public void testStrictUnnecessaryArraySeparatorsWithSkipValue_FirstCase() throws Exception {
+        JsonReader reader = new JsonReader(new StringReader("[true,,true]"));
+        reader.beginArray();
+        assertThat(reader.nextBoolean()).isTrue();
+        assertThatThrownBy(() -> reader.skipValue())
+                .isInstanceOf(MalformedJsonException.class)
+                .withFailMessage("Expected MalformedJsonException at line 1 column 8 path $[1]")
+                .hasMessageContaining("line 1 column 8 path $[1]");
+    }
+
+    @Test
+    public void testStrictUnnecessaryArraySeparatorsWithSkipValue_SecondCase() throws Exception {
+        JsonReader reader = new JsonReader(new StringReader("[,true]"));
+        reader.beginArray();
+        assertThatThrownBy(() -> reader.skipValue())
+                .isInstanceOf(MalformedJsonException.class)
+                .withFailMessage("Expected MalformedJsonException at line 1 column 3 path $[0]")
+                .hasMessageContaining("line 1 column 3 path $[0]");
+    }
+
+    @Test
+    public void testStrictUnnecessaryArraySeparatorsWithSkipValue_ThirdCase() throws Exception {
+        JsonReader reader = new JsonReader(new StringReader("[true,]"));
+        reader.beginArray();
+        assertThat(reader.nextBoolean()).isTrue();
+        assertThatThrownBy(() -> reader.skipValue())
+                .isInstanceOf(MalformedJsonException.class)
+                .withFailMessage("Expected MalformedJsonException at line 1 column 8 path $[1]")
+                .hasMessageContaining("line 1 column 8 path $[1]");
+    }
+
+    @Test
+    public void testStrictUnnecessaryArraySeparatorsWithSkipValue_FourthCase() throws Exception {
+        JsonReader reader = new JsonReader(new StringReader("[,]"));
+        reader.beginArray();
+        assertThatThrownBy(() -> reader.skipValue())
+                .isInstanceOf(MalformedJsonException.class)
+                .withFailMessage("Expected MalformedJsonException at line 1 column 3 path $[0]")
+                .hasMessageContaining("line 1 column 3 path $[0]");
+    }
+}
+```
+

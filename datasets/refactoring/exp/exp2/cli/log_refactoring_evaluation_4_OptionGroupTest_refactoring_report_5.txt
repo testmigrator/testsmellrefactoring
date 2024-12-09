@@ -1,0 +1,14 @@
+asserts result: 
+ Yes
+
+The refactored test maintains the same functionality as the original test. Both tests:
+
+1. Set up the same input arguments `{"--file", "--directory"}`.
+2. Expect an `AlreadySelectedException` to be thrown when `parser.parse(options, args)` is called.
+3. Assert that the `getOptionGroup()` method of the exception returns a non-null value.
+4. Assert that the `isSelected()` method of the option group returns `true`.
+5. Assert that the `getSelected()` method of the option group returns `"f"`.
+6. Assert that the `getOpt()` method of the option returns `"d"`.
+
+The only difference is the use of `assertThrows` in the refactored test, which is a more modern and concise way to test for exceptions in JUnit 5, compared to the try-catch block in the original test. This change does not affect the consistency of the test's functionality.
+

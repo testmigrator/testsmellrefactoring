@@ -1,0 +1,42 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.Options;
+
+public class CommandLineTest {
+
+    private final CommandLineParser parser = new DefaultParser();
+    private final Options options = new Options();
+
+    @Test
+    public void testOptionAndOptionWithArgument() {
+        // Arrange
+        final String[] args = {"-p", "-attr", "p"};
+        final int expectedArgsLength = 0;
+        final String expectedAttrValue = "p";
+
+        // Act
+        CommandLine cl = parseCommandLine(args);
+
+        // Assert
+        assertTrue(cl.hasOption("p"), "Confirm -p is set");
+        assertTrue(cl.hasOption("attr"), "Confirm -attr is set");
+        assertEquals(expectedAttrValue, cl.getOptionValue("attr"), "Confirm arg of -attr");
+        assertEquals(expectedArgsLength, cl.getArgs().length, "Confirm all arguments recognized");
+    }
+
+    private CommandLine parseCommandLine(String[] args) {
+        try {
+            return parser.parse(options, args);
+        } catch (Exception e) {
+            fail("Parsing command line arguments should not throw an exception: " + e.getMessage());
+            return null; // This will never be reached due to the fail call.
+        }
+    }
+}
+```
+

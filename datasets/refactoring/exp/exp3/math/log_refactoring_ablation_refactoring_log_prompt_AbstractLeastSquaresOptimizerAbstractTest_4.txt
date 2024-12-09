@@ -1,0 +1,29 @@
+asserts result: 
+ ```java
+@Test
+public void testOneSet() {
+    // Define meaningful variable names for magic numbers
+    double[][] coefficients = {
+        {1, 0, 0},
+        {-1, 1, 0},
+        {0, -1, 1}
+    };
+    double[] constants = {1, 1, 1};
+    double tolerance = 1e-6; // Tolerance for floating-point comparison
+
+    LinearProblem problem = new LinearProblem(coefficients, constants);
+
+    Optimum optimum = optimizer.optimize(problem.getBuilder().build());
+
+    Assert.assertEquals(0, optimum.getRMS(), tolerance);
+    assertEquals(tolerance, optimum.getPoint(), 1, 2, 3);
+}
+
+// Helper method to assert the point values with a tolerance
+private void assertEquals(double tolerance, Point point, double... expectedValues) {
+    for (int i = 0; i < expectedValues.length; i++) {
+        Assert.assertEquals(expectedValues[i], point.get(i), tolerance);
+    }
+}
+```
+

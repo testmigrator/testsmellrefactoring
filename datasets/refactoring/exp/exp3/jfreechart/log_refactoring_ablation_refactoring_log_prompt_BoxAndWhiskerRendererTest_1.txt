@@ -1,0 +1,79 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.jfree.chart.renderer.category.BoxAndWhiskerRenderer;
+import java.awt.Color;
+import java.awt.GradientPaint;
+
+class BoxAndWhiskerRendererTest {
+
+    @Test
+    public void testDefaultEquals() {
+        BoxAndWhiskerRenderer r1 = new BoxAndWhiskerRenderer();
+        BoxAndWhiskerRenderer r2 = new BoxAndWhiskerRenderer();
+        assertEquals(r2, r1, "Two default instances should be equal");
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "setArtifactPaint, 1.0, 2.0, YELLOW, 3.0, 4.0, BLUE",
+        "setFillBox, false",
+        "setItemMargin, 0.11",
+        "setMaximumBarWidth, 0.99",
+        "setMeanVisible, false",
+        "setMedianVisible, false",
+        "setMinOutlierVisible, false",
+        "setMaxOutlierVisible, false"
+    })
+    public void testPropertyChange(String methodName, Object... params) throws Exception {
+        BoxAndWhiskerRenderer r1 = new BoxAndWhiskerRenderer();
+        BoxAndWhiskerRenderer r2 = new BoxAndWhiskerRenderer();
+
+        // Set the property on r1
+        setProperty(r1, methodName, params);
+
+        assertNotEquals(r2, r1, "Instances should not be equal after changing " + methodName);
+
+        // Set the same property on r2
+        setProperty(r2, methodName, params);
+
+        assertEquals(r2, r1, "Instances should be equal after setting the same property");
+    }
+
+    private void setProperty(BoxAndWhiskerRenderer renderer, String methodName, Object... params) throws Exception {
+        switch (methodName) {
+            case "setArtifactPaint":
+                renderer.setArtifactPaint(new GradientPaint((Float) params[0], (Float) params[1], (Color) params[2],
+                        (Float) params[3], (Float) params[4], (Color) params[5]));
+                break;
+            case "setFillBox":
+                renderer.setFillBox((Boolean) params[0]);
+                break;
+            case "setItemMargin":
+                renderer.setItemMargin((Double) params[0]);
+                break;
+            case "setMaximumBarWidth":
+                renderer.setMaximumBarWidth((Double) params[0]);
+                break;
+            case "setMeanVisible":
+                renderer.setMeanVisible((Boolean) params[0]);
+                break;
+            case "setMedianVisible":
+                renderer.setMedianVisible((Boolean) params[0]);
+                break;
+            case "setMinOutlierVisible":
+                renderer.setMinOutlierVisible((Boolean) params[0]);
+                break;
+            case "setMaxOutlierVisible":
+                renderer.setMaxOutlierVisible((Boolean) params[0]);
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown method: " + methodName);
+        }
+    }
+}
+```
+

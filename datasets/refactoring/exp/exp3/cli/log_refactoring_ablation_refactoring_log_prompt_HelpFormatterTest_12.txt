@@ -1,0 +1,41 @@
+asserts result: 
+ ```java
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Options;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+import java.io.ByteArrayOutputStream;
+import java.io.PrintWriter;
+
+public class HelpFormatterTest {
+
+    @Test
+    public void testPrintHelpNewlineFooter() {
+        final HelpFormatter formatter = new HelpFormatter();
+        final ByteArrayOutputStream out = new ByteArrayOutputStream();
+        final PrintWriter pw = new PrintWriter(out);
+
+        final Options options = new Options();
+        options.addOption("a", "b");
+
+        formatter.printHelp(
+                pw,
+                80,
+                "test",
+                "header",
+                options,
+                0,
+                0,
+                ""
+        );
+        final String expected = "usage: test" + System.lineSeparator() +
+                "header" + System.lineSeparator() +
+                "-ab" + System.lineSeparator() +
+                System.lineSeparator();
+        pw.flush();
+        assertEquals(expected, out.toString());
+    }
+}
+```
+

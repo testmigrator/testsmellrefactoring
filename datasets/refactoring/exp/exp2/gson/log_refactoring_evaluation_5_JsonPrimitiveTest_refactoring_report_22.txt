@@ -1,0 +1,5 @@
+asserts result: 
+ Yes
+
+The refactored tests maintain the same functionality as the original test. Each of the original assertions has been broken out into its own test method, and the logic within each test method is equivalent to the corresponding part of the original test. The addition of descriptive messages in the `assertThat` calls does not change the functional behavior but improves readability and debugging.
+

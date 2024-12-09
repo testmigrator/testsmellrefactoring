@@ -1,0 +1,78 @@
+asserts result: 
+ ```java
+import org.jfree.data.xy.DefaultXYDataset;
+import org.jfree.chart.renderer.RendererUtils;
+import static org.junit.Assert.assertEquals;
+import org.junit.Test;
+
+public class RendererUtilsTest {
+
+    private static final double DELTA = 0.001;
+
+    @Test
+    public void testFindLiveItemsUpperBound_NoItems() {
+        DefaultXYDataset<String> dataset = createAscendingDataset();
+        dataset.addSeries("S1", new double[][] {{}, {}});
+        assertEquals("No items should return 0", 0, RendererUtils.findLiveItemsUpperBound(dataset, 0, 10.0, 11.1), DELTA);
+    }
+
+    @Test
+    public void testFindLiveItemsUpperBound_OneItem() {
+        DefaultXYDataset<String> dataset = createAscendingDataset();
+        dataset.addSeries("S2", new double[][] {{1.0}, {9.9}});
+        assertEquals("One item at 1.0 should return 0", 0, RendererUtils.findLiveItemsUpperBound(dataset, 1, 0.0, 1.1), DELTA);
+        assertEquals("One item at 1.0 should return 0", 0, RendererUtils.findLiveItemsUpperBound(dataset, 1, 2.0, 2.2), DELTA);
+    }
+
+    @Test
+    public void testFindLiveItemsUpperBound_TwoItems() {
+        DefaultXYDataset<String> dataset = createAscendingDataset();
+        dataset.addSeries("S3", new double[][] {{1.0, 2.0}, {9.9, 9.9}});
+        assertEquals("Two items, first item should return 0", 0, RendererUtils.findLiveItemsUpperBound(dataset, 2, 0.0, 1.0), DELTA);
+        assertEquals("Two items, second item should return 1", 1, RendererUtils.findLiveItemsUpperBound(dataset, 2, 1.0, 2.2), DELTA);
+        assertEquals("Two items, second item should return 1", 1, RendererUtils.findLiveItemsUpperBound(dataset, 2, 2.0, 3.3), DELTA);
+        assertEquals("Two items, second item should return 1", 1, RendererUtils.findLiveItemsUpperBound(dataset, 2, 3.0, 4.4), DELTA);
+    }
+
+    @Test
+    public void testFindLiveItemsUpperBound_ThreeItems() {
+        DefaultXYDataset<String> dataset = createAscendingDataset();
+        dataset.addSeries("S4", new double[][] {{1.0, 2.0, 3.0}, {9.9, 9.9, 9.9}});
+        assertEquals("Three items, first item should return 0", 0, RendererUtils.findLiveItemsUpperBound(dataset, 3, 0.0, 1.1), DELTA);
+        assertEquals("Three items, second item should return 1", 1, RendererUtils.findLiveItemsUpperBound(dataset, 3, 1.0, 2.2), DELTA);
+        assertEquals("Three items, third item should return 2", 2, RendererUtils.findLiveItemsUpperBound(dataset, 3, 2.0, 3.3), DELTA);
+        assertEquals("Three items, third item should return 2", 2, RendererUtils.findLiveItemsUpperBound(dataset, 3, 3.0, 4.4), DELTA);
+    }
+
+    @Test
+    public void testFindLiveItemsUpperBound_FourItems() {
+        DefaultXYDataset<String> dataset = createAscendingDataset();
+        dataset.addSeries("S5", new double[][] {{1.0, 2.0, 3.0, 4.0}, {9.9, 9.9, 9.9, 9.9}});
+        assertEquals("Four items, first item should return 0", 0, RendererUtils.findLiveItemsUpperBound(dataset, 4, 0.0, 1.1), DELTA);
+        assertEquals("Four items, second item should return 1", 1, RendererUtils.findLiveItemsUpperBound(dataset, 4, 1.0, 2.2), DELTA);
+        assertEquals("Four items, third item should return 2", 2, RendererUtils.findLiveItemsUpperBound(dataset, 4, 2.0, 3.3), DELTA);
+        assertEquals("Four items, fourth item should return 3", 3, RendererUtils.findLiveItemsUpperBound(dataset, 4, 3.0, 4.4), DELTA);
+        assertEquals("Four items, fourth item should return 3", 3, RendererUtils.findLiveItemsUpperBound(dataset, 4, 4.0, 5.5), DELTA);
+    }
+
+    @Test
+    public void testFindLiveItemsUpperBound_RepeatingItems() {
+        DefaultXYDataset<String> dataset = createAscendingDataset();
+        dataset.addSeries("S6", new double[][] {{1.0, 2.0, 2.0, 2.0, 3.0}, {9.9, 9.9, 9.9, 9.9, 9.9}});
+        assertEquals("Repeating items, first item should return 0", 0, RendererUtils.findLiveItemsUpperBound(dataset, 5, 0.0, 1.0), DELTA);
+        assertEquals("Repeating items, third item should return 3", 3, RendererUtils.findLiveItemsUpperBound(dataset, 5, 0.0, 2.0), DELTA);
+        assertEquals("Repeating items, fifth item should return 4", 4, RendererUtils.findLiveItemsUpperBound(dataset, 5, 0.0, 3.0), DELTA);
+        assertEquals("Repeating items, fifth item should return 4", 4, RendererUtils.findLiveItemsUpperBound(dataset, 5, 0.0, 4.0), DELTA);
+    }
+
+    private DefaultXYDataset<String> createAscendingDataset() {
+        return new DefaultXYDataset<String>() {
+            @Override
+            public DomainOrder getDomainOrder() {
+                return DomainOrder.ASCENDING;
+            }
+        };
+    }
+}
+```
+

@@ -1,0 +1,31 @@
+asserts result: 
+ ```java
+import org.jfree.chart.renderer.category.BarRenderer;
+import org.jfree.chart.labels.StandardCategoryItemLabelGenerator;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+
+public class BarRendererTest {
+
+    @Test
+    public void testEquals_SameSeriesItemLabelGenerator() {
+        BarRenderer r1 = new BarRenderer();
+        r1.setSeriesItemLabelGenerator(0, new StandardCategoryItemLabelGenerator());
+        BarRenderer r2 = new BarRenderer();
+        r2.setSeriesItemLabelGenerator(0, new StandardCategoryItemLabelGenerator());
+        assertEquals(r1, r2);
+    }
+
+    @Test
+    public void testNotEquals_DifferentSeriesItemLabelGenerator() {
+        BarRenderer r1 = new BarRenderer();
+        r1.setSeriesItemLabelGenerator(0, new StandardCategoryItemLabelGenerator());
+        BarRenderer r2 = new BarRenderer();
+        r2.setSeriesItemLabelGenerator(0, new StandardCategoryItemLabelGenerator());
+        r2.setSeriesItemLabelGenerator(1, new StandardCategoryItemLabelGenerator("X", new java.text.DecimalFormat("0.0")));
+        assertNotEquals(r1, r2);
+    }
+}
+```
+

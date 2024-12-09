@@ -1,0 +1,5 @@
+asserts result: 
+ yes
+
+The refactored code maintains the same functionality as the original test. The changes primarily involve breaking down the single large test method into smaller, more focused test methods, each testing a specific scenario. This approach improves readability and maintainability without altering the underlying behavior or the expected outcomes of the tests. Each test case in the refactored version corresponds to a part of the original test, and the assertions and expected results remain consistent.
+

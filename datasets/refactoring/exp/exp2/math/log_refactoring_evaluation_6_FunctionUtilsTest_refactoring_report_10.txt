@@ -1,0 +1,5 @@
+asserts result: 
+ Yes
+
+The functionality between the original test and the refactored test is consistent. The refactoring primarily involves updating the way exceptions are asserted using `assertThrows` instead of a try-catch block, but the logic and the assertions remain the same. Both versions of the test check for a `DimensionMismatchException` and verify the dimensions and arguments of the exception.
+

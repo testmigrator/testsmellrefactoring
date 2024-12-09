@@ -1,0 +1,56 @@
+asserts result: 
+ ```java
+import org.apache.commons.math4.legacy.analysis.UnivariateFunction;
+import org.apache.commons.math4.legacy.analysis.integration.IterativeLegendreGaussIntegrator;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.assertions.AssertionConsumer;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+class IntegrationTests {
+
+    private static final double VALUE = 0.2;
+    private static final double MAX_X = 0.32462367623786328;
+    private static final int MAX_EVALUATIONS = 1000;
+    private static final double TOLERANCE = 1.0e-7;
+
+    @Test
+    void testIntegrationWithDiscontinuity() {
+        UnivariateFunction f = x -> (x >= 0 && x <= 5) ? VALUE : 0.0;
+        IterativeLegendreGaussIntegrator gauss = new IterativeLegendreGaussIntegrator(5, 3, 100);
+
+        double result = gauss.integrate(Integer.MAX_VALUE, f, -10, MAX_X);
+        assertEquals(MAX_X * VALUE, result, TOLERANCE, "Integration result should match expected value");
+
+        assertTrue(gauss.getEvaluations() > 37000000, "Number of evaluations should be greater than 37 million");
+        assertTrue(gauss.getIterations() < 30, "Number of iterations should be less than 30");
+    }
+
+    @Test
+    void testIntegrationWithMaxEvaluations() {
+        UnivariateFunction f = x -> (x >= 0 && x <= 5) ? VALUE : 0.0;
+        IterativeLegendreGaussIntegrator gauss = new IterativeLegendreGaussIntegrator(5, 3, 100);
+
+        TooManyEvaluationsException exception = assertThrows(TooManyEvaluationsException.class, () -> {
+            gauss.integrate(MAX_EVALUATIONS, f, -10, MAX_X);
+        }, "Expected TooManyEvaluationsException to be thrown");
+
+        assertEquals(MAX_EVALUATIONS, exception.getMax(), "Maximum evaluations should match the set limit");
+    }
+
+    @Test
+    void testIntegrationOnTwoSides() {
+        UnivariateFunction f = x -> (x >= 0 && x <= 5) ? VALUE : 0.0;
+        IterativeLegendreGaussIntegrator gauss = new IterativeLegendreGaussIntegrator(5, 3, 100);
+
+        double sum1 = gauss.integrate(MAX_EVALUATIONS, f, -10, 0);
+        int eval1 = gauss.getEvaluations();
+        double sum2 = gauss.integrate(MAX_EVALUATIONS, f, 0, MAX_X);
+        int eval2 = gauss.getEvaluations();
+
+        assertEquals(MAX_X * VALUE, sum1 + sum2, TOLERANCE, "Sum of integrations should match expected value");
+        assertTrue(eval1 + eval2 < 200, "Total number of evaluations should be less than 200");
+    }
+}
+```
+

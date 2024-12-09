@@ -1,0 +1,31 @@
+asserts result: 
+ ```java
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class ChartRenderingInfoTest {
+
+    @Test
+    public void testSerializationEquality() {
+        ChartRenderingInfo originalInfo = createChartRenderingInfo();
+        ChartRenderingInfo serializedInfo = TestUtils.serialised(originalInfo);
+
+        assertEquals("Serialized ChartRenderingInfo should be equal to the original", originalInfo, serializedInfo);
+    }
+
+    @Test
+    public void testSerializationPlotInfoOwner() {
+        ChartRenderingInfo originalInfo = createChartRenderingInfo();
+        ChartRenderingInfo serializedInfo = TestUtils.serialised(originalInfo);
+
+        assertEquals("Serialized ChartRenderingInfo should have the same owner as its plot info", serializedInfo, serializedInfo.getPlotInfo().getOwner());
+    }
+
+    private ChartRenderingInfo createChartRenderingInfo() {
+        ChartRenderingInfo info = new ChartRenderingInfo();
+        info.getPlotInfo().setDataArea(new Rectangle2D.Double(1.0, 2.0, 3.0, 4.0));
+        return info;
+    }
+}
+```
+

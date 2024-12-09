@@ -1,0 +1,11 @@
+asserts result: 
+ Yes
+
+The refactored tests maintain the same functionality as the original test. The original single test has been split into three separate tests, each focusing on a specific aspect of the `nodeIsNotASiblingOfItself` function:
+
+1. **testNodeIsNotASiblingOfItself_Text**: Verifies that the text content of the second paragraph (`p2`) is "Two".
+2. **testNodeIsNotASiblingOfItself_SiblingCount**: Verifies that the second paragraph (`p2`) has 2 sibling nodes.
+3. **testNodeIsNotASiblingOfItself_SiblingContent**: Verifies the content of the sibling nodes.
+
+Each refactored test calls a common setup method (`setupNodeIsNotASiblingOfItself`) to initialize the document and the element, ensuring that the setup is consistent across all tests. The assertions in the refactored tests are equivalent to those in the original test, thus maintaining the same functionality.
+

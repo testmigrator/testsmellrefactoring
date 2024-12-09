@@ -1,0 +1,39 @@
+asserts result: 
+ ```java
+import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Attributes;
+import org.jsoup.nodes.Tag;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import static org.junit.jupiter.api.Assertions.*;
+
+class ElementTest {
+
+    @ParameterizedTest
+    @CsvSource({
+        "toto, true",
+        " toto, true",
+        "toto , true",
+        "\ttoto , true",
+        "  toto , true",
+        "ab, false",
+        "     , false",
+        "tototo, false",
+        "raulpismuth  , true",
+        " abcd  raulpismuth efgh , true",
+        " abcd efgh raulpismuth, true",
+        " abcd efgh raulpismuth , true"
+    })
+    void testHasClass(String className, boolean expectedResult) {
+        Tag tag = Tag.valueOf("a");
+        Attributes attribs = new Attributes();
+        Element el = new Element(tag, "", attribs);
+
+        attribs.put("class", className);
+        boolean hasClass = el.hasClass("toto");
+
+        assertEquals(expectedResult, hasClass, "Testing class: " + className);
+    }
+}
+```
+

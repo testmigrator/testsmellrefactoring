@@ -1,0 +1,58 @@
+asserts result: 
+ ```java
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class CommandLineParserTest {
+
+    private final DefaultParser parser = new DefaultParser();
+    private final Options options = new Options();
+
+    @Test
+    public void testLongOptionWithEqualsQuoteHandling() {
+        final String[] args = {"--bfile=\"quoted string\""};
+
+        CommandLine cl;
+        try {
+            cl = parser.parse(options, args);
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+
+        assertEquals("\"quoted string\"", cl.getOptionValue("bfile"), "Confirm --bfile=\"arg\" strips quotes");
+    }
+}
+```
+
+However, to fully address the code smell `Exception_Catching_Throwing` and leverage JUnit 5's exception handling features, we can further refactor the test as follows:
+
+```java
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class CommandLineParserTest {
+
+    private final DefaultParser parser = new DefaultParser();
+    private final Options options = new Options();
+
+    @Test
+    public void testLongOptionWithEqualsQuoteHandling() {
+        final String[] args = {"--bfile=\"quoted string\""};
+
+        CommandLine cl = assertDoesNotThrow(() -> parser.parse(options, args), "Parsing should not throw an exception");
+
+        assertEquals("\"quoted string\"", cl.getOptionValue("bfile"), "Confirm --bfile=\"arg\" strips quotes");
+    }
+}
+```
+

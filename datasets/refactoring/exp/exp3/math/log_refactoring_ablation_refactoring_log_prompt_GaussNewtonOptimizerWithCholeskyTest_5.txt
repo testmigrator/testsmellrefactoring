@@ -1,0 +1,20 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import org.junit.jupiter.api.Test;
+import org.apache.commons.math3.exception.ConvergenceException;
+import org.apache.commons.math3.exception.TooManyEvaluationsException;
+
+public class YourTestClass {
+
+    @Override
+    @Test
+    public void testHahn1() {
+        // Expected exceptions for different optimizers
+        assertThrows(ConvergenceException.class, () -> super.testHahn1(), "Expected ConvergenceException for LU");
+        assertThrows(TooManyEvaluationsException.class, () -> super.testHahn1(), "Expected TooManyEvaluationsException for QR");
+    }
+}
+```
+

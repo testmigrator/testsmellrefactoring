@@ -1,0 +1,24 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import static org.junit.Assert.assertEquals;
+import org.junit.Test;
+
+public class DocumentTest {
+
+    @Test
+    public void testClonesDeclarations() {
+        // Arrange
+        Document doc = Jsoup.parse("<!DOCTYPE html><html><head><title>Doctype test");
+        Document clone = doc.clone();
+
+        // Act & Assert
+        assertEquals("HTML content should be equal after cloning", doc.html(), clone.html());
+        assertEquals("Cloned document should have the correct HTML structure", 
+                     "<!doctype html><html><head><title>Doctype test</title></head><body></body></html>", 
+                     TextUtil.stripNewlines(clone.html()));
+    }
+}
+```
+

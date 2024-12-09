@@ -1,0 +1,50 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import static org.junit.Assert.*;
+import org.junit.Test;
+
+public class ElementTest {
+
+    @Test
+    public void testAppendAndOuterHtml() {
+        Element el = new Element("a");
+        el.append("<span>Hello</span>");
+        assertEquals("Element should contain the appended span", "<a><span>Hello</span></a>", el.outerHtml());
+    }
+
+    @Test
+    public void testSelectFirst() {
+        Element el = new Element("a").append("<span>Hello</span>");
+        Element span = el.selectFirst("span");
+        assertNotNull("Span element should be found", span);
+    }
+
+    @Test
+    public void testRootForSpan() {
+        Element el = new Element("a").append("<span>Hello</span>");
+        Element span = el.selectFirst("span");
+        Element root = span.root();
+        assertSame("Root of span should be the same as the original element", el, root);
+    }
+
+    @Test
+    public void testRootForDiv() {
+        Document doc = Jsoup.parse("<div><p>One<p>Two<p>Three");
+        Element div = doc.selectFirst("div");
+        Element root = div.root();
+        assertSame("Root of div should be the document", doc, root);
+    }
+
+    @Test
+    public void testOwnerDocument() {
+        Document doc = Jsoup.parse("<div><p>One<p>Two<p>Three");
+        Element div = doc.selectFirst("div");
+        Document ownerDoc = div.ownerDocument();
+        assertSame("Owner document of div should be the document", doc, ownerDoc);
+    }
+}
+```
+

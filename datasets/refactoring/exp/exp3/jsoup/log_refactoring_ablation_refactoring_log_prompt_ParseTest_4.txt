@@ -1,0 +1,43 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import static org.junit.jupiter.api.Assertions.*;
+
+class HtmlParserTest {
+
+    private Document document;
+
+    @TempDir
+    public Path tempDir;
+
+    @BeforeEach
+    void setUp() throws IOException {
+        File in = tempDir.resolve("yahoo-jp.html").toFile();
+        Files.copy(getClass().getResourceAsStream("/htmltests/yahoo-jp.html"), in.toPath());
+        assertTrue(in.exists(), "The file should exist");
+
+        document = Jsoup.parse(in, "UTF-8", "http://www.yahoo.co.jp/index.html");
+    }
+
+    @Test
+    void testYahooJp() {
+        assertEquals("Yahoo! JAPAN", document.title(), "The title should be 'Yahoo! JAPAN'");
+        
+        Element a = document.select("a[href=t/2322m2]").first();
+        assertNotNull(a, "The anchor element should not be null");
+
+        assertEquals("http://www.yahoo.co.jp/_ylh=X3oDMTB0NWxnaGxsBF9TAzIwNzcyOTYyNjUEdGlkAzEyBHRtcGwDZ2Ex/t/2322m2", 
+                     a.attr("abs:href"), 
+                     "The absolute href attribute should match the expected URL");
+        
+        assertEquals("全国、人気の駅ランキング", a.text(), "The text of the anchor element should be '全国、人気の駅ランキング'");
+    }
+}
+```
+

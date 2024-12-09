@@ -1,0 +1,33 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import static org.junit.Assert.assertEquals;
+
+public class NodeTest {
+
+    @Test
+    public void testRemoveTextContent() {
+        Document doc = Jsoup.parse("<p>One <span>two</span> three</p>");
+        Element p = doc.select("p").first();
+        p.childNode(0).remove();
+
+        String expectedText = "two three";
+        String actualText = p.text();
+        assertEquals("Text content should be 'two three' after removing the first child node", expectedText, actualText);
+    }
+
+    @Test
+    public void testRemoveHtmlContent() {
+        Document doc = Jsoup.parse("<p>One <span>two</span> three</p>");
+        Element p = doc.select("p").first();
+        p.childNode(0).remove();
+
+        String expectedHtml = "<span>two</span> three";
+        String actualHtml = TextUtil.stripNewlines(p.html());
+        assertEquals("HTML content should be '<span>two</span> three' after removing the first child node", expectedHtml, actualHtml);
+    }
+}
+```
+

@@ -1,0 +1,78 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class ElementTest {
+
+    @Test
+    public void testAppendDivToParent() {
+        String parentHtml = "<div class='a'></div>";
+        String childHtml = "<div class='b'></div><p>Two</p>";
+
+        Document parentDoc = Jsoup.parse(parentHtml);
+        Element parent = parentDoc.body();
+        Document childDoc = Jsoup.parse(childHtml);
+
+        Element div = childDoc.select("div").first();
+        Element appendedDiv = div.appendTo(parent);
+        assertEquals("Appended div should be the same as the original div", div, appendedDiv);
+    }
+
+    @Test
+    public void testAppendPToDiv() {
+        String parentHtml = "<div class='a'><div class='b'></div></div>";
+        String childHtml = "<p>Two</p>";
+
+        Document parentDoc = Jsoup.parse(parentHtml);
+        Element div = parentDoc.select("div.b").first();
+        Document childDoc = Jsoup.parse(childHtml);
+
+        Element p = childDoc.select("p").first();
+        Element appendedP = p.appendTo(div);
+        assertEquals("Appended paragraph should be the same as the original paragraph", p, appendedP);
+    }
+
+    @Test
+    public void testFinalHtmlStructureAfterAppending() {
+        String parentHtml = "<div class='a'></div>";
+        String childHtml = "<div class='b'></div><p>Two</p>";
+
+        Document parentDoc = Jsoup.parse(parentHtml);
+        Element parent = parentDoc.body();
+        Document childDoc = Jsoup.parse(childHtml);
+
+        Element div = childDoc.select("div").first();
+        Element p = childDoc.select("p").first();
+
+        div.appendTo(parent);
+        p.appendTo(div);
+
+        assertEquals("Final HTML structure after appending elements",
+                "<div class=\"a\"></div>\n<div class=\"b\">\n <p>Two</p>\n</div>",
+                parentDoc.body().html());
+    }
+
+    @Test
+    public void testChildDocumentEmptyAfterAppending() {
+        String parentHtml = "<div class='a'></div>";
+        String childHtml = "<div class='b'></div><p>Two</p>";
+
+        Document parentDoc = Jsoup.parse(parentHtml);
+        Element parent = parentDoc.body();
+        Document childDoc = Jsoup.parse(childHtml);
+
+        Element div = childDoc.select("div").first();
+        Element p = childDoc.select("p").first();
+
+        div.appendTo(parent);
+        p.appendTo(div);
+
+        assertEquals("Child document should be empty after appending elements", "", childDoc.body().html());
+    }
+}
+```
+

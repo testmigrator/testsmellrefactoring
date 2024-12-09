@@ -1,0 +1,10 @@
+asserts result: 
+ Yes
+
+The refactored tests maintain the same functionality as the original test. The original test `testIterator` is split into two separate tests in the refactored version:
+
+1. `testIterator_HasNext()` checks if the iterator has elements, which is equivalent to the first part of the original test where `assertTrue(iterator.hasNext());` is called.
+2. `testIterator_ElementsMatch()` verifies that the elements in the iterator match the expected data, including the number of elements, which is equivalent to the second part of the original test where the loop iterates over the attributes and asserts their key-value pairs.
+
+Both refactored tests together cover all the assertions and logic present in the original test, ensuring that the functionality remains consistent.
+

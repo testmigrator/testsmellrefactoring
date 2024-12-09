@@ -1,0 +1,39 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+
+public class DocumentTest {
+
+    private static final String echoUrl = "http://example.com/echo";
+    private static final String CONTENT_TYPE = "Content-Type";
+    private static final String MULTIPART_FORM_DATA = "multipart/form-data";
+    private static final String browserUa = "Mozilla/5.0";
+
+    @Test
+    public void shouldPostMultipartFormDataWithoutInputStream() {
+        try {
+            Document doc = Jsoup.connect(echoUrl)
+                    .header(CONTENT_TYPE, MULTIPART_FORM_DATA)
+                    .userAgent(browserUa)
+                    .data("uname", "Jsoup", "uname", "Jonathan", "百", "度一下")
+                    .post();
+
+            assertTrue(ihVal(CONTENT_TYPE, doc).contains(MULTIPART_FORM_DATA), "Content-Type should contain multipart/form-data");
+            assertTrue(ihVal(CONTENT_TYPE, doc).contains("boundary"), "Content-Type should contain boundary");
+            assertEquals("Jsoup, Jonathan", ihVal("uname", doc), "uname should be Jsoup, Jonathan");
+            assertEquals("度一下", ihVal("百", doc), "百 should be 度一下");
+        } catch (IOException e) {
+            fail("IOException should not be thrown: " + e.getMessage());
+        }
+    }
+
+    private String ihVal(String key, Document doc) {
+        // Assuming this method extracts the value from the document based on the key
+        return doc.select("meta[name=" + key + "]").attr("content");
+    }
+}
+```
+

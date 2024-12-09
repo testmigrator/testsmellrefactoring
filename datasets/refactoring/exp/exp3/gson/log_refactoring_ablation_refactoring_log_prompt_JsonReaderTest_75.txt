@@ -1,0 +1,27 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.MalformedJsonException;
+import org.junit.jupiter.api.Test;
+
+public class JsonReaderTest {
+
+    @Test
+    public void testStrictUnquotedNamesThrowsMalformedJsonException() {
+        JsonReader reader = new JsonReader(new java.io.StringReader("{a:true}"));
+        reader.beginObject();
+
+        MalformedJsonException exception = assertThrows(MalformedJsonException.class, () -> reader.nextName());
+        assertEquals("line 1 column 3 path $.", exception.getMessage());
+    }
+
+    private void assertEquals(String expected, String actual) {
+        if (!expected.equals(actual)) {
+            throw new AssertionError("Expected: " + expected + ", but was: " + actual);
+        }
+    }
+}
+```
+

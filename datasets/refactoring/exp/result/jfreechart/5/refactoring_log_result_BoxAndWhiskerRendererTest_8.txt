@@ -1,0 +1,55 @@
+Input Parameters:
+Test Code:
+ @Test
+    public void testGetLegendItemSeriesIndex() {
+        DefaultCategoryDataset<String, String> dataset0 = new DefaultCategoryDataset<>();
+        dataset0.addValue(21.0, "R1", "C1");
+        dataset0.addValue(22.0, "R2", "C1");
+        DefaultCategoryDataset<String, String> dataset1 = new DefaultCategoryDataset<>();
+        dataset1.addValue(23.0, "R3", "C1");
+        dataset1.addValue(24.0, "R4", "C1");
+        dataset1.addValue(25.0, "R5", "C1");
+        BoxAndWhiskerRenderer r = new BoxAndWhiskerRenderer();
+        CategoryPlot<String, String> plot = new CategoryPlot<>(dataset0, new CategoryAxis("x"),
+                new NumberAxis("y"), r);
+        plot.setDataset(1, dataset1);
+        /*JFreeChart chart =*/ new JFreeChart(plot);
+        LegendItem li = r.getLegendItem(1, 2);
+        assertEquals("R5", li.getLabel());
+        assertEquals(1, li.getDatasetIndex());
+        assertEquals(2, li.getSeriesIndex());
+    }
+Context: /org/jfree/chart/renderer/category/BoxAndWhiskerRenderer
+Smell List: ['Assertion_Roulette', 'Magic_Number_Test']
+Smell Description List: ['Test Smell Type：Assertion Roulette\n\nFeature:\nA test method contains more than one assertion statement without an explanation/message (parameter in the assertion method).\n', 'Test Smell Type：Magic Number Test\n\nFeature:\nAn assertion method that contains a numeric literal as an argument.\n']
+Refactoring DSL: ['RefactorRule:\n  SmellType: Assertion Roulette\n  Description: Add descriptive messages to assert statements to improve readability and maintainability.\n  Steps:\n    - Step:\n        Description: "Add descriptive message to each assert statement(except assertThat, assertThrows)."\n        Action: AddMessageToAssert\n        Parameters:\n          MessagePattern: "{assertionMessage}"\n  Example:\n    Before: |\n      @Test\n      public void T() {\n        stmt\n        assert_1\n        ...\n        assert_n\n        stmt\'\n      }\n    After: |\n      @Test\n      public void T() {\n        stmt\n        assert_1(..., "Descriptive message for assert statement")\n        ...\n        assert_n(..., "Descriptive message for assert statement")\n        stmt\'\n      }\n    Variables:\n      assertionMessage: "Descriptive message for assert statement"\n', 'RefactorRule:\n  SmellType: Magic Number Test\n  Description: "Extract magic numbers and assign meaningful names to improve readability and maintainability."\n  Steps:\n    - Step:\n        Action: IdentifyMagicNumbers\n        Description: "Identify magic numbers in assertions"\n        Parameters:\n          TargetType: Method\n          SourcePattern: |\n            assertEquals({magicNumber}, {variable})\n    - Step:\n        Action: ExtractVariable\n        Description: "Extract magic number to a variable with meaningful name"\n        Parameters:\n          TargetType: Method\n          SourcePattern: |\n            assertEquals({magicNumber}, {variable})\n          ReplacementPattern: |\n            int {meaningfulName} = {magicNumber};\n            assertEquals({meaningfulName}, {variable})\n  Example:\n    Before: |\n      @Test\n      public void T() {\n          stmt\n          assertEquals(1, a)\n          stmt\'\n      }\n    After: |\n      @Test\n      public void T() {\n          int x = 1; // x: meaningful variable name\n          stmt\n          assertEquals(x, a)\n          stmt\'\n      }\n  Variables:\n    magicNumber: "1"\n    variable: "a"\n    meaningfulName: "x"\n']
+Checkpoints: ['[ ] All assert statements have been added with clear explanatory messages.\n', '[ ] All magic numbers in the test code have been extracted and assigned meaningful variable names.\n']
+
+Refactored Code: 
+ 
+@Test
+public void testGetLegendItemSeriesIndex() {
+    DefaultCategoryDataset<String, String> dataset0 = new DefaultCategoryDataset<>();
+    dataset0.addValue(21.0, "R1", "C1");
+    dataset0.addValue(22.0, "R2", "C1");
+    DefaultCategoryDataset<String, String> dataset1 = new DefaultCategoryDataset<>();
+    dataset1.addValue(23.0, "R3", "C1");
+    dataset1.addValue(24.0, "R4", "C1");
+    dataset1.addValue(25.0, "R5", "C1");
+    BoxAndWhiskerRenderer r = new BoxAndWhiskerRenderer();
+    CategoryPlot<String, String> plot = new CategoryPlot<>(dataset0, new CategoryAxis("x"),
+            new NumberAxis("y"), r);
+    plot.setDataset(1, dataset1);
+    /*JFreeChart chart =*/ new JFreeChart(plot);
+    LegendItem li = r.getLegendItem(1, 2);
+
+    String expectedLabel = "R5";
+    int expectedDatasetIndex = 1;
+    int expectedSeriesIndex = 2;
+
+    assertEquals(expectedLabel, li.getLabel(), "The label of the legend item should match the expected value.");
+    assertEquals(expectedDatasetIndex, li.getDatasetIndex(), "The dataset index of the legend item should match the expected value.");
+    assertEquals(expectedSeriesIndex, li.getSeriesIndex(), "The series index of the legend item should match the expected value.");
+}
+
+

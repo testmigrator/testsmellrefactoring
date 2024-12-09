@@ -1,0 +1,40 @@
+asserts result: 
+ ```java
+import org.apache.commons.cli.DefaultParser;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class DefaultParserTest {
+
+    @Test
+    public void testBuilderWithNoStripQuotes() {
+        // @formatter:off
+        DefaultParser parser = DefaultParser.builder()
+            .setStripLeadingAndTrailingQuotes(false)
+            .build();
+        // @formatter:on
+        assertEquals(DefaultParser.class, parser.getClass());
+    }
+
+    @Test
+    public void testBuilderWithNoPartialMatching() {
+        // @formatter:off
+        DefaultParser parser = DefaultParser.builder()
+            .setAllowPartialMatching(false)
+            .build();
+        // @formatter:on
+        assertEquals(DefaultParser.class, parser.getClass());
+    }
+
+    @Test
+    public void testBuilderWithNullDeprecatedHandler() {
+        // @formatter:off
+        DefaultParser parser = DefaultParser.builder()
+            .setDeprecatedHandler(null)
+            .build();
+        // @formatter:on
+        assertEquals(DefaultParser.class, parser.getClass());
+    }
+}
+```
+

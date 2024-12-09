@@ -1,0 +1,33 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.*;
+import static com.google.gson.stream.JsonToken.NUMBER;
+
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.Strictness;
+import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.io.StringReader;
+
+class JsonReaderTest {
+
+    @Test
+    public void testPeekLongMinValue_PeekReturnsNumber() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("[-9223372036854775808]"));
+        reader.setStrictness(Strictness.LENIENT);
+        reader.beginArray();
+        assertEquals(NUMBER, reader.peek(), "Expected peek to return NUMBER token");
+    }
+
+    @Test
+    public void testPeekLongMinValue_NextLongReturnsCorrectValue() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("[-9223372036854775808]"));
+        reader.setStrictness(Strictness.LENIENT);
+        reader.beginArray();
+        reader.peek(); // Ensure we are at the correct position
+        assertEquals(-9223372036854775808L, reader.nextLong(), "Expected nextLong to return -9223372036854775808L");
+    }
+}
+```
+

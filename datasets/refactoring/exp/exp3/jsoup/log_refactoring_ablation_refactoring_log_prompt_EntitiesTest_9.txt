@@ -1,0 +1,27 @@
+asserts result: 
+ ```java
+import org.jsoup.nodes.Entities;
+import org.jsoup.nodes.OutputSettings;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class EntitiesTest {
+
+    @Test
+    public void testEscapeCaseSensitive() {
+        String unescaped = "Ü ü & &";
+        String expectedEscaped = "&Uuml; &uuml; &amp; &amp;";
+        String actualEscaped = Entities.escape(unescaped, new OutputSettings().charset("ascii").escapeMode(Entities.EscapeMode.extended));
+        assertEquals("Escaping case sensitive characters should match expected output", expectedEscaped, actualEscaped);
+    }
+
+    @Test
+    public void testUnescapeCaseSensitive() {
+        String escaped = "&Uuml; &uuml; &amp; &AMP";
+        String expectedUnescaped = "Ü ü & &";
+        String actualUnescaped = Entities.unescape(escaped);
+        assertEquals("Unescaping case sensitive characters should match expected output", expectedUnescaped, actualUnescaped);
+    }
+}
+```
+

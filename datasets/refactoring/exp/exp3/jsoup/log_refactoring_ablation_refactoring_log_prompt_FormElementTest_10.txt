@@ -1,0 +1,59 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.form.FormElement;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class FormElementTest {
+
+    private static final String HTML = "<html>\n" +
+            "  <body> \n" +
+            "      <form action=\"/hello.php\" method=\"post\">\n" +
+            "      User:<input type=\"text\" name=\"user\" />\n" +
+            "      Password:<input type=\"password\" name=\"pass\" />\n" +
+            "      <input type=\"submit\" name=\"login\" value=\"login\" />\n" +
+            "   </form>\n" +
+            "  </body>\n" +
+            "</html>  ";
+
+    private static final int EXPECTED_FORM_DATA_SIZE = 2;
+
+    @Test
+    public void shouldRemovePasswordInputElement() {
+        Document doc = Jsoup.parse(HTML);
+        FormElement form = (FormElement) doc.selectFirst("form");
+        Element pass = form.selectFirst("input[name=pass]");
+        pass.remove();
+
+        Element removedPass = doc.selectFirst("input[name=pass]");
+        assertEquals("Password input element should be removed", null, removedPass);
+    }
+
+    @Test
+    public void shouldVerifyFormDataSizeAfterRemovingElement() {
+        Document doc = Jsoup.parse(HTML);
+        FormElement form = (FormElement) doc.selectFirst("form");
+        Element pass = form.selectFirst("input[name=pass]");
+        pass.remove();
+
+        List<Connection.KeyVal> formData = form.formData();
+        assertEquals("Form data size should be " + EXPECTED_FORM_DATA_SIZE, EXPECTED_FORM_DATA_SIZE, formData.size());
+    }
+
+    @Test
+    public void shouldVerifyRemainingFormKeysAfterRemovingElement() {
+        Document doc = Jsoup.parse(HTML);
+        FormElement form = (FormElement) doc.selectFirst("form");
+        Element pass = form.selectFirst("input[name=pass]");
+        pass.remove();
+
+        List<Connection.KeyVal> formData = form.formData();
+        assertEquals("First key should be 'user'", "user", formData.get(0).key());
+        assertEquals("Second key should be 'login'", "login", formData.get(1).key());
+    }
+}
+```
+

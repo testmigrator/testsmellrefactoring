@@ -1,0 +1,53 @@
+asserts result: 
+ ```java
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.XmlDeclaration;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class DocumentTest {
+
+    private static final String CHARSET_UTF8 = "UTF-8";
+    private static final String XML_VERSION = "1.0";
+
+    @Test
+    public void testMetaCharsetUpdateXmlNoCharset() {
+        // Arrange
+        Document doc = createXmlDocument(XML_VERSION, "none", false);
+        doc.updateMetaCharsetElement(true);
+        doc.charset(Charset.forName(CHARSET_UTF8));
+
+        // Act
+        String actualXmlString = doc.toString();
+        XmlDeclaration selectedNode = (XmlDeclaration) doc.childNode(0);
+
+        // Assert
+        String expectedXmlString = "<?xml version=\"" + XML_VERSION + "\" encoding=\"" + CHARSET_UTF8 + "\"?>\n" +
+                "<root>\n" +
+                " node\n" +
+                "</root>";
+        assertEquals("XML string does not match expected output", expectedXmlString, actualXmlString);
+        assertEquals("Encoding attribute does not match expected value", CHARSET_UTF8, selectedNode.attr("encoding"));
+    }
+
+    @Test
+    public void testMetaCharsetUpdateXmlNoCharsetEncodingAttribute() {
+        // Arrange
+        Document doc = createXmlDocument(XML_VERSION, "none", false);
+        doc.updateMetaCharsetElement(true);
+        doc.charset(Charset.forName(CHARSET_UTF8));
+
+        // Act
+        XmlDeclaration selectedNode = (XmlDeclaration) doc.childNode(0);
+
+        // Assert
+        assertEquals("Encoding attribute does not match expected value", CHARSET_UTF8, selectedNode.attr("encoding"));
+    }
+
+    private Document createXmlDocument(String version, String charset, boolean standalone) {
+        // Implementation of createXmlDocument method
+        return new Document("", version, charset, standalone);
+    }
+}
+```
+

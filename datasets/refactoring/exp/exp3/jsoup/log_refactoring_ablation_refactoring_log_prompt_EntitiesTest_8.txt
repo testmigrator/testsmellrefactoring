@@ -1,0 +1,27 @@
+asserts result: 
+ ```java
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class EntitiesTest {
+
+    @Test
+    public void testStrictUnescape() {
+        // for attributes, enforce strict unescaping (must look like &#xxx; , not just &#xxx)
+        String text = "Hello &amp= &amp;";
+        
+        // Test strict unescaping
+        assertEquals("Strict unescaping should convert &amp= to &amp= and &amp; to &", 
+                     "Hello &amp= &", Entities.unescape(text, true));
+        
+        // Test default unescaping
+        assertEquals("Default unescaping should convert &amp= to &= and &amp; to &", 
+                     "Hello &= &", Entities.unescape(text));
+        
+        // Test non-strict unescaping
+        assertEquals("Non-strict unescaping should convert &amp= to &= and &amp; to &", 
+                     "Hello &= &", Entities.unescape(text, false));
+    }
+}
+```
+

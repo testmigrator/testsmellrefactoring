@@ -1,0 +1,28 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.junit.Test;
+import static org.junit.Assert.*;
+
+public class DocumentTest {
+
+    @Test
+    public void testMetaCharsetUpdateDisabled() {
+        // Arrange
+        final Document docDisabled = Document.createShell("");
+        final String htmlNoCharset = "<html>\n" +
+                " <head></head>\n" +
+                " <body></body>\n" +
+                "</html>";
+
+        // Act
+        Document parsedDoc = Jsoup.parse(htmlNoCharset);
+
+        // Assert
+        assertEquals("HTML content should match the expected structure", htmlNoCharset, parsedDoc.outerHtml());
+        assertNull("There should be no meta charset tag in the document", docDisabled.select("meta[charset]").first());
+    }
+}
+```
+

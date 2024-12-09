@@ -1,0 +1,40 @@
+Input Parameters:
+Test Code:
+ @Test
+  public void testViewUpdates() {
+    JsonArray a = new JsonArray();
+    List<JsonElement> list = a.asList();
+
+    a.add(1);
+    assertThat(list).hasSize(1);
+    assertThat(list.get(0)).isEqualTo(new JsonPrimitive(1));
+
+    list.add(new JsonPrimitive(2));
+    assertThat(a).hasSize(2);
+    assertThat(a.get(1)).isEqualTo(new JsonPrimitive(2));
+  }
+Context: 
+Smell List: ['Assertion_Roulette', 'Magic_Number_Test']
+Smell Description List: ['Test Smell Type：Assertion Roulette\n\nFeature:\nA test method contains more than one assertion statement without an explanation/message (parameter in the assertion method).\n', 'Test Smell Type：Magic Number Test\n\nFeature:\nAn assertion method that contains a numeric literal as an argument.\n']
+Refactoring DSL: ['RefactorRule:\n  SmellType: Assertion Roulette\n  Description: Add descriptive messages to assert statements to improve readability and maintainability.\n  Steps:\n    - Step:\n        Description: "Add descriptive message to each assert statement(except assertThat, assertThrows)."\n        Action: AddMessageToAssert\n        Parameters:\n          MessagePattern: "{assertionMessage}"\n  Example:\n    Before: |\n      @Test\n      public void T() {\n        stmt\n        assert_1\n        ...\n        assert_n\n        stmt\'\n      }\n    After: |\n      @Test\n      public void T() {\n        stmt\n        assert_1(..., "Descriptive message for assert statement")\n        ...\n        assert_n(..., "Descriptive message for assert statement")\n        stmt\'\n      }\n    Variables:\n      assertionMessage: "Descriptive message for assert statement"\n', 'RefactorRule:\n  SmellType: Magic Number Test\n  Description: "Extract magic numbers and assign meaningful names to improve readability and maintainability."\n  Steps:\n    - Step:\n        Action: IdentifyMagicNumbers\n        Description: "Identify magic numbers in assertions"\n        Parameters:\n          TargetType: Method\n          SourcePattern: |\n            assertEquals({magicNumber}, {variable})\n    - Step:\n        Action: ExtractVariable\n        Description: "Extract magic number to a variable with meaningful name"\n        Parameters:\n          TargetType: Method\n          SourcePattern: |\n            assertEquals({magicNumber}, {variable})\n          ReplacementPattern: |\n            int {meaningfulName} = {magicNumber};\n            assertEquals({meaningfulName}, {variable})\n  Example:\n    Before: |\n      @Test\n      public void T() {\n          stmt\n          assertEquals(1, a)\n          stmt\'\n      }\n    After: |\n      @Test\n      public void T() {\n          int x = 1; // x: meaningful variable name\n          stmt\n          assertEquals(x, a)\n          stmt\'\n      }\n  Variables:\n    magicNumber: "1"\n    variable: "a"\n    meaningfulName: "x"\n']
+Checkpoints: ['[ ] All assert statements have been added with clear explanatory messages.\n', '[ ] All magic numbers in the test code have been extracted and assigned meaningful variable names.\n']
+
+Refactored Code: 
+ 
+@Test
+public void testViewUpdates() {
+    JsonArray jsonArray = new JsonArray();
+    List<JsonElement> list = jsonArray.asList();
+
+    int initialElement = 1;
+    jsonArray.add(initialElement);
+    assertThat(list).hasSize(1, "List should have one element after adding the first element");
+    assertThat(list.get(0)).isEqualTo(new JsonPrimitive(initialElement), "First element in the list should match the added element");
+
+    int secondElement = 2;
+    list.add(new JsonPrimitive(secondElement));
+    assertThat(jsonArray).hasSize(2, "JsonArray should have two elements after adding the second element");
+    assertThat(jsonArray.get(1)).isEqualTo(new JsonPrimitive(secondElement), "Second element in the JsonArray should match the added element");
+}
+
+

@@ -1,0 +1,35 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Tag;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class NodeTest {
+
+    @Test
+    public void testInsertBeforeSingleElement() {
+        Document doc = Jsoup.parse("<p>One <b>two</b> three</p>");
+        Element newNode = new Element(Tag.valueOf("em"), "");
+        newNode.appendText("four");
+
+        doc.select("b").first().before(newNode);
+
+        String expectedHtml = "<p>One <em>four</em><b>two</b> three</p>";
+        assertEquals("Check if the new element is inserted before the <b> tag", expectedHtml, doc.body().html());
+    }
+
+    @Test
+    public void testInsertBeforeMultipleElements() {
+        Document doc = Jsoup.parse("<p>One <em>four</em><b>two</b> three</p>");
+
+        doc.select("b").first().before("<i>five</i>");
+
+        String expectedHtml = "<p>One <em>four</em><i>five</i><b>two</b> three</p>";
+        assertEquals("Check if the new HTML is inserted before the <b> tag", expectedHtml, doc.body().html());
+    }
+}
+```
+

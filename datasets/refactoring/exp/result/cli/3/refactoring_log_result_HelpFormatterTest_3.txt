@@ -1,0 +1,49 @@
+Input Parameters:
+Test Code:
+ @Test
+    public void testDefaultArgName() {
+        final Option option = Option.builder("f").hasArg().required(true).build();
+
+        final Options options = new Options();
+        options.addOption(option);
+
+        final StringWriter out = new StringWriter();
+
+        final HelpFormatter formatter = new HelpFormatter();
+        formatter.setArgName("argument");
+        formatter.printUsage(new PrintWriter(out), 80, "app", options);
+
+        assertEquals("usage: app -f <argument>" + EOL, out.toString());
+    }
+Context: /org/apache/commons/cli/HelpFormatter
+Smell List: ['Sensitive_Equality', 'Eager_Test']
+Smell Description List: ['Test Smell Type：Sensitive Equality\n\nFeature:\nA test method invokes the toString() method of an object.\n', 'Test Smell Type：Eager Test\n\nFeature:\nA test method contains multiple calls to multiple production methods.\n']
+Refactoring DSL: ['RefactorRule:\n  SmellType: Sensitive Equality\n  Description: "Avoid using the toString() method for comparing objects in assertions."\n  Steps:\n    - Step:\n        Description: "Extract the value returned by toString() into a separate variable for comparison. Ensure toString() does not directly appear in assertions."\n        Action: ReplaceMethodCall\n        Parameters:\n          TargetPattern: |\n            assertEquals({object1}.toString(), {expectedString});\n          ReplacementPattern: |\n            String actualValue = {object1}.toString();\n            assertEquals({expectedString}, actualValue);\n  Example:\n    Before: |\n      @Test\n      public void T() {\n        Object object1 = new Object();\n        assertEquals(object1.toString(), "expectedString");\n      }\n    After: |\n      @Test\n      public void T() {\n        Object object1 = new Object();\n        String actualValue = object1.toString();\n        assertEquals("expectedString", actualValue);\n      }\n', 'RefactorRule:\n  SmellType: Eager Test\n  Description: "Refactor test methods to group related assertions logically and extract reusable setup logic into private methods."\n  Steps:\n    - Step1:\n        Description: "Extract shared setup logic into a reusable, private method and ensure it is used across all relevant tests."\n        Action: ExtractSetupMethod\n        Parameters:\n          Condition: "If multiple tests share the same setup logic."\n          MethodNamePattern: setupTest{OriginalMethodName}\n    - Step2:\n        Description: "Group related assertions into cohesive sub-tests while retaining necessary setup logic."\n        Action: GroupAssertions\n        Parameters:\n          GroupBy: LogicalConcern\n    - Step3:\n        Description: "Create new test methods for each cohesive group of assertions and ensure readability."\n        Action: CreateTestMethods\n        Parameters:\n          IncludeSetup: True\n          NamePattern: test{OriginalMethodName}_{Concern}\n  Example:\n    Before: |\n      @Test\n      public void testExample() {\n          setup();\n          assertEquals(1, methodA());\n          assertTrue(methodB());\n      }\n    After: |\n      private void setupTestExample() {\n          setup();\n      }\n\n      @Test\n      public void testExample_MethodA() {\n          setupTestExample();\n          assertEquals(1, methodA());\n      }\n\n      @Test\n      public void testExample_MethodB() {\n          setupTestExample();\n          assertTrue(methodB());\n      }\n  Variables:\n    OriginalMethodName: The name of the original test method.\n    LogicalConcern: The logical aspect tested (e.g., a specific API, validation, or behavior).\n']
+Checkpoints: ['[ ] All instances of the ‘Sensitive Equality’ code smell have been refactored by directly comparing objects instead of using the toString() method for comparisons in tests, to enhance stability and avoid future failures due to changes in the toString() method’s implementation.\n', '[ ] All eager tests have been split into separate tests, each focusing on verifying a single API.\n']
+
+Refactored Code: 
+ 
+@Test
+public void testDefaultArgName_UsageFormat() {
+    Options options = setupTestDefaultArgNameOptions();
+    String usage = generateUsageMessage(options);
+
+    assertEquals("usage: app -f <argument>" + EOL, usage);
+}
+
+private Options setupTestDefaultArgNameOptions() {
+    final Option option = Option.builder("f").hasArg().required(true).build();
+    final Options options = new Options();
+    options.addOption(option);
+    return options;
+}
+
+private String generateUsageMessage(Options options) {
+    final StringWriter out = new StringWriter();
+    final HelpFormatter formatter = new HelpFormatter();
+    formatter.setArgName("argument");
+    formatter.printUsage(new PrintWriter(out), 80, "app", options);
+    return out.toString();
+}
+
+

@@ -1,0 +1,51 @@
+asserts result: 
+ ```java
+import org.apache.commons.math3.linear.ArrayRealVector;
+import org.apache.commons.math3.linear.MatrixUtils;
+import org.apache.commons.math3.linear.RealMatrix;
+import org.apache.commons.math3.linear.RealVector;
+import org.apache.commons.math3.optim.nonlinear.vector.jacobian.LeastSquaresBuilder;
+import org.apache.commons.math3.optim.nonlinear.vector.jacobian.MultivariateJacobianFunction;
+import org.apache.commons.math3.util.Precision;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
+
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+public class CovarianceTest {
+
+    @Test
+    public void testComputeCovariance() {
+        // Setup
+        RealVector point = new ArrayRealVector(2);
+        Evaluation evaluation = new LeastSquaresBuilder()
+                .model(new MultivariateJacobianFunction() {
+                    @Override
+                    public Pair<RealVector, RealMatrix> value(RealVector point) {
+                        return new Pair<>(
+                                new ArrayRealVector(2),
+                                MatrixUtils.createRealDiagonalMatrix(new double[]{1, 1e-2})
+                        );
+                    }
+                })
+                .weight(MatrixUtils.createRealDiagonalMatrix(new double[]{1, 1}))
+                .target(new ArrayRealVector(2))
+                .build()
+                .evaluate(point);
+
+        // Action
+        RealMatrix covariance = evaluation.getCovariances(JdkMath.nextAfter(1e-4, 0.0));
+        assertArrayEquals(
+                MatrixUtils.createRealMatrix(new double[][]{{1, 0}, {0, 1e4}}).getData(),
+                covariance.getData(),
+                Precision.EPSILON
+        );
+
+        // Singularity fail
+        Executable singularityCheck = () -> evaluation.getCovariances(JdkMath.nextAfter(1e-4, 1.0));
+        assertThrows(SingularMatrixException.class, singularityCheck);
+    }
+}
+```
+

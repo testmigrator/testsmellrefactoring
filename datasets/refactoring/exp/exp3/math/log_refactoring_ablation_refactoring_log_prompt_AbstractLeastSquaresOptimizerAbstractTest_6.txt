@@ -1,0 +1,23 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import org.junit.jupiter.api.Test;
+
+public class LinearProblemOptimizerTest {
+
+    @Test
+    public void testNonInvertible() {
+        LinearProblem problem = new LinearProblem(new double[][]{
+            {1, 2, -3},
+            {2, 1, 3},
+            {-3, 0, -9}
+        }, new double[]{1, 1, 1});
+
+        assertThrows(ConvergenceException.class, () -> {
+            optimizer.optimize(problem.getBuilder().build());
+        });
+    }
+}
+```
+

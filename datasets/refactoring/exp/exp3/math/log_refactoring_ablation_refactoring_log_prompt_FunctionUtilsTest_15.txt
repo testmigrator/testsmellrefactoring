@@ -1,0 +1,95 @@
+asserts result: 
+ ```java
+import org.apache.commons.math4.legacy.analysis.FunctionUtils;
+import org.apache.commons.math4.legacy.analysis.MultivariateDifferentiableFunction;
+import org.apache.commons.math4.legacy.analysis.MultivariateFunction;
+import org.apache.commons.math4.legacy.analysis.differentiation.DerivativeStructure;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIf;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class MultivariateFunctionTest {
+
+    private static final double A = 1.5;
+    private static final double B = 0.5;
+    private static final double C = 0.25;
+    private static final double DELTA = 1.0e-15;
+
+    @EnabledIf("isValidRange")
+    @Test
+    public void testValue() {
+        testFunction((f, x, y) -> assertEquals(A * x * x + B * y * y + C * x * y, f.value(new double[]{x, y}), DELTA));
+    }
+
+    @EnabledIf("isValidRange")
+    @Test
+    public void testDfdx() {
+        testFunction((dfdx, x, y) -> assertEquals(2 * A * x + C * y, dfdx.value(new double[]{x, y}), DELTA));
+    }
+
+    @EnabledIf("isValidRange")
+    @Test
+    public void testDfdy() {
+        testFunction((dfdy, x, y) -> assertEquals(2 * B * y + C * x, dfdy.value(new double[]{x, y}), DELTA));
+    }
+
+    @EnabledIf("isValidRange")
+    @Test
+    public void testD2fdx2() {
+        testFunction((d2fdx2, x, y) -> assertEquals(2 * A, d2fdx2.value(new double[]{x, y}), DELTA));
+    }
+
+    @EnabledIf("isValidRange")
+    @Test
+    public void testD2fdy2() {
+        testFunction((d2fdy2, x, y) -> assertEquals(2 * B, d2fdy2.value(new double[]{x, y}), DELTA));
+    }
+
+    @EnabledIf("isValidRange")
+    @Test
+    public void testD2fdxdy() {
+        testFunction((d2fdxdy, x, y) -> assertEquals(C, d2fdxdy.value(new double[]{x, y}), DELTA));
+    }
+
+    private void testFunction(FunctionTester tester) {
+        for (double x = -1.0; x < 1; x += 0.01) {
+            for (double y = -1.0; y < 1; y += 0.01) {
+                tester.test(x, y);
+            }
+        }
+    }
+
+    private interface FunctionTester {
+        void test(double x, double y);
+    }
+
+    private boolean isValidRange() {
+        return true; // This can be replaced with actual range validation logic if needed
+    }
+
+    private MultivariateDifferentiableFunction createMdf() {
+        return new MultivariateDifferentiableFunction() {
+            @Override
+            public double value(double[] point) {
+                return A * point[0] * point[0] + B * point[1] * point[1] + C * point[0] * point[1];
+            }
+
+            @Override
+            public DerivativeStructure value(DerivativeStructure[] point) {
+                DerivativeStructure x = point[0];
+                DerivativeStructure y = point[1];
+                DerivativeStructure x2 = x.multiply(x);
+                DerivativeStructure y2 = y.multiply(y);
+                DerivativeStructure xy = x.multiply(y);
+                return x2.multiply(A).add(y2.multiply(B)).add(xy.multiply(C));
+            }
+        };
+    }
+
+    private MultivariateFunction getFunction(MultivariateDifferentiableFunction mdf, int[] order) {
+        return FunctionUtils.derivative(mdf, order);
+    }
+}
+```
+

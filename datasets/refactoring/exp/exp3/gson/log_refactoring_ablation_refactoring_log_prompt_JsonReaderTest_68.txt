@@ -1,0 +1,37 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.MalformedJsonException;
+import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.io.StringReader;
+
+public class JsonReaderTest {
+
+    @Test
+    public void testStrictNameValueSeparatorWithEqualSign() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("{\"a\"=true}"));
+        reader.beginObject();
+        assertThat(reader.nextName(), equalTo("a"));
+        var e = assertThrows(MalformedJsonException.class, () -> reader.nextBoolean(),
+                "Expected MalformedJsonException to be thrown for '=' separator");
+        assertThat(e.getMessage(), equalTo("Expected name but was '=' at line 1 column 6 path $.a"));
+    }
+
+    @Test
+    public void testStrictNameValueSeparatorWithDoubleArrow() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("{\"a\"=>true}"));
+        reader.beginObject();
+        assertThat(reader.nextName(), equalTo("a"));
+        var e = assertThrows(MalformedJsonException.class, () -> reader.nextBoolean(),
+                "Expected MalformedJsonException to be thrown for '=>' separator");
+        assertThat(e.getMessage(), equalTo("Expected name but was '=>' at line 1 column 6 path $.a"));
+    }
+}
+```
+

@@ -1,0 +1,10 @@
+asserts result: 
+ yes
+
+The original test and the refactored tests maintain the same functionality. The refactored version splits the original test into two separate methods, each focusing on a specific aspect of the test:
+
+1. `testEqualsHashCodeIgnoringOrder_KeySetOrder` checks the order of the key sets for objects `a` and `b`.
+2. `testEqualsHashCodeIgnoringOrder_EqualsAndHashCode` checks the equality and hash code of objects `a` and `b`.
+
+Both aspects are covered in the original test, and the refactored version ensures that these checks are still performed, maintaining the overall functionality.
+

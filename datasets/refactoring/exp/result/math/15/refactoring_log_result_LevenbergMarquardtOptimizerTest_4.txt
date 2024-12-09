@@ -1,0 +1,57 @@
+Input Parameters:
+Test Code:
+ @Test
+    public void testEvaluationCount() {
+        //setup
+        LeastSquaresProblem lsp = new LinearProblem(new double[][] {{1}}, new double[] {1})
+                .getBuilder()
+                .checker(new ConvergenceChecker<Evaluation>() {
+                    @Override
+                    public boolean converged(int iteration, Evaluation previous, Evaluation current) {
+                        return true;
+                    }
+                })
+                .build();
+
+        //action
+        Optimum optimum = optimizer.optimize(lsp);
+
+        //verify
+        //check iterations and evaluations are not switched.
+        Assert.assertEquals(1, optimum.getIterations());
+        Assert.assertEquals(2, optimum.getEvaluations());
+    }
+Context: /org/apache/commons/math4/legacy/fitting/leastsquares/LevenbergMarquardtOptimizer
+Smell List: ['Assertion_Roulette', 'Magic_Number_Test']
+Smell Description List: ['Test Smell Type：Assertion Roulette\n\nFeature:\nA test method contains more than one assertion statement without an explanation/message (parameter in the assertion method).\n', 'Test Smell Type：Magic Number Test\n\nFeature:\nAn assertion method that contains a numeric literal as an argument.\n']
+Refactoring DSL: ['RefactorRule:\n  SmellType: Assertion Roulette\n  Description: Add descriptive messages to assert statements to improve readability and maintainability.\n  Steps:\n    - Step:\n        Description: "Add descriptive message to each assert statement(except assertThat, assertThrows)."\n        Action: AddMessageToAssert\n        Parameters:\n          MessagePattern: "{assertionMessage}"\n  Example:\n    Before: |\n      @Test\n      public void T() {\n        stmt\n        assert_1\n        ...\n        assert_n\n        stmt\'\n      }\n    After: |\n      @Test\n      public void T() {\n        stmt\n        assert_1(..., "Descriptive message for assert statement")\n        ...\n        assert_n(..., "Descriptive message for assert statement")\n        stmt\'\n      }\n    Variables:\n      assertionMessage: "Descriptive message for assert statement"\n', 'RefactorRule:\n  SmellType: Magic Number Test\n  Description: "Extract magic numbers and assign meaningful names to improve readability and maintainability."\n  Steps:\n    - Step:\n        Action: IdentifyMagicNumbers\n        Description: "Identify magic numbers in assertions"\n        Parameters:\n          TargetType: Method\n          SourcePattern: |\n            assertEquals({magicNumber}, {variable})\n    - Step:\n        Action: ExtractVariable\n        Description: "Extract magic number to a variable with meaningful name"\n        Parameters:\n          TargetType: Method\n          SourcePattern: |\n            assertEquals({magicNumber}, {variable})\n          ReplacementPattern: |\n            int {meaningfulName} = {magicNumber};\n            assertEquals({meaningfulName}, {variable})\n  Example:\n    Before: |\n      @Test\n      public void T() {\n          stmt\n          assertEquals(1, a)\n          stmt\'\n      }\n    After: |\n      @Test\n      public void T() {\n          int x = 1; // x: meaningful variable name\n          stmt\n          assertEquals(x, a)\n          stmt\'\n      }\n  Variables:\n    magicNumber: "1"\n    variable: "a"\n    meaningfulName: "x"\n']
+Checkpoints: ['[ ] All assert statements have been added with clear explanatory messages.\n', '[ ] All magic numbers in the test code have been extracted and assigned meaningful variable names.\n']
+
+Refactored Code: 
+ 
+@Test
+public void testEvaluationCount() {
+    //setup
+    int expectedIterations = 1;
+    int expectedEvaluations = 2;
+
+    LeastSquaresProblem lsp = new LinearProblem(new double[][] {{1}}, new double[] {1})
+            .getBuilder()
+            .checker(new ConvergenceChecker<Evaluation>() {
+                @Override
+                public boolean converged(int iteration, Evaluation previous, Evaluation current) {
+                    return true;
+                }
+            })
+            .build();
+
+    //action
+    Optimum optimum = optimizer.optimize(lsp);
+
+    //verify
+    //check iterations and evaluations are not switched.
+    Assert.assertEquals("Expected number of iterations", expectedIterations, optimum.getIterations());
+    Assert.assertEquals("Expected number of evaluations", expectedEvaluations, optimum.getEvaluations());
+}
+
+

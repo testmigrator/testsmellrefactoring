@@ -1,0 +1,22 @@
+asserts result: 
+ ```java
+import org.junit.Test;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertFalse;
+
+public class ArchiveUtilsTest {
+
+    @Test
+    public void testToAsciiBytes() {
+        final byte[] byteArray = ArchiveUtils.toAsciiBytes("SOCKET");
+        assertArrayEquals("Expected ASCII bytes for 'SOCKET'", new byte[] { (byte) 83, (byte) 79, (byte) 67, (byte) 75, (byte) 69, (byte) 84 }, byteArray);
+    }
+
+    @Test
+    public void testIsEqualWithNull() {
+        final byte[] byteArray = ArchiveUtils.toAsciiBytes("SOCKET");
+        assertFalse("Expected false when comparing unequal byte arrays", ArchiveUtils.isEqualWithNull(byteArray, 0, 46, byteArray, 63, 0));
+    }
+}
+```
+

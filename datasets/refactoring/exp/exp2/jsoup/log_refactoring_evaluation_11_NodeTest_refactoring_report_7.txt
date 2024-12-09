@@ -1,0 +1,5 @@
+asserts result: 
+ Yes
+
+The functionality between the original test and the refactored tests is consistent. The refactored version splits the original single test into two separate tests, each focusing on one of the links. The `setupHandleAbsOnFileUris` method is used to prepare the document, which is then used in both tests. The assertions in the refactored tests are equivalent to those in the original test, ensuring that the expected behavior is maintained.
+

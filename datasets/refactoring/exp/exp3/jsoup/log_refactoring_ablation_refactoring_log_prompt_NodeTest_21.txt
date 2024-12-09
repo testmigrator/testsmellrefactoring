@@ -1,0 +1,55 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Node;
+import org.jsoup.nodes.TextNode;
+import org.jsoup.nodes.TextUtil;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class NodeTest {
+
+    private static final String HTML = "<div id=1>Text 1 <p>One</p> Text 2 <p>Two<p>Three</div><div id=2>";
+    private static final int EXPECTED_CHILD_NODES_SIZE = 5;
+    private static final String UPDATED_TEXT = "Text 1 updated";
+    private static final String EXPECTED_DIV1_HTML = "<div id=\"1\">Text 1 <p>One</p> Text 2 <p>Two</p><p>Three</p></div>";
+    private static final String EXPECTED_DIV2_HTML = "<div id=\"2\">" + UPDATED_TEXT + "<p>One</p> Text 2 <p>Two</p><p>Three</p></div>";
+
+    @Test
+    public void testChildNodesCopySize() {
+        Document doc = Jsoup.parse(HTML);
+        Element div1 = doc.select("#1").first();
+        List<Node> divChildren = div1.childNodesCopy();
+        assertEquals("The number of child nodes should be 5", EXPECTED_CHILD_NODES_SIZE, divChildren.size());
+    }
+
+    @Test
+    public void testTextNodeModification() {
+        Document doc = Jsoup.parse(HTML);
+        Element div1 = doc.select("#1").first();
+        TextNode tn1 = (TextNode) div1.childNode(0);
+        assertEquals("The original text node should be 'Text 1 '", "Text 1 ", tn1.text());
+
+        List<Node> divChildren = div1.childNodesCopy();
+        TextNode tn2 = (TextNode) divChildren.get(0);
+        tn2.text(UPDATED_TEXT);
+        assertEquals("The original text node should remain unchanged", "Text 1 ", tn1.text());
+    }
+
+    @Test
+    public void testInsertChildren() {
+        Document doc = Jsoup.parse(HTML);
+        Element div1 = doc.select("#1").first();
+        Element div2 = doc.select("#2").first();
+        List<Node> divChildren = div1.childNodesCopy();
+        div2.insertChildren(-1, divChildren);
+
+        String expectedHtml = EXPECTED_DIV1_HTML + EXPECTED_DIV2_HTML;
+        String actualHtml = TextUtil.stripNewlines(doc.body().html());
+        assertEquals("The HTML should match the expected output", expectedHtml, actualHtml);
+    }
+}
+```
+

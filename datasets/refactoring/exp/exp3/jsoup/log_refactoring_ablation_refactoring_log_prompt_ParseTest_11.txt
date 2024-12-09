@@ -1,0 +1,45 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import static org.junit.jupiter.api.Assertions.*;
+
+class DocumentParserTest {
+
+    private File inputFile;
+
+    @TempDir
+    Path tempDir;
+
+    @BeforeEach
+    void setUp() throws IOException {
+        // Create a temporary file from the resource
+        Path resourcePath = getClass().getResource("/htmltests/lowercase-charset-test.html").toURI();
+        inputFile = tempDir.resolve("lowercase-charset-test.html").toFile();
+        Files.copy(resourcePath, inputFile.toPath());
+    }
+
+    @Test
+    void testLowercaseUtf8Charset() throws IOException {
+        // Check if the file exists
+        assertTrue(inputFile.exists(), "Input file does not exist");
+
+        Document doc = Jsoup.parse(inputFile, null);
+
+        Element form = doc.select("#form").first();
+        assertNotNull(form, "Form element not found");
+
+        int expectedChildCount = 2;
+        assertEquals(expectedChildCount, form.children().size(), "Form should have " + expectedChildCount + " children");
+
+        String expectedCharset = "UTF-8";
+        assertEquals(expectedCharset, doc.outputSettings().charset().name(), "Document charset should be " + expectedCharset);
+    }
+}
+```
+

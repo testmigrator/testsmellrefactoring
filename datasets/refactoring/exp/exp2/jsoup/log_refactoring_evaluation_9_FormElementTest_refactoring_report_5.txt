@@ -1,0 +1,5 @@
+asserts result: 
+ Yes
+
+The functionality between the original test and the refactored test is consistent. Both tests check that an `IllegalArgumentException` is thrown when attempting to submit a form without a base URI, and both verify that the exception message matches the expected message. The refactored version uses `assertThrows` to make the test more concise and readable, but the behavior and the checks remain the same.
+

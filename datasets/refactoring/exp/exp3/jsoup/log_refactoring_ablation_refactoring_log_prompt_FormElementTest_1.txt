@@ -1,0 +1,77 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class FormElementTest {
+
+    private static final String HTML = "<form id='1'><button id='1'></button><fieldset id='2'></fieldset><input id='3'><keygen id='4'><object id='5'></object><output id='6'></output><select id='7'><option></option></select><textarea id='8'></textarea><p id='9'></p></form>";
+
+    @Test
+    public void testButtonElementPresence() {
+        Document doc = Jsoup.parse(HTML);
+        FormElement form = (FormElement) doc.select("form").first();
+        assertEquals(1, form.elements().select("button").size());
+    }
+
+    @Test
+    public void testFieldSetElementPresence() {
+        Document doc = Jsoup.parse(HTML);
+        FormElement form = (FormElement) doc.select("form").first();
+        assertEquals(1, form.elements().select("fieldset").size());
+    }
+
+    @Test
+    public void testInputElementPresence() {
+        Document doc = Jsoup.parse(HTML);
+        FormElement form = (FormElement) doc.select("form").first();
+        assertEquals(1, form.elements().select("input").size());
+    }
+
+    @Test
+    public void testKeyGenElementPresence() {
+        Document doc = Jsoup.parse(HTML);
+        FormElement form = (FormElement) doc.select("form").first();
+        assertEquals(1, form.elements().select("keygen").size());
+    }
+
+    @Test
+    public void testObjectElementPresence() {
+        Document doc = Jsoup.parse(HTML);
+        FormElement form = (FormElement) doc.select("form").first();
+        assertEquals(1, form.elements().select("object").size());
+    }
+
+    @Test
+    public void testOutputElementPresence() {
+        Document doc = Jsoup.parse(HTML);
+        FormElement form = (FormElement) doc.select("form").first();
+        assertEquals(1, form.elements().select("output").size());
+    }
+
+    @Test
+    public void testSelectElementPresence() {
+        Document doc = Jsoup.parse(HTML);
+        FormElement form = (FormElement) doc.select("form").first();
+        assertEquals(1, form.elements().select("select").size());
+    }
+
+    @Test
+    public void testTextAreaElementPresence() {
+        Document doc = Jsoup.parse(HTML);
+        FormElement form = (FormElement) doc.select("form").first();
+        assertEquals(1, form.elements().select("textarea").size());
+    }
+
+    @Test
+    public void testTotalElementCount() {
+        Document doc = Jsoup.parse(HTML);
+        FormElement form = (FormElement) doc.select("form").first();
+        assertEquals(8, form.elements().size());
+    }
+}
+```
+

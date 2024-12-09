@@ -1,0 +1,10 @@
+asserts result: 
+ Yes
+
+The refactored tests maintain the same functionality as the original test. The original test has been split into two separate tests, each focusing on a specific aspect of the `testMetaCharsetUpdateXmlNoCharset` method:
+
+1. **testMetaCharsetUpdateXmlNoCharset_DocumentToString**: This test checks if the string representation of the document matches the expected XML with the UTF-8 charset.
+2. **testMetaCharsetUpdateXmlNoCharset_XmlDeclarationEncoding**: This test checks if the `encoding` attribute of the XML declaration is correctly set to UTF-8.
+
+Both tests use the `setupTestMetaCharsetUpdateXmlNoCharset` method to prepare the document, ensuring that the setup is consistent with the original test. The assertions in both refactored tests are equivalent to the assertions in the original test, thus maintaining functional consistency.
+

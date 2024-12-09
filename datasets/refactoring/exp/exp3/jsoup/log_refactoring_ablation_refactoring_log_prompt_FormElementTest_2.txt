@@ -1,0 +1,49 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.FormElement;
+import org.jsoup.Connection;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class FormElementTest {
+
+    private static final String HTML = "<form><input name='one' value='two'><select name='three'><option value='not'>" +
+            "<option value='four' selected><option value='five' selected><textarea name=six>seven</textarea>" +
+            "<input name='seven' type='radio' value='on' checked><input name='seven' type='radio' value='off'>" +
+            "<input name='eight' type='checkbox' checked><input name='nine' type='checkbox' value='unset'>" +
+            "<input name='ten' value='text' disabled>" +
+            "<input name='eleven' value='text' type='button'>" +
+            "</form>";
+
+    @Test
+    public void createsFormData() {
+        Document doc = Jsoup.parse(HTML);
+        FormElement form = (FormElement) doc.select("form").first();
+        List<Connection.KeyVal> data = form.formData();
+
+        int expectedSize = 6;
+        assertEquals("Form data size should be " + expectedSize, expectedSize, data.size());
+
+        Connection.KeyVal one = new Connection.KeyVal("one", "two");
+        assertEquals("Form data should contain 'one=two'", one, data.get(0));
+
+        Connection.KeyVal threeFour = new Connection.KeyVal("three", "four");
+        assertEquals("Form data should contain 'three=four'", threeFour, data.get(1));
+
+        Connection.KeyVal threeFive = new Connection.KeyVal("three", "five");
+        assertEquals("Form data should contain 'three=five'", threeFive, data.get(2));
+
+        Connection.KeyVal sixSeven = new Connection.KeyVal("six", "seven");
+        assertEquals("Form data should contain 'six=seven'", sixSeven, data.get(3));
+
+        Connection.KeyVal sevenOn = new Connection.KeyVal("seven", "on");
+        assertEquals("Form data should contain 'seven=on'", sevenOn, data.get(4));
+
+        Connection.KeyVal eightOn = new Connection.KeyVal("eight", "on");
+        assertEquals("Form data should contain 'eight=on'", eightOn, data.get(5));
+    }
+}
+```
+

@@ -1,0 +1,45 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
+import com.google.gson.stream.Strictness;
+
+import org.junit.jupiter.api.Test;
+
+public class JsonReaderTest {
+
+    @Test
+    public void testPeekLongMaxValue_PeekReturnsNumber() throws Exception {
+        JsonReader reader = new JsonReader(new StringReader("[9223372036854775807]"));
+        reader.setStrictness(Strictness.LENIENT);
+        reader.beginArray();
+        assertEquals(JsonToken.NUMBER, reader.peek(), "Expected peek to return NUMBER");
+    }
+
+    @Test
+    public void testPeekLongMaxValue_NextLongReturnsCorrectValue() throws Exception {
+        JsonReader reader = new JsonReader(new StringReader("[9223372036854775807]"));
+        reader.setStrictness(Strictness.LENIENT);
+        reader.beginArray();
+        reader.peek(); // Ensure the array has started and the value is ready
+        assertEquals(9223372036854775807L, reader.nextLong(), "Expected nextLong to return 9223372036854775807L");
+    }
+
+    @Test
+    public void testPeekLongMaxValue_IOExceptionHandling() {
+        JsonReader reader = new JsonReader(new StringReader("[9223372036854775807]"));
+        reader.setStrictness(Strictness.LENIENT);
+
+        assertThrows(IOException.class, () -> {
+            reader.beginArray();
+            reader.peek();
+            reader.nextLong();
+            reader.nextLong(); // This should throw an IOException as there are no more elements
+        }, "Expected IOException when calling nextLong after the last element");
+    }
+}
+```
+

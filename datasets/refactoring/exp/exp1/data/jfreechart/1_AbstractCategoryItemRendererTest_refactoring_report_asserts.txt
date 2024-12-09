@@ -1,0 +1,19 @@
+total tests: 4
+total asserts: 17
+assertNotSame(r1, r2, "r1 and r2 should not be the same object");
+assertSame(r1.getClass(), r2.getClass(), "r1 and r2 should be of the same class");
+assertEquals(r1, r2, "r1 and r2 should be equal");
+assertNotSame(r1, r2, "r1 and r2 should not be the same object");
+assertSame(r1.getClass(), r2.getClass(), "r1 and r2 should be of the same class");
+assertEquals(r1, r2, "r1 and r2 should be equal");
+assertNotSame(r1, r2, "r1 and r2 should be different instances");
+assertSame(r1.getClass(), r2.getClass(), "r1 and r2 should be of the same class");
+assertEquals(r1, r2, "r1 and r2 should be equal");
+assertNotSame(r1.getLegendItemLabelGenerator(), r2.getLegendItemLabelGenerator(), "Generators should be different instances after cloning");
+assertNotSame(r1, r2, "r1 and r2 should be different instances");
+assertSame(r1.getClass(), r2.getClass(), "r1 and r2 should be of the same class");
+assertEquals(r1, r2, "r1 and r2 should be equal");
+assertNotSame(r1.getLegendItemToolTipGenerator(), r2.getLegendItemToolTipGenerator(), "The legend item tool tip generators should be different instances");
+assertNotSame(r1, r2, "r1 and r2 should be different instances");
+assertSame(r1.getClass(), r2.getClass(), "r1 and r2 should be of the same class");
+assertEquals(r1, r2, "r1 and r2 should be equal");

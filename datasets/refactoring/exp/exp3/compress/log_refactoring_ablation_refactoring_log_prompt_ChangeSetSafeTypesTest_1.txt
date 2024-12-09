@@ -1,0 +1,81 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.io.TempDir;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class ArchiveTest {
+
+    @TempDir
+    Path tempDir;
+
+    @Test
+    public void testAddAlreadyExistingWithReplaceFalse() throws IOException {
+        final String archiverName = "zip";
+        final Path input = createArchive(archiverName);
+        final Path result = tempDir.resolve("test." + archiverName);
+        final Path file1 = tempDir.resolve("test.txt");
+
+        try (InputStream inputStream = Files.newInputStream(input);
+             ZipArchiveInputStream ais = createArchiveInputStream(archiverName, inputStream);
+             OutputStream outputStream = Files.newOutputStream(result);
+             ZipArchiveOutputStream out = createArchiveOutputStream(archiverName, outputStream);
+             InputStream csInputStream = Files.newInputStream(file1)) {
+
+            assertTrue(Files.exists(result), "Result file should exist before performing the test.");
+
+            final ChangeSet<ZipArchiveEntry> changeSet = createChangeSet();
+            final ZipArchiveEntry entry = new ZipArchiveEntry("testdata/test1.xml");
+            changeSet.add(entry, csInputStream, false);
+
+            final ChangeSetResults results = new ChangeSetPerformer<>(changeSet).perform(ais, out);
+
+            assertTrue(results.getAddedFromStream().contains("testdata/test1.xml"), "Expected 'testdata/test1.xml' to be added from stream.");
+            assertTrue(results.getAddedFromChangeSet().isEmpty(), "No entries should be added from change set.");
+            assertTrue(results.getDeleted().isEmpty(), "No entries should be deleted.");
+
+            checkArchiveContent(result, archiveList);
+        } catch (Exception e) {
+            fail("Unexpected exception occurred: " + e.getMessage());
+        }
+    }
+
+    private Path createArchive(String archiverName) throws IOException {
+        // Implementation to create the initial archive
+        return tempDir.resolve("initial." + archiverName);
+    }
+
+    private File getFile(String fileName) throws IOException {
+        // Implementation to create the file
+        File file = tempDir.resolve(fileName).toFile();
+        Files.write(file.toPath(), List.of("Test content"));
+        return file;
+    }
+
+    private ZipArchiveInputStream createArchiveInputStream(String archiverName, InputStream inputStream) throws IOException {
+        // Implementation to create the archive input stream
+        return new ZipArchiveInputStream(inputStream);
+    }
+
+    private ZipArchiveOutputStream createArchiveOutputStream(String archiverName, OutputStream outputStream) throws IOException {
+        // Implementation to create the archive output stream
+        return new ZipArchiveOutputStream(outputStream);
+    }
+
+    private ChangeSet<ZipArchiveEntry> createChangeSet() {
+        // Implementation to create the change set
+        return new ChangeSet<>();
+    }
+
+    private void checkArchiveContent(Path result, List<String> archiveList) throws IOException {
+        // Implementation to check the archive content
+    }
+}
+```
+

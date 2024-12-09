@@ -1,0 +1,17 @@
+asserts result: 
+ Yes
+
+The refactored tests maintain the same functionality as the original test. The original test checks the following:
+
+1. The initial HTML matches the outer HTML of the selected paragraph.
+2. The HTML remains unchanged when accessed from a different thread.
+3. The charset is correctly set to US-ASCII after the thread execution.
+4. The final HTML is correctly encoded in ASCII.
+
+The refactored tests achieve these same checks but split the process into two separate tests for better readability and modularity:
+
+- `testParseAndHtmlOnDifferentThreads_InitialHTML` checks that the initial HTML matches the expected value.
+- `testParseAndHtmlOnDifferentThreads_ThreadOutput` checks the thread execution, charset setting, and final ASCII-encoded HTML.
+
+Both sets of tests ensure that the document is correctly parsed, the thread executes without errors, and the final HTML is correctly encoded. Therefore, the functionality is consistent.
+

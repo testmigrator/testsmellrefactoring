@@ -1,0 +1,48 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class ElementTest {
+
+    @Test
+    public void testNextElementSiblingAfterInsertionInOriginalDocument() {
+        // via https://github.com/jhy/jsoup/issues/951
+        String html = "<!DOCTYPE html><html lang=\"en\"><head></head><body><div>Initial element</div></body></html>";
+        String expectedText = "New element";
+
+        Document original = Jsoup.parse(html);
+        Element originalElement = original.body().child(0);
+        originalElement.after("<div>" + expectedText + "</div>");
+
+        Element originalNextElementSibling = originalElement.nextElementSibling();
+        Element originalNextSibling = (Element) originalElement.nextSibling();
+
+        assertEquals("Expected text in next element sibling after insertion in original document", expectedText, originalNextElementSibling.text());
+        assertEquals("Expected text in next sibling after insertion in original document", expectedText, originalNextSibling.text());
+    }
+
+    @Test
+    public void testNextElementSiblingAfterInsertionInClonedDocument() {
+        // via https://github.com/jhy/jsoup/issues/951
+        String html = "<!DOCTYPE html><html lang=\"en\"><head></head><body><div>Initial element</div></body></html>";
+        String cloneExpect = "New element in clone";
+
+        Document original = Jsoup.parse(html);
+        Document clone = original.clone();
+
+        Element cloneElement = clone.body().child(0);
+        cloneElement.after("<div>" + cloneExpect + "</div>");
+
+        Element cloneNextElementSibling = cloneElement.nextElementSibling();
+        Element cloneNextSibling = (Element) cloneElement.nextSibling();
+
+        assertEquals("Expected text in next element sibling after insertion in cloned document", cloneExpect, cloneNextElementSibling.text());
+        assertEquals("Expected text in next sibling after insertion in cloned document", cloneExpect, cloneNextSibling.text());
+    }
+}
+```
+

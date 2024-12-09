@@ -1,0 +1,9 @@
+asserts result: 
+ - For the assert statement: `assertTrue(doc.select("meta[name=charset]").isEmpty(), "There should be no meta elements with name='charset' after updating the charset.");`
+  - Reason: The message is misleading because it suggests that there should be no meta elements with `name='charset'`, but typically, a `<meta>` tag with `name='charset'` is used to specify the character encoding of the document. The assertion might be correct if the intent is to ensure that this specific `<meta>` tag does not exist after an update, but the message could be clearer about the context or the reason why this should not exist.
+
+- For the assert statement: `assertEquals("dontTouch", selectedNode.attr("version"), "The version attribute should remain 'dontTouch'");`
+  - Reason: The message is not semantically clear. It is not explicit about what `selectedNode` is or why the version attribute should remain `dontTouch`. A more descriptive message would help clarify the purpose of the assertion.
+
+All other assert statements meet the criteria for both semantic clarity and correctness in expressing the purpose of the assertion.
+

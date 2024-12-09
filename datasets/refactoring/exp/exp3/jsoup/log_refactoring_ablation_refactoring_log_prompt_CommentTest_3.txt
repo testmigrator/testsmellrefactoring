@@ -1,0 +1,51 @@
+asserts result: 
+ ```java
+import org.jsoup.nodes.Comment;
+import org.junit.Test;
+import static org.junit.Assert.*;
+
+public class CommentTest {
+
+    private Comment comment;
+
+    @Test
+    public void testCloneCreatesDifferentInstance() {
+        // Arrange
+        comment = new Comment("Original");
+
+        // Act
+        Comment clonedComment = comment.clone();
+
+        // Assert
+        assertNotNull("Cloned comment should not be null", clonedComment);
+        assertNotSame("Cloned comment should be a different instance", comment, clonedComment);
+    }
+
+    @Test
+    public void testClonePreservesData() {
+        // Arrange
+        comment = new Comment("Original");
+
+        // Act
+        Comment clonedComment = comment.clone();
+
+        // Assert
+        assertEquals("Cloned comment should have the same data as the original", comment.getData(), clonedComment.getData());
+    }
+
+    @Test
+    public void testCloneAllowsModificationOfClonedInstance() {
+        // Arrange
+        comment = new Comment("Original");
+
+        // Act
+        Comment clonedComment = comment.clone();
+        clonedComment.setData("New");
+
+        // Assert
+        assertEquals("Cloned comment data should be updated", "New", clonedComment.getData());
+        assertNotEquals("Original comment data should remain unchanged", comment.getData(), clonedComment.getData());
+    }
+}
+```
+

@@ -1,0 +1,62 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.nodes.TextNode;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class ElementTest {
+
+    private static final String REFERENCE_HTML = "<html><body>" +
+            "<div id='div1'></div>" +
+            "<div id='div2'></div>" +
+            "<p>Hello</p>" +
+            "<p>Another </p>" +
+            "<img src='foo.png' />" +
+            "</body></html>";
+
+    @Test
+    public void testGetElementsByTagNameDiv() {
+        Document doc = Jsoup.parse(REFERENCE_HTML);
+        List<Element> divs = doc.getElementsByTag("div");
+        assertEquals("Number of div elements should be 2", 2, divs.size());
+        assertEquals("First div element should have id 'div1'", "div1", divs.get(0).id());
+        assertEquals("Second div element should have id 'div2'", "div2", divs.get(1).id());
+    }
+
+    @Test
+    public void testGetElementsByTagNameP() {
+        Document doc = Jsoup.parse(REFERENCE_HTML);
+        List<Element> ps = doc.getElementsByTag("p");
+        assertEquals("Number of p elements should be 2", 2, ps.size());
+        assertEquals("First p element text should be 'Hello'", "Hello", ((TextNode) ps.get(0).childNode(0)).getWholeText());
+        assertEquals("Second p element text should be 'Another '", "Another ", ((TextNode) ps.get(1).childNode(0)).getWholeText());
+    }
+
+    @Test
+    public void testGetElementsByTagNamePCaseInsensitive() {
+        Document doc = Jsoup.parse(REFERENCE_HTML);
+        List<Element> ps = doc.getElementsByTag("p");
+        List<Element> ps2 = doc.getElementsByTag("P");
+        assertEquals("Case-insensitive search for p elements should return the same list", ps, ps2);
+    }
+
+    @Test
+    public void testGetElementsByTagNameImg() {
+        Document doc = Jsoup.parse(REFERENCE_HTML);
+        List<Element> imgs = doc.getElementsByTag("img");
+        assertEquals("Number of img elements should be 1", 1, imgs.size());
+        assertEquals("Img element should have src 'foo.png'", "foo.png", imgs.get(0).attr("src"));
+    }
+
+    @Test
+    public void testGetElementsByTagNameNonExistent() {
+        Document doc = Jsoup.parse(REFERENCE_HTML);
+        List<Element> empty = doc.getElementsByTag("wtf");
+        assertEquals("Number of non-existent elements should be 0", 0, empty.size());
+    }
+}
+```
+

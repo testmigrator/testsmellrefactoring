@@ -1,0 +1,42 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+
+import org.jfree.chart.renderer.category.StackedAreaRenderer;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+
+public class StackedAreaRendererTest {
+
+    @Test
+    public void testDefaultEquality() {
+        StackedAreaRenderer r1 = new StackedAreaRenderer();
+        StackedAreaRenderer r2 = new StackedAreaRenderer();
+        assertEquals(r1, r2, "Default instances should be equal");
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "false, false",
+        "true, false",
+        "false, true",
+        "true, true"
+    })
+    public void testEqualityWithRenderAsPercentages(boolean r1Setting, boolean r2Setting) {
+        StackedAreaRenderer r1 = new StackedAreaRenderer();
+        StackedAreaRenderer r2 = new StackedAreaRenderer();
+
+        r1.setRenderAsPercentages(r1Setting);
+        r2.setRenderAsPercentages(r2Setting);
+
+        if (r1Setting == r2Setting) {
+            assertEquals(r1, r2, "Instances should be equal when renderAsPercentages is set to the same value");
+        } else {
+            assertNotEquals(r1, r2, "Instances should not be equal when renderAsPercentages is set to different values");
+        }
+    }
+}
+```
+

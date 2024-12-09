@@ -1,0 +1,52 @@
+asserts result: 
+ ```java
+import org.apache.commons.math4.distribution.ContinuousDistribution;
+import org.apache.commons.math4.distribution.RandomSource;
+import org.apache.commons.math4.distribution.UniformContinuousDistribution;
+import org.apache.commons.math4.fitting.PolynomialFunction;
+import org.apache.commons.math4.fitting.SimpleCurveFitter;
+import org.apache.commons.math4.fitting.WeightedObservedPoints;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIf;
+
+import static org.apache.commons.math4.testutils.TestUtils.assertEquals;
+
+public class PolynomialFitTest {
+
+    private static final long RANDOMIZER_SEED = 53882150042L;
+    private static final long RNG_SEED = 64925784253L;
+    private static final double NOISE_LEVEL = 0.1;
+    private static final double TOLERANCE = 2e-2;
+    private static final int SAMPLE_SIZE = 100;
+
+    @EnabledIf("isTestEnvironmentReady")
+    @Test
+    public void testPolynomialFit() {
+        final Random randomizer = new Random(RANDOMIZER_SEED);
+        final ContinuousDistribution.Sampler rng = UniformContinuousDistribution.of(-100, 100).createSampler(RandomSource.WELL_512_A.create(RNG_SEED));
+
+        final double[] coefficients = { 12.9, -3.4, 2.1 }; // 12.9 - 3.4 x + 2.1 x^2
+        final PolynomialFunction f = new PolynomialFunction(coefficients);
+
+        // Collect data from a known polynomial.
+        final WeightedObservedPoints obs = new WeightedObservedPoints();
+        for (int i = 0; i < SAMPLE_SIZE; i++) {
+            final double x = rng.sample();
+            obs.add(x, f.value(x) + NOISE_LEVEL * randomizer.nextGaussian());
+        }
+
+        final ParametricUnivariateFunction function = new PolynomialFunction.Parametric();
+        // Start fit from initial guesses that are far from the optimal values.
+        final SimpleCurveFitter fitter = SimpleCurveFitter.create(function, new double[] { -1e20, 3e15, -5e25 });
+        final double[] best = fitter.fit(obs.toList());
+
+        assertEquals("best != coeff", coefficients, best, TOLERANCE);
+    }
+
+    public boolean isTestEnvironmentReady() {
+        // Implement the condition to check if the test environment is ready
+        return true; // Placeholder implementation
+    }
+}
+```
+

@@ -1,0 +1,29 @@
+asserts result: 
+ ```java
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import org.jfree.chart.renderer.category.LayeredBarRenderer;
+import java.awt.Color;
+
+public class LayeredBarRendererTest {
+
+    @Test
+    public void testDefaultFillPaintSerialization() {
+        LayeredBarRenderer r1 = new LayeredBarRenderer();
+        r1.setDefaultFillPaint(Color.RED);
+        LayeredBarRenderer r2 = TestUtils.serialised(r1);
+        assertEquals(r1.getDefaultFillPaint(), r2.getDefaultFillPaint());
+        TestUtils.checkIndependence(r1, r2);
+    }
+
+    @Test
+    public void testSeriesBarWidthSerialization() {
+        LayeredBarRenderer r1 = new LayeredBarRenderer();
+        r1.setSeriesBarWidth(1, 9.0);
+        LayeredBarRenderer r2 = TestUtils.serialised(r1);
+        assertEquals(r1.getSeriesBarWidth(1), r2.getSeriesBarWidth(1));
+        TestUtils.checkIndependence(r1, r2);
+    }
+}
+```
+

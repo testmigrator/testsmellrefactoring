@@ -1,0 +1,69 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+import org.junit.Test;
+import static org.junit.Assert.*;
+
+public class ElementTest {
+
+    private static final String HTML = "<ul id='ul'>" +
+            "<li id='a'>a</li>" +
+            "<li id='b'>b</li>" +
+            "<li id='c'>c</li>" +
+            "</ul> Not An Element but a node" +
+            "<div id='div'>" +
+            "<li id='d'>d</li>" +
+            "</div>";
+
+    @Test
+    public void testNextElementSiblingsForElementA() {
+        Document doc = Jsoup.parse(HTML);
+        Element element = doc.getElementById("a");
+        Elements elementSiblings = element.nextElementSiblings();
+        assertNotNull("Element siblings should not be null for element 'a'", elementSiblings);
+        assertEquals("Element 'a' should have 2 next element siblings", 2, elementSiblings.size());
+        assertEquals("First sibling of element 'a' should be 'b'", "b", elementSiblings.get(0).id());
+        assertEquals("Second sibling of element 'a' should be 'c'", "c", elementSiblings.get(1).id());
+    }
+
+    @Test
+    public void testNextElementSiblingsForElementB() {
+        Document doc = Jsoup.parse(HTML);
+        Element element = doc.getElementById("b");
+        Elements elementSiblings = element.nextElementSiblings();
+        assertNotNull("Element siblings should not be null for element 'b'", elementSiblings);
+        assertEquals("Element 'b' should have 1 next element sibling", 1, elementSiblings.size());
+        assertEquals("First sibling of element 'b' should be 'c'", "c", elementSiblings.get(0).id());
+    }
+
+    @Test
+    public void testNextElementSiblingsForElementC() {
+        Document doc = Jsoup.parse(HTML);
+        Element element = doc.getElementById("c");
+        Elements elementSiblings = element.nextElementSiblings();
+        assertEquals("Element 'c' should have 0 next element siblings", 0, elementSiblings.size());
+    }
+
+    @Test
+    public void testNextElementSiblingsForElementUl() {
+        Document doc = Jsoup.parse(HTML);
+        Element element = doc.getElementById("ul");
+        Elements elementSiblings = element.nextElementSiblings();
+        assertNotNull("Element siblings should not be null for element 'ul'", elementSiblings);
+        assertEquals("Element 'ul' should have 1 next element sibling", 1, elementSiblings.size());
+        assertEquals("First sibling of element 'ul' should be 'div'", "div", elementSiblings.get(0).id());
+    }
+
+    @Test
+    public void testNextElementSiblingsForElementDiv() {
+        Document doc = Jsoup.parse(HTML);
+        Element element = doc.getElementById("div");
+        Elements elementSiblings = element.nextElementSiblings();
+        assertEquals("Element 'div' should have 0 next element siblings", 0, elementSiblings.size());
+    }
+}
+```
+

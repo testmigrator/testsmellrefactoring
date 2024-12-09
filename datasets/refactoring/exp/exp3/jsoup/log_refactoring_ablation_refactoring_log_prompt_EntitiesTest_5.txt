@@ -1,0 +1,29 @@
+asserts result: 
+ ```java
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class EntitiesTest {
+
+    @Test
+    public void testGetByName_nGt() {
+        assertEquals("Should return '≫⃒' for 'nGt'", "≫⃒", Entities.getByName("nGt"));
+    }
+
+    @Test
+    public void testGetByName_fjlig() {
+        assertEquals("Should return 'fj' for 'fjlig'", "fj", Entities.getByName("fjlig"));
+    }
+
+    @Test
+    public void testGetByName_gg() {
+        assertEquals("Should return '≫' for 'gg'", "≫", Entities.getByName("gg"));
+    }
+
+    @Test
+    public void testGetByName_copy() {
+        assertEquals("Should return '©' for 'copy'", "©", Entities.getByName("copy"));
+    }
+}
+```
+

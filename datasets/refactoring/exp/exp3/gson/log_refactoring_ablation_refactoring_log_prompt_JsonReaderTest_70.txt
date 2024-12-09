@@ -1,0 +1,31 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.MalformedJsonException;
+import org.junit.jupiter.api.Test;
+
+public class JsonReaderTest {
+
+    @Test
+    public void testStrictNameValueSeparatorWithSkipValueEqualsSign() throws Exception {
+        JsonReader reader = new JsonReader(new StringReader("{\"a\"=true}"));
+        reader.beginObject();
+        assertEquals("a", reader.nextName(), "Expected name to be 'a'");
+        MalformedJsonException e = assertThrows(MalformedJsonException.class, () -> reader.skipValue());
+        assertEquals("line 1 column 6 path $.a", e.getMessage(), "Expected specific error message for equals sign");
+    }
+
+    @Test
+    public void testStrictNameValueSeparatorWithSkipValueDoubleArrow() throws Exception {
+        JsonReader reader = new JsonReader(new StringReader("{\"a\"=>true}"));
+        reader.beginObject();
+        assertEquals("a", reader.nextName(), "Expected name to be 'a'");
+        MalformedJsonException e = assertThrows(MalformedJsonException.class, () -> reader.skipValue());
+        assertEquals("line 1 column 6 path $.a", e.getMessage(), "Expected specific error message for double arrow");
+    }
+}
+```
+

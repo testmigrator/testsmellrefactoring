@@ -1,0 +1,57 @@
+asserts result: 
+ ```java
+import org.apache.commons.math4.analysis.UnivariateDifferentiableFunction;
+import org.apache.commons.math4.analysis.UnivariateFunction;
+import org.apache.commons.math4.analysis.function.FunctionUtils;
+import org.apache.commons.math4.analysis.differentiation.DerivativeStructure;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+
+class MathFunctionTest {
+
+    private static final double TOLERANCE = 1.0e-15;
+
+    @Test
+    @DisplayName("Test function value")
+    void testFunctionValue() {
+        UnivariateDifferentiableFunction f = createFunction();
+        for (double t = -1.0; t < 1; t += 0.01) {
+            assertEquals(t * t, f.value(t), TOLERANCE);
+        }
+    }
+
+    @ParameterizedTest
+    @CsvSource({"-1.0, -2.0", "0.0, 0.0", "1.0, 2.0"})
+    @DisplayName("Test first derivative")
+    void testFirstDerivative(double t, double expected) {
+        UnivariateFunction f1 = FunctionUtils.derivative(createFunction(), 1);
+        assertEquals(expected, f1.value(t), TOLERANCE);
+    }
+
+    @ParameterizedTest
+    @CsvSource({"-1.0, 2.0", "0.0, 2.0", "1.0, 2.0"})
+    @DisplayName("Test second derivative")
+    void testSecondDerivative(double t, double expected) {
+        UnivariateFunction f2 = FunctionUtils.derivative(createFunction(), 2);
+        assertEquals(expected, f2.value(t), TOLERANCE);
+    }
+
+    private UnivariateDifferentiableFunction createFunction() {
+        return new UnivariateDifferentiableFunction() {
+            @Override
+            public double value(double x) {
+                return x * x;
+            }
+
+            @Override
+            public DerivativeStructure value(DerivativeStructure x) {
+                return x.multiply(x);
+            }
+        };
+    }
+}
+```
+

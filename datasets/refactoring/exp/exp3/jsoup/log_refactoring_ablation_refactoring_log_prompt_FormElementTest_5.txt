@@ -1,0 +1,25 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.FormElement;
+import org.junit.jupiter.api.Test;
+
+public class FormElementTest {
+
+    @Test
+    public void actionWithNoBaseUri() {
+        String html = "<form><input name='q'></form>";
+        Document doc = Jsoup.parse(html);
+        FormElement form = (FormElement) doc.select("form").first();
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            form.submit();
+        });
+
+        assertEquals("Could not determine a form action URL for submit. Ensure you set a base URI when parsing.", exception.getMessage());
+    }
+}
+```
+

@@ -1,0 +1,34 @@
+asserts result: 
+ - `assertEquals(h1, h2, "Hash codes of g1 and g2 should be equal");` - yes
+- `assertNotSame(g1, g2, "g1 and g2 should not be the same object");` - yes
+- `assertSame(g1.getClass(), g2.getClass(), "g1 and g2 should be instances of the same class");` - yes
+- `assertEquals(g1, g2, "g1 and g2 should be equal");` - yes
+- `assertNotEquals(g1, g2, "g1 and g2 should not be equal after modifying the rectangle of g1");` - yes
+- `assertNotSame(g1, g2, "g1 and g2 should be different instances");` - yes
+- `assertSame(g1.getClass(), g2.getClass(), "g1 and g2 should be of the same class");` - yes
+- `assertEquals(g1, g2, "g1 and g2 should be equal");` - yes
+- `assertNotEquals(g1, g2, "g1 and g2 should not be equal after modifying the line in g1");` - yes
+- `assertEquals(r1, r2, "Default instances should be equal");` - yes
+- `assertEquals(r2, r1, "Equality should be symmetric");` - yes
+- `assertNotEquals(r1, r2, "Instances with different errorIndicatorPaint should not be equal");` - yes
+- `assertEquals(r1, r2, "Instances with the same errorIndicatorPaint should be equal");` - yes
+- `assertEquals(r1, r2, "r1 and r2 should be equal");` - yes
+- `assertEquals(h1, h2, "Hash codes of r1 and r2 should be equal");` - yes
+- `assertNotSame(r1, r2, "The cloned object should not be the same instance as the original object");` - yes
+- `assertSame(r1.getClass(), r2.getClass(), "The cloned object should be of the same class as the original object");` - yes
+- `assertEquals(r1, r2, "The cloned object should be equal to the original object");` - yes
+- `assertTrue(r.getDefaultLinesVisible(), "Default lines should be visible when linesVisible is set to true");` - yes
+- `assertFalse(r.getDefaultShapesVisible(), "Default shapes should not be visible when shapesVisible is set to false");` - yes
+- `assertFalse(r.getDefaultLinesVisible(), "Default lines should not be visible when linesVisible is set to false");` - yes
+- `assertTrue(r.getDefaultShapesVisible(), "Default shapes should be visible when shapesVisible is set to true");` - yes
+- `assertEquals(r1, r2, "Default state should be equal");` - yes
+- `assertNotEquals(r1, r2, "Should not be equal after setting render as percentages on one instance");` - yes
+- `assertEquals(r1, r2, "Should be equal after setting render as percentages on both instances");` - yes
+- `assertEquals("Expected r1 to be equal to r2", r1, r2);` - yes
+- `assertEquals("Expected hash codes of r1 and r2 to be equal", h1, h2);` - yes
+- `assertNotSame(r1, r2, "The cloned object should not be the same instance as the original.");` - yes
+- `assertSame(r1.getClass(), r2.getClass(), "The cloned object should be of the same class as the original.");` - yes
+- `assertEquals(r1, r2, "The cloned object should be equal to the original.");` - yes
+
+All provided assert statements meet the criteria for clarity and correctness in their message parameters.
+

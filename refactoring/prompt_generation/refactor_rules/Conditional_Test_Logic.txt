@@ -1,51 +1,64 @@
 RefactorRule:
   SmellType: Conditional Test Logic
-  Description: Remove control statements (if, switch, conditional expression, etc.) within the test method.
+  Description: "Extract complex control flow logic into separate helper methods to improve readability and testability."
   Steps:
     - Step:
-        Description: "Extract condition into a separate method"
+        Description: "Identify complex control flow constructs"
+        Action: IdentifyComplexControlFlow
+        Parameters:
+          TargetType: Method
+    - Step:
+        Description: "Extract control flow logic into a separate helper method"
         Action: ExtractMethod
         Parameters:
           TargetType: Method
           SourcePattern: |
-            if ({condition}) {
-                {stmt}
+            (if|switch|for|while|do-while) ({condition}) {
+                {statements}
             }
           ExtractedMethod: |
-            boolean isConditionMet() {
-              return {condition};
+            private boolean/void helperMethodName() {
+                {extractedStatements}
             }
     - Step:
-        Description: "Annotate test method with @EnabledIf"
-        Action: AddAnnotation
-        Parameters:
-          TargetType: Method
-          Annotation: @EnabledIf("isConditionMet")
-    - Step:
-        Description: "Remove original conditional logic from test method"
-        Action: RemoveConditional
+        Description: "Replace complex control flow with a call to the helper method"
+        Action: ReplaceControlFlow
         Parameters:
           SourcePattern: |
-              if ({condition}) {
-                 {stmt}
-              }
+            (if|switch|for|while|do-while) ({condition}) {
+                {statements}
+            }
           ReplacementPattern: |
-              {stmt}
+            helperMethodName();
   Example:
     Before: |
       @Test
-      public void T() {
-        if (C) {
-           stmt
-        }
+      public void complexTest() {
+          if (condition1 && condition2) {
+              if (condition3) {
+                  doSomething();
+              } else {
+                  doSomethingElse();
+              }
+          } else {
+              doDefault();
+          }
       }
     After: |
-      boolean isC(){
-        return C;
+      private boolean isComplexConditionMet() {
+          return condition1 && condition2 && condition3;
+      }
+
+      private void handleComplexScenario() {
+          if (isComplexConditionMet()) {
+              doSomething();
+          } else {
+              doSomethingElse();
+          }
       }
 
       @Test
-      @EnableIf("isC")
-      public void T() {
-        stmt
+      public void complexTest() {
+          handleComplexScenario();
+          doDefault();
       }

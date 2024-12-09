@@ -1,0 +1,28 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.io.StringWriter;
+
+public class JsonWriterTest {
+
+    @Test
+    public void testNonFiniteDoubles() {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+
+        assertThrows(IllegalArgumentException.class, () -> {
+            assertNonFiniteDoublesExceptions(jsonWriter);
+        });
+    }
+
+    private void assertNonFiniteDoublesExceptions(JsonWriter jsonWriter) throws IOException {
+        // Simulate the conditions that should throw an exception
+        jsonWriter.value(Double.POSITIVE_INFINITY);
+    }
+}
+```
+

@@ -1,0 +1,65 @@
+Input Parameters:
+Test Code:
+ @Test public void controlsAddedAfterParseAreLinkedWithForms() {
+        Document doc = Jsoup.parse("<body />");
+        doc.body().html("<form />");
+
+        Element formEl = doc.select("form").first();
+        formEl.append("<input name=foo value=bar>");
+
+        assertTrue(formEl instanceof FormElement);
+        FormElement form = (FormElement) formEl;
+        assertEquals(1, form.elements().size());
+
+        List<Connection.KeyVal> data = form.formData();
+        assertEquals("foo=bar", data.get(0).toString());
+    }
+Context: /org/jsoup/nodes/FormElement
+Smell List: ['Assertion_Roulette', 'Sensitive_Equality', 'Eager_Test', 'Magic_Number_Test']
+Smell Description List: ['Test Smell Type：Assertion Roulette\n\nFeature:\nA test method contains more than one assertion statement without an explanation/message (parameter in the assertion method).\n', 'Test Smell Type：Sensitive Equality\n\nFeature:\nA test method invokes the toString() method of an object.\n', 'Test Smell Type：Eager Test\n\nFeature:\nA test method contains multiple calls to multiple production methods.\n', 'Test Smell Type：Magic Number Test\n\nFeature:\nAn assertion method that contains a numeric literal as an argument.\n']
+Refactoring DSL: ['RefactorRule:\n  SmellType: Assertion Roulette\n  Description: Add descriptive messages to assert statements to improve readability and maintainability.\n  Steps:\n    - Step:\n        Description: "Add descriptive message to each assert statement(except assertThat, assertThrows)."\n        Action: AddMessageToAssert\n        Parameters:\n          MessagePattern: "{assertionMessage}"\n  Example:\n    Before: |\n      @Test\n      public void T() {\n        stmt\n        assert_1\n        ...\n        assert_n\n        stmt\'\n      }\n    After: |\n      @Test\n      public void T() {\n        stmt\n        assert_1(..., "Descriptive message for assert statement")\n        ...\n        assert_n(..., "Descriptive message for assert statement")\n        stmt\'\n      }\n    Variables:\n      assertionMessage: "Descriptive message for assert statement"\n', 'RefactorRule:\n  SmellType: Sensitive Equality\n  Description: "Avoid using the toString() method for comparing objects in assertions."\n  Steps:\n    - Step:\n        Description: "Extract the value returned by toString() into a separate variable for comparison. Ensure toString() does not directly appear in assertions."\n        Action: ReplaceMethodCall\n        Parameters:\n          TargetPattern: |\n            assertEquals({object1}.toString(), {expectedString});\n          ReplacementPattern: |\n            String actualValue = {object1}.toString();\n            assertEquals({expectedString}, actualValue);\n  Example:\n    Before: |\n      @Test\n      public void T() {\n        Object object1 = new Object();\n        assertEquals(object1.toString(), "expectedString");\n      }\n    After: |\n      @Test\n      public void T() {\n        Object object1 = new Object();\n        String actualValue = object1.toString();\n        assertEquals("expectedString", actualValue);\n      }\n', 'RefactorRule:\n  SmellType: Eager Test\n  Description: "Refactor test methods to group related assertions logically and extract reusable setup logic into private methods."\n  Steps:\n    - Step1:\n        Description: "Extract shared setup logic into a reusable, private method and ensure it is used across all relevant tests."\n        Action: ExtractSetupMethod\n        Parameters:\n          Condition: "If multiple tests share the same setup logic."\n          MethodNamePattern: setupTest{OriginalMethodName}\n    - Step2:\n        Description: "Group related assertions into cohesive sub-tests while retaining necessary setup logic."\n        Action: GroupAssertions\n        Parameters:\n          GroupBy: LogicalConcern\n    - Step3:\n        Description: "Create new test methods for each cohesive group of assertions and ensure readability."\n        Action: CreateTestMethods\n        Parameters:\n          IncludeSetup: True\n          NamePattern: test{OriginalMethodName}_{Concern}\n  Example:\n    Before: |\n      @Test\n      public void testExample() {\n          setup();\n          assertEquals(1, methodA());\n          assertTrue(methodB());\n      }\n    After: |\n      private void setupTestExample() {\n          setup();\n      }\n\n      @Test\n      public void testExample_MethodA() {\n          setupTestExample();\n          assertEquals(1, methodA());\n      }\n\n      @Test\n      public void testExample_MethodB() {\n          setupTestExample();\n          assertTrue(methodB());\n      }\n  Variables:\n    OriginalMethodName: The name of the original test method.\n    LogicalConcern: The logical aspect tested (e.g., a specific API, validation, or behavior).\n', 'RefactorRule:\n  SmellType: Magic Number Test\n  Description: "Extract magic numbers and assign meaningful names to improve readability and maintainability."\n  Steps:\n    - Step:\n        Action: IdentifyMagicNumbers\n        Description: "Identify magic numbers in assertions"\n        Parameters:\n          TargetType: Method\n          SourcePattern: |\n            assertEquals({magicNumber}, {variable})\n    - Step:\n        Action: ExtractVariable\n        Description: "Extract magic number to a variable with meaningful name"\n        Parameters:\n          TargetType: Method\n          SourcePattern: |\n            assertEquals({magicNumber}, {variable})\n          ReplacementPattern: |\n            int {meaningfulName} = {magicNumber};\n            assertEquals({meaningfulName}, {variable})\n  Example:\n    Before: |\n      @Test\n      public void T() {\n          stmt\n          assertEquals(1, a)\n          stmt\'\n      }\n    After: |\n      @Test\n      public void T() {\n          int x = 1; // x: meaningful variable name\n          stmt\n          assertEquals(x, a)\n          stmt\'\n      }\n  Variables:\n    magicNumber: "1"\n    variable: "a"\n    meaningfulName: "x"\n']
+Checkpoints: ['[ ] All assert statements have been added with clear explanatory messages.\n', '[ ] All instances of the ‘Sensitive Equality’ code smell have been refactored by directly comparing objects instead of using the toString() method for comparisons in tests, to enhance stability and avoid future failures due to changes in the toString() method’s implementation.\n', '[ ] All eager tests have been split into separate tests, each focusing on verifying a single API.\n', '[ ] All magic numbers in the test code have been extracted and assigned meaningful variable names.\n']
+
+Refactored Code: 
+ 
+private Document setupControlsAddedAfterParseAreLinkedWithForms() {
+    Document doc = Jsoup.parse("<body />");
+    doc.body().html("<form />");
+
+    Element formEl = doc.select("form").first();
+    formEl.append("<input name=foo value=bar>");
+
+    return doc;
+}
+
+@Test
+public void testControlsAddedAfterParseAreLinkedWithForms_FormElementInstance() {
+    Document doc = setupControlsAddedAfterParseAreLinkedWithForms();
+    Element formEl = doc.select("form").first();
+
+    assertTrue(formEl instanceof FormElement, "The selected element should be an instance of FormElement");
+}
+
+@Test
+public void testControlsAddedAfterParseAreLinkedWithForms_ElementsSize() {
+    Document doc = setupControlsAddedAfterParseAreLinkedWithForms();
+    Element formEl = doc.select("form").first();
+    FormElement form = (FormElement) formEl;
+
+    final int expectedElementsSize = 1;
+    assertEquals(expectedElementsSize, form.elements().size(), "The form should contain exactly one element");
+}
+
+@Test
+public void testControlsAddedAfterParseAreLinkedWithForms_FormDataContent() {
+    Document doc = setupControlsAddedAfterParseAreLinkedWithForms();
+    Element formEl = doc.select("form").first();
+    FormElement form = (FormElement) formEl;
+
+    List<Connection.KeyVal> data = form.formData();
+    String actualValue = data.get(0).toString();
+    final String expectedFormData = "foo=bar";
+    assertEquals(expectedFormData, actualValue, "The form data should contain 'foo=bar'");
+}
+
+

@@ -1,0 +1,93 @@
+asserts result: 
+ - **Statement**: `assertEquals(text, Entities.unescape(escapedAsciiFull), "Unescaping ASCII Full Escaped Text");`
+  - **Evaluation**: yes
+
+- **Statement**: `assertEquals(text, Entities.unescape(escapedAsciiXhtml), "Unescaping ASCII XHTML Escaped Text");`
+  - **Evaluation**: yes
+
+- **Statement**: `assertEquals(text, Entities.unescape(escapedUtfFull), "Unescaping UTF-8 Full Escaped Text");`
+  - **Evaluation**: yes
+
+- **Statement**: `assertEquals(text, Entities.unescape(escapedUtfMin), "Unescaping UTF-8 Min Escaped Text");`
+  - **Evaluation**: yes
+
+- **Statement**: `assertEquals("&#x1d559;", escapedAscii, "ASCII base escape should match expected value");`
+  - **Evaluation**: yes
+
+- **Statement**: `assertEquals("&hopf;", escapedAsciiFull, "ASCII extended escape should match expected value");`
+  - **Evaluation**: yes
+
+- **Statement**: `assertEquals(text, escapedUtf, "UTF-8 extended escape should match original text");`
+  - **Evaluation**: yes
+
+- **Statement**: `assertEquals(un, Entities.unescape(text), "Unescaped text should match expected output");`
+  - **Evaluation**: yes
+
+- **Statement**: `assertEquals("&Gt; &Gg;&#x338; &Gt;&#x20d2; &Gt;&#x338; &Gt; &Gt;", escaped, "Escaped text should match expected output");`
+  - **Evaluation**: yes
+
+- **Statement**: `assertEquals(un, Entities.unescape(escaped), "Round-trip unescaping should result in the original text");`
+  - **Evaluation**: yes
+
+- **Statement**: `assertEquals(ampCodepoint, xhtml.codepointForName("amp"), "Checking codepoint for 'amp'");`
+  - **Evaluation**: yes
+
+- **Statement**: `assertEquals(gtCodepoint, xhtml.codepointForName("gt"), "Checking codepoint for 'gt'");`
+  - **Evaluation**: yes
+
+- **Statement**: `assertEquals(ltCodepoint, xhtml.codepointForName("lt"), "Checking codepoint for 'lt'");`
+  - **Evaluation**: yes
+
+- **Statement**: `assertEquals(quotCodepoint, xhtml.codepointForName("quot"), "Checking codepoint for 'quot'");`
+  - **Evaluation**: yes
+
+- **Statement**: `assertEquals("amp", xhtml.nameForCodepoint(ampCodepoint), "Checking name for codepoint 38");`
+  - **Evaluation**: yes
+
+- **Statement**: `assertEquals("gt", xhtml.nameForCodepoint(gtCodepoint), "Checking name for codepoint 62");`
+  - **Evaluation**: yes
+
+- **Statement**: `assertEquals("lt", xhtml.nameForCodepoint(ltCodepoint), "Checking name for codepoint 60");`
+  - **Evaluation**: yes
+
+- **Statement**: `assertEquals("quot", xhtml.nameForCodepoint(quotCodepoint), "Checking name for codepoint 34");`
+  - **Evaluation**: yes
+
+- **Statement**: `assertEquals("≫⃒", Entities.getByName("nGt"), "Check if 'nGt' returns '≫⃒'");`
+  - **Evaluation**: yes
+
+- **Statement**: `assertEquals("fj", Entities.getByName("fjlig"), "Check if 'fjlig' returns 'fj'");`
+  - **Evaluation**: yes
+
+- **Statement**: `assertEquals("≫", Entities.getByName("gg"), "Check if 'gg' returns '≫'");`
+  - **Evaluation**: yes
+
+- **Statement**: `assertEquals("©", Entities.getByName("copy"), "Check if 'copy' returns '©'");`
+  - **Evaluation**: yes
+
+- **Statement**: `assertEquals("&#x210c1;", escapedAscii, "Check if supplementary character is correctly escaped in ASCII");`
+  - **Evaluation**: yes
+
+- **Statement**: `assertEquals(text, escapedUtf, "Check if supplementary character is not escaped in UTF-8");`
+  - **Evaluation**: yes
+
+- **Statement**: `assertEquals("Hello Æ &<> ® Å &angst π π 新 there &! ¾ © ©", Entities.unescape(text), "Standard entities should be correctly unescaped");`
+  - **Evaluation**: yes
+
+- **Statement**: `assertEquals("&0987654321; &unknown", Entities.unescape(text), "Unknown entities should remain unchanged");`
+  - **Evaluation**: yes
+
+- **Statement**: `assertEquals("Hello &amp= &", Entities.unescape(text, true), "Strict unescaping should handle incomplete entities correctly");`
+  - **Evaluation**: yes
+
+- **Statement**: `assertEquals("Hello &= &", Entities.unescape(text), "Default unescaping should handle incomplete entities correctly");`
+  - **Evaluation**: yes
+
+- **Statement**: `assertEquals("Hello &= &", Entities.unescape(text, false), "Non-strict unescaping should handle incomplete entities correctly");`
+  - **Evaluation**: yes
+
+- **Statement**: `assertEquals(escaped, Entities.escape(unescaped, new OutputSettings().charset("ascii").escapeMode(extended)), "Escaping special characters should produce the correct HTML entities");`
+  - **Evaluation**: yes
+
+All provided assert statements meet the criteria for clarity and correctness in their message parameters.
+

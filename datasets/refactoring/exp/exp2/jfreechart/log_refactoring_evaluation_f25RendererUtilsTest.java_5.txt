@@ -1,0 +1,5 @@
+asserts result: 
+ Yes
+
+The refactored tests maintain the same functionality as the original test. Each refactored test method focuses on a specific scenario (no items, one item, two items, etc.), and the assertions within each method match the expected outcomes from the original test. The `createDescendingDataset` method ensures that the dataset used in each test is correctly configured to return `DomainOrder.DESCENDING`, which is consistent with the setup in the original test. Therefore, the functionality is consistent between the original and refactored tests.
+

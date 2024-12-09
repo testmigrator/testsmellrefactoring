@@ -1,0 +1,39 @@
+asserts result: 
+ ```java
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotSame;
+
+import org.jfree.chart.renderer.category.BarRenderer;
+import org.junit.Test;
+
+public class BarRendererTest {
+
+    @Test
+    public void testSerialization_SeriesOutlineStroke() {
+        BarRenderer r1 = new BarRenderer();
+        r1.setSeriesOutlineStroke(1, new BasicStroke(9.0f));
+        BarRenderer r2 = TestUtils.serialised(r1);
+        assertEquals("Series outline stroke should be equal after serialization", r1.getSeriesOutlineStroke(1), r2.getSeriesOutlineStroke(1));
+        assertNotSame("Serialized object should not be the same instance", r1, r2);
+    }
+
+    @Test
+    public void testSerialization_DefaultOutlineStroke() {
+        BarRenderer r1 = new BarRenderer();
+        r1.setDefaultOutlineStroke(new BasicStroke(4.5f));
+        BarRenderer r2 = TestUtils.serialised(r1);
+        assertEquals("Default outline stroke should be equal after serialization", r1.getDefaultOutlineStroke(), r2.getDefaultOutlineStroke());
+        assertNotSame("Serialized object should not be the same instance", r1, r2);
+    }
+
+    @Test
+    public void testSerialization_Independence() {
+        BarRenderer r1 = new BarRenderer();
+        r1.setSeriesOutlineStroke(1, new BasicStroke(9.0f));
+        r1.setDefaultOutlineStroke(new BasicStroke(4.5f));
+        BarRenderer r2 = TestUtils.serialised(r1);
+        TestUtils.checkIndependence(r1, r2);
+    }
+}
+```
+

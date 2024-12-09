@@ -1,0 +1,10 @@
+total tests: 2
+total asserts: 8
+assertEquals(r1, r2, "Default state equality check failed");
+assertEquals(r2, r1, "Default state equality check failed (reversed)");
+assertNotEquals(r1, r2, "Equality check failed when SeriesToGroupMap is different");
+assertEquals(r1, r2, "Equality check failed when SeriesToGroupMap is the same");
+assertNotSame(r1, r2, "r1 and r2 should be different instances");
+assertSame(r1.getClass(), r2.getClass(), "r1 and r2 should be of the same class");
+assertEquals(r1, r2, "r1 and r2 should be equal in content");
+assertDoesNotThrow(() -> TestUtils.checkIndependence(r1, r2), "r1 and r2 should be independent");

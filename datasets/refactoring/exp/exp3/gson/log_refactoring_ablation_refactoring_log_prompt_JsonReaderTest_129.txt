@@ -1,0 +1,30 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
+import com.google.gson.stream.MalformedJsonException;
+import com.google.gson.stream.Strictness;
+import org.junit.jupiter.api.Test;
+
+class JsonReaderTest {
+
+    @Test
+    public void testUnterminatedStringFailure() throws Exception {
+        JsonReader reader = new JsonReader(new StringReader("[\"string"));
+        reader.setStrictness(Strictness.LENIENT);
+        reader.beginArray();
+
+        // Verify that the next token is a STRING
+        assertEquals(JsonToken.STRING, reader.peek(), "Expected the next token to be a STRING");
+
+        // Verify that nextString() throws MalformedJsonException
+        var e = assertThrows(MalformedJsonException.class, () -> reader.nextString(), "Expected MalformedJsonException to be thrown");
+        assertEquals("Unterminated string at line 1 column 9 path $[0]\n" +
+                     "See https://github.com/google/gson/blob/main/Troubleshooting.md#malformed-json", e.getMessage(), "Expected specific error message");
+    }
+}
+```
+

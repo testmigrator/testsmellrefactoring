@@ -1,0 +1,5 @@
+asserts result: 
+ yes
+
+The functionality between the original test and the refactored tests is consistent. The refactored version splits the original single test into two separate tests, each focusing on a specific type of name-value separator (`=` and `=>`). The logic and assertions in the refactored tests are equivalent to those in the original test, ensuring that the same conditions are checked and the same outcomes are expected.
+

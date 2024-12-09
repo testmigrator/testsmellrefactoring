@@ -1,0 +1,29 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.MalformedJsonException;
+import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.io.StringReader;
+
+public class JsonReaderTest {
+
+    @Test
+    public void testStrictNonFiniteDoublesWithSkipValue() throws IOException {
+        String json = "[NaN]";
+        JsonReader reader = new JsonReader(new StringReader(json));
+        reader.beginArray();
+
+        MalformedJsonException exception = assertThrows(MalformedJsonException.class, () -> {
+            reader.skipValue();
+        });
+
+        assertEquals("line 1 column 2 path $[0]", exception.getMessage());
+    }
+}
+```
+

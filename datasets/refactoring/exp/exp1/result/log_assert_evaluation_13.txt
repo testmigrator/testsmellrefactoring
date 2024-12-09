@@ -1,0 +1,34 @@
+asserts result: 
+ - 'assertEquals(UPPER_BOUND_VALUE, scale.getUpperBound(), EPSILON, "Upper bound should match the expected value");' - yes
+- 'assertEquals(Color.RED, scale.getDefaultPaint(), "Default paint should match the expected color");' - yes
+- 'assertEquals("GanttRenderer instances should be equal", r1, r2);' - yes
+- 'assertEquals("Hash codes of equal GanttRenderer instances should be equal", h1, h2);' - yes
+- 'assertNotSame(r1, r2, "The cloned instance should be a different object from the original.");' - yes
+- 'assertSame(r1.getClass(), r2.getClass(), "The cloned instance should have the same class as the original.");' - yes
+- 'assertEquals(r1, r2, "The cloned instance should have the same content as the original.");' - yes
+- 'assertEquals(expected, actual, "Check if simple string generates correct URL fragment");' - yes
+- 'assertEquals(expected, actual, "Check if complex string with special characters generates correct URL fragment");' - yes
+- 'assertEquals("r1 and r2 should be equal", r1, r2);' - yes
+- 'assertEquals("Hash codes of r1 and r2 should be equal", h1, h2);' - yes
+- 'assertNotSame(r1, r2, "Cloned instances should be different objects");' - yes
+- 'assertSame(r1.getClass(), r2.getClass(), "Cloned instance should have the same class type as the original");' - yes
+- 'assertEquals(r1, r2, "Cloned instance should have the same content as the original");' - yes
+- 'assertEquals(r1, r2, "Serialized and deserialized objects should be equal");' - yes
+- 'assertNotSame(r1, r2, "Serialized and deserialized objects should not be the same instance");' - yes
+- 'assertNotNull(li, "The legend item should be visible when series is visible in legend.");' - yes
+- 'assertNull(li, "The legend item should not be visible when series is hidden in legend.");' - yes
+- 'assertEquals(expectedLabel, li.getLabel(), "The label of the legend item should match the expected value.");' - yes
+- 'assertEquals(expectedDatasetIndex, li.getDatasetIndex(), "The dataset index of the legend item should match the expected value.");' - yes
+- 'assertEquals(expectedSeriesIndex, li.getSeriesIndex(), "The series index of the legend item should match the expected value.");' - yes
+- 'assertNull(renderer.findRangeBounds(null), "Expected null when dataset is null");' - yes
+- 'assertNull(renderer.findRangeBounds(dataset), "Expected null when dataset is empty");' - yes
+- 'assertEquals(expectedRange, renderer.findRangeBounds(dataset), "Expected range [0.0, 1.0] for single positive value");' - yes
+- 'assertEquals(expectedRange, renderer.findRangeBounds(dataset), "Expected range [1.0, 1.0] with base excluded");' - yes
+- 'assertEquals(expectedRange, renderer.findRangeBounds(dataset), "Expected range [-2.0, 1.0] with multiple values");' - yes
+- 'assertEquals(expectedRange, renderer.findRangeBounds(dataset), "Expected range [-2.0, 1.0] with null value");' - yes
+- 'assertEquals(expectedRange, renderer.findRangeBounds(dataset), "Expected range [-6.0, 1.0] with multiple series");' - yes
+- 'assertEquals(expectedRange, renderer.findRangeBounds(dataset), "Expected range [-2.0, 1.0] with series 1 invisible");' - yes
+- 'assertEquals("Expected r1 to be equal to r2", r1, r2);' - yes
+
+All provided assert statements meet the specified criteria. The messages are semantically clear and correctly express the purpose of the assert statements.
+

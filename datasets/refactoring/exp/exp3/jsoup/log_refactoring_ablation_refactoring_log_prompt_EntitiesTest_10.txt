@@ -1,0 +1,31 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import static org.junit.Assert.assertEquals;
+
+public class EntitiesTest {
+
+    @Test
+    public void testLetterDigitEntities() {
+        String html = "<p>&sup1;&sup2;&sup3;&frac14;&frac12;&frac34;</p>";
+        Document doc = Jsoup.parse(html);
+        doc.outputSettings().charset("ascii");
+        Element p = doc.select("p").first();
+
+        // Verify HTML content when charset is ASCII
+        assertEquals("HTML content should match the original entities when charset is ASCII", "&sup1;&sup2;&sup3;&frac14;&frac12;&frac34;", p.html());
+
+        // Verify text content when charset is ASCII
+        assertEquals("Text content should be the decoded entities when charset is ASCII", "¹²³¼½¾", p.text());
+
+        // Change charset to UTF-8
+        doc.outputSettings().charset("UTF-8");
+
+        // Verify HTML content when charset is UTF-8
+        assertEquals("HTML content should be the decoded entities when charset is UTF-8", "¹²³¼½¾", p.html());
+    }
+}
+```
+

@@ -1,0 +1,29 @@
+asserts result: 
+ ```java
+public class LookupPaintScaleTest {
+
+    private static final double LOWER_BOUND = 1.0;
+    private static final double UPPER_BOUND = 2.0;
+    private static final Color DEFAULT_PAINT = Color.RED;
+    private static final double EPSILON = 0.0001;
+
+    @Test
+    public void testLowerBound() {
+        LookupPaintScale scale = new LookupPaintScale(LOWER_BOUND, UPPER_BOUND, DEFAULT_PAINT);
+        assertEquals("Lower bound should be set correctly", LOWER_BOUND, scale.getLowerBound(), EPSILON);
+    }
+
+    @Test
+    public void testUpperBound() {
+        LookupPaintScale scale = new LookupPaintScale(LOWER_BOUND, UPPER_BOUND, DEFAULT_PAINT);
+        assertEquals("Upper bound should be set correctly", UPPER_BOUND, scale.getUpperBound(), EPSILON);
+    }
+
+    @Test
+    public void testDefaultPaint() {
+        LookupPaintScale scale = new LookupPaintScale(LOWER_BOUND, UPPER_BOUND, DEFAULT_PAINT);
+        assertEquals("Default paint should be set correctly", DEFAULT_PAINT, scale.getDefaultPaint());
+    }
+}
+```
+

@@ -1,0 +1,5 @@
+asserts result: 
+ Yes
+
+The refactored tests maintain the same functionality as the original test. The original single test method has been split into two separate methods, each focusing on a specific assertion. However, both assertions are still performed using the same `Document` object, which is now set up in a private method `setupTestGetText()`. This ensures that the behavior and the expected outcomes remain consistent.
+

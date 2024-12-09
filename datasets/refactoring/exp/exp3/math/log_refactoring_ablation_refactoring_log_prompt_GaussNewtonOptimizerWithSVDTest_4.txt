@@ -1,0 +1,17 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import org.junit.jupiter.api.Test;
+
+public class MyTest {
+
+    @Override
+    @Test
+    public void testGetIterations() {
+        // this diverges with SVD
+        assertThrows(TooManyEvaluationsException.class, () -> super.testGetIterations());
+    }
+}
+```
+

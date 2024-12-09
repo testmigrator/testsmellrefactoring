@@ -1,0 +1,5 @@
+asserts result: 
+ Yes
+
+The refactored code maintains the same functionality as the original test. The setup steps have been moved to a separate method `setupTestPrintSortedUsage()`, but the logic and the sequence of operations remain the same. The test method `testPrintSortedUsage_Output()` calls this setup method and then performs the assertion, ensuring that the output is still compared against the expected value. Therefore, the functionality is consistent between the original and refactored tests.
+

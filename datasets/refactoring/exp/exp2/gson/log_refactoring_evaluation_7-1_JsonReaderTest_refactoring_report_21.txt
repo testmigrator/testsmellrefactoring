@@ -1,0 +1,5 @@
+asserts result: 
+ Yes
+
+The refactored tests maintain the same functionality as the original test. The original test `testSkipObjectName` has been broken down into three separate tests (`testSkipObjectName_Peek`, `testSkipObjectName_GetPath`, and `testSkipObjectName_ReadInt`), each focusing on a specific aspect of the functionality. The setup for these tests is encapsulated in the `setupTestSkipObjectName` method, ensuring that the initial state and actions up to the point of assertion are consistent with the original test. Each refactored test then performs an individual assertion that corresponds to one of the assertions in the original test, maintaining the overall functionality and coverage.
+

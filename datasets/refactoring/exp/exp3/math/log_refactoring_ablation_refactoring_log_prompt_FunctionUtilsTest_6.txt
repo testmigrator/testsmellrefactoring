@@ -1,0 +1,49 @@
+asserts result: 
+ ```java
+import org.apache.commons.math4.legacy.analysis.differentiation.DerivativeStructure;
+import org.apache.commons.math4.legacy.analysis.differentiation.UnivariateDifferentiableFunction;
+import org.apache.commons.math4.legacy.analysis.function.Constant;
+import org.apache.commons.math4.legacy.analysis.function.Cos;
+import org.apache.commons.math4.legacy.analysis.function.Cosh;
+import org.apache.commons.math4.legacy.analysis.function.Identity;
+import org.apache.commons.math4.legacy.analysis.function.Inverse;
+import org.apache.commons.math4.legacy.analysis.function.Power;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class FunctionUtilsTest {
+
+    private static final double EPS = 1e-10;
+    private static final double A = 1.2345678;
+
+    @Test
+    public void testMultiplyConstantAndIdentity() {
+        UnivariateDifferentiableFunction c = new Constant(4);
+        UnivariateDifferentiableFunction id = new Identity();
+        double expectedValue = 8 * A;
+        double actualValue = FunctionUtils.multiply(c, id, id).value(new DerivativeStructure(1, 1, 0, A)).getPartialDerivative(1);
+        assertEquals(expectedValue, actualValue, EPS);
+    }
+
+    @Test
+    public void testMultiplyInversePowerCos() {
+        UnivariateDifferentiableFunction inv = new Inverse();
+        UnivariateDifferentiableFunction pow = new Power(2.5);
+        UnivariateDifferentiableFunction cos = new Cos();
+        double expectedValue = 1.5 * Math.sqrt(A) * Math.cos(A) - Math.pow(A, 1.5) * Math.sin(A);
+        double actualValue = FunctionUtils.multiply(inv, pow, cos).value(new DerivativeStructure(1, 1, 0, A)).getPartialDerivative(1);
+        assertEquals(expectedValue, actualValue, EPS);
+    }
+
+    @Test
+    public void testMultiplyInversePowerCosh() {
+        UnivariateDifferentiableFunction inv = new Inverse();
+        UnivariateDifferentiableFunction pow = new Power(2.5);
+        UnivariateDifferentiableFunction cosh = new Cosh();
+        double expectedValue = 1.5 * Math.sqrt(A) * Math.cosh(A) + Math.pow(A, 1.5) * Math.sinh(A);
+        double actualValue = FunctionUtils.multiply(inv, pow, cosh).value(new DerivativeStructure(1, 1, 0, A)).getPartialDerivative(1);
+        assertEquals(expectedValue, actualValue, 8 * EPS);
+    }
+}
+```
+

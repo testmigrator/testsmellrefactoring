@@ -1,0 +1,36 @@
+asserts result: 
+ ```java
+import static org.junit.Assert.assertThrows;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.startsWith;
+
+import org.junit.Test;
+
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.Strictness;
+import java.io.IOException;
+import java.io.StringReader;
+
+public class JsonReaderTest {
+
+    @Test
+    public void testEscapedNewlineNotAllowedInStrictMode() {
+        String json = "\"\\\n\"";
+        JsonReader reader = new JsonReader(new StringReader(json));
+        reader.setStrictness(Strictness.STRICT);
+
+        IOException expectedException = assertThrows(
+            "Expected an IOException to be thrown when reading an escaped newline in strict mode",
+            IOException.class,
+            () -> reader.nextString()
+        );
+
+        assertThat(
+            "The exception message should start with 'Cannot escape a newline character in strict mode'",
+            expectedException.getMessage(),
+            startsWith("Cannot escape a newline character in strict mode")
+        );
+    }
+}
+```
+

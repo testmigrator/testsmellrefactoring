@@ -1,0 +1,34 @@
+asserts result: 
+ - 'assertEquals("New", c1.getData(), "Cloned object\'s data should be updated to the new value");' - yes
+- 'assertNotEquals(c1.getData(), comment.getData(), "Cloned object\'s data should not be the same as the original object\'s data after modification");' - yes
+- 'assertFalse(comment.isXmlDeclaration(), "Comment should not be an XML declaration");' - yes
+- 'assertTrue(decl.isXmlDeclaration(), "Declaration should be an XML declaration");' - yes
+- 'assertEquals(expectedSize, a.size(), "The size of attributes should be 3");' - yes
+- 'assertTrue(a.hasKey("Tot"), "Attribute \'Tot\' should exist");' - yes
+- 'assertTrue(a.hasKey("Hello"), "Attribute \'Hello\' should exist");' - yes
+- 'assertTrue(a.hasKey("data-name"), "Attribute \'data-name\' should exist");' - yes
+- 'assertFalse(a.hasKey("tot"), "Attribute \'tot\' should not exist (case-sensitive)");' - yes
+- 'assertTrue(a.hasKeyIgnoreCase("tot"), "Attribute \'tot\' should exist (case-insensitive)");' - yes
+- 'assertEquals("There", a.getIgnoreCase("hEllo"), "Attribute \'hEllo\' should return \'There\' (case-insensitive)");' - yes
+- 'assertEquals(expectedDatasetSize, dataset.size(), "The size of dataset should be 1");' - yes
+- 'assertEquals("Jsoup", dataset.get("name"), "The value of \'name\' in dataset should be \'Jsoup\'");' - yes
+- 'assertEquals("", a.get("tot"), "Attribute \'tot\' should return an empty string");' - yes
+- 'assertEquals("a&p", a.get("Tot"), "Attribute \'Tot\' should return \'a&p\'");' - yes
+- 'assertEquals("a&p", a.getIgnoreCase("tot"), "Attribute \'tot\' should return \'a&p\' (case-insensitive)");' - yes
+- 'assertEquals(expectedHtml, a.html(), "HTML representation of attributes should match expected output");' - yes
+- 'assertEquals(expectedHtml, actualValue, "String representation of attributes should match HTML representation");' - yes
+- 'assertTrue(attributes.hasKey("Tot"), "Attributes should contain key \'Tot\'");' - yes
+- 'assertEquals(value, attributes.get(key), "Attribute \'" + key + "\' should have value \'" + value + "\'");' - yes
+- 'assertEquals("Tot", attr.getKey(), "First attribute key should be \'Tot\'");' - yes
+- 'assertEquals(2, attributes.size(), "Attributes size should be 2 after removing \'Tot\'");' - yes
+- 'assertEquals("Hello", attr.getKey(), "Next attribute key should be \'Hello\'");' - yes
+- 'assertEquals("There", attr.getValue(), "Attribute \'Hello\' should have value \'There\'");' - yes
+- 'assertEquals(2, attributes.size(), "Attributes size should be 2 after removing \'Tot\'");' - yes
+- 'assertEquals("There", attributes.get("Hello"), "Attribute \'Hello\' should still have value \'There\'");' - yes
+- 'assertFalse(attributes.hasKey("Tot"), "Attributes should not contain key \'Tot\'");' - yes
+- 'assertEquals(expectedCount, seen, "The number of attributes seen should match the expected count");' - yes
+- 'assertEquals(expectedValue, attribute.getValue(), "The value of the attribute at index " + index + " should match the expected value");' - yes
+- 'assertTrue(iterator.hasNext(), "Iterator should have elements");' - yes
+
+All provided assert statements meet the criteria for both semantically clear message parameters and correct expression of the purpose of the assert statement.
+

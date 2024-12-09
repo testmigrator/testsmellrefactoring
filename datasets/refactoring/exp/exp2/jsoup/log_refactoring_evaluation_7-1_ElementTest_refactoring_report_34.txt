@@ -1,0 +1,11 @@
+asserts result: 
+ Yes
+
+The refactored tests maintain the same functionality as the original test. The original single test case has been split into three separate test cases, each focusing on a specific aspect of the `wrap` method:
+
+1. **testWrap_SingleDiv**: Tests wrapping with a single div, equivalent to the first part of the original test.
+2. **testWrap_NestedDivs**: Tests wrapping with nested divs, equivalent to the second part of the original test.
+3. **testWrap_ReturnValue**: Tests the return value of the `wrap` method, equivalent to the third assertion in the original test.
+
+Each refactored test case accurately reproduces the behavior and assertions of the corresponding parts of the original test. Therefore, the functionality is consistent.
+

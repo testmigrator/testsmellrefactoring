@@ -1,0 +1,35 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.util.stream.Stream;
+
+public class LookupPaintScaleTest {
+
+    @DisplayName("Test Serialization of LookupPaintScale")
+    @ParameterizedTest(name = "Test with {0}")
+    @MethodSource("provideTestCases")
+    public void testSerialization(LookupPaintScale original, LookupPaintScale expected) {
+        LookupPaintScale serialized = TestUtils.serialised(original);
+        assertEquals(expected, serialized, "Serialized object should be equal to the original");
+    }
+
+    private static Stream<Arguments> provideTestCases() {
+        return Stream.of(
+            Arguments.of(new LookupPaintScale(), new LookupPaintScale()),
+            Arguments.of(createComplexLookupPaintScale(), createComplexLookupPaintScale())
+        );
+    }
+
+    private static LookupPaintScale createComplexLookupPaintScale() {
+        LookupPaintScale scale = new LookupPaintScale(1.0, 2.0, new GradientPaint(1.0f, 2.0f, Color.RED, 3.0f, 4.0f, Color.YELLOW));
+        scale.add(1.5, new GradientPaint(1.1f, 2.2f, Color.RED, 3.3f, 4.4f, Color.BLUE));
+        return scale;
+    }
+}
+```
+

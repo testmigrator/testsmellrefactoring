@@ -1,0 +1,19 @@
+asserts result: 
+ ```java
+@Test
+public void testQRColumnsPermutation() {
+    // Define meaningful variable names for magic numbers
+    double[][] matrix = {{1, -1}, {0, 2}, {1, -2}};
+    double[] vector = {4, 6, 1};
+    double tolerance = 1e-6; // Tolerance for floating-point comparisons
+
+    LinearProblem problem = new LinearProblem(matrix, vector);
+
+    Optimum optimum = optimizer.optimize(problem.getBuilder().build());
+
+    Assert.assertEquals(0, optimum.getRMS(), tolerance);
+    assertEquals(tolerance, optimum.getPoint(), 7, 3);
+    assertEquals(tolerance, optimum.getResiduals(), 0, 0, 0);
+}
+```
+

@@ -1,0 +1,24 @@
+asserts result: 
+ ```java
+import org.junit.Test;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
+
+public class ArchiveUtilsTest {
+
+    @Test
+    public void testMatchAsciiBufferWithBuffer1() {
+        final byte[] buffer1 = { 'a', 'b', 'c' };
+        assertTrue("Buffer1 should match 'abc'", ArchiveUtils.matchAsciiBuffer("abc", buffer1));
+        assertFalse("Buffer1 should not match 'abc\\0'", ArchiveUtils.matchAsciiBuffer("abc\0", buffer1));
+    }
+
+    @Test
+    public void testMatchAsciiBufferWithBuffer2() {
+        final byte[] buffer2 = { 'd', 'e', 'f', 0 };
+        assertTrue("Buffer2 should match 'def\\0'", ArchiveUtils.matchAsciiBuffer("def\0", buffer2));
+        assertFalse("Buffer2 should not match 'def'", ArchiveUtils.matchAsciiBuffer("def", buffer2));
+    }
+}
+```
+

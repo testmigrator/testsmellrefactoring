@@ -1,0 +1,26 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+@DisplayName("Tests for BR element handling")
+public class BrElementHandlingTest {
+
+    @ParameterizedTest(name = "Test BR element with space: {0}")
+    @CsvSource({
+            "<p>Hello<br>there</p>, Hello there",
+            "<p>Hello <br> there</p>, Hello there"
+    })
+    public void testBrHasSpace(String html, String expectedText) {
+        Document doc = Jsoup.parse(html);
+        assertEquals(expectedText, doc.text(), "The text content should match after parsing the HTML");
+        assertEquals(expectedText, doc.select("p").first().ownText(), "The own text of the paragraph should match after parsing the HTML");
+    }
+}
+```
+

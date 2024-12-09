@@ -1,0 +1,98 @@
+asserts result: 
+ - `assertEquals("<p><span>Two</span><span>Three</span></p>", TextUtil.stripNewlines(clone.outerHtml()), "Cloned element should have appended child");`
+  - **Reason**: The message "Cloned element should have appended child" is not semantically clear. It does not specify what the expected outcome is in terms of the HTML structure.
+
+- `assertEquals("<div><p>One</p><p><span>Two</span></p></div>", TextUtil.stripNewlines(doc.body().html()), "Original document should not be modified");`
+  - **Reason**: The message "Original document should not be modified" is not semantically clear. It does not specify what aspect of the document should not be modified.
+
+- `assertNotNull(clone.parent(), "Cloned element should have a parent after adoption");`
+  - **Reason**: The message "Cloned element should have a parent after adoption" is semantically clear and correctly expresses the purpose of the assert statement.
+
+- `assertEquals("<div><p>One</p><p><span>Two</span></p></div><p><span>Two</span><span>Three</span></p>", TextUtil.stripNewlines(doc.body().html()), "Cloned element should be adopted into the document");`
+  - **Reason**: The message "Cloned element should be adopted into the document" is semantically clear and correctly expresses the purpose of the assert statement.
+
+- `assertEquals(1, d.childNodeSize(), "Original div should have 1 child node");`
+  - **Reason**: The message "Original div should have 1 child node" is semantically clear and correctly expresses the purpose of the assert statement.
+
+- `assertEquals(0, d2.childNodeSize(), "Cloned div should have 0 child nodes");`
+  - **Reason**: The message "Cloned div should have 0 child nodes" is semantically clear and correctly expresses the purpose of the assert statement.
+
+- `assertEquals(1, p.childNodeSize(), "Original p should have 1 child node");`
+  - **Reason**: The message "Original p should have 1 child node" is semantically clear and correctly expresses the purpose of the assert statement.
+
+- `assertEquals(0, p2.childNodeSize(), "Cloned p should have 0 child nodes");`
+  - **Reason**: The message "Cloned p should have 0 child nodes" is semantically clear and correctly expresses the purpose of the assert statement.
+
+- `assertEquals("", p2.text(), "Cloned p should have no text content");`
+  - **Reason**: The message "Cloned p should have no text content" is semantically clear and correctly expresses the purpose of the assert statement.
+
+- `assertEquals(TEXT_CONTENT, t2.text(), "Cloned text node should have the same text content");`
+  - **Reason**: The message "Cloned text node should have the same text content" is semantically clear and correctly expresses the purpose of the assert statement.
+
+- `assertEquals(P_CLASS, p2.className(), "Cloned p should have the same class name");`
+  - **Reason**: The message "Cloned p should have the same class name" is semantically clear and correctly expresses the purpose of the assert statement.
+
+- `assertEquals(P_CLASS, p.className(), "Original p should retain its class name after removing from cloned p");`
+  - **Reason**: The message "Original p should retain its class name after removing from cloned p" is semantically clear and correctly expresses the purpose of the assert statement.
+
+- `assertEquals(1, d2.childNodeSize(), "Cloned div should have 1 child node after appending");`
+  - **Reason**: The message "Cloned div should have 1 child node after appending" is semantically clear and correctly expresses the purpose of the assert statement.
+
+- `assertEquals(NEW_TEXT_CONTENT, d2.text(), "Cloned div should have the new text content");`
+  - **Reason**: The message "Cloned div should have the new text content" is semantically clear and correctly expresses the purpose of the assert statement.
+
+- `assertEquals(TEXT_CONTENT, d.text(), "Original div should retain its original text content");`
+  - **Reason**: The message "Original div should retain its original text content" is semantically clear and correctly expresses the purpose of the assert statement.
+
+- `assertEquals(BASE_URI, d2.baseUri(), "Cloned div should have the same base URI");`
+  - **Reason**: The message "Cloned div should have the same base URI" is semantically clear and correctly expresses the purpose of the assert statement.
+
+- `assertEquals(0, doc.select("i").size(), "No <i> tags should remain after changing the tag name.");`
+  - **Reason**: The message "No <i> tags should remain after changing the tag name." is semantically clear and correctly expresses the purpose of the assert statement.
+
+- `assertEquals(1, doc.select("em").size(), "One <em> tag should be present after changing the tag name.");`
+  - **Reason**: The message "One <em> tag should be present after changing the tag name." is semantically clear and correctly expresses the purpose of the assert statement.
+
+- `assertEquals(expectedHtml, doc.select("div").first().html(), "The content of the <div> should be updated to <em>Hello</em>.");`
+  - **Reason**: The message "The content of the <div> should be updated to <em>Hello</em>." is semantically clear and correctly expresses the purpose of the assert statement.
+
+- `assertTrue(doc.html().contains(doc.select("title").outerHtml()), "Document HTML should contain the outer HTML of the title element");`
+  - **Reason**: The message "Document HTML should contain the outer HTML of the title element" is semantically clear and correctly expresses the purpose of the assert statement.
+
+- `assertTrue(doc.html().contains(doc.select("div").outerHtml()), "Document HTML should contain the outer HTML of the div element");`
+  - **Reason**: The message "Document HTML should contain the outer HTML of the div element" is semantically clear and correctly expresses the purpose of the assert statement.
+
+- `assertEquals(expectedTextNodesCount, textNodes.size(), "The number of text nodes should be 3");`
+  - **Reason**: The message "The number of text nodes should be 3" is semantically clear and correctly expresses the purpose of the assert statement.
+
+- `assertEquals("One ", textNodes.get(0).text(), "The first text node should contain 'One '");`
+  - **Reason**: The message "The first text node should contain 'One '" is semantically clear and correctly expresses the purpose of the assert statement.
+
+- `assertEquals(" Three ", textNodes.get(1).text(), "The second text node should contain ' Three '");`
+  - **Reason**: The message "The second text node should contain ' Three '" is semantically clear and correctly expresses the purpose of the assert statement.
+
+- `assertEquals(" Four", textNodes.get(2).text(), "The third text node should contain ' Four'");`
+  - **Reason**: The message "The third text node should contain ' Four'" is semantically clear and correctly expresses the purpose of the assert statement.
+
+- `assertEquals(expectedTextNodesCount, brElement.textNodes().size(), "The <br> element should have no text nodes");`
+  - **Reason**: The message "The <br> element should have no text nodes" is semantically clear and correctly expresses the purpose of the assert statement.
+
+- `assertEquals(expectedFinalText, p.text(), "The final text of the paragraph should match the expected value.");`
+  - **Reason**: The message "The final text of the paragraph should match the expected value." is semantically clear and correctly expresses the purpose of the assert statement.
+
+- `assertEquals(expectedOwnText, p.ownText(), "The own text of the paragraph should match the expected value.");`
+  - **Reason**: The message "The own text of the paragraph should match the expected value." is semantically clear and correctly expresses the purpose of the assert statement.
+
+- `assertEquals(expectedTextNodesCount, p.textNodes().size(), "The number of text nodes should match the expected count after manipulation.");`
+  - **Reason**: The message "The number of text nodes should match the expected count after manipulation." is semantically clear and correctly expresses the purpose of the assert statement.
+
+- `assertEquals(expectedScriptDataSize, scriptData.size(), "Script element should contain exactly one data node");`
+  - **Reason**: The message "Script element should contain exactly one data node" is semantically clear and correctly expresses the purpose of the assert statement.
+
+**Summary**:
+- Non-compliant assert statements:
+  - `assertEquals("<p><span>Two</span><span>Three</span></p>", TextUtil.stripNewlines(clone.outerHtml()), "Cloned element should have appended child");`
+  - `assertEquals("<div><p>One</p><p><span>Two</span></p></div>", TextUtil.stripNewlines(doc.body().html()), "Original document should not be modified");`
+
+All other assert statements meet the criteria.
+

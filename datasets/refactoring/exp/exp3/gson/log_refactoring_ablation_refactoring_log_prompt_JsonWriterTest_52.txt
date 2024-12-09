@@ -1,0 +1,32 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+
+import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.io.StringWriter;
+import com.google.gson.stream.JsonWriter;
+
+class JsonWriterTest {
+
+    @Test
+    public void testClosedWriterThrowsOnFlush() throws IOException {
+        // Arrange
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter writer = new JsonWriter(stringWriter);
+
+        // Act
+        writer.beginArray();
+        writer.endArray();
+        writer.close();
+
+        // Assert
+        var exception = assertThrows(IllegalStateException.class, () -> writer.flush(), "Expected IllegalStateException to be thrown when flushing a closed JsonWriter");
+        assertThat(exception.getMessage(), equalTo("JsonWriter is closed."));
+    }
+}
+```
+

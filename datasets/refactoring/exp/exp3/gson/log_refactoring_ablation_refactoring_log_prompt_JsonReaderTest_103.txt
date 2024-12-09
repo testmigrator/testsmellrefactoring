@@ -1,0 +1,42 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.MalformedJsonException;
+import com.google.gson.stream.Strictness;
+
+import org.junit.jupiter.api.Test;
+
+class JsonReaderTest {
+
+    @Test
+    public void testLenientPartialNonExecutePrefixNextString() throws IOException {
+        JsonReader reader = new JsonReader(reader(")]}' []"));
+        reader.setStrictness(Strictness.LENIENT);
+        String result = reader.nextString();
+        assertEquals(")", result, "Expected the next string to be \")\"");
+    }
+
+    @Test
+    public void testLenientPartialNonExecutePrefixMalformedJsonException() {
+        JsonReader reader = new JsonReader(reader(")]}' []"));
+        reader.setStrictness(Strictness.LENIENT);
+        reader.nextString(); // Consume the first token
+
+        var e = assertThrows(MalformedJsonException.class, () -> reader.nextString());
+        assertEquals(
+            "Unexpected value at line 1 column 3 path $\n" +
+            "See https://github.com/google/gson/blob/main/Troubleshooting.md#malformed-json",
+            e.getMessage(),
+            "Expected MalformedJsonException with specific message"
+        );
+    }
+
+    private java.io.Reader reader(String content) {
+        return new java.io.StringReader(content);
+    }
+}
+```
+

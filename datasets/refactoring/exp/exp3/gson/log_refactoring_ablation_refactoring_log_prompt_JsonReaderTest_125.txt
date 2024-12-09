@@ -1,0 +1,89 @@
+asserts result: 
+ ```java
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
+import com.google.gson.stream.Strictness;
+import org.junit.jupiter.api.Test;
+
+class JsonReaderTest {
+
+    @Test
+    public void testEmptyStringName_PeekBeginObject() throws Exception {
+        JsonReader reader = new JsonReader(new StringReader("{\"\":true}"));
+        reader.setStrictness(Strictness.LENIENT);
+        assertThat(reader.peek()).isEqualTo(JsonToken.BEGIN_OBJECT).withFailMessage("Expected BEGIN_OBJECT token");
+    }
+
+    @Test
+    public void testEmptyStringName_BeginObject() throws Exception {
+        JsonReader reader = new JsonReader(new StringReader("{\"\":true}"));
+        reader.setStrictness(Strictness.LENIENT);
+        reader.beginObject();
+        assertThat(reader.peek()).isEqualTo(JsonToken.NAME).withFailMessage("Expected NAME token after beginObject");
+    }
+
+    @Test
+    public void testEmptyStringName_NextName() throws Exception {
+        JsonReader reader = new JsonReader(new StringReader("{\"\":true}"));
+        reader.setStrictness(Strictness.LENIENT);
+        reader.beginObject();
+        assertThat(reader.nextName()).isEqualTo("").withFailMessage("Expected empty string as name");
+    }
+
+    @Test
+    public void testEmptyStringName_PeekBoolean() throws Exception {
+        JsonReader reader = new JsonReader(new StringReader("{\"\":true}"));
+        reader.setStrictness(Strictness.LENIENT);
+        reader.beginObject();
+        reader.nextName();
+        assertThat(reader.peek()).isEqualTo(JsonToken.BOOLEAN).withFailMessage("Expected BOOLEAN token after nextName");
+    }
+
+    @Test
+    public void testEmptyStringName_NextBoolean() throws Exception {
+        JsonReader reader = new JsonReader(new StringReader("{\"\":true}"));
+        reader.setStrictness(Strictness.LENIENT);
+        reader.beginObject();
+        reader.nextName();
+        assertThat(reader.nextBoolean()).isTrue().withFailMessage("Expected true boolean value");
+    }
+
+    @Test
+    public void testEmptyStringName_PeekEndObject() throws Exception {
+        JsonReader reader = new JsonReader(new StringReader("{\"\":true}"));
+        reader.setStrictness(Strictness.LENIENT);
+        reader.beginObject();
+        reader.nextName();
+        reader.nextBoolean();
+        assertThat(reader.peek()).isEqualTo(JsonToken.END_OBJECT).withFailMessage("Expected END_OBJECT token after nextBoolean");
+    }
+
+    @Test
+    public void testEmptyStringName_EndObject() throws Exception {
+        JsonReader reader = new JsonReader(new StringReader("{\"\":true}"));
+        reader.setStrictness(Strictness.LENIENT);
+        reader.beginObject();
+        reader.nextName();
+        reader.nextBoolean();
+        reader.endObject();
+        assertThat(reader.peek()).isEqualTo(JsonToken.END_DOCUMENT).withFailMessage("Expected END_DOCUMENT token after endObject");
+    }
+
+    @Test
+    public void testEmptyStringName_ExceptionHandling() {
+        JsonReader reader = new JsonReader(new StringReader("{\"\":true}"));
+        reader.setStrictness(Strictness.LENIENT);
+        assertThrows(IOException.class, () -> {
+            reader.beginObject();
+            reader.nextName();
+            reader.nextBoolean();
+            reader.endObject();
+            reader.nextName(); // This should throw an IOException
+        });
+    }
+}
+```
+

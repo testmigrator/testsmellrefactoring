@@ -1,0 +1,57 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+class ElementTest {
+
+    @Test
+    public void testInitialClassNames() {
+        Document doc = Jsoup.parse("<div class=\"c1 c2\">C</div>");
+        Element div = doc.select("div").get(0);
+
+        assertEquals("c1 c2", div.className(), "Initial class name should be 'c1 c2'");
+        
+        Set<String> classNames = div.classNames();
+        assertEquals(2, classNames.size(), "Initial class names size should be 2");
+        assertTrue(classNames.contains("c1"), "Initial class names should contain 'c1'");
+        assertTrue(classNames.contains("c2"), "Initial class names should contain 'c2'");
+    }
+
+    @Test
+    public void testSetModificationDoesNotAffectElement() {
+        Document doc = Jsoup.parse("<div class=\"c1 c2\">C</div>");
+        Element div = doc.select("div").get(0);
+
+        Set<String> classNames = div.classNames();
+        classNames.add("c3");
+
+        assertEquals(2, div.classNames().size(), "Class names size should remain 2 after modifying the set");
+        assertEquals("c1 c2", div.className(), "Class name should remain 'c1 c2' after modifying the set");
+    }
+
+    @Test
+    public void testUpdateClassNames() {
+        Document doc = Jsoup.parse("<div class=\"c1 c2\">C</div>");
+        Element div = doc.select("div").get(0);
+
+        Set<String> newClassNames = new LinkedHashSet<>();
+        newClassNames.addAll(div.classNames());
+        newClassNames.add("c3");
+
+        div.classNames(newClassNames);
+
+        assertEquals("c1 c2 c3", div.className(), "Updated class name should be 'c1 c2 c3'");
+
+        Set<String> updatedClassNames = div.classNames();
+        assertEquals(3, updatedClassNames.size(), "Updated class names size should be 3");
+        assertTrue(updatedClassNames.contains("c1"), "Updated class names should contain 'c1'");
+        assertTrue(updatedClassNames.contains("c2"), "Updated class names should contain 'c2'");
+        assertTrue(updatedClassNames.contains("c3"), "Updated class names should contain 'c3'");
+    }
+}
+```
+

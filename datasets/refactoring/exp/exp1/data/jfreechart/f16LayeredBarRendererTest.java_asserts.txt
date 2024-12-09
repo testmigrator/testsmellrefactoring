@@ -1,0 +1,12 @@
+total tests: 3
+total asserts: 10
+assertEquals(r1, r2, "Initial state of two LayeredBarRenderers should be equal");
+assertNotEquals(r1, r2, "LayeredBarRenderers should not be equal after setting series bar width on one instance");
+assertEquals(r1, r2, "LayeredBarRenderers should be equal after setting the same series bar width on both instances");
+assertNotEquals(r1, r2, "LayeredBarRenderers should not be equal after setting base on one instance");
+assertEquals(r1, r2, "LayeredBarRenderers should be equal after setting the same base on both instances");
+assertEquals(r1, r2, "LayeredBarRenderer instances should be equal");
+assertEquals(h1, h2, "Hash codes of equal LayeredBarRenderer instances should be equal");
+assertNotSame(r1, r2, "The cloned object should not be the same instance as the original");
+assertSame(r1.getClass(), r2.getClass(), "The cloned object should be of the same class as the original");
+assertEquals(r1, r2, "The cloned object should be equal to the original");

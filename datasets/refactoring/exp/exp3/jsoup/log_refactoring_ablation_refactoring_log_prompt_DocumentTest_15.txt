@@ -1,0 +1,40 @@
+asserts result: 
+ ```java
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.junit.Test;
+import java.nio.charset.Charset;
+
+import static org.junit.Assert.assertEquals;
+
+public class DocumentTest {
+
+    private static final String CHARSET_UTF8 = "UTF-8";
+
+    @Test
+    public void testMetaCharsetUpdateNoCharsetMetaElementCreated() {
+        final Document docNoCharset = Document.createShell("");
+        docNoCharset.updateMetaCharsetElement(true);
+        docNoCharset.charset(Charset.forName(CHARSET_UTF8));
+
+        Element metaElement = docNoCharset.select("meta[charset]").first();
+        assertEquals("Meta element with charset attribute should be created", CHARSET_UTF8, metaElement.attr("charset"));
+    }
+
+    @Test
+    public void testMetaCharsetUpdateNoCharsetHtmlStructure() {
+        final Document docNoCharset = Document.createShell("");
+        docNoCharset.updateMetaCharsetElement(true);
+        docNoCharset.charset(Charset.forName(CHARSET_UTF8));
+
+        final String expectedHtmlCharsetUTF8 = "<html>\n" +
+                " <head>\n" +
+                "  <meta charset=\"" + CHARSET_UTF8 + "\">\n" +
+                " </head>\n" +
+                " <body></body>\n" +
+                "</html>";
+        assertEquals("HTML structure should match the expected output", expectedHtmlCharsetUTF8, docNoCharset.outerHtml());
+    }
+}
+```
+

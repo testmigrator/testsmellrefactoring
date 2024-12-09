@@ -1,0 +1,32 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Comment;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class CommentTest {
+
+    @Test
+    public void testCommentToString() {
+        Comment comment = new Comment("This is one heck of a comment!", "");
+        assertEquals("Comment string representation should match", "<!-- This is one heck of a comment! -->", comment.toString());
+    }
+
+    @Test
+    public void testCommentInDiv() {
+        Document doc = Jsoup.parse("<div><!-- comment--></div>");
+        assertEquals("HTML content of div should match", "<div>\n <!-- comment-->\n</div>", doc.body().html());
+    }
+
+    @Test
+    public void testCommentInParagraph() {
+        Document doc = Jsoup.parse("<p>One<!-- comment -->Two</p>");
+        assertEquals("HTML content of paragraph should match", "<p>One<!-- comment -->Two</p>", doc.body().html());
+        assertEquals("Text content of paragraph should match", "OneTwo", doc.text());
+    }
+}
+```
+

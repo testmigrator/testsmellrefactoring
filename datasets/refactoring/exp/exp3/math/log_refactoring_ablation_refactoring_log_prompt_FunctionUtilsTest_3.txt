@@ -1,0 +1,49 @@
+asserts result: 
+ ```java
+import org.apache.commons.math4.legacy.analysis.function.Identity;
+import org.apache.commons.math4.legacy.analysis.function.Constant;
+import org.apache.commons.math4.legacy.analysis.function.Minus;
+import org.apache.commons.math4.legacy.analysis.function.Inverse;
+import org.apache.commons.math4.legacy.analysis.FunctionUtils;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class FunctionUtilsTest {
+
+    private static final double EPS = 1e-6;
+
+    @Test
+    public void testAddInverseMinusConstantIdentity() {
+        UnivariateFunction id = new Identity();
+        UnivariateFunction c = new Constant(4);
+        UnivariateFunction m = new Minus();
+        UnivariateFunction inv = new Inverse();
+
+        double expectedResult = 4.5;
+        double actualResult = FunctionUtils.add(inv, m, c, id).value(2);
+        assertEquals(expectedResult, actualResult, EPS);
+    }
+
+    @Test
+    public void testAddConstantIdentity() {
+        UnivariateFunction id = new Identity();
+        UnivariateFunction c = new Constant(4);
+
+        double expectedResult = 6; // 4 + 2
+        double actualResult = FunctionUtils.add(c, id).value(2);
+        assertEquals(expectedResult, actualResult, EPS);
+    }
+
+    @Test
+    public void testAddConstantComposeMinusIdentity() {
+        UnivariateFunction id = new Identity();
+        UnivariateFunction c = new Constant(4);
+        UnivariateFunction m = new Minus();
+
+        double expectedResult = 2; // 4 - 2
+        double actualResult = FunctionUtils.add(c, FunctionUtils.compose(m, id)).value(2);
+        assertEquals(expectedResult, actualResult, EPS);
+    }
+}
+```
+

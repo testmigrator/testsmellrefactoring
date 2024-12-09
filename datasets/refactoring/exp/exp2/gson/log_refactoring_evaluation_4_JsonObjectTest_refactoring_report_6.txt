@@ -1,0 +1,11 @@
+asserts result: 
+ Yes
+
+The refactored tests maintain the same functionality as the original test. The original test `testAddingCharacterProperties` has been split into three separate tests, each focusing on a specific aspect of the functionality:
+
+1. `testAddingCharacterProperties_HasProperty` checks if the JSON object contains the property.
+2. `testAddingCharacterProperties_GetProperty` verifies that the JSON element is not null and its string representation matches the expected value.
+3. `testAddingCharacterProperties_GetAsCharacter` ensures that the character value retrieved from the JSON element matches the expected value.
+
+The `setupTestAddingCharacterProperties` method initializes the common setup required for all these tests, ensuring that the tests are consistent with the original test's behavior.
+

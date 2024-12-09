@@ -1,0 +1,34 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.OutputSettings;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class DocumentTest {
+
+    @Test
+    public void testHtmlAppendablePrettyPrintFalse() {
+        String htmlContent = "<html><head><title>Hello</title></head><body><p>One</p><p>Two</p></body></html>";
+        Document document = Jsoup.parse(htmlContent);
+        OutputSettings outputSettings = new OutputSettings();
+        outputSettings.prettyPrint(false);
+        document.outputSettings(outputSettings);
+
+        StringWriter stringWriter = new StringWriter();
+        document.html(stringWriter);
+
+        assertEquals(htmlContent, stringWriter.toString());
+    }
+
+    @Test
+    public void testOutputSettingsPrettyPrintFalse() {
+        OutputSettings outputSettings = new OutputSettings();
+        outputSettings.prettyPrint(false);
+
+        assertFalse(outputSettings.prettyPrint());
+    }
+}
+```
+

@@ -1,0 +1,7 @@
+total tests: 2
+total asserts: 5
+assertEquals(expectedZero, TypeHandler.createNumber("0"), "The result for creating a number from '0' should be 0L");
+assertEquals(expectedZeroPointZero, TypeHandler.createNumber("0.0"), "The result for creating a number from '0.0' should be 0d");
+assertEquals(Converter.PATH, typeHandler.getConverter(Path.class), "Default converter should be PATH");
+assertEquals(PATH_CONVERTER, typeHandler.getConverter(Path.class), "Custom converter should be PATH_CONVERTER");
+assertEquals(Converter.DEFAULT, typeHandler.getConverter(Path.class), "After removal, default converter should revert to DEFAULT");

@@ -1,0 +1,80 @@
+Input Parameters:
+Test Code:
+ @Test
+    public void testSmallError() {
+        final Random randomizer = new Random(53882150042L);
+        double maxError = 0;
+        for (int degree = 0; degree < 10; ++degree) {
+            final PolynomialFunction p = buildRandomPolynomial(degree, randomizer);
+            final SimpleCurveFitter fitter = PolynomialCurveFitter.create(degree);
+
+            final WeightedObservedPoints obs = new WeightedObservedPoints();
+            for (double x = -1.0; x < 1.0; x += 0.01) {
+                obs.add(1.0, x, p.value(x) + 0.1 * randomizer.nextGaussian());
+            }
+
+            final PolynomialFunction fitted = new PolynomialFunction(fitter.fit(obs.toList()));
+
+            for (double x = -1.0; x < 1.0; x += 0.01) {
+                final double error = JdkMath.abs(p.value(x) - fitted.value(x)) /
+                    (1.0 + JdkMath.abs(p.value(x)));
+                maxError = JdkMath.max(maxError, error);
+                Assert.assertTrue(JdkMath.abs(error) < 0.1);
+            }
+        }
+        Assert.assertTrue(maxError > 0.01);
+    }
+Context: /org/apache/commons/math4/legacy/fitting/PolynomialCurveFitter
+Smell List: ['Assertion_Roulette', 'Conditional_Test_Logic']
+Smell Description List: ['Test Smell Type：Assertion Roulette\n\nFeature:\nA test method contains more than one assertion statement without an explanation/message (parameter in the assertion method).\n', 'Test Smell Type：Conditional Test Logic\n\nFeature:\nA test method that contains one or more control statements (i.e if, switch, conditional expression, for, foreach and while statement).\n']
+Refactoring DSL: ['RefactorRule:\n  SmellType: Assertion Roulette\n  Description: Add descriptive messages to assert statements to improve readability and maintainability.\n  Steps:\n    - Step:\n        Description: "Add descriptive message to each assert statement(except assertThat, assertThrows)."\n        Action: AddMessageToAssert\n        Parameters:\n          MessagePattern: "{assertionMessage}"\n  Example:\n    Before: |\n      @Test\n      public void T() {\n        stmt\n        assert_1\n        ...\n        assert_n\n        stmt\'\n      }\n    After: |\n      @Test\n      public void T() {\n        stmt\n        assert_1(..., "Descriptive message for assert statement")\n        ...\n        assert_n(..., "Descriptive message for assert statement")\n        stmt\'\n      }\n    Variables:\n      assertionMessage: "Descriptive message for assert statement"\n', 'RefactorRule:\n  SmellType: Conditional Test Logic\n  Description: "Extract complex control flow logic into separate helper methods to improve readability and testability."\n  Steps:\n    - Step:\n        Description: "Identify complex control flow constructs"\n        Action: IdentifyComplexControlFlow\n        Parameters:\n          TargetType: Method\n    - Step:\n        Description: "Extract control flow logic into a separate helper method"\n        Action: ExtractMethod\n        Parameters:\n          TargetType: Method\n          SourcePattern: |\n            (if|switch|for|while|do-while) ({condition}) {\n                {statements}\n            }\n          ExtractedMethod: |\n            private boolean/void helperMethodName() {\n                {extractedStatements}\n            }\n    - Step:\n        Description: "Replace complex control flow with a call to the helper method"\n        Action: ReplaceControlFlow\n        Parameters:\n          SourcePattern: |\n            (if|switch|for|while|do-while) ({condition}) {\n                {statements}\n            }\n          ReplacementPattern: |\n            helperMethodName();\n  Example:\n    Before: |\n      @Test\n      public void complexTest() {\n          if (condition1 && condition2) {\n              if (condition3) {\n                  doSomething();\n              } else {\n                  doSomethingElse();\n              }\n          } else {\n              doDefault();\n          }\n      }\n    After: |\n      private boolean isComplexConditionMet() {\n          return condition1 && condition2 && condition3;\n      }\n\n      private void handleComplexScenario() {\n          if (isComplexConditionMet()) {\n              doSomething();\n          } else {\n              doSomethingElse();\n          }\n      }\n\n      @Test\n      public void complexTest() {\n          handleComplexScenario();\n          doDefault();\n      }\n']
+Checkpoints: ['[ ] All assert statements have been added with clear explanatory messages.\n', '[ ] All conditional test logic has been refactored to use JUnit 5’s conditional test execution feature, with the condition verified in an external method assigned via the @EnabledIf annotation.\n']
+
+Refactored Code: 
+ 
+@Test
+public void testSmallError() {
+    final Random randomizer = new Random(53882150042L);
+    double maxError = 0;
+
+    for (int degree = 0; degree < 10; ++degree) {
+        final PolynomialFunction p = buildRandomPolynomial(degree, randomizer);
+        final SimpleCurveFitter fitter = PolynomialCurveFitter.create(degree);
+
+        final WeightedObservedPoints obs = new WeightedObservedPoints();
+        addObservations(obs, p, randomizer);
+
+        final PolynomialFunction fitted = new PolynomialFunction(fitter.fit(obs.toList()));
+
+        double currentMaxError = computeMaxError(p, fitted, randomizer);
+        maxError = Math.max(maxError, currentMaxError);
+        assertMaxError(currentMaxError, degree);
+    }
+    assertOverallMaxError(maxError);
+}
+
+private void addObservations(WeightedObservedPoints obs, PolynomialFunction p, Random randomizer) {
+    for (double x = -1.0; x < 1.0; x += 0.01) {
+        obs.add(1.0, x, p.value(x) + 0.1 * randomizer.nextGaussian());
+    }
+}
+
+private double computeMaxError(PolynomialFunction p, PolynomialFunction fitted, Random randomizer) {
+    double maxError = 0;
+    for (double x = -1.0; x < 1.0; x += 0.01) {
+        final double error = Math.abs(p.value(x) - fitted.value(x)) /
+            (1.0 + Math.abs(p.value(x)));
+        maxError = Math.max(maxError, error);
+    }
+    return maxError;
+}
+
+private void assertMaxError(double currentMaxError, int degree) {
+    assertTrue("Error for degree " + degree + " exceeds acceptable threshold", currentMaxError < 0.1);
+}
+
+private void assertOverallMaxError(double maxError) {
+    assertTrue("Overall maximum error is too small", maxError > 0.01);
+}
+
+

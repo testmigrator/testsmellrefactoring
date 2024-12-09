@@ -1,0 +1,63 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.jfree.chart.axis.AxisLocation;
+import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.legend.PaintScaleLegend;
+import org.jfree.chart.renderer.LookupPaintScale;
+import org.jfree.chart.renderer.GrayPaintScale;
+import java.awt.Color;
+import java.awt.GradientPaint;
+import java.awt.BasicStroke;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+
+public class PaintScaleLegendTest {
+
+    private PaintScaleLegend l1;
+    private PaintScaleLegend l2;
+
+    @BeforeEach
+    public void setUp() {
+        l1 = new PaintScaleLegend(new GrayPaintScale(), new NumberAxis("X"));
+        l2 = new PaintScaleLegend(new GrayPaintScale(), new NumberAxis("X"));
+    }
+
+    @Test
+    public void testDefaultInstances() {
+        assertEquals(l1, l2, "Default instances should be equal");
+        assertEquals(l2, l1, "Default instances should be equal");
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "setScale, new LookupPaintScale(), new LookupPaintScale()",
+        "setAxis, new NumberAxis('Axis 2'), new NumberAxis('Axis 2')",
+        "setAxisLocation, AxisLocation.BOTTOM_OR_RIGHT, AxisLocation.BOTTOM_OR_RIGHT",
+        "setAxisOffset, 99.0, 99.0",
+        "setStripWidth, 99.0, 99.0",
+        "setStripOutlineVisible, true, true",
+        "setStripOutlinePaint, new GradientPaint(1.0f, 2.0f, Color.RED, 3.0f, 4.0f, Color.BLUE), new GradientPaint(1.0f, 2.0f, Color.RED, 3.0f, 4.0f, Color.BLUE)",
+        "setStripOutlineStroke, new BasicStroke(1.1f), new BasicStroke(1.1f)",
+        "setBackgroundPaint, new GradientPaint(1.0f, 2.0f, Color.RED, 3.0f, 4.0f, Color.BLUE), new GradientPaint(1.0f, 2.0f, Color.RED, 3.0f, 4.0f, Color.BLUE)",
+        "setSubdivisionCount, 99, 99"
+    })
+    public void testPropertyEquality(String methodName, Object value1, Object value2) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        invokeMethod(l1, methodName, value1);
+        assertNotEquals(l1, l2, "Objects should not be equal after setting " + methodName);
+
+        invokeMethod(l2, methodName, value2);
+        assertEquals(l1, l2, "Objects should be equal after setting " + methodName);
+    }
+
+    private void invokeMethod(PaintScaleLegend legend, String methodName, Object value) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        var method = PaintScaleLegend.class.getMethod(methodName, value.getClass());
+        method.invoke(legend, value);
+    }
+}
+```
+

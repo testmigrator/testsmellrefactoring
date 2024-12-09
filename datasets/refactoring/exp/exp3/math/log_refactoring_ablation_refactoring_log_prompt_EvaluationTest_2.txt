@@ -1,0 +1,58 @@
+asserts result: 
+ ```java
+import org.apache.commons.math3.linear.ArrayRealVector;
+import org.apache.commons.math3.linear.DiagonalMatrix;
+import org.apache.commons.math3.linear.MatrixUtils;
+import org.apache.commons.math3.linear.RealMatrix;
+import org.apache.commons.math3.linear.RealVector;
+import org.apache.commons.math3.optim.nonlinear.vector.leastsquares.LeastSquaresBuilder;
+import org.apache.commons.math3.optim.nonlinear.vector.leastsquares.LeastSquaresProblem.Evaluation;
+import org.apache.commons.math3.optim.nonlinear.vector.leastsquares.MultivariateJacobianFunction;
+import org.junit.Test;
+import static org.junit.Assert.assertArrayEquals;
+import org.apache.commons.math3.util.Precision;
+import org.apache.commons.math3.test.TestUtils;
+
+public class RefactoredTest {
+
+    private static final double[] POINT_VALUES = {1, 2};
+    private static final double[] TARGET_VALUES = {3, 4};
+    private static final double[][] JACOBIAN_VALUES = {{5, 6}, {7, 8}};
+    private static final double[] EXPECTED_RESIDUALS = {-12, -8};
+    private static final double[][] EXPECTED_JACOBIAN = {{20, 24}, {14, 16}};
+    private static final double EPSILON = Precision.EPSILON;
+
+    @Test
+    public void testComputeValueAndJacobian() {
+        // setup
+        final RealVector point = new ArrayRealVector(POINT_VALUES);
+        Evaluation evaluation = new LeastSquaresBuilder()
+                .weight(new DiagonalMatrix(new double[]{16, 4}))
+                .model(new MultivariateJacobianFunction() {
+                    @Override
+                    public Pair<RealVector, RealMatrix> value(RealVector actualPoint) {
+                        // verify correct values passed in
+                        assertArrayEquals(POINT_VALUES, actualPoint.toArray(), EPSILON);
+                        // return values
+                        return new Pair<>(
+                                new ArrayRealVector(TARGET_VALUES),
+                                MatrixUtils.createRealMatrix(JACOBIAN_VALUES)
+                        );
+                    }
+                })
+                .target(new double[2])
+                .build()
+                .evaluate(point);
+
+        // action
+        RealVector residuals = evaluation.getResiduals();
+        RealMatrix jacobian = evaluation.getJacobian();
+
+        // verify
+        assertArrayEquals(POINT_VALUES, evaluation.getPoint().toArray(), 0);
+        assertArrayEquals(EXPECTED_RESIDUALS, residuals.toArray(), EPSILON);
+        TestUtils.assertEquals("jacobian", jacobian, MatrixUtils.createRealMatrix(EXPECTED_JACOBIAN), EPSILON);
+    }
+}
+```
+

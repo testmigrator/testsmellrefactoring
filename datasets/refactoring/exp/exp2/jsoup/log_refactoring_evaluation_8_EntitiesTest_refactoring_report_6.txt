@@ -1,0 +1,5 @@
+asserts result: 
+ yes
+
+The refactored tests maintain the same functionality as the original test. The original test checks two conditions: the escaping of a supplementary character in ASCII and in UTF-8. The refactored version separates these into two distinct test methods, each focusing on one of these conditions. Additionally, the refactored version introduces a helper method `setupEscapeSupplementaryCharacter` to avoid duplicating the setup code for generating the supplementary character. This does not change the behavior or the outcome of the tests. Therefore, the functionality is consistent.
+

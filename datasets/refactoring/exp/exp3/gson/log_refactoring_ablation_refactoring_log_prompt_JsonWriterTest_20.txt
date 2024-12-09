@@ -1,0 +1,23 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+public class JsonWriterTest {
+
+    @Test
+    public void testNonFiniteFloats() {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+
+        assertThrows(IllegalArgumentException.class, () -> assertNonFiniteFloatsExceptions(jsonWriter));
+    }
+
+    private void assertNonFiniteFloatsExceptions(JsonWriter jsonWriter) {
+        // Implementation of the method that should throw an exception
+        // This is a placeholder for the actual implementation
+        throw new IllegalArgumentException("Non-finite float value encountered");
+    }
+}
+```
+

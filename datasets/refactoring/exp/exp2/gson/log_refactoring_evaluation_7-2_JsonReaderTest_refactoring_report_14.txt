@@ -1,0 +1,10 @@
+asserts result: 
+ Yes
+
+The refactored tests maintain the same functionality as the original test. The original test checks that `nextInt()` throws a `NumberFormatException` and then verifies that `nextDouble()` reads the correct double value. The refactored version splits this into two separate tests but still performs the same checks:
+
+1. `testIntegerMismatchFailuresDoNotAdvance_ExceptionThrown` ensures that `nextInt()` throws a `NumberFormatException`.
+2. `testIntegerMismatchFailuresDoNotAdvance_ReadDouble` ensures that `nextDouble()` correctly reads the double value after the exception.
+
+Both the original and refactored tests achieve the same purpose, so the functionality is consistent.
+

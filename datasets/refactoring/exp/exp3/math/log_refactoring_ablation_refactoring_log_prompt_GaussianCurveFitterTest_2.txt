@@ -1,0 +1,50 @@
+asserts result: 
+ ```java
+import org.apache.commons.math4.legacy.fitting.GaussianCurveFitter;
+import org.apache.commons.math4.legacy.fitting.SimpleCurveFitter;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class GaussianCurveFitterTest {
+
+    private static final double X_SHIFT = 1e8;
+    private static final double EXPECTED_PARAMETER_0 = 3496978.1837704973;
+    private static final double EXPECTED_PARAMETER_1 = X_SHIFT + 4.054933085999146;
+    private static final double EXPECTED_PARAMETER_2 = 0.015039355620304326;
+    private static final double TOLERANCE_PARAMETER_0 = 1e-2;
+    private static final double TOLERANCE_PARAMETER_1 = 1e-6;
+    private static final double TOLERANCE_PARAMETER_2 = 1e-2;
+
+    @ParameterizedTest
+    @CsvSource({
+        "0, 1, 0",
+        "1, 1, 1",
+        "2, 1, 2"
+    })
+    public void testDataset1LargeXShift(int index, double expectedValue, double tolerance) {
+        final SimpleCurveFitter fitter = GaussianCurveFitter.create();
+        final double[] parameters = fitter.fit(createDataset(DATASET1, X_SHIFT, 0).toList());
+
+        switch (index) {
+            case 0:
+                assertEquals(expectedValue, parameters[0] / EXPECTED_PARAMETER_0, tolerance);
+                break;
+            case 1:
+                assertEquals(expectedValue, parameters[1] / EXPECTED_PARAMETER_1, tolerance);
+                break;
+            case 2:
+                assertEquals(expectedValue, parameters[2] / EXPECTED_PARAMETER_2, tolerance);
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid index: " + index);
+        }
+    }
+
+    private List<WeightedObservedPoint> createDataset(double[] dataset, double xShift, double yShift) {
+        // Implementation of createDataset method
+        return null; // Placeholder implementation
+    }
+}
+```
+

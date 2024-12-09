@@ -1,0 +1,53 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import com.google.gson.stream.JsonReader;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+
+import java.io.StringReader;
+
+class JsonReaderTest {
+
+    private JsonReader jsonReader;
+
+    @BeforeEach
+    void setUp() {
+        // Setup can be done here if needed
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "[\"// comment\"], // comment",
+        "{\"a\":\"#someComment\"}, a, #someComment",
+        "{\"#//a\":\"#some //Comment\"}, #//a, #some //Comment"
+    })
+    void testCommentsInStringValue(String jsonString, String expectedName, String expectedValue) throws Exception {
+        jsonReader = new JsonReader(new StringReader(jsonString));
+
+        if (jsonString.startsWith("[")) {
+            jsonReader.beginArray();
+            assertEquals(expectedValue, jsonReader.nextString(), "Failed to read string value from array");
+            jsonReader.endArray();
+        } else {
+            jsonReader.beginObject();
+            assertEquals(expectedName, jsonReader.nextName(), "Failed to read object key");
+            assertEquals(expectedValue, jsonReader.nextString(), "Failed to read object value");
+            jsonReader.endObject();
+        }
+    }
+
+    @Test
+    void testExceptionHandling() {
+        assertThrows(Exception.class, () -> {
+            jsonReader = new JsonReader(new StringReader("[invalid json]"));
+            jsonReader.beginArray();
+        }, "Expected an exception for invalid JSON input");
+    }
+}
+```
+

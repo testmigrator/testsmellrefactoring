@@ -1,0 +1,30 @@
+asserts result: 
+ ```java
+import org.apache.commons.math4.analysis.UnivariateFunction;
+import org.apache.commons.math4.analysis.integration.TrapezoidIntegrator;
+import org.apache.commons.math4.util.JdkMath;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import static org.junit.jupiter.api.Assertions.*;
+
+class QuinticFunctionTest {
+
+    @ParameterizedTest
+    @CsvSource({
+        "0, 1, -1.0/48, 5000, 15",
+        "0, 0.5, 11.0/768, 2500, 15",
+        "-1, 4, 2048/3.0 - 78 + 1.0/48, 5000, 15"
+    })
+    void testQuinticFunction(double min, double max, double expected, int maxEvaluations, int maxIterations) {
+        UnivariateFunction f = new QuinticFunction();
+        UnivariateIntegrator integrator = new TrapezoidIntegrator();
+        double tolerance = JdkMath.abs(expected * integrator.getRelativeAccuracy());
+        double result = integrator.integrate(10000, f, min, max);
+
+        assertTrue(integrator.getEvaluations() < maxEvaluations, "Evaluations should be less than " + maxEvaluations);
+        assertTrue(integrator.getIterations() < maxIterations, "Iterations should be less than " + maxIterations);
+        assertEquals(expected, result, tolerance, "Result should be close to expected value within tolerance");
+    }
+}
+```
+

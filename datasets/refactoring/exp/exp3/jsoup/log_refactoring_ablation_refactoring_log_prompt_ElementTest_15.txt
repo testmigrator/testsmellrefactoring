@@ -1,0 +1,42 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class ElementTest {
+
+    private static final String HTML = "<div class='mellow yellow'><span class=mellow>Hello <b class='yellow'>Yellow!</b></span><p>Empty</p></div>";
+    private static final String CLASS_MELLOW = "mellow";
+    private static final String CLASS_YELLOW = "yellow";
+    private static final String CLASS_SOLO = "solo";
+
+    @Test
+    public void testGetElementsByClassMellow() {
+        Document doc = Jsoup.parse(HTML);
+        List<Element> elements = doc.getElementsByClass(CLASS_MELLOW);
+        assertEquals("Expected 2 elements with class 'mellow'", 2, elements.size());
+        assertEquals("First element should be a div", "div", elements.get(0).tagName());
+        assertEquals("Second element should be a span", "span", elements.get(1).tagName());
+    }
+
+    @Test
+    public void testGetElementsByClassYellow() {
+        Document doc = Jsoup.parse(HTML);
+        List<Element> elements = doc.getElementsByClass(CLASS_YELLOW);
+        assertEquals("Expected 2 elements with class 'yellow'", 2, elements.size());
+        assertEquals("First element should be a div", "div", elements.get(0).tagName());
+        assertEquals("Second element should be a b", "b", elements.get(1).tagName());
+    }
+
+    @Test
+    public void testGetElementsByClassSolo() {
+        Document doc = Jsoup.parse(HTML);
+        List<Element> elements = doc.getElementsByClass(CLASS_SOLO);
+        assertEquals("Expected 0 elements with class 'solo'", 0, elements.size());
+    }
+}
+```
+

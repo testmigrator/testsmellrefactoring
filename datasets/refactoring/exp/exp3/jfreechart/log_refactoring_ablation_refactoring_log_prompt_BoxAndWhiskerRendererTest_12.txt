@@ -1,0 +1,33 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.assertDoesNotThrow;
+import org.jfree.chart.ChartRenderingInfo;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.CategoryPlot;
+import org.jfree.chart.axis.CategoryAxis;
+import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.renderer.category.BoxAndWhiskerRenderer;
+import org.jfree.data.statistics.DefaultBoxAndWhiskerCategoryDataset;
+import org.jfree.data.statistics.BoxAndWhiskerItem;
+
+public class BoxAndWhiskerRendererTest {
+
+    @Test
+    public void testDrawWithNullQ3() {
+        assertDoesNotThrow(() -> {
+            DefaultBoxAndWhiskerCategoryDataset<String, String> dataset
+                = new DefaultBoxAndWhiskerCategoryDataset<>();
+            dataset.add(new BoxAndWhiskerItem(1.0, 2.0, 3.0, null, 0.5, 4.5,
+                -0.5, 5.5, null), "S1", "C1");
+            CategoryPlot<String, String> plot = new CategoryPlot<>(dataset,
+                new CategoryAxis("Category"), new NumberAxis("Value"),
+                new BoxAndWhiskerRenderer());
+            ChartRenderingInfo info = new ChartRenderingInfo();
+            JFreeChart chart = new JFreeChart(plot);
+            chart.createBufferedImage(300, 200, info);
+        });
+    }
+}
+```
+

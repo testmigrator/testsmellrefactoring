@@ -1,0 +1,48 @@
+Input Parameters:
+Test Code:
+ @Test
+  public void testSet() {
+    JsonArray a = new JsonArray();
+    a.add(1);
+
+    List<JsonElement> list = a.asList();
+    JsonElement old = list.set(0, new JsonPrimitive(2));
+    assertThat(old).isEqualTo(new JsonPrimitive(1));
+    assertThat(list.get(0)).isEqualTo(new JsonPrimitive(2));
+    assertThat(a.get(0)).isEqualTo(new JsonPrimitive(2));
+
+    assertThrows(IndexOutOfBoundsException.class, () -> list.set(-1, new JsonPrimitive(1)));
+    assertThrows(IndexOutOfBoundsException.class, () -> list.set(2, new JsonPrimitive(1)));
+
+    NullPointerException e = assertThrows(NullPointerException.class, () -> list.set(0, null));
+    assertThat(e).hasMessageThat().isEqualTo("Element must be non-null");
+  }
+Context: 
+Smell List: ['Assertion_Roulette', 'Magic_Number_Test']
+Smell Description List: ['Test Smell Type：Assertion Roulette\n\nFeature:\nA test method contains more than one assertion statement without an explanation/message (parameter in the assertion method).\n', 'Test Smell Type：Magic Number Test\n\nFeature:\nAn assertion method that contains a numeric literal as an argument.\n']
+Refactoring DSL: ['RefactorRule:\n  SmellType: Assertion Roulette\n  Description: Add descriptive messages to assert statements to improve readability and maintainability.\n  Steps:\n    - Step:\n        Description: "Add descriptive message to each assert statement(except assertThat, assertThrows)."\n        Action: AddMessageToAssert\n        Parameters:\n          MessagePattern: "{assertionMessage}"\n  Example:\n    Before: |\n      @Test\n      public void T() {\n        stmt\n        assert_1\n        ...\n        assert_n\n        stmt\'\n      }\n    After: |\n      @Test\n      public void T() {\n        stmt\n        assert_1(..., "Descriptive message for assert statement")\n        ...\n        assert_n(..., "Descriptive message for assert statement")\n        stmt\'\n      }\n    Variables:\n      assertionMessage: "Descriptive message for assert statement"\n', 'RefactorRule:\n  SmellType: Magic Number Test\n  Description: "Extract magic numbers and assign meaningful names to improve readability and maintainability."\n  Steps:\n    - Step:\n        Action: IdentifyMagicNumbers\n        Description: "Identify magic numbers in assertions"\n        Parameters:\n          TargetType: Method\n          SourcePattern: |\n            assertEquals({magicNumber}, {variable})\n    - Step:\n        Action: ExtractVariable\n        Description: "Extract magic number to a variable with meaningful name"\n        Parameters:\n          TargetType: Method\n          SourcePattern: |\n            assertEquals({magicNumber}, {variable})\n          ReplacementPattern: |\n            int {meaningfulName} = {magicNumber};\n            assertEquals({meaningfulName}, {variable})\n  Example:\n    Before: |\n      @Test\n      public void T() {\n          stmt\n          assertEquals(1, a)\n          stmt\'\n      }\n    After: |\n      @Test\n      public void T() {\n          int x = 1; // x: meaningful variable name\n          stmt\n          assertEquals(x, a)\n          stmt\'\n      }\n  Variables:\n    magicNumber: "1"\n    variable: "a"\n    meaningfulName: "x"\n']
+Checkpoints: ['[ ] All assert statements have been added with clear explanatory messages.\n', '[ ] All magic numbers in the test code have been extracted and assigned meaningful variable names.\n']
+
+Refactored Code: 
+ 
+  @Test
+  public void testSet() {
+    JsonArray a = new JsonArray();
+    a.add(1);
+
+    List<JsonElement> list = a.asList();
+    JsonElement old = list.set(0, new JsonPrimitive(2));
+    assertThat(old).isEqualTo(new JsonPrimitive(1)).withFailMessage("The old element should be 1");
+    assertThat(list.get(0)).isEqualTo(new JsonPrimitive(2)).withFailMessage("The new element at index 0 should be 2");
+    assertThat(a.get(0)).isEqualTo(new JsonPrimitive(2)).withFailMessage("The new element in JsonArray at index 0 should be 2");
+
+    int invalidIndexNegative = -1;
+    int invalidIndexOutOfRange = 2;
+    assertThrows("Setting element at negative index should throw IndexOutOfBoundsException", IndexOutOfBoundsException.class, () -> list.set(invalidIndexNegative, new JsonPrimitive(1)));
+    assertThrows("Setting element at out-of-range index should throw IndexOutOfBoundsException", IndexOutOfBoundsException.class, () -> list.set(invalidIndexOutOfRange, new JsonPrimitive(1)));
+
+    NullPointerException e = assertThrows("Setting null element should throw NullPointerException", NullPointerException.class, () -> list.set(0, null));
+    assertThat(e).hasMessageThat().isEqualTo("Element must be non-null").withFailMessage("Exception message should indicate that element must be non-null");
+  }
+
+

@@ -1,0 +1,32 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
+import org.junit.jupiter.api.Test;
+import java.io.IOException;
+import java.io.StringReader;
+
+class JsonReaderTest {
+
+    @Test
+    public void testTopLevelValueTypeWithSkipValue() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("true"));
+        reader.skipValue();
+        assertThat(reader.peek(), equalTo(JsonToken.END_DOCUMENT));
+    }
+
+    @Test
+    public void testTopLevelValueTypeWithSkipValue_ExceptionHandling() {
+        JsonReader reader = new JsonReader(new StringReader("true"));
+        assertThrows(IOException.class, () -> {
+            reader.skipValue();
+            reader.nextName(); // This should throw an IOException as nextName is called after END_DOCUMENT
+        });
+    }
+}
+```
+

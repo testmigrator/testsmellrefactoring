@@ -1,0 +1,139 @@
+Input Parameters:
+Test Code:
+ @Test
+    public void testCircleFitting() {
+        CircleVectorial circle = new CircleVectorial();
+        circle.addPoint(30, 68);
+        circle.addPoint(50, -6);
+        circle.addPoint(110, -20);
+        circle.addPoint(35, 15);
+        circle.addPoint(45, 97);
+        final double[] start = {98.680, 47.345};
+
+        Optimum optimum = optimizer.optimize(builder(circle).start(start).build());
+
+        Assert.assertTrue(optimum.getEvaluations() < 10);
+
+        double rms = optimum.getRMS();
+        Assert.assertEquals(1.768262623567235, JdkMath.sqrt(circle.getN()) * rms, TOL);
+
+        Vector2D center = Vector2D.of(optimum.getPoint().getEntry(0), optimum.getPoint().getEntry(1));
+        Assert.assertEquals(69.96016176931406, circle.getRadius(center), 1e-6);
+        Assert.assertEquals(96.07590211815305, center.getX(), 1e-6);
+        Assert.assertEquals(48.13516790438953, center.getY(), 1e-6);
+
+        double[][] cov = optimum.getCovariances(1e-14).getData();
+        Assert.assertEquals(1.839, cov[0][0], 0.001);
+        Assert.assertEquals(0.731, cov[0][1], 0.001);
+        Assert.assertEquals(cov[0][1], cov[1][0], 1e-14);
+        Assert.assertEquals(0.786, cov[1][1], 0.001);
+
+        // add perfect measurements and check formal errors are reduced
+        double r = circle.getRadius(center);
+        for (double d = 0; d < 2 * JdkMath.PI; d += 0.01) {
+            circle.addPoint(center.getX() + r * JdkMath.cos(d), center.getY() + r * JdkMath.sin(d));
+        }
+
+        double[] weights = new double[circle.getN()];
+        Arrays.fill(weights, 2);
+
+        optimum = optimizer.optimize(
+                builder(circle).weight(new DiagonalMatrix(weights)).start(start).build());
+
+        cov = optimum.getCovariances(1e-14).getData();
+        Assert.assertEquals(0.0016, cov[0][0], 0.001);
+        Assert.assertEquals(3.2e-7, cov[0][1], 1e-9);
+        Assert.assertEquals(cov[0][1], cov[1][0], 1e-14);
+        Assert.assertEquals(0.0016, cov[1][1], 0.001);
+    }
+Context: 
+Smell List: ['Assertion_Roulette', 'Conditional_Test_Logic', 'Duplicate_Assert', 'Magic_Number_Test']
+Smell Description List: ['Test Smell Type：Assertion Roulette\n\nFeature:\nA test method contains more than one assertion statement without an explanation/message (parameter in the assertion method).\n', 'Test Smell Type：Conditional Test Logic\n\nFeature:\nA test method that contains one or more control statements (i.e if, switch, conditional expression, for, foreach and while statement).\n', 'Test Smell Type：Duplicate Assert\n\nFeature:\nA test method that contains more than one assertion statement with the same parameters.\n', 'Test Smell Type：Magic Number Test\n\nFeature:\nAn assertion method that contains a numeric literal as an argument.\n']
+Refactoring DSL: ['RefactorRule:\n  SmellType: Assertion Roulette\n  Description: Add descriptive messages to assert statements to improve readability and maintainability.\n  Steps:\n    - Step:\n        Description: "Add descriptive message to each assert statement(except assertThat, assertThrows)."\n        Action: AddMessageToAssert\n        Parameters:\n          MessagePattern: "{assertionMessage}"\n  Example:\n    Before: |\n      @Test\n      public void T() {\n        stmt\n        assert_1\n        ...\n        assert_n\n        stmt\'\n      }\n    After: |\n      @Test\n      public void T() {\n        stmt\n        assert_1(..., "Descriptive message for assert statement")\n        ...\n        assert_n(..., "Descriptive message for assert statement")\n        stmt\'\n      }\n    Variables:\n      assertionMessage: "Descriptive message for assert statement"\n', 'RefactorRule:\n  SmellType: Conditional Test Logic\n  Description: "Remove control statements (if, switch, conditional expression, etc.) within the test method by extracting them into helper methods."\n  Steps:\n    - Step:\n        Description: "Extract control logic into a separate helper method"\n        Action: ExtractMethod\n        Parameters:\n          TargetType: Method\n          SourcePattern: |\n            if ({condition}) {\n                {stmt}\n            }\n          ExtractedMethod: |\n            private boolean isConditionMet() {\n                return {condition};\n            }\n    - Step:\n        Description: "Replace conditional logic with a call to the helper method"\n        Action: ReplaceConditional\n        Parameters:\n          SourcePattern: |\n            if ({condition}) {\n                {stmt}\n            }\n          ReplacementPattern: |\n            if (isConditionMet()) {\n                {stmt}\n            }\n  Example:\n    Before: |\n      @Test\n      public void T() {\n          if (someCondition()) {\n              executeLogic();\n          }\n      }\n    After: |\n      private boolean isConditionMet() {\n          return someCondition();\n      }\n      @Test\n      public void T() {\n          if (isConditionMet()) {\n              executeLogic();\n          }\n      }\n', 'RefactorRule:\n  SmellType: Duplicate Assert\n  Description: "If the assertion logic is the same but tested with different inputs, convert the test to a parameterized test using JUnit 5\'s @CsvSource annotation. Otherwise, split the test into multiple separate methods, each containing a single assertion."\n  Steps:\n    - Step:\n        Description: "Check if there are multiple assertions testing the same condition"\n        Action: IdentifySameAssertions\n        Parameters:\n          SourcePattern: |\n\t          assert(expected, ...)\n\t          assert(expected, ...)\n    - Step:\n        Description: "Create new test methods if necessary to separate assertions for different inputs"\n        Action: SplitMethod\n        Parameters:\n          TargetType: Method\n\n    - Step:\n        Description: "Convert the test method to a parameterized test"\n        Action: ConvertToParameterizedTest\n        Parameters:\n          TargetType: Method\n    - Step:\n        Description: "Add @CsvSource annotation to declare parameterized values."\n        Action: AddAnnotation\n        Parameters:\n          TargetType: Method\n          Annotation: |\n            @CsvSource({\n              "{paramValues}"\n            })\n    - Step:\n        Description: "Refactor the test method to use parameterized values."\n        Action: RefactorMethod\n        Parameters:\n          SourcePattern: |\n            public void T() {\n              {originalStatements}\n            }\n          ReplacementPattern: |\n            public void T({parameterNames}) {\n              {refactoredStatements}\n            }\n  Example:\n    Before: |\n      @Test\n      public void T() {\n        assertEquals(expectedA, methodUnderTest(a));\n        assertEquals(expectedB, methodUnderTest(b));\n      }\n\n    After: |\n      @ParameterizedTest\n      @CsvSource({\n        "a, expectedA",\n        "b, expectedB"\n      })\n      public void T(String input, String expected) {\n        assertEquals(expected, methodUnderTest(input));\n      }\n', 'RefactorRule:\n  SmellType: Magic Number Test\n  Description: "Extract magic numbers and assign meaningful names to improve readability and maintainability."\n  Steps:\n    - Step:\n        Action: IdentifyMagicNumbers\n        Description: "Identify magic numbers in assertions"\n        Parameters:\n          TargetType: Method\n          SourcePattern: |\n            assertEquals({magicNumber}, {variable})\n    - Step:\n        Action: ExtractVariable\n        Description: "Extract magic number to a variable with meaningful name"\n        Parameters:\n          TargetType: Method\n          SourcePattern: |\n            assertEquals({magicNumber}, {variable})\n          ReplacementPattern: |\n            int {meaningfulName} = {magicNumber};\n            assertEquals({meaningfulName}, {variable})\n  Example:\n    Before: |\n      @Test\n      public void T() {\n          stmt\n          assertEquals(1, a)\n          stmt\'\n      }\n    After: |\n      @Test\n      public void T() {\n          int x = 1; // x: meaningful variable name\n          stmt\n          assertEquals(x, a)\n          stmt\'\n      }\n  Variables:\n    magicNumber: "1"\n    variable: "a"\n    meaningfulName: "x"\n']
+Checkpoints: ['[ ] All assert statements have been added with clear explanatory messages.\n', '[ ] All conditional test logic has been refactored to use JUnit 5’s conditional test execution feature, with the condition verified in an external method assigned via the @EnabledIf annotation.\n', '[ ] All duplicate assertions have been refactored using JUnit 5 Parameterized Tests, where the lists of parameterizable values are declared in a specific annotation, and the test method is executed independently m times.\n', '[ ] All magic numbers in the test code have been extracted and assigned meaningful variable names.\n']
+
+Refactored Code: 
+ 
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
+
+public class CircleFittingTest {
+
+    private static final double TOL = 1e-6;
+    private static final double RADIUS_THRESHOLD = 1.768262623567235;
+    private static final double COVARIANCE_THRESHOLD_1 = 1.839;
+    private static final double COVARIANCE_THRESHOLD_2 = 0.731;
+    private static final double COVARIANCE_THRESHOLD_3 = 0.786;
+    private static final double PERFECT_RADIUS_THRESHOLD = 0.0016;
+    private static final double PERFECT_COVARIANCE_THRESHOLD_1 = 3.2e-7;
+
+    @Test
+    public void testCircleFittingInitialPoints() {
+        CircleVectorial circle = new CircleVectorial();
+        circle.addPoint(30, 68);
+        circle.addPoint(50, -6);
+        circle.addPoint(110, -20);
+        circle.addPoint(35, 15);
+        circle.addPoint(45, 97);
+        final double[] start = {98.680, 47.345};
+
+        Optimum optimum = optimizer.optimize(builder(circle).start(start).build());
+
+        assertTrue(optimum.getEvaluations() < 10, "Optimization evaluations should be less than 10");
+
+        double rms = optimum.getRMS();
+        assertEquals(RADIUS_THRESHOLD, JdkMath.sqrt(circle.getN()) * rms, TOL, "Root mean square error should match expected value");
+
+        Vector2D center = Vector2D.of(optimum.getPoint().getEntry(0), optimum.getPoint().getEntry(1));
+        assertEquals(69.96016176931406, circle.getRadius(center), TOL, "Calculated radius should match expected value");
+        assertEquals(96.07590211815305, center.getX(), TOL, "Center X coordinate should match expected value");
+        assertEquals(48.13516790438953, center.getY(), TOL, "Center Y coordinate should match expected value");
+
+        double[][] cov = optimum.getCovariances(1e-14).getData();
+        assertEquals(COVARIANCE_THRESHOLD_1, cov[0][0], 0.001, "Covariance [0][0] should match expected value");
+        assertEquals(COVARIANCE_THRESHOLD_2, cov[0][1], 0.001, "Covariance [0][1] should match expected value");
+        assertEquals(cov[0][1], cov[1][0], 1e-14, "Covariance [1][0] should match [0][1]");
+        assertEquals(COVARIANCE_THRESHOLD_3, cov[1][1], 0.001, "Covariance [1][1] should match expected value");
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "0, 0.0016, 3.2e-7",
+        "1, 0.0016, 3.2e-7"
+    })
+    public void testCircleFittingWithPerfectMeasurements(int index, double expectedCov00, double expectedCov01) {
+        CircleVectorial circle = new CircleVectorial();
+        circle.addPoint(30, 68);
+        circle.addPoint(50, -6);
+        circle.addPoint(110, -20);
+        circle.addPoint(35, 15);
+        circle.addPoint(45, 97);
+        final double[] start = {98.680, 47.345};
+
+        Optimum optimum = optimizer.optimize(builder(circle).start(start).build());
+
+        Vector2D center = Vector2D.of(optimum.getPoint().getEntry(0), optimum.getPoint().getEntry(1));
+        double r = circle.getRadius(center);
+
+        for (double d = 0; d < 2 * JdkMath.PI; d += 0.01) {
+            circle.addPoint(center.getX() + r * JdkMath.cos(d), center.getY() + r * JdkMath.sin(d));
+        }
+
+        double[] weights = new double[circle.getN()];
+        Arrays.fill(weights, 2);
+
+        optimum = optimizer.optimize(
+                builder(circle).weight(new DiagonalMatrix(weights)).start(start).build());
+
+        double[][] cov = optimum.getCovariances(1e-14).getData();
+        assertEquals(expectedCov00, cov[0][0], 0.001, "Covariance [0][0] should match expected value");
+        assertEquals(expectedCov01, cov[0][1], 1e-9, "Covariance [0][1] should match expected value");
+        assertEquals(cov[0][1], cov[1][0], 1e-14, "Covariance [1][0] should match [0][1]");
+        assertEquals(expectedCov00, cov[1][1], 0.001, "Covariance [1][1] should match expected value");
+    }
+}
+
+

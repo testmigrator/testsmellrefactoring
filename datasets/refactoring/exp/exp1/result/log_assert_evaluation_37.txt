@@ -1,0 +1,32 @@
+asserts result: 
+ - `assertFalse(secondCallable.isBackwardsCallable(), "Expected secondCallable to not be backwards callable");` - yes
+- `assertFalse(thirdCallable.isBackwardsCallable(), "Expected thirdCallable to not be backwards callable");` - yes
+- `assertEquals(EXPECTED_LAYOUT_SIZE, layoutElements.size(), "Expected layout elements size to be " + EXPECTED_LAYOUT_SIZE);` - yes
+- `assertEquals(EXPECTED_BODY_SIZE, thirdBody.size(), "Expected body size to be " + EXPECTED_BODY_SIZE);` - yes
+- `assertEquals(thirdCallable, call.getCallable(), "Expected the call's callable to be thirdCallable");` - yes
+- `assertTrue(thirdCallable.isBackwardsCallable(), "Expected thirdCallable to be backwards callable");` - yes
+- `assertFalse(firstCallable.isBackwardsCallable(), "Expected firstCallable to not be backwards callable");` - yes
+- `assertFalse(secondCallable.isBackwardsCallable(), "Expected secondCallable to not be backwards callable");` - yes (Note: This is a duplicate of the first assert statement in the list, but it still meets the criteria.)
+- `assertEquals(EXPECTED_LAYOUT_SIZE, layoutElements.size(), "Expected layout elements size to be " + EXPECTED_LAYOUT_SIZE);` - yes (Note: Duplicate assertion)
+- `assertEquals(EXPECTED_BODY_SIZE, thirdBody.size(), "Expected body size to be " + EXPECTED_BODY_SIZE);` - yes (Note: Duplicate assertion)
+- `assertEquals(expectedThirdCallable, call.getCallable(), "Expected the call's callable to match expected thirdCallable");` - yes
+- `assertTrue(expectedThirdCallable.isBackwardsCallable(), "Expected " + expectedThirdCallable + " to be backwards callable");` - yes
+- `assertFalse(expectedFirstCallable.isBackwardsCallable(), "Expected " + expectedFirstCallable + " to not be backwards callable");` - yes
+- `assertFalse(expectedSecondCallable.isBackwardsCallable(), "Expected " + expectedSecondCallable + " to not be backwards callable");` - yes
+- `assertEquals(expectedSize, layoutElements.size(), "The size of layout elements should be 1");` - yes
+- `assertTrue(element instanceof Reference, "The layout element should be an instance of Reference");` - yes
+- `assertEquals(layout, referenceElement.getTag(), "The tag of the reference element should match the input layout");` - yes
+- `assertEquals(expectedSize, layoutElements.size(), "The size of layout elements should be " + expectedSize);` - yes
+- `assertEquals(expectedTag, countElement.getTag(), "The tag of the count element should be " + expectedTag);` - yes
+- `assertEquals(expectedSize, replicatedElements.size(), "The size of replicated elements should be " + expectedSize);` - yes
+- `assertEquals(expectedTag, firstElement.getTag(), "The tag of the first replicated element should be " + expectedTag);` - yes
+- `assertEquals(expectedTag, secondElement.getTag(), "The tag of the second replicated element should be " + expectedTag);` - yes
+- `assertEquals(expectedTag, thirdElement.getTag(), "The tag of the third replicated element should be " + expectedTag);` - yes
+- `assertEquals(expectedTag, fourthElement.getTag(), "The tag of the fourth replicated element should be " + expectedTag);` - yes
+- `assertEquals(expectedTag, fifthElement.getTag(), "The tag of the fifth replicated element should be " + expectedTag);` - yes
+- `assertEquals(1, layoutElements.size(), "Expected 1 layout element");` - yes
+- `assertEquals("B", tag.getTag(), "Expected tag 'B'");` - yes
+- `assertEquals(2, unionCases.size(), "Expected 2 union cases");` - yes
+- `assertTrue(firstCase.hasTag(55), "First case should have tag 55");` - yes
+- `assertFalse(firstCase.hasTag(23), "First case should not have tag 23");` - yes
+

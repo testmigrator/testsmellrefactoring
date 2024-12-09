@@ -1,0 +1,5 @@
+asserts result: 
+ yes
+
+The refactored tests cover all the scenarios from the original test method, ensuring that the `hasClass` method is tested under various conditions of whitespace and class name presence. Each scenario from the original test is represented in the refactored version, maintaining the same assertions and expected outcomes. The refactoring improves readability and maintainability without altering the functional coverage of the tests.
+

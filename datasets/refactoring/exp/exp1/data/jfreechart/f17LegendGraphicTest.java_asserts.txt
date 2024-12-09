@@ -1,0 +1,12 @@
+total tests: 3
+total asserts: 10
+assertEquals(g1, g2, "g1 and g2 should be equal");
+assertEquals(h1, h2, "Hash codes of g1 and g2 should be equal");
+assertNotSame(g1, g2, "g1 and g2 should not be the same object");
+assertSame(g1.getClass(), g2.getClass(), "g1 and g2 should be instances of the same class");
+assertEquals(g1, g2, "g1 and g2 should be equal");
+assertNotEquals(g1, g2, "g1 and g2 should not be equal after modifying the rectangle of g1");
+assertNotSame(g1, g2, "g1 and g2 should be different instances");
+assertSame(g1.getClass(), g2.getClass(), "g1 and g2 should be of the same class");
+assertEquals(g1, g2, "g1 and g2 should be equal");
+assertNotEquals(g1, g2, "g1 and g2 should not be equal after modifying the line in g1");

@@ -1,0 +1,36 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+class JsonReaderTest {
+
+    private JsonReader reader;
+
+    @BeforeEach
+    void setUp() {
+        reader = new JsonReader();
+    }
+
+    @ParameterizedTest(name = "Test unescaped control character {0}")
+    @CsvSource({
+        "\"\\0\", \"\\u0000\"",
+        "\"\\t\", \"\\u0009\"",
+        "\"\\u001F\", \"\\u001F\""
+    })
+    void testStrictModeFailsToParseUnescapedControlCharacter(String json, String controlChar) {
+        reader.setStrictness(Strictness.STRICT);
+        reader.setReader(new StringReader(json));
+
+        IOException expected = assertThrows(IOException.class, reader::nextString);
+        assertThat(expected)
+            .hasMessageStartingWith("Unescaped control characters (\\u0000-\\u001F) are not allowed in strict mode")
+            .withFailMessage("Expected exception message for control character: " + controlChar);
+    }
+}
+```
+

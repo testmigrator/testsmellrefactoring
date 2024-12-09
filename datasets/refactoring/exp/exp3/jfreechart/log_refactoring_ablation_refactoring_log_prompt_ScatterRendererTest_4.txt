@@ -1,0 +1,67 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.jfree.chart.renderer.category.ScatterRenderer;
+import org.jfree.data.category.DefaultMultiValueCategoryDataset;
+import org.jfree.data.Range;
+
+public class ScatterRendererTest {
+
+    private static final double MIN_VALUE_1 = 1.0;
+    private static final double MAX_VALUE_1 = 1.0;
+    private static final double MIN_VALUE_2 = 2.0;
+    private static final double MAX_VALUE_2 = 2.2;
+    private static final double MIN_VALUE_3 = -3.2;
+    private static final double MAX_VALUE_3 = 2.2;
+    private static final double MIN_VALUE_4 = -3.2;
+    private static final double MAX_VALUE_4 = 6.0;
+    private static final double MIN_VALUE_5 = -3.2;
+    private static final double MAX_VALUE_5 = 2.2;
+
+    @Test
+    public void testFindRangeBoundsWithNullDataset() {
+        ScatterRenderer renderer = new ScatterRenderer();
+        assertNull(renderer.findRangeBounds(null), "Expected null when dataset is null");
+    }
+
+    @Test
+    public void testFindRangeBoundsWithEmptyDataset() {
+        ScatterRenderer renderer = new ScatterRenderer();
+        DefaultMultiValueCategoryDataset<String, String> dataset = new DefaultMultiValueCategoryDataset<>();
+        assertNull(renderer.findRangeBounds(dataset), "Expected null when dataset is empty");
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "1.0, R1, C1, 1.0, 1.0",
+        "2.0, R1, C2, 1.0, 2.2",
+        "-3.2, R1, C3, -3.2, 2.2",
+        "6.0, R2, C1, -3.2, 6.0"
+    })
+    public void testFindRangeBoundsWithValues(double value, String rowKey, String columnKey, double expectedMin, double expectedMax) {
+        ScatterRenderer renderer = new ScatterRenderer();
+        DefaultMultiValueCategoryDataset<String, String> dataset = new DefaultMultiValueCategoryDataset<>();
+        List<Number> values = Arrays.asList(value);
+        dataset.add(values, rowKey, columnKey);
+        assertEquals(new Range(expectedMin, expectedMax), renderer.findRangeBounds(dataset), 
+            "Expected range [" + expectedMin + ", " + expectedMax + "] for dataset with value " + value);
+    }
+
+    @Test
+    public void testFindRangeBoundsWithHiddenSeries() {
+        ScatterRenderer renderer = new ScatterRenderer();
+        DefaultMultiValueCategoryDataset<String, String> dataset = new DefaultMultiValueCategoryDataset<>();
+        List<Number> values = Arrays.asList(MIN_VALUE_3, MAX_VALUE_3);
+        dataset.add(values, "R1", "C3");
+        values = Arrays.asList(MAX_VALUE_4);
+        dataset.add(values, "R2", "C1");
+        renderer.setSeriesVisible(1, Boolean.FALSE);
+        assertEquals(new Range(MIN_VALUE_5, MAX_VALUE_5), renderer.findRangeBounds(dataset), 
+            "Expected range [" + MIN_VALUE_5 + ", " + MAX_VALUE_5 + "] when series 1 is hidden");
+    }
+}
+```
+

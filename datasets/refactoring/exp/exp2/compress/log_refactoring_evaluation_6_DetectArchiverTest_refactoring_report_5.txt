@@ -1,0 +1,21 @@
+asserts result: 
+ The functionality between the original test and the refactored test is not consistent.
+
+**Inconsistency Overview:**
+- **Original Test:** The original test directly asserts that calling `checkDetectedType("tar", path)` should throw an `ArchiveException` when the archive is empty.
+- **Refactored Test:** The refactored test wraps the entire assertion in an `assertDoesNotThrow` block, which means it expects the entire block to execute without throwing any exceptions.
+This changes the behavior because if `createEmptyArchive("tar")` or any other part of the block throws an exception, the test will fail even if `checkDetectedType("tar", path)` correctly throws an `ArchiveException`.
+
+To make the refactored test consistent with the original, you should remove the `assertDoesNotThrow` block and keep the direct assertion on `checkDetectedType("tar", path)`:
+
+```java
+@Test
+public void testEmptyTarArchive() {
+    // Can't detect empty tar archive from its contents.
+    final Path path = createEmptyArchive("tar"); // will be deleted by tearDown()
+    assertThrows(ArchiveException.class, () -> checkDetectedType("tar", path));
+}
+```
+
+This ensures that the test still checks for the specific `ArchiveException` being thrown when `checkDetectedType("tar", path)` is called.
+

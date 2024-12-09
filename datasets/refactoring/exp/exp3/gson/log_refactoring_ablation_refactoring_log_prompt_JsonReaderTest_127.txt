@@ -1,0 +1,51 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
+
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
+import com.google.gson.stream.MalformedJsonException;
+import com.google.gson.stream.Strictness;
+
+import java.io.IOException;
+import java.io.StringReader;
+
+import org.junit.jupiter.api.Test;
+
+class JsonReaderTest {
+
+    @Test
+    public void testLenientExtraCommasInMaps_BeginObject() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("{\"a\":\"b\",}"));
+        reader.setStrictness(Strictness.LENIENT);
+        reader.beginObject();
+        assertThat(reader.nextName(), equalTo("a"), "Expected key 'a' at line 1 column 7 path $");
+    }
+
+    @Test
+    public void testLenientExtraCommasInMaps_ReadValue() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("{\"a\":\"b\",}"));
+        reader.setStrictness(Strictness.LENIENT);
+        reader.beginObject();
+        reader.nextName(); // Consume the key
+        assertThat(reader.nextString(), equalTo("b"), "Expected value 'b' at line 1 column 9 path $.a");
+    }
+
+    @Test
+    public void testLenientExtraCommasInMaps_PeekAfterValue() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("{\"a\":\"b\",}"));
+        reader.setStrictness(Strictness.LENIENT);
+        reader.beginObject();
+        reader.nextName(); // Consume the key
+        reader.nextString(); // Consume the value
+        var e = assertThrows(MalformedJsonException.class, () -> reader.peek(),
+                "Expected MalformedJsonException when peeking after value");
+        assertThat(e.getMessage(), equalTo("Expected name at line 1 column 11 path $.a\n" +
+                "See https://github.com/google/gson/blob/main/Troubleshooting.md#malformed-json"),
+                "Expected specific error message");
+    }
+}
+```
+

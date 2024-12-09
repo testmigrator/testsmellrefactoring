@@ -1,0 +1,46 @@
+asserts result: 
+ ```java
+import org.apache.commons.cli.HelpFormatter;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+class HelpFormatterTest {
+
+    private static final String EOL = System.lineSeparator();
+
+    @Test
+    public void testRenderWrappedTextSingleLine() throws IOException {
+        // Arrange
+        final int width = 12;
+        final int padding = 0;
+        final String text = "This is a test.";
+        final String expected = "This is a" + EOL + "test.";
+
+        final StringBuffer sb = new StringBuffer();
+        new HelpFormatter().renderWrappedText(sb, width, padding, text);
+
+        // Act & Assert
+        assertEquals(expected, sb.toString(), "Single line text should be wrapped correctly.");
+    }
+
+    @Test
+    public void testRenderWrappedTextSingleLine_ExceptionHandling() throws IOException {
+        // Arrange
+        final int width = 12;
+        final int padding = 0;
+        final String text = "This is a test.";
+        final StringBuffer sb = new StringBuffer();
+
+        final HelpFormatter spy = spy(new HelpFormatter());
+        doThrow(IOException.class).when(spy).appendWrappedText(sb, width, padding, text);
+
+        // Act & Assert
+        Executable executable = () -> spy.renderWrappedText(sb, width, padding, text);
+        assertThrows(UncheckedIOException.class, executable, "IOException should be wrapped in UncheckedIOException.");
+    }
+}
+```
+

@@ -1,0 +1,55 @@
+asserts result: 
+ ```java
+import org.apache.commons.math3.linear.ArrayRealVector;
+import org.apache.commons.math3.linear.RealMatrix;
+import org.apache.commons.math3.linear.RealVector;
+import org.apache.commons.math3.optim.nonlinear.vector.jacobian.LeastSquaresFactory;
+import org.apache.commons.math3.optim.nonlinear.vector.jacobian.MultivariateJacobianFunction;
+import org.apache.commons.math3.optim.nonlinear.vector.jacobian.ValueAndJacobianFunction;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.assertions.AssertionUtils;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+public class LazyEvaluationPreconditionTest {
+
+    @Test
+    public void testLazyEvaluationPrecondition() {
+        final RealVector dummy = new ArrayRealVector(new double[] { 0 });
+
+        // "ValueAndJacobianFunction" is required but we implement only
+        // "MultivariateJacobianFunction".
+        final MultivariateJacobianFunction m1 = new MultivariateJacobianFunction() {
+            @Override
+            public Pair<RealVector, RealMatrix> value(RealVector notUsed) {
+                return new Pair<>(null, null);
+            }
+        };
+
+        assertThrows(MathIllegalStateException.class, () -> {
+            LeastSquaresFactory.create(m1, dummy, dummy, null, null, 0, 0, true, null);
+        });
+
+        final MultivariateJacobianFunction m2 = new ValueAndJacobianFunction() {
+            @Override
+            public Pair<RealVector, RealMatrix> value(RealVector notUsed) {
+                return new Pair<>(null, null);
+            }
+
+            @Override
+            public RealVector computeValue(final double[] params) {
+                return null;
+            }
+
+            @Override
+            public RealMatrix computeJacobian(final double[] params) {
+                return null;
+            }
+        };
+
+        // Should pass.
+        LeastSquaresFactory.create(m2, dummy, dummy, null, null, 0, 0, true, null);
+    }
+}
+```
+

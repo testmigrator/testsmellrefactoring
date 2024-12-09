@@ -1,0 +1,25 @@
+asserts result: 
+ ```java
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class StandardToolTipTagFragmentGeneratorTest {
+
+    @Test
+    public void testGenerateURLFragmentForSimpleString() {
+        StandardToolTipTagFragmentGenerator generator = new StandardToolTipTagFragmentGenerator();
+        String expected = " title=\"abc\" alt=\"\"";
+        String actual = generator.generateToolTipFragment("abc");
+        assertEquals("Expected fragment for simple string 'abc'", expected, actual);
+    }
+
+    @Test
+    public void testGenerateURLFragmentForComplexString() {
+        StandardToolTipTagFragmentGenerator generator = new StandardToolTipTagFragmentGenerator();
+        String expected = " title=\"Series &quot;A&quot;, 100.0\" alt=\"\"";
+        String actual = generator.generateToolTipFragment("Series \"A\", 100.0");
+        assertEquals("Expected fragment for complex string 'Series \"A\", 100.0'", expected, actual);
+    }
+}
+```
+

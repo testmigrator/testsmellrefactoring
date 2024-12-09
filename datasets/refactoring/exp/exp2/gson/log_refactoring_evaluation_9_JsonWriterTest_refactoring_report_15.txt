@@ -1,0 +1,23 @@
+asserts result: 
+ The functionality between the original test and the refactored test is not consistent. The main reason for the inconsistency is the introduction of an additional `assertDoesNotThrow` wrapper around the entire test logic in the refactored version. This change can mask the actual behavior of the test, especially if an unexpected exception occurs before the `assertThrows` call.
+
+### Inconsistency Overview:
+- **Original Test**: Directly tests that calling `endArray()` after `beginObject()` results in an `IllegalStateException` with the correct error message.
+- **Refactored Test**: Wraps the entire test logic in an `assertDoesNotThrow`, which means that if any unexpected exception occurs before the `assertThrows` call, the test will fail with a generic message, potentially obscuring the root cause of the failure.
+
+To maintain consistency, the refactored test should focus on the specific behavior being tested without introducing additional layers of exception handling that could hide issues. Here’s a more consistent refactored version:
+
+```java
+@Test
+public void testBadNestingObject_BeginArrayBeginObjectEndArray() {
+    StringWriter stringWriter = new StringWriter();
+    JsonWriter jsonWriter = new JsonWriter(stringWriter);
+    jsonWriter.beginArray();
+    jsonWriter.beginObject();
+    var e = assertThrows(IllegalStateException.class, () -> jsonWriter.endArray(), "Expected IllegalStateException when ending array after beginning object");
+    assertThat(e).hasMessageThat().isEqualTo("Nesting problem.").withFailMessage("Expected nesting problem message to be 'Nesting problem.'");
+}
+```
+
+This version directly tests the expected behavior without the additional `assertDoesNotThrow` wrapper, ensuring that the test fails with a clear and specific message if the expected exception is not thrown.
+

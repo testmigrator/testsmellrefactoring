@@ -1,0 +1,30 @@
+asserts result: 
+ ```java
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.PosixParser;
+import org.apache.commons.cli.PatternOptionBuilder;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.assertions.AssertionUtils;
+
+import java.net.URL;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class MyTest {
+
+    @Test
+    void testURLPattern() {
+        final Options options = PatternOptionBuilder.parsePattern("u/v/");
+        final CommandLineParser parser = new PosixParser();
+
+        assertDoesNotThrow(() -> {
+            final CommandLine line = parser.parse(options, new String[]{"-u", "https://commons.apache.org", "-v", "foo://commons.apache.org"});
+            assertEquals(new URL("https://commons.apache.org"), line.getOptionObject("u"), "u value should be correct");
+            assertNull(line.getOptionObject("v"), "v value should be null");
+        });
+    }
+}
+```
+

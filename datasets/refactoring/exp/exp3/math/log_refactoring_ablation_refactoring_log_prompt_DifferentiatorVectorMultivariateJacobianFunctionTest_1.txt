@@ -1,0 +1,66 @@
+asserts result: 
+ ```java
+import org.apache.commons.math4.legacy.fitting.leastsquares.LeastSquaresOptimizer;
+import org.apache.commons.math4.linear.RealMatrix;
+import org.apache.commons.math4.linear.RealVector;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIf;
+
+import static org.junit.jupiter.api.condition.OS;
+
+public class BevingtonTest {
+
+    private static final double TOLERANCE = 1e-40;
+
+    @EnabledIf("isTestValid")
+    @Test
+    public void testBevington() {
+        // the analytical optimum to compare to
+        final LeastSquaresOptimizer.Optimum analyticalOptimum = findBevington(false);
+        final RealVector analyticalSolution = analyticalOptimum.getPoint();
+        final RealMatrix analyticalCovarianceMatrix = analyticalOptimum.getCovariances(1e-14);
+
+        // the automatic DifferentiatorVectorMultivariateJacobianFunction optimum
+        final LeastSquaresOptimizer.Optimum automaticOptimum = findBevington(true);
+        final RealVector automaticSolution = automaticOptimum.getPoint();
+        final RealMatrix automaticCovarianceMatrix = automaticOptimum.getCovariances(1e-14);
+
+        final int numParams = analyticalOptimum.getPoint().getDimension();
+
+        // Check that the automatic solution is within the reference error range.
+        for (int i = 0; i < numParams; i++) {
+            final double error = Math.sqrt(analyticalCovarianceMatrix.getEntry(i, i));
+            Assertions.assertEquals(analyticalSolution.getEntry(i), automaticSolution.getEntry(i), error, "Parameter " + i);
+        }
+
+        // Check that each entry of the computed covariance matrix is within 1% of the reference analytical matrix entry.
+        for (int i = 0; i < numParams; i++) {
+            for (int j = 0; j < numParams; j++) {
+                Assertions.assertEquals(analyticalCovarianceMatrix.getEntry(i, j), automaticCovarianceMatrix.getEntry(i, j), 
+                    Math.abs(0.01 * analyticalCovarianceMatrix.getEntry(i, j)), "Covariance matrix [" + i + "][" + j + "]");
+            }
+        }
+
+        // Check various measures of goodness-of-fit.
+        Assertions.assertEquals(analyticalOptimum.getChiSquare(), automaticOptimum.getChiSquare(), TOLERANCE);
+        Assertions.assertEquals(analyticalOptimum.getCost(), automaticOptimum.getCost(), TOLERANCE);
+        Assertions.assertEquals(analyticalOptimum.getRMS(), automaticOptimum.getRMS(), TOLERANCE);
+        Assertions.assertEquals(analyticalOptimum.getReducedChiSquare(automaticOptimum.getPoint().getDimension()), 
+            automaticOptimum.getReducedChiSquare(automaticOptimum.getPoint().getDimension()), TOLERANCE);
+    }
+
+    private boolean isTestValid() {
+        // Define the condition under which the test should run
+        // For example, you can check if certain system properties are set or if specific conditions are met
+        return true; // Placeholder, replace with actual condition
+    }
+
+    private LeastSquaresOptimizer.Optimum findBevington(boolean useAutomatic) {
+        // Implementation of findBevington method
+        // This is a placeholder method and should be replaced with the actual implementation
+        return null;
+    }
+}
+```
+

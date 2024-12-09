@@ -1,0 +1,33 @@
+asserts result: 
+ ```java
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.parser.Parser;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class DocumentTest {
+
+    @Test
+    public void testMetaCharsetElementUpdate() {
+        final Document doc = createHtmlDocument("dontTouch");
+        doc.updateMetaCharsetElement(true);
+
+        Element metaElement = doc.head().selectFirst("meta[charset]");
+        assertEquals(charsetUtf8, metaElement.attr("charset"));
+    }
+
+    @Test
+    public void testDocumentCharsetUpdate() {
+        final Document doc = createHtmlDocument("dontTouch");
+        doc.charset(Charset.forName(charsetUtf8));
+
+        assertEquals(Charset.forName(charsetUtf8), doc.charset());
+    }
+
+    private Document createHtmlDocument(String content) {
+        return Parser.parse("<html><head><title>" + content + "</title></head><body></body></html>", "");
+    }
+}
+```
+

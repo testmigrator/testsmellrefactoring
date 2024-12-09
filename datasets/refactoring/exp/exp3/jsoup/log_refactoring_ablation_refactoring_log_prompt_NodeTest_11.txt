@@ -1,0 +1,35 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class DocumentTest {
+
+    @Test
+    public void testCreateElement() {
+        Document doc = Jsoup.parse("<p>One <span>two</span> three</p>");
+        Element em = doc.createElement("em").text("foo");
+        assertEquals("<em>foo</em>", em.outerHtml());
+    }
+
+    @Test
+    public void testSelectElement() {
+        Document doc = Jsoup.parse("<p>One <span>two</span> three</p>");
+        Element p = doc.select("p").first();
+        assertNotNull(p);
+    }
+
+    @Test
+    public void testChildNodeReplacement() {
+        Document doc = Jsoup.parse("<p>One <span>two</span> three</p>");
+        Element p = doc.select("p").first();
+        Element em = doc.createElement("em").text("foo");
+        p.childNode(1).replaceWith(em);
+        assertEquals("One <em>foo</em> three", p.html());
+    }
+}
+```
+

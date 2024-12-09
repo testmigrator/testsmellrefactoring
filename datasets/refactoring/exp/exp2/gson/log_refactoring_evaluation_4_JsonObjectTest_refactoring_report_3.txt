@@ -1,0 +1,5 @@
+asserts result: 
+ Yes
+
+The refactored tests maintain the same functionality as the original test. Each specific case (null, empty, and whitespace property names) is now tested in its own method, but the overall behavior being tested remains consistent. The setup method ensures that each test starts with a fresh `JsonObject` instance, and the assertions check the same conditions as the original test.
+

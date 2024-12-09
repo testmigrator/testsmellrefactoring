@@ -1,0 +1,31 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Entities;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+
+public class EntitiesTest {
+
+    @Test
+    public void escapesGtInXmlAttributesButNotInHtml() {
+        // https://github.com/jhy/jsoup/issues/528 - < is OK in HTML attribute values, but not in XML
+
+        String docHtml = "<a title='<p>One</p>'>One</a>";
+        Document doc = Jsoup.parse(docHtml);
+        Element element = doc.select("a").first();
+
+        doc.outputSettings().escapeMode(Entities.EscapeMode.base);
+        assertEquals("HTML mode: < should not be escaped in attribute values", 
+                     "<a title=\"<p>One</p>\">One</a>", element.outerHtml());
+
+        doc.outputSettings().escapeMode(Entities.EscapeMode.xhtml);
+        assertEquals("XHTML mode: < should be escaped in attribute values", 
+                     "<a title=\"&lt;p>One&lt;/p>\">One</a>", element.outerHtml());
+    }
+}
+```
+

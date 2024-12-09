@@ -1,0 +1,36 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
+import java.io.IOException;
+import com.google.gson.stream.JsonReader;
+import java.io.StringReader;
+
+class JsonReaderTest {
+
+    @Test
+    public void testPrematureEndOfInput_BeginObject() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("{\"a\":true,"));
+        reader.beginObject();
+        assertThat(reader.nextName(), equalTo("a"), "Expected name 'a' but found something else");
+    }
+
+    @Test
+    public void testPrematureEndOfInput_NextBoolean() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("{\"a\":true,"));
+        reader.beginObject();
+        assertThat(reader.nextName(), equalTo("a"), "Expected name 'a' but found something else");
+        assertTrue(reader.nextBoolean(), "Expected boolean true but found something else");
+    }
+
+    @Test
+    public void testPrematureEndOfInput_NextNameThrowsException() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("{\"a\":true,"));
+        reader.beginObject();
+        assertThat(reader.nextName(), equalTo("a"), "Expected name 'a' but found something else");
+        assertTrue(reader.nextBoolean(), "Expected boolean true but found something else");
+        assertThrows(EOFException.class, () -> reader.nextName(), "Expected EOFException when reading next name");
+    }
+}
+```
+

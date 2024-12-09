@@ -1,0 +1,92 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+
+import com.google.gson.stream.JsonWriter;
+import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.io.StringWriter;
+
+class JsonWriterTest {
+
+    @Test
+    public void testBeginArray() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.beginArray();
+        assertThat(stringWriter.toString(), equalTo("["));
+    }
+
+    @Test
+    public void testNullValue() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.nullValue();
+        assertThat(stringWriter.toString(), equalTo("null"));
+    }
+
+    @Test
+    public void testEndArray() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.endArray();
+        assertThat(stringWriter.toString(), equalTo("]"));
+    }
+
+    @Test
+    public void testCompleteArrayWithNull() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.beginArray();
+        jsonWriter.nullValue();
+        jsonWriter.endArray();
+        assertThat(stringWriter.toString(), equalTo("[null]"));
+    }
+
+    @Test
+    public void testIOExceptionOnBeginArray() {
+        assertThrows(IOException.class, () -> {
+            StringWriter stringWriter = new StringWriter() {
+                @Override
+                public void write(int c) throws IOException {
+                    throw new IOException("Simulated IOException");
+                }
+            };
+            JsonWriter jsonWriter = new JsonWriter(stringWriter);
+            jsonWriter.beginArray();
+        });
+    }
+
+    @Test
+    public void testIOExceptionOnNullValue() {
+        assertThrows(IOException.class, () -> {
+            StringWriter stringWriter = new StringWriter() {
+                @Override
+                public void write(int c) throws IOException {
+                    throw new IOException("Simulated IOException");
+                }
+            };
+            JsonWriter jsonWriter = new JsonWriter(stringWriter);
+            jsonWriter.nullValue();
+        });
+    }
+
+    @Test
+    public void testIOExceptionOnEndArray() {
+        assertThrows(IOException.class, () -> {
+            StringWriter stringWriter = new StringWriter() {
+                @Override
+                public void write(int c) throws IOException {
+                    throw new IOException("Simulated IOException");
+                }
+            };
+            JsonWriter jsonWriter = new JsonWriter(stringWriter);
+            jsonWriter.endArray();
+        });
+    }
+}
+```
+

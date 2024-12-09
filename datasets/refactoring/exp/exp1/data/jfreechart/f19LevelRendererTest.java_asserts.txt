@@ -1,0 +1,11 @@
+total tests: 3
+total asserts: 9
+assertEquals(r1, r2, "LevelRenderers should be equal");
+assertEquals(h1, h2, "Hash codes of equal LevelRenderers should be equal");
+assertNotSame(r1, r2, "The cloned instance should not be the same as the original instance");
+assertSame(r1.getClass(), r2.getClass(), "The cloned instance should be of the same class as the original instance");
+assertEquals(r1, r2, "The cloned instance should be equal to the original instance");
+assertTrue(checkIndependence(r1, r2), "The cloned instance should be independent of the original instance");
+assertEquals("R5", li.getLabel(), "The label of the legend item should be 'R5'");
+assertEquals(expectedDatasetIndex, li.getDatasetIndex(), "The dataset index of the legend item should be 1");
+assertEquals(expectedSeriesIndex, li.getSeriesIndex(), "The series index of the legend item should be 2");

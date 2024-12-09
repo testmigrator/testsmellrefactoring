@@ -1,0 +1,5 @@
+asserts result: 
+ Yes
+
+The functionality between the original test and the refactored test is consistent. The only change in the refactored code is the introduction of an intermediate variable `actualValue` to store the result of `sb.toString()` before passing it to `assertEquals`. This does not alter the behavior or outcome of the test.
+

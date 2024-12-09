@@ -1,0 +1,25 @@
+asserts result: 
+ ```java
+@Test
+public void testNormalDistributionWithLargeSigma() {
+    // Define constants with meaningful names
+    final double largeSigma = 1000;
+    final double meanValue = 0;
+    final double normalizationFactor = 1 / (largeSigma * JdkMath.sqrt(2 * JdkMath.PI));
+    final UnivariateFunction normalDistribution = new Gaussian(normalizationFactor, meanValue, largeSigma);
+
+    final double tolerance = 1e-2;
+    final int numberOfPoints = 60;
+    final IterativeLegendreGaussIntegrator integrator = 
+        new IterativeLegendreGaussIntegrator(numberOfPoints, tolerance, tolerance);
+
+    final double lowerBound = -5000;
+    final double upperBound = 5000;
+    final double integralResult = integrator.integrate(numberOfPoints, normalDistribution, lowerBound, upperBound);
+
+    final double expectedValue = 1;
+    final double delta = 1e-5;
+    Assert.assertEquals(expectedValue, integralResult, delta);
+}
+```
+

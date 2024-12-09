@@ -1,0 +1,50 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+
+public class LegendTitleTest {
+
+    private XYPlot<String> plot1;
+    private LegendTitle t1;
+    private LegendTitle t2;
+
+    @BeforeEach
+    public void setUp() {
+        plot1 = new XYPlot<>();
+        t1 = new LegendTitle(plot1);
+        t2 = new LegendTitle(plot1);
+    }
+
+    @Test
+    public void testInitialEquality() {
+        assertEquals(t1, t2, "Initially, two LegendTitle instances should be equal.");
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "setBackgroundPaint, new GradientPaint(1.0f, 2.0f, Color.RED, 3.0f, 4.0f, Color.YELLOW)",
+        "setLegendItemGraphicEdge, RectangleEdge.BOTTOM",
+        "setLegendItemGraphicAnchor, RectangleAnchor.BOTTOM_LEFT",
+        "setLegendItemGraphicLocation, RectangleAnchor.TOP_LEFT",
+        "setItemFont, new Font(\"Dialog\", Font.PLAIN, 19)",
+        "setSortOrder, SortOrder.DESCENDING"
+    })
+    public void testPropertyChange(String methodName, String value) throws Exception {
+        Method method = LegendTitle.class.getMethod(methodName, Class.forName(value.getClass().getName()));
+        method.invoke(t1, value);
+        assertNotEquals(t1, t2, "After changing " + methodName + ", the two LegendTitle instances should not be equal.");
+
+        method.invoke(t2, value);
+        assertEquals(t1, t2, "After setting the same " + methodName + " on both instances, they should be equal.");
+    }
+}
+```
+
+Note: The `@CsvSource` values are simplified for demonstration purposes. In a real scenario, you would need to handle the dynamic invocation of methods with different types of parameters more robustly, possibly by using a custom `ArgumentsProvider` or by manually creating a list of `Arguments` objects.
+

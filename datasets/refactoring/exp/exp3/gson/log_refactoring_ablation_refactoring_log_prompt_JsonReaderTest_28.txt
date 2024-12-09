@@ -1,0 +1,47 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.*;
+import static com.google.common.truth.Truth.assertThat;
+
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
+
+import java.io.IOException;
+import java.io.StringReader;
+
+class JsonReaderTest {
+
+    private JsonReader reader(String json) {
+        return new JsonReader(new StringReader(json));
+    }
+
+    @Test
+    public void testSkipValueAtArrayEnd_ShouldNotThrowException() {
+        JsonReader reader = reader("[]");
+        Executable executable = () -> {
+            reader.beginArray();
+            reader.skipValue();
+        };
+        assertDoesNotThrow(executable);
+    }
+
+    @Test
+    public void testSkipValueAtArrayEnd_ShouldPeekEndDocument() throws IOException {
+        JsonReader reader = reader("[]");
+        reader.beginArray();
+        reader.skipValue();
+        assertThat(reader.peek()).isEqualTo(JsonToken.END_ARRAY, "Expected END_ARRAY token after skipping value");
+    }
+
+    @Test
+    public void testSkipValueAtArrayEnd_ShouldReturnCorrectPath() throws IOException {
+        JsonReader reader = reader("[]");
+        reader.beginArray();
+        reader.skipValue();
+        assertThat(reader.getPath()).isEqualTo("$", "Expected path to be '$' after skipping value");
+    }
+}
+```
+

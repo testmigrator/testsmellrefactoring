@@ -1,0 +1,43 @@
+Input Parameters:
+Test Code:
+ @Test
+    public void testOneSet() {
+        LinearProblem problem = new LinearProblem(new double[][]{
+                {1, 0, 0},
+                {-1, 1, 0},
+                {0, -1, 1}
+        }, new double[]{1, 1, 1});
+
+        Optimum optimum = optimizer.optimize(problem.getBuilder().build());
+
+        Assert.assertEquals(0, optimum.getRMS(), TOL);
+        assertEquals(TOL, optimum.getPoint(), 1, 2, 3);
+    }
+Context: 
+Smell List: ['Magic_Number_Test']
+Smell Description List: ['Test Smell Type：Magic Number Test\n\nFeature:\nAn assertion method that contains a numeric literal as an argument.\n']
+Refactoring DSL: ['RefactorRule:\n  SmellType: Magic Number Test\n  Description: "Extract magic numbers and assign meaningful names to improve readability and maintainability."\n  Steps:\n    - Step:\n        Action: IdentifyMagicNumbers\n        Description: "Identify magic numbers in assertions"\n        Parameters:\n          TargetType: Method\n          SourcePattern: |\n            assertEquals({magicNumber}, {variable})\n    - Step:\n        Action: ExtractVariable\n        Description: "Extract magic number to a variable with meaningful name"\n        Parameters:\n          TargetType: Method\n          SourcePattern: |\n            assertEquals({magicNumber}, {variable})\n          ReplacementPattern: |\n            int {meaningfulName} = {magicNumber};\n            assertEquals({meaningfulName}, {variable})\n  Example:\n    Before: |\n      @Test\n      public void T() {\n          stmt\n          assertEquals(1, a)\n          stmt\'\n      }\n    After: |\n      @Test\n      public void T() {\n          int x = 1; // x: meaningful variable name\n          stmt\n          assertEquals(x, a)\n          stmt\'\n      }\n  Variables:\n    magicNumber: "1"\n    variable: "a"\n    meaningfulName: "x"\n']
+Checkpoints: ['[ ] All magic numbers in the test code have been extracted and assigned meaningful variable names.\n']
+
+Refactored Code: 
+ 
+@Test
+public void testOneSet() {
+    double[][] matrix = {
+        {1, 0, 0},
+        {-1, 1, 0},
+        {0, -1, 1}
+    };
+    double[] vector = {1, 1, 1};
+    double tolerance = 1e-6; // TOL: Meaningful name for tolerance
+
+    LinearProblem problem = new LinearProblem(matrix, vector);
+
+    Optimum optimum = optimizer.optimize(problem.getBuilder().build());
+
+    int expectedNumber = 0;
+    Assert.assertEquals(expectedNumber, optimum.getRMS(), tolerance);
+    assertEquals(tolerance, optimum.getPoint(), 1, 2, 3);
+}
+
+

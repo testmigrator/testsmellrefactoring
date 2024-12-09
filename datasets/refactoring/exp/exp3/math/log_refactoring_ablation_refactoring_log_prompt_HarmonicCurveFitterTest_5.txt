@@ -1,0 +1,40 @@
+asserts result: 
+ ```java
+import org.apache.commons.math4.legacy.fitting.HarmonicCurveFitter;
+import org.apache.commons.math4.exception.MathIllegalStateException;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIf;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+public class HarmonicCurveFitterTest {
+
+    @Test
+    @EnabledIf("isTriangularFunction")
+    public void testMath844() {
+        final double[] y = { 0, 1, 2, 3, 2, 1,
+                            0, -1, -2, -3, -2, -1,
+                            0, 1, 2, 3, 2, 1,
+                            0, -1, -2, -3, -2, -1,
+                            0, 1, 2, 3, 2, 1, 0 };
+        final List<HarmonicCurveFitter.WeightedObservedPoint> points = new ArrayList<>();
+        for (int i = 0; i < y.length; i++) {
+            points.add(new HarmonicCurveFitter.WeightedObservedPoint(1, i, y[i]));
+        }
+
+        assertThrows(MathIllegalStateException.class, () -> {
+            new HarmonicCurveFitter.ParameterGuesser().guess(points);
+        });
+    }
+
+    private boolean isTriangularFunction() {
+        // This method should return true if the test should be executed.
+        // In this case, we always want to execute the test.
+        return true;
+    }
+}
+```
+

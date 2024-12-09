@@ -1,0 +1,11 @@
+asserts result: 
+ yes
+
+The refactored tests maintain the same functionality as the original test. The original test checks for the correct behavior of reading an unterminated JSON object, including reading the name and value, and then throwing a `MalformedJsonException` on the next operation (`peek`). The refactored version splits this into three separate tests:
+
+1. `testUnterminatedObject_nextName()` - Verifies that the first property name in the object is read correctly.
+2. `testUnterminatedObject_nextString()` - Verifies that the value for the first property in the object is read correctly.
+3. `testUnterminatedObject_peekThrowsException()` - Verifies that a `MalformedJsonException` is thrown when attempting to peek into an unterminated object.
+
+Each of these tests covers a part of the original test, ensuring that the overall functionality remains consistent.
+

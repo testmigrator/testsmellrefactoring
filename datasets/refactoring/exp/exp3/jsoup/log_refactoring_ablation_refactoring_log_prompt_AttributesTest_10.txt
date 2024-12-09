@@ -1,0 +1,63 @@
+asserts result: 
+ ```java
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
+
+public class AttributesTest {
+
+    private static final String KEY_TOT = "Tot";
+    private static final String KEY_TOT_LOWER = "tot";
+    private static final String KEY_HELLO = "Hello";
+    private static final String KEY_HELLO_LOWER = "hello";
+    private static final String KEY_DATA_NAME = "data-name";
+    private static final String VALUE_A_AND_P = "a&p";
+    private static final String VALUE_ONE = "one";
+    private static final String VALUE_THERE = "There";
+    private static final String VALUE_JSOUP = "Jsoup";
+
+    @Test
+    public void testInitialSizeAfterAddingAttributes() {
+        Attributes a = new Attributes();
+        a.put(KEY_TOT, VALUE_A_AND_P);
+        a.put(KEY_TOT_LOWER, VALUE_ONE);
+        a.put(KEY_HELLO, VALUE_THERE);
+        a.put(KEY_HELLO_LOWER, VALUE_THERE);
+        a.put(KEY_DATA_NAME, VALUE_JSOUP);
+
+        assertEquals("Initial size after adding attributes should be 5", 5, a.size());
+    }
+
+    @Test
+    public void testSizeAfterRemovingAttributes() {
+        Attributes a = new Attributes();
+        a.put(KEY_TOT, VALUE_A_AND_P);
+        a.put(KEY_TOT_LOWER, VALUE_ONE);
+        a.put(KEY_HELLO, VALUE_THERE);
+        a.put(KEY_HELLO_LOWER, VALUE_THERE);
+        a.put(KEY_DATA_NAME, VALUE_JSOUP);
+
+        a.remove(KEY_TOT);
+        a.remove(KEY_HELLO);
+
+        assertEquals("Size after removing 'Tot' and 'Hello' should be 3", 3, a.size());
+    }
+
+    @Test
+    public void testHasKeyAfterRemovingAttributes() {
+        Attributes a = new Attributes();
+        a.put(KEY_TOT, VALUE_A_AND_P);
+        a.put(KEY_TOT_LOWER, VALUE_ONE);
+        a.put(KEY_HELLO, VALUE_THERE);
+        a.put(KEY_HELLO_LOWER, VALUE_THERE);
+        a.put(KEY_DATA_NAME, VALUE_JSOUP);
+
+        a.remove(KEY_TOT);
+        a.remove(KEY_HELLO);
+
+        assertTrue("Attribute 'tot' should still exist after removing 'Tot'", a.hasKey(KEY_TOT_LOWER));
+        assertFalse("Attribute 'Tot' should no longer exist after removal", a.hasKey(KEY_TOT));
+    }
+}
+```
+

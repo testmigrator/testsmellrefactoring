@@ -1,0 +1,31 @@
+asserts result: 
+ ```java
+import static org.junit.Assert.assertEquals;
+
+public class EntitiesTest {
+
+    private static final String AMPERSAND = "amp";
+    private static final String GREATER_THAN = "gt";
+    private static final String LESS_THAN = "lt";
+    private static final String QUOTATION_MARK = "quot";
+
+    private static final int AMPERSAND_CODEPOINT = 38;
+    private static final int GREATER_THAN_CODEPOINT = 62;
+    private static final int LESS_THAN_CODEPOINT = 60;
+    private static final int QUOTATION_MARK_CODEPOINT = 34;
+
+    @Test
+    public void testXhtmlEntityCodepoints() {
+        assertEquals("Codepoint for amp should be 38", AMPERSAND_CODEPOINT, xhtml.codepointForName(AMPERSAND));
+        assertEquals("Codepoint for gt should be 62", GREATER_THAN_CODEPOINT, xhtml.codepointForName(GREATER_THAN));
+        assertEquals("Codepoint for lt should be 60", LESS_THAN_CODEPOINT, xhtml.codepointForName(LESS_THAN));
+        assertEquals("Codepoint for quot should be 34", QUOTATION_MARK_CODEPOINT, xhtml.codepointForName(QUOTATION_MARK));
+
+        assertEquals("Name for codepoint 38 should be amp", AMPERSAND, xhtml.nameForCodepoint(AMPERSAND_CODEPOINT));
+        assertEquals("Name for codepoint 62 should be gt", GREATER_THAN, xhtml.nameForCodepoint(GREATER_THAN_CODEPOINT));
+        assertEquals("Name for codepoint 60 should be lt", LESS_THAN, xhtml.nameForCodepoint(LESS_THAN_CODEPOINT));
+        assertEquals("Name for codepoint 34 should be quot", QUOTATION_MARK, xhtml.nameForCodepoint(QUOTATION_MARK_CODEPOINT));
+    }
+}
+```
+

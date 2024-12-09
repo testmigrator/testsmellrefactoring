@@ -1,0 +1,49 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.jsoup.Jsoup.parse;
+
+public class NewsHomepageTest {
+
+    @TempDir
+    public Path tempDir;
+
+    private File inputFile;
+
+    @BeforeEach
+    public void setUp() throws IOException {
+        inputFile = tempDir.resolve("news-com-au-home.html").toFile();
+        Files.copy(getClass().getResourceAsStream("/htmltests/news-com-au-home.html"), inputFile.toPath());
+        assertTrue(inputFile.exists(), "Input file should exist");
+    }
+
+    @Test
+    public void testNewsHomepage() throws IOException {
+        Document doc = parse(inputFile, "UTF-8", "http://www.news.com.au/");
+        
+        assertEquals("News.com.au | News from Australia and around the world online | NewsComAu", doc.title(), "Title should match expected value");
+        assertEquals("Brace yourself for Metro meltdown", doc.select(".id1225817868581 h4").text().trim(), "Headline text should match expected value");
+
+        Element a = doc.select("a[href=/entertainment/horoscopes]").first();
+        assertNotNull(a, "Horoscopes link should be found");
+        assertEquals("/entertainment/horoscopes", a.attr("href"), "Relative href should match expected value");
+        assertEquals("http://www.news.com.au/entertainment/horoscopes", a.attr("abs:href"), "Absolute href should match expected value");
+
+        Element hs = doc.select("a[href*=naughty-corners-are-a-bad-idea]").first();
+        assertNotNull(hs, "Naughty corners link should be found");
+        assertEquals(
+            "http://www.heraldsun.com.au/news/naughty-corners-are-a-bad-idea-for-kids/story-e6frf7jo-1225817899003",
+            hs.attr("href"), "Relative href should match expected value"
+        );
+        assertEquals(hs.attr("href"), hs.attr("abs:href"), "Absolute href should match relative href");
+    }
+}
+```
+

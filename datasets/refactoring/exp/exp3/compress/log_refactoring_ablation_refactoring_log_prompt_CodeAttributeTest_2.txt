@@ -1,0 +1,46 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIf;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class CodeAttributeTest {
+
+    private static final int MAX_STACK = 3;
+    private static final int MAX_LOCALS = 2;
+    private static final byte[] MIXED_BYTE_ARRAY = mixedByteArray; // Assuming mixedByteArray is defined elsewhere
+    private static final String EXPECTED_BYTE_CODE_STRING = "aload_0_putfield_this";
+    private static final int[] EXPECTED_LABELS = { 0, 1, 4, 5, 8, 9, 10, 13, 14 };
+
+    @Test
+    @EnabledIf("isTestEnvironmentValid")
+    public void testMixedByteCodes() {
+        final OperandManager operandManager = new MockOperandManager();
+        operandManager.setSegment(segment);
+        operandManager.setCurrentClass("java/lang/Foo");
+
+        final CodeAttribute attribute = new CodeAttribute(
+            MAX_STACK,
+            MAX_LOCALS,
+            MIXED_BYTE_ARRAY,
+            segment,
+            operandManager,
+            new ArrayList<>()
+        );
+
+        assertEquals(MAX_LOCALS, attribute.maxLocals, "Max locals should match");
+        assertEquals(MAX_STACK, attribute.maxStack, "Max stack should match");
+        assertEquals(EXPECTED_BYTE_CODE_STRING, attribute.byteCodes.get(4).toString(), "Byte code string should match");
+
+        for (int index = 0; index < EXPECTED_LABELS.length; index++) {
+            assertEquals(EXPECTED_LABELS[index], attribute.byteCodeOffsets.get(index).intValue(), "Byte code offset should match at index " + index);
+        }
+    }
+
+    private boolean isTestEnvironmentValid() {
+        // Add your condition here to check if the test environment is valid
+        return true; // Example: always valid for simplicity
+    }
+}
+```
+

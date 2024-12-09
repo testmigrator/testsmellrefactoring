@@ -1,0 +1,21 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+class DocumentTest {
+
+    @Test
+    public void documentsWithSameContentAreVerifiable() {
+        Document docA = Jsoup.parse("<div/>One");
+        Document docB = Jsoup.parse("<div/>One");
+        Document docC = Jsoup.parse("<div/>Two");
+
+        assertTrue(docA.hasSameValue(docB), "Documents with the same content should be verifiable as equal");
+        assertFalse(docA.hasSameValue(docC), "Documents with different content should not be verifiable as equal");
+    }
+}
+```
+

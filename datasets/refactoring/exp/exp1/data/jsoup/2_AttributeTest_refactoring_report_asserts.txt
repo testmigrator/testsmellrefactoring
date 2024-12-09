@@ -1,0 +1,14 @@
+total tests: 4
+total asserts: 12
+assertEquals("key=\"value &amp;\"", attr.html(), "HTML rendering should correctly escape special characters");
+assertEquals(attr.html(), actualValue, "The HTML representation should match the string representation");
+assertEquals(expectedHtml, attr.html(), "HTML representation of the attribute should match the expected string");
+assertEquals(attr.html(), actualValue, "toString() should return the same value as html()");
+assertEquals("", attributes.get("hidden"), "The value of the 'hidden' attribute should be an empty string");
+assertEquals("hidden", first.getKey(), "The key of the first attribute should be 'hidden'");
+assertEquals("", first.getValue(), "The value of the first attribute should be an empty string");
+assertFalse(first.hasDeclaredValue(), "The 'hidden' attribute should not have a declared value");
+assertTrue(Attribute.isBooleanAttribute(first.getKey()), "The 'hidden' attribute should be recognized as a boolean attribute");
+assertTrue(a1.hasDeclaredValue(), "Attribute 'one' should have a declared value even if it's empty.");
+assertFalse(a2.hasDeclaredValue(), "Attribute 'two' should not have a declared value as it is null.");
+assertTrue(a3.hasDeclaredValue(), "Attribute 'thr' should have a declared value as it is not null or empty.");

@@ -1,0 +1,50 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import static org.junit.jupiter.api.Assertions.*;
+
+class LookupPaintScaleTest {
+
+    @Test
+    public void testDefaultInstancesAreEqual() {
+        LookupPaintScale g1 = new LookupPaintScale();
+        LookupPaintScale g2 = new LookupPaintScale();
+        assertEquals(g1, g2, "Default instances should be equal");
+        assertEquals(g2, g1, "Default instances should be equal in reverse order");
+    }
+
+    @Test
+    public void testInstancesWithSameParametersAreEqual() {
+        LookupPaintScale g1 = new LookupPaintScale(1.0, 2.0, Color.RED);
+        LookupPaintScale g2 = new LookupPaintScale(1.0, 2.0, Color.RED);
+        assertEquals(g1, g2, "Instances with the same parameters should be equal");
+        assertEquals(g2, g1, "Instances with the same parameters should be equal in reverse order");
+    }
+
+    @Test
+    public void testInstancesWithDifferentParametersAreNotEqual() {
+        LookupPaintScale g1 = new LookupPaintScale(1.0, 2.0, Color.RED);
+        LookupPaintScale g2 = new LookupPaintScale();
+        assertNotEquals(g1, g2, "Instances with different parameters should not be equal");
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "1.5, 1.0, 2.0, RED, 3.0, 4.0, BLUE",
+        "1.6, 1.0, 2.0, RED, 3.0, 4.0, BLUE"
+    })
+    public void testAddingGradientPaints(double key, double x1, double y1, String color1, double x2, double y2, String color2) {
+        LookupPaintScale g1 = new LookupPaintScale(1.0, 2.0, Color.decode(color1));
+        LookupPaintScale g2 = new LookupPaintScale(1.0, 2.0, Color.decode(color1));
+
+        g1.add(key, new GradientPaint((float) x1, (float) y1, Color.decode(color1), (float) x2, (float) y2, Color.decode(color2)));
+        assertNotEquals(g1, g2, "Instances should not be equal after adding different GradientPaints");
+
+        g2.add(key, new GradientPaint((float) x1, (float) y1, Color.decode(color1), (float) x2, (float) y2, Color.decode(color2)));
+        assertEquals(g1, g2, "Instances should be equal after adding the same GradientPaints");
+    }
+}
+```
+

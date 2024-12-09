@@ -1,0 +1,5 @@
+asserts result: 
+ yes
+
+The refactored tests maintain the same functionality as the original test. The original test performs two assertions within a single method: one for `peek()` and another for `nextLong()`. The refactored version splits these into two separate test methods, each focusing on one of the assertions. However, both the setup and the assertions themselves are preserved, ensuring that the overall functionality remains consistent.
+

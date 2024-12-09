@@ -1,14 +1,31 @@
 RefactorRule:
   SmellType: Duplicate Assert
-  Description: "Uses JUnit 5 Parameterized Tests to eliminate duplicate assert statements by declaring parameterizable values in an annotation and executing the test method multiple times."
+  Description: "If the assertion logic is the same but tested with different inputs, prioritize splitting the test into multiple separate methods with a single assertion each."
   Steps:
     - Step:
-        Description: "Convert test method to a parameterized test method"
+        Description: "Identify duplicate assertions that test the same condition with different inputs."
+        Action: IdentifySameAssertions
+        Parameters:
+          SourcePattern: |
+            assert(expectedA, ...)
+            assert(expectedB, ...)
+    - Step:
+        Description: "If the assertions are simple and few, split the test into multiple methods, each with a single assertion."
+        Action: SplitMethod
+        Parameters:
+          TargetType: Method
+          Conditions: |
+            - The assertions are simple and do not involve complex variations.
+    - Step:
+        Description: "If there are many similar assertions with significant variations, convert the test to a parameterized test."
         Action: ConvertToParameterizedTest
         Parameters:
           TargetType: Method
+          Conditions: |
+            - There are many test cases with similar logic that would benefit from parameterization.
+            - The variations are extensive, with a large number of inputs or expected outputs.
     - Step:
-        Description: "Declare parameterizable values in @CsvSource annotation"
+        Description: "Add @CsvSource annotation to declare parameterized values."
         Action: AddAnnotation
         Parameters:
           TargetType: Method
@@ -17,56 +34,30 @@ RefactorRule:
               "{paramValues}"
             })
     - Step:
-        Description: "Refactor test method to use parameterized values"
+        Description: "Refactor the test method to use parameterized values."
         Action: RefactorMethod
         Parameters:
           SourcePattern: |
             public void T() {
-              {stmts}
+              {originalStatements}
             }
           ReplacementPattern: |
-            public void T({params}) {
-              {refactoredStmts}
+            public void T({parameterNames}) {
+              {refactoredStatements}
             }
   Example:
     Before: |
       @Test
-      public void T() {
-        stmt_1(P1);
-        ...
-        stmt_n(W1);
-        ...
-        stmt_1(Pm);
-        ...
-        stmt_n(Wm);
+      public void testDuplicateAssertions() {
+        assertEquals(expectedA, methodUnderTest(a));
+        assertEquals(expectedB, methodUnderTest(b));
       }
     After: |
-      @ParameterizedTest
-      @CsvSource({
-        "P1, ..., W1",
-        ...
-        "Pm, ..., Wm"
-      })
-      public void T(P, ..., W) {
-        stmt_1(P);
-        ...
-        stmt_n(W);
+      @Test
+      public void testWithInputA() {
+        assertEquals(expectedA, methodUnderTest(a));
       }
-  Variables:
-    paramValues: |
-      "P1, ..., W1",
-      ...
-      "Pm, ..., Wm"
-    stmts: |
-      stmt_1(P1);
-      ...
-      stmt_n(W1);
-      ...
-      stmt_1(Pm);
-      ...
-      stmt_n(Wm);
-    params: "P, ..., W"
-    refactoredStmts: |
-      stmt_1(P);
-      ...
-      stmt_n(W);
+      @Test
+      public void testWithInputB() {
+        assertEquals(expectedB, methodUnderTest(b));
+      }

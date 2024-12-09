@@ -1,0 +1,5 @@
+asserts result: 
+ yes
+
+The functionality between the original test and the refactored test is consistent. The only change introduced in the refactored version is the wrapping of the entire test body within an `assertDoesNotThrow` lambda expression. This change does not affect the behavior or the outcome of the test; it merely ensures that the test will fail if any exception is thrown during its execution, which was implicitly expected in the original version. The assertions and the logic remain the same, ensuring that the test still verifies the same conditions.
+

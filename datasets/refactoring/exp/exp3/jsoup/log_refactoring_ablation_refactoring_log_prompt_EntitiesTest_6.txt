@@ -1,0 +1,25 @@
+asserts result: 
+ ```java
+import org.jsoup.nodes.Entities;
+import org.jsoup.nodes.OutputSettings;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class EntitiesTest {
+
+    @Test
+    public void escapeSupplementaryCharacterToAscii() {
+        String text = new String(Character.toChars(135361));
+        String escapedAscii = Entities.escape(text, new OutputSettings().charset("ascii").escapeMode(base));
+        assertEquals("Supplementary character should be escaped to ASCII", "&#x210c1;", escapedAscii);
+    }
+
+    @Test
+    public void escapeSupplementaryCharacterToUtf8() {
+        String text = new String(Character.toChars(135361));
+        String escapedUtf = Entities.escape(text, new OutputSettings().charset("UTF-8").escapeMode(base));
+        assertEquals("Supplementary character should remain unchanged in UTF-8", text, escapedUtf);
+    }
+}
+```
+

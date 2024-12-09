@@ -1,0 +1,43 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.FormElement;
+import org.jsoup.helper.Connection;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class FormElementTest {
+
+    private static final String HTML = "<html>\n" +
+            "<body>  \n" +
+            "  <table>\n" +
+            "      <form action=\"/hello.php\" method=\"post\">\n" +
+            "      <tr><td>User:</td><td> <input type=\"text\" name=\"user\" /></td></tr>\n" +
+            "      <tr><td>Password:</td><td> <input type=\"password\" name=\"pass\" /></td></tr>\n" +
+            "      <tr><td><input type=\"submit\" name=\"login\" value=\"login\" /></td></tr>\n" +
+            "   </form>\n" +
+            "  </table>\n" +
+            "</body>\n" +
+            "</html>";
+
+    private static final int EXPECTED_FORM_DATA_SIZE = 3;
+    private static final String USER_KEY = "user";
+    private static final String PASS_KEY = "pass";
+    private static final String LOGIN_KEY = "login";
+
+    @Test
+    public void adoptedFormsRetainInputs() {
+        // Test for https://github.com/jhy/jsoup/issues/249
+        Document doc = Jsoup.parse(HTML);
+        FormElement form = (FormElement) doc.select("form").first();
+        List<Connection.KeyVal> data = form.formData();
+
+        assertEquals("Form data size should be " + EXPECTED_FORM_DATA_SIZE, EXPECTED_FORM_DATA_SIZE, data.size());
+        assertEquals("First input key should be " + USER_KEY, USER_KEY, data.get(0).key());
+        assertEquals("Second input key should be " + PASS_KEY, PASS_KEY, data.get(1).key());
+        assertEquals("Third input key should be " + LOGIN_KEY, LOGIN_KEY, data.get(2).key());
+    }
+}
+```
+

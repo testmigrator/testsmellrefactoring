@@ -1,0 +1,109 @@
+Input Parameters:
+Test Code:
+ @Test
+    public void testDeprecated() throws ParseException {
+        final Set<Option> handler = new HashSet<>();
+        parser = DefaultParser.builder().setDeprecatedHandler(handler::add).build();
+        final Option opt1 = Option.builder().option("d1").deprecated().build();
+        // @formatter:off
+        final Option opt2 = Option.builder().option("d2").deprecated(DeprecatedAttributes.builder()
+                .setForRemoval(true)
+                .setSince("1.0")
+                .setDescription("Do this instead.").get()).build();
+        // @formatter:on
+        final Option opt3 = Option.builder().option("a").build();
+        // @formatter:off
+        final CommandLine cl = parser.parse(new Options()
+                .addOption(opt1)
+                .addOption(opt2)
+                .addOption(opt3),
+                new String[] {"-d1", "-d2", "-a"});
+        // @formatter:on
+        // Trigger handler:
+        assertTrue(cl.hasOption(opt1.getOpt()));
+        assertTrue(cl.hasOption(opt2.getOpt()));
+        assertTrue(cl.hasOption(opt3.getOpt()));
+        // Assert handler was triggered
+        assertTrue(handler.contains(opt1));
+        assertTrue(handler.contains(opt2));
+        assertFalse(handler.contains(opt3));
+    }
+Context: /org/apache/commons/cli/DefaultParser
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing', 'Eager_Test']
+Smell Description List: ['Test Smell Type：Assertion Roulette\n\nFeature:\nA test method contains more than one assertion statement without an explanation/message (parameter in the assertion method).\n', 'Test Smell Type：Exception_Catching_Throwing\n\nFeature:\nA test method that contains either a throw statement or a catch clause.\n', 'Test Smell Type：Eager Test\n\nFeature:\nA test method contains multiple calls to multiple production methods.\n']
+Refactoring DSL: ['RefactorRule:\n  SmellType: Assertion Roulette\n  Description: Add descriptive messages to assert statements to improve readability and maintainability.\n  Steps:\n    - Step:\n        Description: "Add descriptive message to each assert statement(except assertThat, assertThrows)."\n        Action: AddMessageToAssert\n        Parameters:\n          MessagePattern: "{assertionMessage}"\n  Example:\n    Before: |\n      @Test\n      public void T() {\n        stmt\n        assert_1\n        ...\n        assert_n\n        stmt\'\n      }\n    After: |\n      @Test\n      public void T() {\n        stmt\n        assert_1(..., "Descriptive message for assert statement")\n        ...\n        assert_n(..., "Descriptive message for assert statement")\n        stmt\'\n      }\n    Variables:\n      assertionMessage: "Descriptive message for assert statement"\n', 'RefactorRule:\n  SmellType: Exception_Catching_Throwing\n  Description: Refactor test methods to use JUnit 5 exception handling features.\n  Steps:\n    - Step:\n        Description: "Handle try-catch blocks containing \'fail\' calls"\n        Action: ReplaceTryCatchWithAssertThrows\n        Parameters:\n          SourcePattern: |\n            try {\n              {tryBlock}\n              fail();\n            } catch ({exception}) {\n              {catchBlock}\n            }\n          ReplacementPattern: |\n            {exception} exception = assertThrows({exception}.class, () -> {\n              {tryBlock}\n            });\n            {catchBlock}\n    - Step:\n        Description: "Handle test methods with \'throws\' declaration but no try-catch block"\n        Action: WrapWithAssertDoesNotThrow\n        Parameters:\n          DetectionPattern: |\n            MethodDeclaration [throws!=null && BodyContainsTryCatch=false]\n          ReplacementPattern: |\n            assertDoesNotThrow(() -> {\n              {methodBody}\n            }, "Unexpected exception occurred during the test");\n\n    - Step:\n        Description: "Handle test methods with try-catch blocks without \'fail\' calls"\n        Action: ReplaceTryCatchWithoutFail\n        Parameters:\n          SourcePattern: |\n            try {\n              {tryBlock}\n            } catch ({exception}) {\n              {catchBlock}\n            }\n          ReplacementPattern: |\n            assertDoesNotThrow(() -> {\n              {tryBlock}\n            });\n            {catchBlock}\n\n  Example:\n    Before: |\n      @Test\n      public void T() {\n        stmt\n        try {\n            stmt\'\n            fail();\n        } catch (E) {\n            evs\n        }\n        stmt\'\'\n      }\n    After: |\n      @Test\n      public void T() {\n        stmt\n        assertThrows(E.class, () -> {\n            stmt\'\n        });\n        evs\n        stmt\'\'\n      }\n  Variables:\n    exception: E\n    tryBlock: stmt\'\n    catchBlock: evs\n    tryBlockStatement: stmt\'i\n', 'RefactorRule:\n  SmellType: Eager Test\n  Description: "Refactor test methods to group related assertions logically and extract reusable setup logic into private methods."\n  Steps:\n    - Step1:\n        Description: "Extract shared setup logic into a reusable, private method and ensure it is used across all relevant tests."\n        Action: ExtractSetupMethod\n        Parameters:\n          Condition: "If multiple tests share the same setup logic."\n          MethodNamePattern: setupTest{OriginalMethodName}\n    - Step2:\n        Description: "Group related assertions into cohesive sub-tests while retaining necessary setup logic."\n        Action: GroupAssertions\n        Parameters:\n          GroupBy: LogicalConcern\n    - Step3:\n        Description: "Create new test methods for each cohesive group of assertions and ensure readability."\n        Action: CreateTestMethods\n        Parameters:\n          IncludeSetup: True\n          NamePattern: test{OriginalMethodName}_{Concern}\n  Example:\n    Before: |\n      @Test\n      public void testExample() {\n          setup();\n          assertEquals(1, methodA());\n          assertTrue(methodB());\n      }\n    After: |\n      private void setupTestExample() {\n          setup();\n      }\n\n      @Test\n      public void testExample_MethodA() {\n          setupTestExample();\n          assertEquals(1, methodA());\n      }\n\n      @Test\n      public void testExample_MethodB() {\n          setupTestExample();\n          assertTrue(methodB());\n      }\n  Variables:\n    OriginalMethodName: The name of the original test method.\n    LogicalConcern: The logical aspect tested (e.g., a specific API, validation, or behavior).\n']
+Checkpoints: ['[ ] All assert statements have been added with clear explanatory messages.\n', '[ ] All exception handling has been refactored to use the JUnit 5 Exception Handling feature.\n', '[ ] All eager tests have been split into separate tests, each focusing on verifying a single API.\n']
+
+Refactored Code: 
+ 
+private Set<Option> setupTestDeprecated() {
+    final Set<Option> handler = new HashSet<>();
+    parser = DefaultParser.builder().setDeprecatedHandler(handler::add).build();
+    final Option opt1 = Option.builder().option("d1").deprecated().build();
+    final Option opt2 = Option.builder().option("d2").deprecated(DeprecatedAttributes.builder()
+            .setForRemoval(true)
+            .setSince("1.0")
+            .setDescription("Do this instead.").get()).build();
+    final Option opt3 = Option.builder().option("a").build();
+    return handler;
+}
+
+@Test
+public void testDeprecated_OptionD1() {
+    final Set<Option> handler = setupTestDeprecated();
+    assertDoesNotThrow(() -> {
+        final CommandLine cl = parser.parse(new Options()
+                        .addOption(Option.builder().option("d1").deprecated().build())
+                        .addOption(Option.builder().option("d2").deprecated(DeprecatedAttributes.builder()
+                                .setForRemoval(true)
+                                .setSince("1.0")
+                                .setDescription("Do this instead.").get()).build())
+                        .addOption(Option.builder().option("a").build()),
+                new String[]{"-d1", "-d2", "-a"});
+
+        assertTrue(cl.hasOption("d1"), "Option d1 should be present");
+        assertTrue(handler.contains(Option.builder().option("d1").deprecated().build()), "Handler should contain option d1");
+
+    }, "Unexpected exception occurred during the test");
+}
+
+@Test
+public void testDeprecated_OptionD2() {
+    final Set<Option> handler = setupTestDeprecated();
+    assertDoesNotThrow(() -> {
+        final CommandLine cl = parser.parse(new Options()
+                        .addOption(Option.builder().option("d1").deprecated().build())
+                        .addOption(Option.builder().option("d2").deprecated(DeprecatedAttributes.builder()
+                                .setForRemoval(true)
+                                .setSince("1.0")
+                                .setDescription("Do this instead.").get()).build())
+                        .addOption(Option.builder().option("a").build()),
+                new String[]{"-d1", "-d2", "-a"});
+
+        assertTrue(cl.hasOption("d2"), "Option d2 should be present");
+        assertTrue(handler.contains(Option.builder().option("d2").deprecated(DeprecatedAttributes.builder()
+                .setForRemoval(true)
+                .setSince("1.0")
+                .setDescription("Do this instead.").get()).build()), "Handler should contain option d2");
+    }, "Unexpected exception occurred during the test");
+}
+
+@Test
+public void testDeprecated_OptionA() {
+    final Set<Option> handler = setupTestDeprecated();
+    assertDoesNotThrow(() -> {
+        final CommandLine cl = parser.parse(new Options()
+                        .addOption(Option.builder().option("d1").deprecated().build())
+                        .addOption(Option.builder().option("d2").deprecated(DeprecatedAttributes.builder()
+                                .setForRemoval(true)
+                                .setSince("1.0")
+                                .setDescription("Do this instead.").get()).build())
+                        .addOption(Option.builder().option("a").build()),
+                new String[]{"-d1", "-d2", "-a"});
+
+        assertTrue(cl.hasOption("a"), "Option a should be present");
+        assertFalse(handler.contains(Option.builder().option("a").build()), "Handler should not contain option a");
+    }, "Unexpected exception occurred during the test");
+}
+
+

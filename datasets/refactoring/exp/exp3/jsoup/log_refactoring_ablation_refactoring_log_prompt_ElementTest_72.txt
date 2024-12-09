@@ -1,0 +1,68 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Node;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class ElementTest {
+
+    private static final String HTML = "<div><p><a>One</a></p><p><a>Two</a></p>Three</div><span>Four</span><foo></foo><img>";
+
+    @Test
+    public void testInitialChildrenCount() {
+        Document doc = Jsoup.parse(HTML);
+        Element div = doc.select("div").first();
+        Elements els = div.children();
+        List<Node> nodes = div.childNodes();
+
+        assertEquals(2, els.size(), "The div should have 2 child elements initially");
+        assertEquals(3, nodes.size(), "The div should have 3 child nodes initially");
+    }
+
+    @Test
+    public void testInsertChildren() {
+        Document doc = Jsoup.parse(HTML);
+        Element div = doc.select("div").first();
+        Elements initialEls = div.children();
+
+        Element p3 = new Element("p").text("P3");
+        Element p4 = new Element("p").text("P4");
+        div.insertChildren(1, p3);
+        div.insertChildren(3, p4);
+        Elements updatedEls = div.children();
+
+        assertEquals(2, initialEls.size(), "The initial children list should not change");
+        assertEquals(4, updatedEls.size(), "The updated children list should have 4 elements");
+        assertEquals("<p><a>One</a></p>\n" +
+                "<p>P3</p>\n" +
+                "<p><a>Two</a></p>\n" +
+                "<p>P4</p>Three", div.html(), "The div's HTML should be updated correctly");
+        assertEquals("P3", updatedEls.get(1).text(), "The second element should be P3");
+        assertEquals("P4", updatedEls.get(3).text(), "The fourth element should be P4");
+    }
+
+    @Test
+    public void testAfterMethod() {
+        Document doc = Jsoup.parse(HTML);
+        Element div = doc.select("div").first();
+        Elements initialEls = div.children();
+
+        Element p3 = new Element("p").text("P3");
+        div.insertChildren(1, p3);
+
+        p3.after("<span>Another</span>");
+        Elements updatedEls = div.children();
+
+        assertEquals(3, updatedEls.size(), "The children list should have 3 elements after insertion");
+        assertEquals("span", updatedEls.get(2).tagName(), "The third element should be a span");
+        assertEquals("Another", updatedEls.get(2).text(), "The span should contain 'Another'");
+        assertEquals("<p><a>One</a></p>\n" +
+                "<p>P3</p><span>Another</span>\n" +
+                "<p><a>Two</a></p>Three", div.html(), "The div's HTML should be updated correctly");
+    }
+}
+```
+

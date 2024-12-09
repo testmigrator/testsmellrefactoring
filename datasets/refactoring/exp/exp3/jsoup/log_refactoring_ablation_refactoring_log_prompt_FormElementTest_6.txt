@@ -1,0 +1,38 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.nodes.FormElement;
+import org.junit.Test;
+import static org.junit.Assert.*;
+
+public class FormElementTest {
+
+    private static final String HTML_BODY = "<body />";
+    private static final String FORM_ACTION = "http://example.com/search";
+    private static final String INPUT_NAME = "q";
+    private static final String INPUT_VALUE = "search";
+    private static final int EXPECTED_ELEMENT_COUNT = 1;
+
+    @Test
+    public void testFormElementInstance() {
+        Document doc = Jsoup.parse(HTML_BODY);
+        doc.body().html("<form action='" + FORM_ACTION + "'><input name='" + INPUT_NAME + "' value='" + INPUT_VALUE + "'>");
+
+        Element formEl = doc.select("form").first();
+        assertTrue("Form element should be an instance of FormElement", formEl instanceof FormElement);
+    }
+
+    @Test
+    public void testFormElementContainsSingleInput() {
+        Document doc = Jsoup.parse(HTML_BODY);
+        doc.body().html("<form action='" + FORM_ACTION + "'><input name='" + INPUT_NAME + "' value='" + INPUT_VALUE + "'>");
+
+        Element formEl = doc.select("form").first();
+        FormElement form = (FormElement) formEl;
+        assertEquals("Form element should contain exactly one input element", EXPECTED_ELEMENT_COUNT, form.elements().size());
+    }
+}
+```
+

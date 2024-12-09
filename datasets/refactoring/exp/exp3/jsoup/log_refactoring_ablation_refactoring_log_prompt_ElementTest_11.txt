@@ -1,0 +1,61 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class ElementTest {
+
+    @Test
+    public void testGetTextOfElementById() {
+        Document doc = Jsoup.parse("<div><p>Hello<p id=1>there<p>this<p>this<p>is<p>an<p id=last>element</div>");
+        Element p = doc.getElementById("1");
+        assertEquals("Text of element with id '1' should be 'there'", "there", p.text());
+    }
+
+    @Test
+    public void testGetPreviousElementSiblingText() {
+        Document doc = Jsoup.parse("<div><p>Hello<p id=1>there<p>this<p>this<p>is<p>an<p id=last>element</div>");
+        Element p = doc.getElementById("1");
+        assertEquals("Previous element sibling text should be 'Hello'", "Hello", p.previousElementSibling().text());
+    }
+
+    @Test
+    public void testGetNextElementSiblingText() {
+        Document doc = Jsoup.parse("<div><p>Hello<p id=1>there<p>this<p>this<p>is<p>an<p id=last>element</div>");
+        Element p = doc.getElementById("1");
+        assertEquals("Next element sibling text should be 'this'", "this", p.nextElementSibling().text());
+    }
+
+    @Test
+    public void testGetSecondNextElementSiblingText() {
+        Document doc = Jsoup.parse("<div><p>Hello<p id=1>there<p>this<p>this<p>is<p>an<p id=last>element</div>");
+        Element p = doc.getElementById("1");
+        assertEquals("Second next element sibling text should be 'this'", "this", p.nextElementSibling().nextElementSibling().text());
+    }
+
+    @Test
+    public void testGetThirdNextElementSiblingText() {
+        Document doc = Jsoup.parse("<div><p>Hello<p id=1>there<p>this<p>this<p>is<p>an<p id=last>element</div>");
+        Element p = doc.getElementById("1");
+        assertEquals("Third next element sibling text should be 'is'", "is", p.nextElementSibling().nextElementSibling().nextElementSibling().text());
+    }
+
+    @Test
+    public void testGetFirstElementSiblingText() {
+        Document doc = Jsoup.parse("<div><p>Hello<p id=1>there<p>this<p>this<p>is<p>an<p id=last>element</div>");
+        Element p = doc.getElementById("1");
+        assertEquals("First element sibling text should be 'Hello'", "Hello", p.firstElementSibling().text());
+    }
+
+    @Test
+    public void testGetLastElementSiblingText() {
+        Document doc = Jsoup.parse("<div><p>Hello<p id=1>there<p>this<p>this<p>is<p>an<p id=last>element</div>");
+        Element p = doc.getElementById("1");
+        assertEquals("Last element sibling text should be 'element'", "element", p.lastElementSibling().text());
+    }
+}
+```
+

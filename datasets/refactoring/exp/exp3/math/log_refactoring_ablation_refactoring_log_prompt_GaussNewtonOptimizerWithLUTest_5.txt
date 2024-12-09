@@ -1,0 +1,19 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+public class YourTestClass {
+
+    @Test
+    public void testHahn1() {
+        /*
+         * TODO This test leads to a singular problem with the Gauss-Newton
+         * optimizer. This should be inquired.
+         */
+        assertThrows(ConvergenceException.class, () -> super.testHahn1(), "Expected ConvergenceException for LU");
+        assertThrows(TooManyEvaluationsException.class, () -> super.testHahn1(), "Expected TooManyEvaluationsException for QR");
+    }
+}
+```
+

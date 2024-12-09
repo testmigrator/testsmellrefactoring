@@ -1,0 +1,133 @@
+Input Parameters:
+Test Code:
+ @Test
+  public void testGetAdapter_Concurrency() {
+    class DummyAdapter<T> extends TypeAdapter<T> {
+      @Override
+      public void write(JsonWriter out, T value) throws IOException {
+        throw new AssertionError("not needed for this test");
+      }
+
+      @Override
+      public T read(JsonReader in) throws IOException {
+        throw new AssertionError("not needed for this test");
+      }
+    }
+
+    final AtomicInteger adapterInstancesCreated = new AtomicInteger(0);
+    final AtomicReference<TypeAdapter<?>> threadAdapter = new AtomicReference<>();
+    final Class<?> requestedType = Number.class;
+
+    Gson gson =
+        new GsonBuilder()
+            .registerTypeAdapterFactory(
+                new TypeAdapterFactory() {
+                  private volatile boolean isFirstCall = true;
+
+                  @Override
+                  public <T> TypeAdapter<T> create(final Gson gson, TypeToken<T> type) {
+                    if (isFirstCall) {
+                      isFirstCall = false;
+
+                      // Create a separate thread which requests an adapter for the same type
+                      // This will cause this factory to return a different adapter instance than
+                      // the one it is currently creating
+                      Thread thread =
+                          new Thread() {
+                            @Override
+                            public void run() {
+                              threadAdapter.set(gson.getAdapter(requestedType));
+                            }
+                          };
+                      thread.start();
+                      try {
+                        thread.join();
+                      } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                      }
+                    }
+
+                    // Create a new dummy adapter instance
+                    adapterInstancesCreated.incrementAndGet();
+                    return new DummyAdapter<>();
+                  }
+                })
+            .create();
+
+    TypeAdapter<?> adapter = gson.getAdapter(requestedType);
+    assertThat(adapterInstancesCreated.get()).isEqualTo(2);
+    assertThat(adapter).isInstanceOf(DummyAdapter.class);
+    assertThat(threadAdapter.get()).isInstanceOf(DummyAdapter.class);
+  }
+Context: /com/google/gson/Gson
+Smell List: ['Assertion_Roulette']
+Smell Description List: ['Test Smell Type：Assertion Roulette\n\nFeature:\nA test method contains more than one assertion statement without an explanation/message (parameter in the assertion method).\n']
+Refactoring DSL: ['RefactorRule:\n  SmellType: Assertion Roulette\n  Description: Add descriptive messages to assert statements to improve readability and maintainability.\n  Steps:\n    - Step:\n        Description: "Add descriptive message to each assert statement(except assertThat, assertThrows)."\n        Action: AddMessageToAssert\n        Parameters:\n          MessagePattern: "{assertionMessage}"\n  Example:\n    Before: |\n      @Test\n      public void T() {\n        stmt\n        assert_1\n        ...\n        assert_n\n        stmt\'\n      }\n    After: |\n      @Test\n      public void T() {\n        stmt\n        assert_1(..., "Descriptive message for assert statement")\n        ...\n        assert_n(..., "Descriptive message for assert statement")\n        stmt\'\n      }\n    Variables:\n      assertionMessage: "Descriptive message for assert statement"\n']
+Checkpoints: ['[ ] All assert statements have been added with clear explanatory messages.\n']
+
+Refactored Code: 
+ 
+@Test
+public void testGetAdapter_Concurrency() {
+  class DummyAdapter<T> extends TypeAdapter<T> {
+    @Override
+    public void write(JsonWriter out, T value) throws IOException {
+      throw new AssertionError("not needed for this test");
+    }
+
+    @Override
+    public T read(JsonReader in) throws IOException {
+      throw new AssertionError("not needed for this test");
+    }
+  }
+
+  final AtomicInteger adapterInstancesCreated = new AtomicInteger(0);
+  final AtomicReference<TypeAdapter<?>> threadAdapter = new AtomicReference<>();
+  final Class<?> requestedType = Number.class;
+
+  Gson gson =
+      new GsonBuilder()
+          .registerTypeAdapterFactory(
+              new TypeAdapterFactory() {
+                private volatile boolean isFirstCall = true;
+
+                @Override
+                public <T> TypeAdapter<T> create(final Gson gson, TypeToken<T> type) {
+                  if (isFirstCall) {
+                    isFirstCall = false;
+
+                    // Create a separate thread which requests an adapter for the same type
+                    // This will cause this factory to return a different adapter instance than
+                    // the one it is currently creating
+                    Thread thread =
+                        new Thread() {
+                          @Override
+                          public void run() {
+                            threadAdapter.set(gson.getAdapter(requestedType));
+                          }
+                        };
+                    thread.start();
+                    try {
+                      thread.join();
+                    } catch (InterruptedException e) {
+                      throw new RuntimeException(e);
+                    }
+                  }
+
+                  // Create a new dummy adapter instance
+                  adapterInstancesCreated.incrementAndGet();
+                  return new DummyAdapter<>();
+                }
+              })
+          .create();
+
+  TypeAdapter<?> adapter = gson.getAdapter(requestedType);
+  assertThat(adapterInstancesCreated.get(), "Expected 2 adapter instances to be created")
+      .isEqualTo(2);
+  assertThat(adapter, "Expected the main thread adapter to be an instance of DummyAdapter")
+      .isInstanceOf(DummyAdapter.class);
+  assertThat(threadAdapter.get(), "Expected the thread adapter to be an instance of DummyAdapter")
+      .isInstanceOf(DummyAdapter.class);
+}
+
+

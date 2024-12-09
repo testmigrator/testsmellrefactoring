@@ -1,0 +1,53 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import com.google.gson.stream.JsonWriter;
+import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.io.StringWriter;
+
+class JsonWriterTest {
+
+    @Test
+    public void testBeginArray() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        assertDoesNotThrow(() -> jsonWriter.beginArray());
+        assertEquals("[", stringWriter.toString());
+    }
+
+    @Test
+    public void testValueTrue() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.beginArray();
+        assertDoesNotThrow(() -> jsonWriter.value(true));
+        assertEquals("[true", stringWriter.toString());
+    }
+
+    @Test
+    public void testValueFalse() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.beginArray();
+        jsonWriter.value(true);
+        assertDoesNotThrow(() -> jsonWriter.value(false));
+        assertEquals("[true,false", stringWriter.toString());
+    }
+
+    @Test
+    public void testEndArray() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.beginArray();
+        jsonWriter.value(true);
+        jsonWriter.value(false);
+        assertDoesNotThrow(() -> jsonWriter.endArray());
+        assertEquals("[true,false]", stringWriter.toString());
+    }
+}
+```
+

@@ -1,0 +1,5 @@
+asserts result: 
+ Yes
+
+The refactored test maintains the same functionality as the original test. The changes made are primarily structural, improving readability and maintainability without altering the core logic or expected outcomes of the tests. The use of `@ParameterizedTest` and `@CsvSource` allows the same test to be run with different parameters, effectively replacing the repetitive blocks in the original test. The assertions and the logic for calculating the tolerance and integration results remain consistent.
+

@@ -1,0 +1,40 @@
+asserts result: 
+ ```java
+import org.apache.commons.math4.legacy.analysis.function.Power;
+import org.apache.commons.math4.legacy.analysis.function.UnivariateFunction;
+import org.apache.commons.math4.legacy.analysis.FunctionUtils;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIf;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class FunctionUtilsTest {
+
+    private static final double EPS = 1e-6;
+
+    @Test
+    public void testFixingFirstArgument() {
+        UnivariateFunction scaler = FunctionUtils.fix1stArgument(new org.apache.commons.math4.legacy.analysis.function.Multiply(), 10);
+        double expectedResult = 1.23456;
+        assertEquals(expectedResult, scaler.value(0.123456), EPS);
+    }
+
+    @Test
+    @EnabledIf("isRandomTestEnabled")
+    public void testPowerFunctions() {
+        UnivariateFunction pow1 = new Power(2);
+        UnivariateFunction pow2 = FunctionUtils.fix2ndArgument(new org.apache.commons.math4.legacy.analysis.function.Pow(), 2);
+
+        for (int i = 0; i < 10; i++) {
+            double x = Math.random() * 10;
+            assertEquals(pow1.value(x), pow2.value(x), 0);
+        }
+    }
+
+    private boolean isRandomTestEnabled() {
+        // This method can be used to enable or disable random tests based on certain conditions
+        return true;
+    }
+}
+```
+

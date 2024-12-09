@@ -1,0 +1,5 @@
+asserts result: 
+ yes
+
+The refactored tests maintain the same functionality as the original test. The original test checks the entire output of the `printHelp` method against an array of expected strings. The refactored version splits this into three separate tests, each checking a specific part of the output (usage and header, options, and footer). Each refactored test correctly sets up the necessary components using the `setupTestPrintHelpWithSince` method and then verifies the corresponding section of the output. This ensures that the overall functionality remains consistent.
+

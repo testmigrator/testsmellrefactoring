@@ -1,0 +1,49 @@
+asserts result: 
+ ```java
+import org.jsoup.nodes.Attributes;
+import org.jsoup.nodes.Attribute;
+import org.junit.Test;
+
+import java.util.Iterator;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+
+public class AttributesTest {
+
+    @Test
+    public void testIteratorNextKeyChange() {
+        Attributes a = new Attributes();
+        a.put("Tot", "a&p");
+        a.put("Hello", "There");
+
+        assertFalse("Expected 'Foo' key to not be present initially", a.hasKey("Foo"));
+
+        Iterator<Attribute> iterator = a.iterator();
+        Attribute attr = iterator.next();
+        attr.setKey("Foo");
+
+        assertEquals("Expected 'Foo' key to have value 'a&p'", "a&p", a.get("Foo"));
+        assertFalse("Expected 'Tot' key to no longer be present", a.hasKey("Tot"));
+    }
+
+    @Test
+    public void testIteratorNextValueChange() {
+        Attributes a = new Attributes();
+        a.put("Tot", "a&p");
+        a.put("Hello", "There");
+
+        assertFalse("Expected 'Bar' key to not be present initially", a.hasKey("Bar"));
+
+        Iterator<Attribute> iterator = a.iterator();
+        iterator.next(); // Skip the first attribute
+        Attribute attr = iterator.next();
+        attr.setKey("Bar");
+        attr.setValue("Qux");
+
+        assertEquals("Expected 'Bar' key to have value 'Qux'", "Qux", a.get("Bar"));
+        assertFalse("Expected 'Hello' key to no longer be present", a.hasKey("Hello"));
+    }
+}
+```
+

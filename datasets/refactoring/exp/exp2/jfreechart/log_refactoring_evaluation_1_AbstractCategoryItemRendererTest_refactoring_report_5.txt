@@ -1,0 +1,11 @@
+asserts result: 
+ Yes
+
+The refactored tests maintain the same functionality as the original test. The original single test method has been split into three separate methods, each focusing on a specific aspect of the cloning process:
+
+1. `testCloning_LegendItemLabelGenerator_Instances` checks that `r1` and `r2` are different instances and of the same class.
+2. `testCloning_LegendItemLabelGenerator_Equality` checks that `r1` and `r2` are equal.
+3. `testCloning_LegendItemLabelGenerator_GeneratorCloning` checks that the `LegendItemLabelGenerator` instances associated with `r1` and `r2` are different.
+
+These three tests collectively cover the same assertions as the original test, ensuring that the functionality remains consistent.
+

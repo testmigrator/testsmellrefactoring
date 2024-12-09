@@ -1,0 +1,18 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class TypeHandlerTest {
+
+    @Test
+    public void testCreateClass() {
+        final Class<?> cls = getClass();
+        assertDoesNotThrow(() -> {
+            assertEquals(cls, TypeHandler.createClass(cls.getName()));
+        });
+    }
+}
+```
+

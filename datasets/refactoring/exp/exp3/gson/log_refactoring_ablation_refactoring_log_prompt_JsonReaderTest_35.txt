@@ -1,0 +1,33 @@
+asserts result: 
+ ```java
+import static org.junit.Assert.assertThrows;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.startsWith;
+
+import org.junit.Test;
+
+import java.io.IOException;
+
+public class JsonReaderTest {
+
+    @Test
+    public void testEscapeCharacterQuoteInStrictMode() {
+        String json = "\"\\'\"";
+        JsonReader reader = new JsonReader(new StringReader(json));
+        reader.setStrictness(Strictness.STRICT);
+
+        IOException expectedException = assertThrows(
+            "Expected IOException to be thrown when reading invalid escape character in strict mode",
+            IOException.class,
+            () -> reader.nextString()
+        );
+
+        assertThat(
+            "Expected exception message to start with 'Invalid escaped character \"'\" in strict mode'",
+            expectedException.getMessage(),
+            startsWith("Invalid escaped character \"'\" in strict mode")
+        );
+    }
+}
+```
+

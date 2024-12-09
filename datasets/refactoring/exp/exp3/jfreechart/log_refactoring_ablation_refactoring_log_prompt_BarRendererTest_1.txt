@@ -1,0 +1,79 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+
+class BarRendererTest {
+
+    private BarRenderer r1;
+    private BarRenderer r2;
+
+    @BeforeEach
+    public void setUp() {
+        r1 = new BarRenderer();
+        r2 = new BarRenderer();
+    }
+
+    @Test
+    public void testInitialEquality() {
+        assertEquals(r1, r2, "Initial state should be equal");
+        assertEquals(r2, r1, "Initial state should be equal (reverse check)");
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "setBase, 0.123",
+        "setItemMargin, 0.22",
+        "setDrawBarOutline, false",
+        "setMaximumBarWidth, 0.11",
+        "setMinimumBarLength, 0.04",
+        "setGradientPaintTransformer, CENTER_VERTICAL",
+        "setPositiveItemLabelPositionFallback, INSIDE1",
+        "setNegativeItemLabelPositionFallback, INSIDE1",
+        "setBarPainter, 0.1,0.2,0.3",
+        "setShadowVisible, false",
+        "setShadowPaint, RED",
+        "setShadowXOffset, 3.3",
+        "setShadowYOffset, 3.3"
+    })
+    public void testPropertyEquality(String methodName, Object... args) throws Exception {
+        invokeMethod(r1, methodName, args);
+        assertNotEquals(r1, r2, "Objects should not be equal after setting property: " + methodName);
+
+        invokeMethod(r2, methodName, args);
+        assertEquals(r1, r2, "Objects should be equal after setting the same property: " + methodName);
+    }
+
+    private void invokeMethod(Object target, String methodName, Object[] args) throws Exception {
+        var method = BarRenderer.class.getMethod(methodName, getParameterTypes(args));
+        method.invoke(target, args);
+    }
+
+    private Class<?>[] getParameterTypes(Object[] args) {
+        return Arrays.stream(args).map(arg -> {
+            if (arg instanceof Boolean) return boolean.class;
+            if (arg instanceof Double) return double.class;
+            if (arg instanceof Color) return Color.class;
+            if (arg instanceof GradientPaintTransformType) return GradientPaintTransformType.class;
+            if (arg instanceof ItemLabelAnchor) return ItemLabelAnchor.class;
+            throw new IllegalArgumentException("Unsupported argument type: " + arg.getClass());
+        }).toArray(Class<?>[]::new);
+    }
+}
+```
+
+### Explanation:
+1. **Initial Equality Test**: The `testInitialEquality` method checks the initial state of the `BarRenderer` objects to ensure they are equal.
+2. **Parameterized Test for Property Equality**: The `testPropertyEquality` method uses JUnit 5's `@ParameterizedTest` to test each property individually. It sets a property on `r1`, checks that `r1` and `r2` are not equal, then sets the same property on `r2`, and finally checks that `r1` and `r2` are equal again.
+3. **Dynamic Method Invocation**: The `invokeMethod` method dynamically invokes the setter methods on the `BarRenderer` objects based on the provided method name and arguments.
+4. **Parameter Types Handling**: The `getParameterTypes` method converts the argument types to their corresponding class types to match the method signature during dynamic invocation.
+
+This refactored code addresses the identified code smells:
+- **Assertion Roulette**: Each assertion has a clear message.
+- **Eager Test**: The test is split into a parameterized test, focusing on one property at a time.
+- **Duplicate Assert**: The parameterized test eliminates duplicate assertions by running the same test logic for different properties.
+

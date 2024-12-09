@@ -1,0 +1,5 @@
+Suppose you are a Java testing expert. You are given a set of test codes before and after refactoring (the refactored code may include multiple functions). Please evaluate:
+Whether the functionality between them is consistent (ignoring the code dependencies outside of the functions, such as classes, fields, etc., which already exist in the complete test file).
+Response format:
+If they are consistent, simply reply with: “yes”
+If they are not consistent, please indicate which Test is inconsistent, and provide a brief overview of the reasons for the inconsistency.

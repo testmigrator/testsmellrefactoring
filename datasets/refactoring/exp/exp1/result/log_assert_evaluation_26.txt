@@ -1,0 +1,7 @@
+asserts result: 
+- All assert statements meet the criteria:
+  - The message parameters are semantically clear.
+  - The messages correctly express the purpose of the assert statements.
+
+**yes** for all assertions.
+

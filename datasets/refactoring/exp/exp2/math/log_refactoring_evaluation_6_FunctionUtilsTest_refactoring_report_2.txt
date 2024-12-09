@@ -1,0 +1,5 @@
+asserts result: 
+ Yes
+
+The functionality between the original test and the refactored tests is consistent. Each assertion in the original test has been split into its own test method in the refactored version, maintaining the same logic and expected outcomes. The setup method initializes the objects used in the tests, ensuring that the behavior remains unchanged.
+

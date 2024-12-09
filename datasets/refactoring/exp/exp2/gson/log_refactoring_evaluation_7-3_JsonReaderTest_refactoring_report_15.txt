@@ -1,0 +1,10 @@
+asserts result: 
+ yes
+
+The refactored tests maintain the same functionality as the original test. The original test checks two things:
+
+1. The ability to read a very long unterminated string from a JSON array.
+2. An `EOFException` is thrown when attempting to peek after reading the long string.
+
+The refactored tests split these checks into two separate methods (`testVeryLongUnterminatedString_nextString` and `testVeryLongUnterminatedString_peekThrowsEOFException`), but they still perform the same checks. Additionally, the helper method `createLenientJsonReader` and `createLongString` are used to reduce code duplication and improve readability, without changing the overall behavior of the tests.
+

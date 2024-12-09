@@ -1,0 +1,23 @@
+asserts result: 
+ ```java
+import org.jsoup.nodes.Attribute;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class AttributeTest {
+
+    @Test
+    public void testHtmlEscaping() {
+        Attribute attr = new Attribute("key", "value &");
+        String expectedHtml = "key=\"value &amp;\"";
+        assertEquals("HTML representation should match expected value", expectedHtml, attr.html());
+    }
+
+    @Test
+    public void testHtmlAndToStringEquality() {
+        Attribute attr = new Attribute("key", "value &");
+        assertEquals("HTML representation should match toString()", attr.html(), attr.toString());
+    }
+}
+```
+

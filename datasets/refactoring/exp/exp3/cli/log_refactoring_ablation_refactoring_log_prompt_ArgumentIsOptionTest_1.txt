@@ -1,0 +1,27 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+import picocli.CommandLine;
+
+public class OptionTest {
+
+    private final CommandLine parser = new CommandLine(new Object());
+    private final CommandLine.Model.OptionSpec optionP = CommandLine.Model.OptionSpec.builder("-p").build();
+    private final CommandLine.Model.OptionSpec optionAttr = CommandLine.Model.OptionSpec.builder("-attr").build();
+    private final CommandLine.Model.CommandSpec options = CommandLine.Model.CommandSpec.create()
+            .addOption(optionP)
+            .addOption(optionAttr);
+
+    @Test
+    public void testOption() {
+        final String[] args = {"-p"};
+
+        CommandLine.ParseResult parseResult = parser.parseArgs(args);
+        assertTrue(parseResult.matchedOptions().contains(optionP), "Confirm -p is set");
+        assertFalse(parseResult.matchedOptions().contains(optionAttr), "Confirm -attr is not set");
+        assertEquals(0, parseResult.unmatchedArgs().size(), "Confirm all arguments recognized");
+    }
+}
+```
+

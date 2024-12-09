@@ -1,0 +1,72 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import com.google.gson.stream.JsonWriter;
+import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.io.StringWriter;
+
+class JsonWriterTest {
+
+    @Test
+    public void testBooleanValue() throws IOException {
+        StringWriter string = new StringWriter();
+        JsonWriter writer = new JsonWriter(string);
+        writer.value(true);
+        writer.close();
+        assertEquals("true", string.toString(), "Boolean value should be true");
+    }
+
+    @Test
+    public void testNullValue() throws IOException {
+        StringWriter string = new StringWriter();
+        JsonWriter writer = new JsonWriter(string);
+        writer.nullValue();
+        writer.close();
+        assertEquals("null", string.toString(), "Null value should be null");
+    }
+
+    @Test
+    public void testIntegerValue() throws IOException {
+        StringWriter string = new StringWriter();
+        JsonWriter writer = new JsonWriter(string);
+        writer.value(123);
+        writer.close();
+        assertEquals("123", string.toString(), "Integer value should be 123");
+    }
+
+    @Test
+    public void testDoubleValue() throws IOException {
+        StringWriter string = new StringWriter();
+        JsonWriter writer = new JsonWriter(string);
+        writer.value(123.4);
+        writer.close();
+        assertEquals("123.4", string.toString(), "Double value should be 123.4");
+    }
+
+    @Test
+    public void testStringValue() throws IOException {
+        StringWriter string = new StringWriter();
+        JsonWriter writer = new JsonWriter(string);
+        writer.value("a");
+        writer.close();
+        assertEquals("\"a\"", string.toString(), "String value should be \"a\"");
+    }
+
+    @Test
+    public void testIOExceptionOnClose() {
+        StringWriter string = new StringWriter();
+        JsonWriter writer = new JsonWriter(string) {
+            @Override
+            public JsonWriter close() throws IOException {
+                throw new IOException("Simulated IOException");
+            }
+        };
+        assertThrows(IOException.class, () -> writer.close(), "Expected IOException on close");
+    }
+}
+```
+

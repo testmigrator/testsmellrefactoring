@@ -1,0 +1,5 @@
+asserts result: 
+ Yes
+
+The functionality between the original test and the refactored test is consistent. The only difference is the addition of a message in the `assertThrows` method call, which does not affect the behavior or outcome of the test. Both tests check that an `IOException` is thrown with the correct message when attempting to read an escaped newline character in strict mode.
+

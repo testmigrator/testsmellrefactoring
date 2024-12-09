@@ -1,0 +1,105 @@
+Input Parameters:
+Test Code:
+ @Test
+  public void arrayPath() throws IOException {
+    JsonReader reader = factory.create("[1,2]");
+    assertThat(reader.getPreviousPath()).isEqualTo("$");
+    assertThat(reader.getPath()).isEqualTo("$");
+
+    JsonToken unused1 = reader.peek();
+    assertThat(reader.getPreviousPath()).isEqualTo("$");
+    assertThat(reader.getPath()).isEqualTo("$");
+    reader.beginArray();
+    assertThat(reader.getPreviousPath()).isEqualTo("$[0]");
+    assertThat(reader.getPath()).isEqualTo("$[0]");
+
+    JsonToken unused2 = reader.peek();
+    assertThat(reader.getPreviousPath()).isEqualTo("$[0]");
+    assertThat(reader.getPath()).isEqualTo("$[0]");
+    int unused3 = reader.nextInt();
+    assertThat(reader.getPreviousPath()).isEqualTo("$[0]");
+    assertThat(reader.getPath()).isEqualTo("$[1]");
+
+    JsonToken unused4 = reader.peek();
+    assertThat(reader.getPreviousPath()).isEqualTo("$[0]");
+    assertThat(reader.getPath()).isEqualTo("$[1]");
+    int unused5 = reader.nextInt();
+    assertThat(reader.getPreviousPath()).isEqualTo("$[1]");
+    assertThat(reader.getPath()).isEqualTo("$[2]");
+
+    JsonToken unused6 = reader.peek();
+    assertThat(reader.getPreviousPath()).isEqualTo("$[1]");
+    assertThat(reader.getPath()).isEqualTo("$[2]");
+    reader.endArray();
+    assertThat(reader.getPreviousPath()).isEqualTo("$");
+    assertThat(reader.getPath()).isEqualTo("$");
+
+    JsonToken unused7 = reader.peek();
+    assertThat(reader.getPreviousPath()).isEqualTo("$");
+    assertThat(reader.getPath()).isEqualTo("$");
+    reader.close();
+    assertThat(reader.getPreviousPath()).isEqualTo("$");
+    assertThat(reader.getPath()).isEqualTo("$");
+  }
+Context: 
+Smell List: ['Assertion_Roulette', 'Exception_Catching_Throwing', 'Duplicate_Assert']
+Smell Description List: ['Test Smell Type：Assertion Roulette\n\nFeature:\nA test method contains more than one assertion statement without an explanation/message (parameter in the assertion method).\n', 'Test Smell Type：Exception_Catching_Throwing\n\nFeature:\nA test method that contains either a throw statement or a catch clause.\n', 'Test Smell Type：Duplicate Assert\n\nFeature:\nA test method that contains more than one assertion statement with the same parameters.\n']
+Refactoring DSL: ['RefactorRule:\n  SmellType: Assertion Roulette\n  Description: Add descriptive messages to assert statements to improve readability and maintainability.\n  Steps:\n    - Step:\n        Description: "Add descriptive message to each assert statement(except assertThat, assertThrows)."\n        Action: AddMessageToAssert\n        Parameters:\n          MessagePattern: "{assertionMessage}"\n  Example:\n    Before: |\n      @Test\n      public void T() {\n        stmt\n        assert_1\n        ...\n        assert_n\n        stmt\'\n      }\n    After: |\n      @Test\n      public void T() {\n        stmt\n        assert_1(..., "Descriptive message for assert statement")\n        ...\n        assert_n(..., "Descriptive message for assert statement")\n        stmt\'\n      }\n    Variables:\n      assertionMessage: "Descriptive message for assert statement"\n', 'RefactorRule:\n  SmellType: Exception_Catching_Throwing\n  Description: Ensure tests use assertDoesNotThrow to verify no exceptions are thrown and remove any throws declaration in test methods.\n  Steps:\n    - Step:\n        Description: "Handle try-catch blocks containing \'fail\' calls"\n        Action: ReplaceTryCatchWithAssertThrows\n        Parameters:\n          SourcePattern: |\n            try {\n              {tryBlock}\n              fail();\n            } catch ({exception}) {\n              {catchBlock}\n            }\n          ReplacementPattern: |\n            {exception} exception = assertThrows({exception}.class, () -> {\n              {tryBlock}\n            });\n            {catchBlock}\n    - Step:\n        Description: "Handle test methods with \'throws\' declaration but no try-catch block"\n        Action: WrapWithAssertDoesNotThrow\n        Parameters:\n          DetectionPattern: |\n            MethodDeclaration [throws!=null && BodyContainsTryCatch=false]\n          ReplacementPattern: |\n            assertDoesNotThrow(() -> {\n              {methodBody}\n            }, "Unexpected exception occurred during the test");\n\n    - Step:\n        Description: "Handle test methods with try-catch blocks without \'fail\' calls"\n        Action: ReplaceTryCatchWithoutFail\n        Parameters:\n          SourcePattern: |\n            try {\n              {tryBlock}\n            } catch ({exception}) {\n              {catchBlock}\n            }\n          ReplacementPattern: |\n            assertDoesNotThrow(() -> {\n              {tryBlock}\n            });\n            {catchBlock}\n\n  Example:\n    Before: |\n      @Test\n      public void T() {\n        stmt\n        try {\n            stmt\'\n            fail();\n        } catch (E) {\n            evs\n        }\n        stmt\'\'\n      }\n    After: |\n      @Test\n      public void T() {\n        stmt\n        assertThrows(E.class, () -> {\n            stmt\'\n        });\n        evs\n        stmt\'\'\n      }\n  Variables:\n    exception: E\n    tryBlock: stmt\'\n    catchBlock: evs\n    tryBlockStatement: stmt\'i\n', 'RefactorRule:\n  SmellType: Duplicate Assert\n  Description: "If the assertion logic is the same but tested with different inputs, prioritize splitting the test into multiple separate methods with a single assertion each."\n  Steps:\n    - Step:\n        Description: "Identify duplicate assertions that test the same condition with different inputs."\n        Action: IdentifySameAssertions\n        Parameters:\n          SourcePattern: |\n            assert(expectedA, ...)\n            assert(expectedB, ...)\n    - Step:\n        Description: "If the assertions are simple and few, split the test into multiple methods, each with a single assertion."\n        Action: SplitMethod\n        Parameters:\n          TargetType: Method\n          Conditions: |\n            - The assertions are simple and do not involve complex variations.\n    - Step:\n        Description: "If there are many similar assertions with significant variations, convert the test to a parameterized test."\n        Action: ConvertToParameterizedTest\n        Parameters:\n          TargetType: Method\n          Conditions: |\n            - There are many test cases with similar logic that would benefit from parameterization.\n            - The variations are extensive, with a large number of inputs or expected outputs.\n    - Step:\n        Description: "Add @CsvSource annotation to declare parameterized values."\n        Action: AddAnnotation\n        Parameters:\n          TargetType: Method\n          Annotation: |\n            @CsvSource({\n              "{paramValues}"\n            })\n    - Step:\n        Description: "Refactor the test method to use parameterized values."\n        Action: RefactorMethod\n        Parameters:\n          SourcePattern: |\n            public void T() {\n              {originalStatements}\n            }\n          ReplacementPattern: |\n            public void T({parameterNames}) {\n              {refactoredStatements}\n            }\n  Example:\n    Before: |\n      @Test\n      public void testDuplicateAssertions() {\n        assertEquals(expectedA, methodUnderTest(a));\n        assertEquals(expectedB, methodUnderTest(b));\n      }\n    After: |\n      @Test\n      public void testWithInputA() {\n        assertEquals(expectedA, methodUnderTest(a));\n      }\n      @Test\n      public void testWithInputB() {\n        assertEquals(expectedB, methodUnderTest(b));\n      }\n']
+Checkpoints: ['[ ] All assert statements have been added with clear explanatory messages.\n', '[ ] All exception handling has been refactored to use the JUnit 5 Exception Handling feature.\n', '[ ] All duplicate assertions have been refactored using JUnit 5 Parameterized Tests, where the lists of parameterizable values are declared in a specific annotation, and the test method is executed independently m times.\n']
+
+Refactored Code: 
+ 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import java.io.IOException;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+
+public class ArrayPathTest {
+
+  private JsonReader factoryCreate(String json) throws IOException {
+    return factory.create(json);
+  }
+
+  @ParameterizedTest
+  @CsvSource({
+      "$, $, [1,2], $, $",
+      "$, $, [1,2], $[0], $[0]",
+      "$[0], $[0], [1,2], $[0], $[1]",
+      "$[1], $[1], [1,2], $[1], $[2]",
+      "$, $, [1,2], $, $"
+  })
+  public void testArrayPath(String prevPathBeforePeek, String pathBeforePeek, String json, String expectedPrevPathAfterPeek, String expectedPathAfterPeek) throws IOException {
+    JsonReader reader = factoryCreate(json);
+
+    JsonToken unused1 = reader.peek();
+    assertEquals(prevPathBeforePeek, reader.getPreviousPath(), "Previous path before peek should be " + prevPathBeforePeek);
+    assertEquals(pathBeforePeek, reader.getPath(), "Path before peek should be " + pathBeforePeek);
+
+    if ("$".equals(pathBeforePeek)) {
+      reader.beginArray();
+    } else {
+      reader.nextInt();
+    }
+
+    JsonToken unused2 = reader.peek();
+    assertEquals(expectedPrevPathAfterPeek, reader.getPreviousPath(), "Previous path after peek should be " + expectedPrevPathAfterPeek);
+    assertEquals(expectedPathAfterPeek, reader.getPath(), "Path after peek should be " + expectedPathAfterPeek);
+
+    if ("$[2]".equals(expectedPathAfterPeek)) {
+      reader.endArray();
+    }
+
+    JsonToken unused3 = reader.peek();
+    assertEquals("$", reader.getPreviousPath(), "Previous path after endArray should be $");
+    assertEquals("$", reader.getPath(), "Path after endArray should be $");
+
+    reader.close();
+    assertEquals("$", reader.getPreviousPath(), "Previous path after close should be $");
+    assertEquals("$", reader.getPath(), "Path after close should be $");
+  }
+}
+
+

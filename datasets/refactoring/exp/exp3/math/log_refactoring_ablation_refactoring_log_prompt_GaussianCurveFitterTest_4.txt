@@ -1,0 +1,26 @@
+asserts result: 
+ ```java
+@Test
+public void testWithStartPoint() {
+    // Initial parameters for the curve fitting
+    final double[] initialParameters = { 3.5e6, 4.2, 0.1 };
+
+    // Expected values for the fitted parameters
+    final double expectedAmplitude = 3496978.1837704973;
+    final double expectedMean = 4.054933085999146;
+    final double expectedSigma = 0.015039355620304326;
+
+    // Tolerance for comparison
+    final double tolerance = 1e-4;
+
+    SimpleCurveFitter fitter = GaussianCurveFitter.create();
+    double[] parameters = fitter
+            .withStartPoint(initialParameters)
+            .fit(createDataset(DATASET1).toList());
+
+    Assert.assertEquals(expectedAmplitude, parameters[0], tolerance);
+    Assert.assertEquals(expectedMean, parameters[1], tolerance);
+    Assert.assertEquals(expectedSigma, parameters[2], tolerance);
+}
+```
+

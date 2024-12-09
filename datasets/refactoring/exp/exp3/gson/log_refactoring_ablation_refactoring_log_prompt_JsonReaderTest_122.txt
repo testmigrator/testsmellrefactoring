@@ -1,0 +1,36 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
+
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
+import com.google.gson.stream.Strictness;
+
+import org.junit.jupiter.api.Test;
+
+public class JsonReaderTest {
+
+    @Test
+    public void testStringAsNumberWithTruncatedExponent_ThrowsException() {
+        JsonReader reader = new JsonReader(new StringReader("[123e]"));
+        reader.setStrictness(Strictness.LENIENT);
+
+        assertThrows(IllegalStateException.class, () -> {
+            reader.beginArray();
+            reader.peek();
+        });
+    }
+
+    @Test
+    public void testStringAsNumberWithTruncatedExponent_PeekReturnsString() throws Exception {
+        JsonReader reader = new JsonReader(new StringReader("[\"123e\"]"));
+        reader.setStrictness(Strictness.LENIENT);
+        reader.beginArray();
+
+        assertThat(reader.peek(), equalTo(JsonToken.STRING));
+    }
+}
+```
+

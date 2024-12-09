@@ -1,0 +1,25 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class ElementTest {
+
+    @Test
+    public void testRelativeUrls() {
+        String html = "<body><a href='./one.html'>One</a> <a href='two.html'>two</a> <a href='../three.html'>Three</a> <a href='//example2.com/four/'>Four</a> <a href='https://example2.com/five/'>Five</a>";
+        Document doc = Jsoup.parse(html, "http://example.com/bar/");
+        Elements els = doc.select("a");
+
+        assertEquals("First link should be resolved correctly", "http://example.com/bar/one.html", els.get(0).absUrl("href"));
+        assertEquals("Second link should be resolved correctly", "http://example.com/bar/two.html", els.get(1).absUrl("href"));
+        assertEquals("Third link should be resolved correctly", "http://example.com/three.html", els.get(2).absUrl("href"));
+        assertEquals("Fourth link should be resolved correctly", "http://example2.com/four/", els.get(3).absUrl("href"));
+        assertEquals("Fifth link should be resolved correctly", "https://example2.com/five/", els.get(4).absUrl("href"));
+    }
+}
+```
+

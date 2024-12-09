@@ -1,0 +1,29 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+
+import com.google.gson.stream.JsonWriter;
+import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.io.StringWriter;
+
+class JsonWriterTest {
+
+    @Test
+    public void testValueWithoutName_throwsIllegalStateException() {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.beginObject();
+
+        var exception = assertThrows(IllegalStateException.class, () -> {
+            jsonWriter.value(true);
+        });
+
+        assertThat(exception.getMessage(), equalTo("Nesting problem."));
+    }
+}
+```
+

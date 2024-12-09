@@ -1,0 +1,56 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
+
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.Strictness;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
+
+import java.io.IOException;
+import java.io.StringReader;
+
+public class JsonReaderTest {
+
+    @Test
+    public void testVeryLongUnterminatedString_ReadsCorrectly() throws IOException {
+        // Arrange
+        char[] stringChars = new char[1024 * 16];
+        Arrays.fill(stringChars, 'x');
+        String string = new String(stringChars);
+        String json = "[" + string;
+        JsonReader reader = new JsonReader(new StringReader(json));
+        reader.setStrictness(Strictness.LENIENT);
+
+        // Act
+        reader.beginArray();
+        String result = reader.nextString();
+
+        // Assert
+        assertThat(result, equalTo(string), "The read string should match the expected long string");
+    }
+
+    @Test
+    public void testVeryLongUnterminatedString_PeekThrowsEOFException() throws IOException {
+        // Arrange
+        char[] stringChars = new char[1024 * 16];
+        Arrays.fill(stringChars, 'x');
+        String string = new String(stringChars);
+        String json = "[" + string;
+        JsonReader reader = new JsonReader(new StringReader(json));
+        reader.setStrictness(Strictness.LENIENT);
+
+        // Act
+        reader.beginArray();
+        reader.nextString();
+
+        // Assert
+        Executable executable = () -> reader.peek();
+        assertThrows(EOFException.class, executable, "Peek should throw EOFException when there is no more data to read");
+    }
+}
+```
+

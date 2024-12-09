@@ -1,0 +1,4 @@
+asserts result: 
+ Yes
+
+The functionality between the original and refactored test is consistent.

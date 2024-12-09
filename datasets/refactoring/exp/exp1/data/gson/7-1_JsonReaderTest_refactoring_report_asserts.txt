@@ -1,0 +1,28 @@
+total tests: 5
+total asserts: 26
+assertEquals("a", reader.nextName(), "The next name should be 'a'");
+assertEquals("b", reader.nextName(), "The next name should be 'b'");
+assertEquals(123, reader.nextInt(), "The integer value should be 123");
+assertSame(JsonToken.END_DOCUMENT, reader.peek(), "The peek token should be END_DOCUMENT");
+assertEquals("a", reader.nextName(), "Expected first key to be 'a'");
+assertEquals("a", reader.nextName(), "Expected first key to be 'a'");
+assertEquals("b", reader.nextName(), "Expected second key to be 'b'");
+assertEquals("a", reader.nextName(), "Expected first key to be 'a'");
+assertEquals("b", reader.nextName(), "Expected second key to be 'b'");
+assertEquals(JsonToken.END_DOCUMENT, reader.peek(), "Expected the next token to be END_DOCUMENT");
+assertEquals("a", reader.nextName(), "Expected first key to be 'a'");
+assertEquals("b", reader.nextName(), "Expected second key to be 'b'");
+assertEquals(JsonToken.END_DOCUMENT, reader.peek(), "Expected the next token to be END_DOCUMENT");
+assertEquals("one", reader.nextName(), "Expected next name to be 'one'");
+assertEquals(JsonToken.BEGIN_OBJECT, reader.peek(), "Expected peek to return BEGIN_OBJECT");
+assertEquals("two", reader.nextName(), "Expected next name to be 'two'");
+assertEquals(JsonToken.BEGIN_OBJECT, reader.peek(), "Expected peek to return BEGIN_OBJECT");
+assertEquals("three", reader.nextName(), "Expected next name to be 'three'");
+assertSame(JsonToken.END_DOCUMENT, reader.peek(), "Expected peek to return END_DOCUMENT");
+assertThrows(EOFException.class, reader::beginArray, "Expected EOFException when calling beginArray on empty string");
+assertThrows(EOFException.class, reader::beginObject, "Expected EOFException when calling beginObject on empty string");
+assertStrictError(e, expectedLocation, "Expected MalformedJsonException when peeking octal number");
+assertStrictError(e, expectedLocation, "Expected MalformedJsonException when reading int from octal number");
+assertStrictError(e, expectedLocation, "Expected MalformedJsonException when reading long from octal number");
+assertStrictError(e, expectedLocation, "Expected MalformedJsonException when reading double from octal number");
+assertStrictError(e, expectedLocation, "Expected MalformedJsonException when reading string from octal number");

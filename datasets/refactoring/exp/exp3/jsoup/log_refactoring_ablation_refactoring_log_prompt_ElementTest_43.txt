@@ -1,0 +1,36 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+import org.junit.Test;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+public class ElementTest {
+
+    @Test
+    public void testDivHasText() {
+        Document doc = Jsoup.parse("<div><p>Hello</p><p></p></div>");
+        Element div = doc.select("div").first();
+        assertTrue("The div element should contain text", div.hasText());
+    }
+
+    @Test
+    public void testFirstPHasText() {
+        Document doc = Jsoup.parse("<div><p>Hello</p><p></p></div>");
+        Elements ps = doc.select("p");
+        assertTrue("The first p element should contain text", ps.first().hasText());
+    }
+
+    @Test
+    public void testLastPDoesNotHaveText() {
+        Document doc = Jsoup.parse("<div><p>Hello</p><p></p></div>");
+        Elements ps = doc.select("p");
+        assertFalse("The last p element should not contain text", ps.last().hasText());
+    }
+}
+```
+

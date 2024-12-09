@@ -1,0 +1,41 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.nodes.TextNode;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class ElementTest {
+
+    private static final String HTML = "<p>One <span>Two</span> Three <br> Four</p>";
+    private static final int EXPECTED_TEXT_NODES_SIZE = 3;
+    private static final String TEXT_NODE_1 = "One ";
+    private static final String TEXT_NODE_2 = "Three ";
+    private static final String TEXT_NODE_3 = "Four";
+    private static final int EXPECTED_BR_TEXT_NODES_SIZE = 0;
+
+    @Test
+    public void testGetTextNodesFromPElement() {
+        Document doc = Jsoup.parse(HTML);
+        Element pElement = doc.select("p").first();
+        List<TextNode> textNodes = pElement.textNodes();
+
+        assertEquals("Number of text nodes in <p> element should be 3", EXPECTED_TEXT_NODES_SIZE, textNodes.size());
+        assertEquals("First text node should be 'One '", TEXT_NODE_1, textNodes.get(0).text());
+        assertEquals("Second text node should be 'Three '", TEXT_NODE_2, textNodes.get(1).text());
+        assertEquals("Third text node should be 'Four'", TEXT_NODE_3, textNodes.get(2).text());
+    }
+
+    @Test
+    public void testGetTextNodesFromBrElement() {
+        Document doc = Jsoup.parse(HTML);
+        Element brElement = doc.select("br").first();
+        List<TextNode> textNodes = brElement.textNodes();
+
+        assertEquals("Number of text nodes in <br> element should be 0", EXPECTED_BR_TEXT_NODES_SIZE, textNodes.size());
+    }
+}
+```
+

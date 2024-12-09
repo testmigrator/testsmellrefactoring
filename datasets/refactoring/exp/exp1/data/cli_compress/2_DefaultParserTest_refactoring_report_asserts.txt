@@ -1,0 +1,7 @@
+total tests: 1
+total asserts: 5
+assertTrue(cl.hasOption("d1"), "Option d1 should be present");
+assertTrue(handler.contains(Option.builder().option("d1").deprecated().build()), "Handler should contain option d1");
+assertTrue(cl.hasOption("d2"), "Option d2 should be present");
+assertTrue(cl.hasOption("a"), "Option a should be present");
+assertFalse(handler.contains(Option.builder().option("a").build()), "Handler should not contain option a");

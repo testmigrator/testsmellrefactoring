@@ -1,0 +1,45 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import com.google.gson.stream.JsonWriter;
+import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.io.StringWriter;
+
+class JsonWriterTest {
+
+    @Test
+    public void testWriteTrueBoolean() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.beginArray();
+        jsonWriter.value(true);
+        jsonWriter.endArray();
+        assertDoesNotThrow(() -> assertEquals("[true]", stringWriter.toString()));
+    }
+
+    @Test
+    public void testWriteFalseBoolean() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.beginArray();
+        jsonWriter.value(false);
+        jsonWriter.endArray();
+        assertDoesNotThrow(() -> assertEquals("[false]", stringWriter.toString()));
+    }
+
+    @Test
+    public void testWriteNullBoolean() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.beginArray();
+        jsonWriter.value((Boolean) null);
+        jsonWriter.endArray();
+        assertDoesNotThrow(() -> assertEquals("[null]", stringWriter.toString()));
+    }
+}
+```
+

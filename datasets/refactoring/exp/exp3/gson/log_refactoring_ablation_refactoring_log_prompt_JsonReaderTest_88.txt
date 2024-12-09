@@ -1,0 +1,62 @@
+asserts result: 
+ ```java
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
+import com.google.gson.stream.Strictness;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+
+import java.io.IOException;
+import java.io.StringReader;
+
+class JsonReaderTest {
+
+    private JsonReader reader;
+
+    @BeforeEach
+    void setUp() {
+        reader = new JsonReader(new StringReader("[true;true]"));
+        reader.setStrictness(Strictness.LENIENT);
+    }
+
+    @Test
+    void testBeginArray() throws IOException {
+        reader.beginArray();
+        assertThat(reader.peek()).isEqualTo(JsonToken.BOOLEAN).withFailMessage("Expected the first token to be BOOLEAN");
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, true})
+    void testNextBoolean(boolean expected) throws IOException {
+        reader.beginArray();
+        boolean actual = reader.nextBoolean();
+        assertThat(actual).isEqualTo(expected).withFailMessage("Expected nextBoolean to return " + expected);
+    }
+
+    @Test
+    void testEndArray() throws IOException {
+        reader.beginArray();
+        reader.nextBoolean();
+        reader.nextBoolean();
+        reader.endArray();
+        assertThat(reader.hasNext()).isFalse().withFailMessage("Expected no more tokens after endArray");
+    }
+
+    @Test
+    void testIOExceptionOnInvalidInput() {
+        JsonReader invalidReader = new JsonReader(new StringReader("[true;invalid]"));
+        invalidReader.setStrictness(Strictness.LENIENT);
+        assertThrows(IOException.class, () -> {
+            invalidReader.beginArray();
+            invalidReader.nextBoolean();
+        }, "Expected IOException to be thrown for invalid input");
+    }
+}
+```
+

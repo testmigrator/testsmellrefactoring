@@ -1,0 +1,47 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.assertions.AssertionConsumer;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+class DefaultPolarItemRendererTest {
+
+    @Test
+    public void testCloning_instancesAreDifferent() throws CloneNotSupportedException {
+        DefaultPolarItemRenderer r1 = new DefaultPolarItemRenderer();
+        DefaultPolarItemRenderer r2 = CloneUtils.clone(r1);
+
+        assertNotSame(r1, r2, "Cloned instances should be different objects");
+    }
+
+    @Test
+    public void testCloning_classesAreEqual() throws CloneNotSupportedException {
+        DefaultPolarItemRenderer r1 = new DefaultPolarItemRenderer();
+        DefaultPolarItemRenderer r2 = CloneUtils.clone(r1);
+
+        assertSame(r1.getClass(), r2.getClass(), "Cloned instances should be of the same class");
+    }
+
+    @Test
+    public void testCloning_initialStateIsEqual() throws CloneNotSupportedException {
+        DefaultPolarItemRenderer r1 = new DefaultPolarItemRenderer();
+        DefaultPolarItemRenderer r2 = CloneUtils.clone(r1);
+
+        assertEquals(r1, r2, "Cloned instances should have the same initial state");
+    }
+
+    @Test
+    public void testCloning_stateChangesAreReflected() throws CloneNotSupportedException {
+        DefaultPolarItemRenderer r1 = new DefaultPolarItemRenderer();
+        DefaultPolarItemRenderer r2 = CloneUtils.clone(r1);
+
+        r1.setSeriesFilled(1, true);
+        assertNotEquals(r1, r2, "Cloned instances should differ after changing state in one instance");
+
+        r2.setSeriesFilled(1, true);
+        assertEquals(r1, r2, "Cloned instances should have the same state after making the same changes");
+    }
+}
+```
+

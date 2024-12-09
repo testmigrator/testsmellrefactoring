@@ -1,0 +1,23 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.junit.jupiter.api.Test;
+
+public class ConnectionTest {
+
+    private String echoUrl = "http://example.com";
+
+    @Test
+    public void fetchURIWithWhitespace() {
+        assertDoesNotThrow(() -> {
+            Document doc = Jsoup.connect(echoUrl + "#with whitespaces").get();
+            assertTrue(doc.title().contains("Environment Variables"));
+        }, "Fetching URI with whitespaces should not throw an exception");
+    }
+}
+```
+

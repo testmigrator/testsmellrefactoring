@@ -1,0 +1,52 @@
+asserts result: 
+ ```java
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.junit.jupiter.api.Test;
+
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class HelpFormatterTest {
+
+    @Test
+    public void testDefaultLongOptSeparator() {
+        final HelpFormatter formatter = new HelpFormatter();
+        assertEquals(HelpFormatter.DEFAULT_LONG_OPT_SEPARATOR, formatter.getLongOptSeparator(), "Default long opt separator should match the expected value");
+    }
+
+    @Test
+    public void testSetLongOptSeparator() {
+        final HelpFormatter formatter = new HelpFormatter();
+        formatter.setLongOptSeparator("=");
+        assertEquals("=", formatter.getLongOptSeparator(), "Long opt separator should be set correctly");
+    }
+
+    @Test
+    public void testPrintHelpWithCustomLongOptSeparator() {
+        final Options options = new Options();
+        options.addOption("f", true, "the file");
+        options.addOption(Option.builder("s").longOpt("size").desc("the size").hasArg().argName("SIZE").build());
+        options.addOption(Option.builder().longOpt("age").desc("the age").hasArg().build());
+
+        final HelpFormatter formatter = new HelpFormatter();
+        formatter.setLongOptSeparator("=");
+
+        final StringWriter out = new StringWriter();
+        formatter.printHelp(new PrintWriter(out), 80, "create", "header", options, 2, 2, "footer");
+
+        String expectedOutput = "usage: create" + System.lineSeparator() +
+                                "header" + System.lineSeparator() +
+                                "     --age=<arg>    the age" + System.lineSeparator() +
+                                "  -f <arg>          the file" + System.lineSeparator() +
+                                "  -s,--size=<SIZE>  the size" + System.lineSeparator() +
+                                "footer" + System.lineSeparator();
+
+        assertEquals(expectedOutput, out.toString(), "Printed help output should match the expected format");
+    }
+}
+```
+

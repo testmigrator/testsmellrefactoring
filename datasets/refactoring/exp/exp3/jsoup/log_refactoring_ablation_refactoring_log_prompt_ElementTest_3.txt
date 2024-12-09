@@ -1,0 +1,46 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.junit.Test;
+import static org.junit.Assert.*;
+
+public class ElementTest {
+
+    private static final String reference = "<div id='div1'>Content</div>";
+
+    @Test
+    public void testGetElementById_Div1Exists() {
+        Document doc = Jsoup.parse(reference);
+        Element div = doc.getElementById("div1");
+        assertNotNull("Element with id 'div1' should exist", div);
+        assertEquals("Element id should be 'div1'", "div1", div.id());
+    }
+
+    @Test
+    public void testGetElementById_NoneDoesNotExist() {
+        Document doc = Jsoup.parse(reference);
+        assertNull("Element with id 'none' should not exist", doc.getElementById("none"));
+    }
+
+    @Test
+    public void testGetElementById_Div2Exists() {
+        Document doc2 = Jsoup.parse("<div id=1><div id=2><p>Hello <span id=2>world!</span></p></div></div>");
+        Element div2 = doc2.getElementById("2");
+        assertNotNull("Element with id '2' should exist", div2);
+        assertEquals("Element tag name should be 'div'", "div", div2.tagName());
+    }
+
+    @Test
+    public void testGetElementById_SpanExistsInChildContext() {
+        Document doc2 = Jsoup.parse("<div id=1><div id=2><p>Hello <span id=2>world!</span></p></div></div>");
+        Element div2 = doc2.getElementById("2");
+        assertNotNull("Element with id '2' should exist", div2);
+        Element span = div2.child(0).getElementById("2");
+        assertNotNull("Element with id '2' should exist in child context", span);
+        assertEquals("Element tag name should be 'span'", "span", span.tagName());
+    }
+}
+```
+

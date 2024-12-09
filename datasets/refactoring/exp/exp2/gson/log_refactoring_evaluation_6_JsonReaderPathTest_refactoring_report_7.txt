@@ -1,0 +1,5 @@
+asserts result: 
+ yes
+
+The functionality of the original test and the refactored test is consistent. The refactored test uses `assertDoesNotThrow` to ensure that no exceptions are thrown during the execution of the test, and it includes descriptive messages for each assertion to make the test output more informative. However, the core logic and assertions remain the same, ensuring that the behavior being tested is identical.
+

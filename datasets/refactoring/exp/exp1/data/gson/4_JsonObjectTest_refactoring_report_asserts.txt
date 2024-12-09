@@ -1,0 +1,10 @@
+total tests: 1
+total asserts: 8
+assertFalse(jsonObj.has(propertyName), "Property should not exist initially");
+assertNull(jsonObj.get(propertyName), "Property value should be null initially");
+assertTrue(jsonObj.has(propertyName), "Property should exist after adding");
+assertEquals(value, jsonObj.get(propertyName), "Property value should be correct");
+assertEquals(value, removedElement, "Removed element should be the added value");
+assertFalse(jsonObj.has(propertyName), "Property should not exist after removal");
+assertNull(jsonObj.get(propertyName), "Property value should be null after removal");
+assertNull(jsonObj.remove(propertyName), "Removing non-existent property should return null");

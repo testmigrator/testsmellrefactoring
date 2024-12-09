@@ -1,0 +1,9 @@
+total tests: 2
+total asserts: 7
+assertEquals(r1, r2, "r1 and r2 should be equal");
+assertEquals(h1, h2, "Hash codes of r1 and r2 should be equal");
+assertNotSame(r1, r2, "The cloned instance should be a different object");
+assertSame(r1.getClass(), r2.getClass(), "The cloned instance should be of the same class");
+assertEquals(r1, r2, "The cloned instance should be equal to the original");
+assertNotEquals(r1, r2, "Changing the first bar paint in the original instance should not affect the cloned instance");
+assertEquals(r1, r2, "Setting the same first bar paint in both instances should make them equal again");

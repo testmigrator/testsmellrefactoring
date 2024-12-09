@@ -1,0 +1,16 @@
+total tests: 3
+total asserts: 14
+assertTrue(ArchiveUtils.matchAsciiBuffer("abc", buffer1), "Buffer1 should match 'abc'");
+assertFalse(ArchiveUtils.matchAsciiBuffer("abc\0", buffer1), "Buffer1 should not match 'abc\\0'");
+assertTrue(ArchiveUtils.matchAsciiBuffer("def\0", buffer2), "Buffer2 should match 'def\\0'");
+assertFalse(ArchiveUtils.matchAsciiBuffer("def", buffer2), "Buffer2 should not match 'def'");
+assertTrue(ArchiveUtils.isEqual(buffer1, buffer2, true), "buffer1 and buffer2 should be equal when trailing zeros are ignored");
+assertFalse(ArchiveUtils.isEqual(buffer1, buffer2, false), "buffer1 and buffer2 should not be equal when trailing zeros are considered");
+assertFalse(ArchiveUtils.isEqual(buffer1, buffer2), "buffer1 and buffer2 should not be equal by default");
+assertTrue(ArchiveUtils.isEqual(buffer2, buffer1, true), "buffer2 and buffer1 should be equal when trailing zeros are ignored");
+assertFalse(ArchiveUtils.isEqual(buffer2, buffer1, false), "buffer2 and buffer1 should not be equal when trailing zeros are considered");
+assertFalse(ArchiveUtils.isEqual(buffer2, buffer1), "buffer2 and buffer1 should not be equal by default");
+assertTrue(ArchiveUtils.isEqual(buffer1, buffer3), "buffer1 and buffer3 should be equal");
+assertTrue(ArchiveUtils.isEqual(buffer3, buffer1), "buffer3 and buffer1 should be equal");
+assertArrayEquals(new byte[] { (byte) 83, (byte) 79, (byte) 67, (byte) 75, (byte) 69, (byte) 84 }, byteArray, "ASCII byte conversion should match expected values");
+assertFalse(ArchiveUtils.isEqualWithNull(byteArray, 0, 46, byteArray, 63, 0), "Equality check with invalid parameters should return false");

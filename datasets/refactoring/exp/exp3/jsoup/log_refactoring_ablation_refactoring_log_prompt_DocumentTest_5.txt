@@ -1,0 +1,62 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class DocumentTest {
+
+    @Test
+    public void testCloneInitialContent() {
+        Document doc = Jsoup.parse("<title>Hello</title> <p>One<p>Two");
+        Document clone = doc.clone();
+
+        String expectedHtml = "<html><head><title>Hello</title> </head><body><p>One</p><p>Two</p></body></html>";
+        assertEquals("Cloned document should have the same initial content as the original", 
+                     TextUtil.stripNewlines(expectedHtml), 
+                     TextUtil.stripNewlines(clone.html()));
+    }
+
+    @Test
+    public void testCloneTitleModification() {
+        Document doc = Jsoup.parse("<title>Hello</title> <p>One<p>Two");
+        Document clone = doc.clone();
+
+        clone.title("Hello there");
+
+        String expectedHtml = "<html><head><title>Hello there</title> </head><body><p>One</p><p>Two</p></body></html>";
+        assertEquals("Cloned document title should be modified correctly", 
+                     TextUtil.stripNewlines(expectedHtml), 
+                     TextUtil.stripNewlines(clone.html()));
+    }
+
+    @Test
+    public void testCloneParagraphModification() {
+        Document doc = Jsoup.parse("<title>Hello</title> <p>One<p>Two");
+        Document clone = doc.clone();
+
+        clone.select("p").first().text("One more").attr("id", "1");
+
+        String expectedHtml = "<html><head><title>Hello</title> </head><body><p id=\"1\">One more</p><p>Two</p></body></html>";
+        assertEquals("Cloned document paragraph should be modified correctly", 
+                     TextUtil.stripNewlines(expectedHtml), 
+                     TextUtil.stripNewlines(clone.html()));
+    }
+
+    @Test
+    public void testOriginalDocumentUnchanged() {
+        Document doc = Jsoup.parse("<title>Hello</title> <p>One<p>Two");
+        Document clone = doc.clone();
+
+        clone.title("Hello there");
+        clone.select("p").first().text("One more").attr("id", "1");
+
+        String expectedHtml = "<html><head><title>Hello</title> </head><body><p>One</p><p>Two</p></body></html>";
+        assertEquals("Original document should remain unchanged after cloning and modifying the clone", 
+                     TextUtil.stripNewlines(expectedHtml), 
+                     TextUtil.stripNewlines(doc.html()));
+    }
+}
+```
+

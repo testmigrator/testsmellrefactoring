@@ -1,0 +1,40 @@
+asserts result: 
+ ```java
+@Test
+public void testGetLegendItemSeriesIndex() {
+    // Define meaningful constants for magic numbers
+    final double VALUE_1 = 21.0;
+    final double VALUE_2 = 22.0;
+    final double VALUE_3 = 23.0;
+    final double VALUE_4 = 24.0;
+    final double VALUE_5 = 25.0;
+    final int SERIES_INDEX = 2;
+    final int DATASET_INDEX = 1;
+
+    // Create datasets
+    DefaultCategoryDataset<String, String> dataset0 = new DefaultCategoryDataset<>();
+    dataset0.addValue(VALUE_1, "R1", "C1");
+    dataset0.addValue(VALUE_2, "R2", "C1");
+    DefaultCategoryDataset<String, String> dataset1 = new DefaultCategoryDataset<>();
+    dataset1.addValue(VALUE_3, "R3", "C1");
+    dataset1.addValue(VALUE_4, "R4", "C1");
+    dataset1.addValue(VALUE_5, "R5", "C1");
+
+    // Create renderer and plot
+    LineAndShapeRenderer r = new LineAndShapeRenderer();
+    CategoryPlot<String, String> plot = new CategoryPlot<>(dataset0, new CategoryAxis("x"), new NumberAxis("y"), r);
+    plot.setDataset(DATASET_INDEX, dataset1);
+
+    // Create chart
+    JFreeChart chart = new JFreeChart(plot);
+
+    // Get legend item
+    LegendItem li = r.getLegendItem(DATASET_INDEX, SERIES_INDEX);
+
+    // Assertions with clear messages
+    assertEquals("Label should be R5", "R5", li.getLabel());
+    assertEquals("Dataset index should be 1", DATASET_INDEX, li.getDatasetIndex());
+    assertEquals("Series index should be 2", SERIES_INDEX, li.getSeriesIndex());
+}
+```
+

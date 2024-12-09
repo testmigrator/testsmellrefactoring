@@ -1,0 +1,10 @@
+asserts result: 
+ yes
+
+The refactored tests maintain the same functionality as the original test. The original test checks both the presence of the correct charset attribute in the meta element and the overall structure of the document. The refactored version splits these checks into two separate tests but still performs the same validations:
+
+1. **testMetaCharsetUpdateNoCharset_MetaElement**: This test checks that the charset attribute of the meta element matches the expected value.
+2. **testMetaCharsetUpdateNoCharset_DocumentStructure**: This test checks that the document structure matches the expected HTML structure.
+
+Both tests together ensure that the functionality remains consistent with the original test.
+

@@ -1,0 +1,49 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.assertions.AssertionConsumer;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
+
+class ArchiveInputStreamTest {
+
+    @Test
+    public void testDetection() {
+        checkArchiveType("bla.ar", ArArchiveInputStream.class);
+        checkArchiveType("bla.tar", TarArchiveInputStream.class);
+        checkArchiveType("bla.zip", ZipArchiveInputStream.class);
+        checkArchiveType("bla.jar", ZipArchiveInputStream.class);
+        checkArchiveType("bla.cpio", CpioArchiveInputStream.class);
+        checkArchiveType("bla.arj", ArjArchiveInputStream.class);
+        
+        // Not yet implemented
+        // checkArchiveType("bla.tgz", TarArchiveInputStream.class);
+    }
+
+    private void checkArchiveType(String fileName, Class<?> expectedClass) {
+        try (ArchiveInputStream<?> stream = createArchiveInputStream(fileName)) {
+            assertNotNull(stream, "Stream should not be null for file: " + fileName);
+            assertTrue(expectedClass.isInstance(stream), 
+                "Expected instance of " + expectedClass.getName() + " but got " + stream.getClass().getName() + " for file: " + fileName);
+        } catch (Exception e) {
+            fail("Exception occurred while processing file: " + fileName, e);
+        }
+    }
+
+    private ArchiveInputStream<?> createArchiveInputStream(String fileName) throws Exception {
+        // Implementation of creating the ArchiveInputStream based on the file name
+        // This is a placeholder for the actual implementation
+        return null; // Replace with actual implementation
+    }
+}
+```
+
+### Explanation of Refactoring Steps:
+1. **Extracted Common Logic**: The repeated logic for checking the type of `ArchiveInputStream` was extracted into a separate method `checkArchiveType`.
+2. **Added Explanatory Messages**: Each assertion now includes a message that provides context about what is being tested.
+3. **Exception Handling**: Instead of catching and throwing exceptions, the test now uses `fail` with a descriptive message to indicate the failure.
+4. **JUnit 5 Assertions**: The test uses JUnit 5's `assertNotNull` and `assertTrue` methods, which are more expressive and modern.
+5. **Placeholder for `createArchiveInputStream`**: The `createArchiveInputStream` method is a placeholder and should be replaced with the actual implementation.
+
+This refactored code addresses both the 'Assertion_Roulette' and 'Exception_Catching_Throwing' code smells.
+

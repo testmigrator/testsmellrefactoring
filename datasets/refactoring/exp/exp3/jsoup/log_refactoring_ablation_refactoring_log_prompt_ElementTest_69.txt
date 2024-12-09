@@ -1,0 +1,52 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.QueryParser;
+import org.junit.Test;
+import static org.junit.Assert.*;
+
+public class ElementTest {
+
+    @Test
+    public void testOwnText() {
+        Document doc = Jsoup.parse("<div><p>One <a class=big>Two</a> Three</p><p>Another</p>");
+        Element p = doc.selectFirst(QueryParser.parse("p"));
+        assertEquals("Expected own text of the paragraph element", "One Three", p.ownText());
+    }
+
+    @Test
+    public void testIsMethodWithParagraphEvaluator() {
+        Document doc = Jsoup.parse("<div><p>One <a class=big>Two</a> Three</p><p>Another</p>");
+        Element p = doc.selectFirst(QueryParser.parse("p"));
+        assertTrue("Element should match the paragraph evaluator", p.is(QueryParser.parse("p")));
+    }
+
+    @Test
+    public void testIsMethodWithAnchorEvaluator() {
+        Document doc = Jsoup.parse("<div><p>One <a class=big>Two</a> Three</p><p>Another</p>");
+        Element p = doc.selectFirst(QueryParser.parse("p"));
+        Evaluator aEval = QueryParser.parse("a");
+        assertFalse("Element should not match the anchor evaluator", p.is(aEval));
+    }
+
+    @Test
+    public void testSelectFirstAndClosestMethods() {
+        Document doc = Jsoup.parse("<div><p>One <a class=big>Two</a> Three</p><p>Another</p>");
+        Element p = doc.selectFirst(QueryParser.parse("p"));
+        Evaluator aEval = QueryParser.parse("a");
+        Element a = p.selectFirst(aEval);
+        assertEquals("Expected closest div with a child paragraph", "div", a.closest(QueryParser.parse("div:has( > p)")).tagName());
+    }
+
+    @Test
+    public void testClosestBodyMethod() {
+        Document doc = Jsoup.parse("<div><p>One <a class=big>Two</a> Three</p><p>Another</p>");
+        Element p = doc.selectFirst(QueryParser.parse("p"));
+        Element body = p.closest(QueryParser.parse("body"));
+        assertEquals("Expected closest body element", "body", body.nodeName());
+    }
+}
+```
+

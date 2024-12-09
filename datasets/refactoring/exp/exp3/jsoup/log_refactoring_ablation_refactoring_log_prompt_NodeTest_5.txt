@@ -1,0 +1,35 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+public class NodeTest {
+
+    @Test
+    public void shouldNotHaveAbsHrefForRelativeUrl() {
+        Document doc = Jsoup.parse("<a id=1 href='/foo'>One</a>");
+        Element one = doc.select("#1").first();
+
+        assertFalse("Element should not have abs:href attribute", one.hasAttr("abs:href"));
+        assertTrue("Element should have href attribute", one.hasAttr("href"));
+        assertEquals("Absolute URL should be empty", "", one.absUrl("href"));
+    }
+
+    @Test
+    public void shouldHaveAbsHrefForAbsoluteUrl() {
+        Document doc = Jsoup.parse("<a id=2 href='https://jsoup.org/'>Two</a>");
+        Element two = doc.select("#2").first();
+
+        assertTrue("Element should have abs:href attribute", two.hasAttr("abs:href"));
+        assertTrue("Element should have href attribute", two.hasAttr("href"));
+        assertEquals("Absolute URL should match the href attribute", "https://jsoup.org/", two.absUrl("href"));
+    }
+}
+```
+

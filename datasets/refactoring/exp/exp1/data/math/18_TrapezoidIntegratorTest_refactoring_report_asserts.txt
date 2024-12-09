@@ -1,0 +1,8 @@
+total tests: 2
+total asserts: 6
+Assert.assertTrue("Too many evaluations", integrator.getEvaluations() < MAX_EVALUATIONS);
+Assert.assertTrue("Too many iterations",  integrator.getIterations() < MAX_ITERATIONS);
+Assert.assertEquals("Incorrect integration result", expected, result, tolerance);
+Assert.assertTrue("Too many evaluations", integrator.getEvaluations() < MAX_EVALUATIONS);
+Assert.assertTrue("Too many iterations",  integrator.getIterations() < MAX_ITERATIONS);
+Assert.assertEquals("Incorrect integration result", expected, result, tolerance);

@@ -1,0 +1,34 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+public class NodeTest {
+
+    @Test
+    public void testHandlesAbsPrefix_HrefAttribute() {
+        Document doc = Jsoup.parse("<a href=/foo>Hello</a>", "https://jsoup.org/");
+        Element a = doc.select("a").first();
+        assertEquals("The href attribute should be '/foo'", "/foo", a.attr("href"));
+    }
+
+    @Test
+    public void testHandlesAbsPrefix_AbsHrefAttribute() {
+        Document doc = Jsoup.parse("<a href=/foo>Hello</a>", "https://jsoup.org/");
+        Element a = doc.select("a").first();
+        assertEquals("The abs:href attribute should be 'https://jsoup.org/foo'", "https://jsoup.org/foo", a.attr("abs:href"));
+    }
+
+    @Test
+    public void testHandlesAbsPrefix_HasAbsHrefAttribute() {
+        Document doc = Jsoup.parse("<a href=/foo>Hello</a>", "https://jsoup.org/");
+        Element a = doc.select("a").first();
+        assertTrue("The element should have the abs:href attribute", a.hasAttr("abs:href"));
+    }
+}
+```
+

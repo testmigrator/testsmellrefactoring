@@ -1,0 +1,11 @@
+asserts result: 
+ Yes
+
+The refactored tests maintain the same functionality as the original test. Each part of the original test has been broken down into separate methods, but the overall behavior and assertions remain consistent:
+
+1. **`testPeekMuchLargerThanLongMinValue_Peek`** checks that `peek()` returns `NUMBER`, which is equivalent to the first assertion in the original test.
+2. **`testPeekMuchLargerThanLongMinValue_NextLong`** checks that `nextLong()` throws a `NumberFormatException`, which is equivalent to the second assertion in the original test.
+3. **`testPeekMuchLargerThanLongMinValue_NextDouble`** checks that `nextDouble()` returns the expected double value, which is equivalent to the third assertion in the original test.
+
+The refactoring does not change the logic or the expected outcomes of the tests.
+

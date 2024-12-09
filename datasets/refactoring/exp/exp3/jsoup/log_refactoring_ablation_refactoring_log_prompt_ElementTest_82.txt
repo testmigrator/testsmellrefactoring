@@ -1,0 +1,61 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+public class ElementTest {
+
+    private static final String HTML = "<ul id='ul'>" +
+            "<li id='a'>a</li>" +
+            "<li id='b'>b</li>" +
+            "<li id='c'>c</li>" +
+            "</ul>" +
+            "<div id='div'>" +
+            "<li id='d'>d</li>" +
+            "</div>";
+
+    @Test
+    public void testPreviousElementSiblingsForElementB() {
+        Document doc = Jsoup.parse(HTML);
+        Element element = doc.getElementById("b");
+        Elements elementSiblings = element.previousElementSiblings();
+        assertNotNull(elementSiblings, "Element b should have previous element siblings");
+        assertEquals(1, elementSiblings.size(), "Element b should have exactly 1 previous element sibling");
+        assertEquals("a", elementSiblings.get(0).id(), "The previous element sibling of b should be a");
+    }
+
+    @Test
+    public void testPreviousElementSiblingsForElementA() {
+        Document doc = Jsoup.parse(HTML);
+        Element element = doc.getElementById("a");
+        List<Element> elementSiblings = element.previousElementSiblings();
+        assertEquals(0, elementSiblings.size(), "Element a should have no previous element siblings");
+    }
+
+    @Test
+    public void testPreviousElementSiblingsForElementC() {
+        Document doc = Jsoup.parse(HTML);
+        Element element = doc.getElementById("c");
+        List<Element> elementSiblings = element.previousElementSiblings();
+        assertNotNull(elementSiblings, "Element c should have previous element siblings");
+        assertEquals(2, elementSiblings.size(), "Element c should have exactly 2 previous element siblings");
+        assertEquals("b", elementSiblings.get(0).id(), "The first previous element sibling of c should be b");
+        assertEquals("a", elementSiblings.get(1).id(), "The second previous element sibling of c should be a");
+    }
+
+    @Test
+    public void testPreviousElementSiblingsForElementUl() {
+        Document doc = Jsoup.parse(HTML);
+        Element ul = doc.getElementById("ul");
+        List<Element> elementSiblings = ul.previousElementSiblings();
+        assertEquals(0, elementSiblings.size(), "Element ul should have no previous element siblings");
+    }
+}
+```
+

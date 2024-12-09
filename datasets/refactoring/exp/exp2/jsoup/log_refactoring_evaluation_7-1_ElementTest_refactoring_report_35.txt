@@ -1,0 +1,35 @@
+asserts result: 
+ The refactored tests are not consistent with the original test. Here's an overview of the inconsistencies:
+
+1. **Duplicate Insertions**:
+   - In the original test, `p1.before("<div>one</div><div>two</div>");` is called once.
+   - In the refactored test, `p1.before("<div>one</div><div>two</div>");` is called twice (once in `setupBeforeTest()` and again in `testBefore_InsertMultipleDivs()`). This results in the insertion of `<div>one</div><div>two</div>` being duplicated, which changes the expected HTML structure.
+
+2. **Setup Redundancy**:
+   - The `setupBeforeTest()` method already sets up the initial state by calling `p1.before("<div>one</div><div>two</div>");`. Therefore, calling it again in `testBefore_InsertMultipleDivs()` is redundant and leads to incorrect behavior.
+
+To make the refactored tests consistent with the original test, the duplicate call to `p1.before("<div>one</div><div>two</div>");` should be removed from `testBefore_InsertMultipleDivs()`. Here is the corrected version:
+
+```java
+private void setupBeforeTest() {
+    doc = Jsoup.parse("<div><p>Hello</p><p>There</p></div>");
+    p1 = doc.select("p").first();
+    p1.before("<div>one</div><div>two</div>");
+}
+
+@Test
+public void testBefore_InsertMultipleDivs() {
+    setupBeforeTest();
+    assertEquals("<div><div>one</div><div>two</div><p>Hello</p><p>There</p></div>", TextUtil.stripNewlines(doc.body().html()), "Verify inserting multiple divs before the first paragraph");
+}
+
+@Test
+public void testBefore_InsertPAndComment() {
+    setupBeforeTest();
+    doc.select("p").last().before("<p>Three</p><!-- four -->");
+    assertEquals("<div><div>one</div><div>two</div><p>Hello</p><p>Three</p><!-- four --><p>There</p></div>", TextUtil.stripNewlines(doc.body().html()), "Verify inserting a paragraph and a comment before the last paragraph");
+}
+```
+
+With this correction, the functionality between the original and refactored tests will be consistent.
+

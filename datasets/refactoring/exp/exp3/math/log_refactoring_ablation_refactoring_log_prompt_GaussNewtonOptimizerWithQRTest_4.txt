@@ -1,0 +1,27 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import org.junit.jupiter.api.Test;
+import org.apache.commons.math3.exception.ConvergenceException;
+import org.apache.commons.math3.exception.TooManyEvaluationsException;
+
+public class RefactoredTest {
+
+    @Test
+    public void testHahn1() {
+        // Arrange
+        // No specific setup needed for this test
+
+        // Act & Assert
+        assertThrows(ConvergenceException.class, () -> {
+            super.testHahn1();
+        });
+
+        assertThrows(TooManyEvaluationsException.class, () -> {
+            super.testHahn1();
+        });
+    }
+}
+```
+

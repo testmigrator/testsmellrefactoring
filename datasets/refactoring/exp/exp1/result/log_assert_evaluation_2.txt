@@ -1,0 +1,34 @@
+asserts result: 
+ - 'assertTrue(list.isEmpty(), "List should be empty after removal");' - yes
+- 'assertTrue(a.isEmpty(), "JsonArray should be empty after removal");' - yes
+- 'assertFalse(list.remove(new JsonPrimitive(1)), "Element should not be found");' - yes
+- 'assertFalse(list.remove(null), "Null element should not be found");' - yes
+- 'assertTrue(list.contains(new JsonPrimitive(1)), "List should contain the specified element");' - yes
+- 'assertFalse(list.contains(new JsonPrimitive(2)), "List should not contain the specified element");' - yes
+- 'assertFalse(list.contains(null), "List should not contain null");' - yes
+- 'assertFalse(containsInt, "List should not contain an integer value");' - yes
+- 'assertEquals("r1 and r2 should be equal", r1, r2);' - yes
+- 'assertEquals("Hash codes of r1 and r2 should be equal", h1, h2);' - yes
+- 'assertNotSame(r1, r2, "The cloned object should be a different instance from the original");' - yes
+- 'assertSame(r1.getClass(), r2.getClass(), "The cloned object should be of the same class as the original");' - yes
+- 'assertEquals(r1, r2, "The cloned object should be equal to the original");' - yes
+- 'assertEquals(r1, r2, "Expected r1 and r2 to be equal when both have the same active state.");' - yes
+- 'assertNotEquals(r1, r2, "Expected r1 and r2 to not be equal when one is active and the other is not.");' - yes
+- 'assertEquals(r1, r2, "Expected r1 and r2 to be equal when both are active.");' - yes
+- 'assertNotSame(r1, r2, "The cloned object should not be the same instance as the original.");' - yes
+- 'assertSame(r1.getClass(), r2.getClass(), "The cloned object should be of the same class as the original.");' - yes
+- 'assertEquals(r1, r2, "The cloned object should be equal to the original.");' - yes
+- 'assertDoesNotThrow(() -> TestUtils.checkIndependence(r1, r2), "Checking independence between the original and cloned objects should not throw an exception.");' - yes
+- 'assertEquals(expectedLabel, li.getLabel(), "The label of the legend item should match the expected value.");' - yes
+- 'assertEquals(expectedDatasetIndex, li.getDatasetIndex(), "The dataset index of the legend item should match the expected value.");' - yes
+- 'assertEquals(expectedSeriesIndex, li.getSeriesIndex(), "The series index of the legend item should match the expected value.");' - yes
+- 'assertEquals(r1, r2, "Two default renderers should be equal");' - yes
+- 'assertNotEquals(r1, r2, "Renderers should not be equal after changing series filled state");' - yes
+- 'assertEquals(r1, r2, "Renderers should be equal after setting the same series filled state");' - yes
+- 'assertNotSame(r1, r2, "The cloned instances should be different objects");' - yes
+- 'assertSame(r1.getClass(), r2.getClass(), "The cloned instances should be of the same class");' - yes
+- 'assertEquals(r1, r2, "The initial state of the cloned instance should be equal to the original");' - yes
+- 'assertNotEquals(r1, r2, "Changing the state of the original instance should affect equality with the clone");' - yes
+
+All provided assert statements meet the criteria for clarity and correct expression of their purpose.
+

@@ -1,0 +1,15 @@
+asserts result: 
+ - For the assert statement: `assertEquals(expectedPDataSize, pData.size(), "Paragraph element should contain no data nodes");`
+  - The message "Paragraph element should contain no data nodes" does not clearly convey the expected condition if `expectedPDataSize` is not zero. A more accurate message would be "Paragraph element should contain exactly [expectedPDataSize] data nodes".
+
+- For the assert statement: `assertEquals(expectedChildNodeCount, children.size(), "Initial child node count of div1 should be 4");`
+  - This assert statement is repeated with the same message but different variables (`children.size()` vs `div1.childNodeSize()`). The message should be specific to the variable being checked, such as "Initial child node count of div1's children list should be 4" for `children.size()`.
+
+- For the assert statement: `assertEquals(expectedChildNodeCountDiv1, children.size(), "Children list should be empty after moving nodes to div2");`
+  - The message suggests that the children list should be empty, but the assertion is comparing against `expectedChildNodeCountDiv1`. The message should reflect the expected value, e.g., "Children list of div1 should have [expectedChildNodeCountDiv1] nodes after moving nodes to div2".
+
+- For the assert statement: `assertEquals(expectedChildNodeCountDiv1, div1.childNodeSize(), "Child node count of div1 should be 0 after moving nodes");`
+  - Similar to the previous point, the message suggests that the count should be 0, but the assertion is comparing against `expectedChildNodeCountDiv1`. The message should reflect the expected value, e.g., "Child node count of div1 should be [expectedChildNodeCountDiv1] after moving nodes".
+
+All other assert statements meet the criteria for both semantic clarity and correct expression of the purpose.
+

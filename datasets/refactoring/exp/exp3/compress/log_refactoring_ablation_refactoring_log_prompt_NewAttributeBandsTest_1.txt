@@ -1,0 +1,100 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.assertions.AssertionFailedError;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+class NewAttributeBandsTest {
+
+    private static final String LAYOUT_NAME = "test";
+    private static final int CONTEXT_CLASS = AttributeLayout.CONTEXT_CLASS;
+    private static final String EMPTY_STRING = "";
+    private static final int EXPECTED_SIZE = 0;
+
+    @Test
+    public void testEmptyLayout() {
+        // Arrange
+        final MockNewAttributeBands newAttributeBands = new MockNewAttributeBands(
+            new MockSegment(),
+            new AttributeLayout(LAYOUT_NAME, CONTEXT_CLASS, EMPTY_STRING, EXPECTED_SIZE)
+        );
+
+        // Act
+        final List<?> layoutElements = newAttributeBands.getLayoutElements();
+
+        // Assert
+        assertEquals(EXPECTED_SIZE, layoutElements.size());
+
+        // Verify Exception Handling
+        assertThrows(Pack200Exception.class, () -> {
+            newAttributeBands.throwExceptionIfInvalid();
+        });
+    }
+}
+
+class MockNewAttributeBands {
+    private final MockSegment segment;
+    private final AttributeLayout attributeLayout;
+
+    public MockNewAttributeBands(MockSegment segment, AttributeLayout attributeLayout) {
+        this.segment = segment;
+        this.attributeLayout = attributeLayout;
+    }
+
+    public List<?> getLayoutElements() {
+        return attributeLayout.getLayoutElements();
+    }
+
+    public void throwExceptionIfInvalid() throws Pack200Exception {
+        if (attributeLayout.getName().isEmpty()) {
+            throw new Pack200Exception("Attribute layout name cannot be empty");
+        }
+    }
+}
+
+class MockSegment {}
+
+class AttributeLayout {
+    public static final int CONTEXT_CLASS = 1;
+    private final String name;
+    private final int context;
+    private final String someString;
+    private final int size;
+    private final List<Object> layoutElements = new ArrayList<>();
+
+    public AttributeLayout(String name, int context, String someString, int size) {
+        this.name = name;
+        this.context = context;
+        this.someString = someString;
+        this.size = size;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getContext() {
+        return context;
+    }
+
+    public String getSomeString() {
+        return someString;
+    }
+
+    public int getSize() {
+        return size;
+    }
+
+    public List<Object> getLayoutElements() {
+        return layoutElements;
+    }
+}
+
+class Pack200Exception extends Exception {
+    public Pack200Exception(String message) {
+        super(message);
+    }
+}
+```
+

@@ -1,0 +1,11 @@
+asserts result: 
+ Yes
+
+The refactored tests maintain the same functionality as the original test. The original test checks the behavior of moving child nodes from one element to another, verifying the initial state, the state after the move, and the final document structure. The refactored version splits this into three separate tests:
+
+1. **testMoveByAppend_ChildNodeCountBeforeMove**: Verifies the initial state of `div1` before any nodes are moved.
+2. **testMoveByAppend_ChildNodeCountAfterMove**: Verifies the state of both `div1` and `div2` after the nodes are moved.
+3. **testMoveByAppend_DocumentStructureAfterMove**: Verifies that the document structure matches the expected result after the nodes are moved.
+
+Each of these tests covers a specific aspect of the original test, ensuring that the overall functionality remains consistent.
+

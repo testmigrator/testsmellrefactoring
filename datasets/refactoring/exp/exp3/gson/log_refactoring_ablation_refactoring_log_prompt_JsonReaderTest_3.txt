@@ -1,0 +1,16 @@
+asserts result: 
+ ```java
+import static org.junit.Assert.assertEquals;
+import org.junit.Test;
+
+public class JsonReaderTest {
+
+    @Test
+    public void testSetStrictnessToStrict() {
+        JsonReader reader = new JsonReader(new StringReader("{}"));
+        reader.setStrictness(Strictness.STRICT);
+        assertEquals(Strictness.STRICT, reader.getStrictness());
+    }
+}
+```
+

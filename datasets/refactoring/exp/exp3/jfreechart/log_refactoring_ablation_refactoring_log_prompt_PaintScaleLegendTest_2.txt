@@ -1,0 +1,24 @@
+asserts result: 
+ ```java
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class PaintScaleLegendTest {
+
+    @Test
+    public void testHashCodeEquality() {
+        // Arrange
+        PaintScaleLegend l1 = new PaintScaleLegend(new GrayPaintScale(), new NumberAxis("X"));
+        PaintScaleLegend l2 = new PaintScaleLegend(new GrayPaintScale(), new NumberAxis("X"));
+
+        // Act & Assert
+        assertEquals("l1 and l2 should be equal", l1, l2);
+
+        int h1 = l1.hashCode();
+        int h2 = l2.hashCode();
+
+        assertEquals("Hash codes of l1 and l2 should be equal", h1, h2);
+    }
+}
+```
+

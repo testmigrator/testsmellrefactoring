@@ -1,0 +1,42 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.condition.EnabledIf;
+
+public class DocumentTest {
+
+    private static final String HTML = "<html><body><div><p>before1</p><p>before2</p><p>XXX</p><p>after1</p><p>after2</p></div></body></html>";
+
+    @EnabledIf("isXElementPresent")
+    @Test
+    public void testRemoveBeforeIndex() {
+        Document doc = Jsoup.parse(HTML, "");
+        Element body = doc.select("body").first();
+        Elements elems = body.select("p:matchesOwn(XXX)");
+        Element xElem = elems.first();
+        removeElementsBeforeX(xElem);
+        assertEquals("<body><div><p>XXX</p><p>after1</p><p>after2</p></div></body>", TextUtil.stripNewlines(body.outerHtml()));
+    }
+
+    private boolean isXElementPresent() {
+        Document doc = Jsoup.parse(HTML, "");
+        Element body = doc.select("body").first();
+        Elements elems = body.select("p:matchesOwn(XXX)");
+        return !elems.isEmpty();
+    }
+
+    private void removeElementsBeforeX(Element xElem) {
+        Elements beforeX = xElem.parent().getElementsByIndexLessThan(xElem.elementSiblingIndex());
+        for (Element p : beforeX) {
+            p.remove();
+        }
+    }
+}
+```
+

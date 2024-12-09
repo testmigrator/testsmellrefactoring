@@ -1,0 +1,10 @@
+asserts result: 
+ yes
+
+The refactored test method `testMaxEvaluations` maintains the same functionality as the original test. Both tests aim to verify that a `TooManyEvaluationsException` is thrown when the optimizer exceeds the maximum number of evaluations. The only difference is in the way the exception is caught and verified:
+
+- In the original test, a `try-catch` block is used to catch the `TooManyEvaluationsException`, and if the exception is not thrown, the test fails using `fail(optimizer)`.
+- In the refactored test, the `assertThrows` method from JUnit is used to assert that the `TooManyEvaluationsException` is thrown. This method will automatically fail the test if the expected exception is not thrown.
+
+Both approaches ensure that the test passes only if the `TooManyEvaluationsException` is thrown, making the functionality consistent.
+

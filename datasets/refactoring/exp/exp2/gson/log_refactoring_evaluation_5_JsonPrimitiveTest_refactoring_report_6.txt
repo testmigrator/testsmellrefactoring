@@ -1,0 +1,5 @@
+asserts result: 
+ Yes
+
+The refactored tests maintain the same functionality as the original test. Each assertion from the original `testExponential` method has been split into separate test methods (`testExponential_BigDecimal`, `testExponential_Double`, and `testExponential_IntThrowsException`), but they still perform the same checks and use the same input (`"1E+7"`). The refactoring improves readability and modularity without altering the behavior of the tests.
+

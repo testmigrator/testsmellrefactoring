@@ -1,0 +1,5 @@
+asserts result: 
+ Yes
+
+The refactored tests maintain the same functionality as the original test. Each type of `JsonPrimitive` comparison has been broken out into its own test method, which ensures that each specific case is tested individually. The use of descriptive messages in the assertions helps to clarify what is being tested in each method, maintaining the integrity and clarity of the original test's purpose.
+

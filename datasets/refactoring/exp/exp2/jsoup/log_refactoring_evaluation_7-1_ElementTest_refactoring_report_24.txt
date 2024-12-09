@@ -1,0 +1,5 @@
+asserts result: 
+ Yes
+
+The refactored tests maintain the same functionality as the original test. Each assertion from the original `testContainerOutput` method has been split into its own test method (`testContainerOutput_Title`, `testContainerOutput_FirstDiv`, and `testContainerOutput_BodyContent`). The `setupTestContainerOutput` method initializes the document, which is then used in each of the individual test methods. The assertions and the expected outputs remain the same, ensuring that the functionality is consistent.
+

@@ -1,0 +1,24 @@
+asserts result: 
+ ```java
+import static org.junit.Assert.assertEquals;
+
+public class LookupPaintScaleTest {
+
+    private static final double EPSILON = 0.00001;
+    private static final double LOWER_BOUND_EXPECTED = 0.0;
+    private static final double UPPER_BOUND_EXPECTED = 1.0;
+
+    @Test
+    public void testLowerBound() {
+        LookupPaintScale scale = new LookupPaintScale();
+        assertEquals("Lower bound should be 0.0", LOWER_BOUND_EXPECTED, scale.getLowerBound(), EPSILON);
+    }
+
+    @Test
+    public void testUpperBound() {
+        LookupPaintScale scale = new LookupPaintScale();
+        assertEquals("Upper bound should be 1.0", UPPER_BOUND_EXPECTED, scale.getUpperBound(), EPSILON);
+    }
+}
+```
+

@@ -1,0 +1,5 @@
+asserts result: 
+ Yes
+
+The functionality between the original test and the refactored tests is consistent. The refactoring splits the original test into two separate tests, each focusing on specific aspects of the document and span elements. However, all assertions and checks from the original test are preserved and correctly implemented in the refactored tests.
+

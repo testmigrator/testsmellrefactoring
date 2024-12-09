@@ -1,0 +1,61 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+
+class GanttRendererTest {
+
+    private GanttRenderer r1;
+    private GanttRenderer r2;
+
+    @BeforeEach
+    void setUp() {
+        r1 = new GanttRenderer();
+        r2 = new GanttRenderer();
+    }
+
+    @Test
+    void testDefaultEquality() {
+        assertEquals(r1, r2, "Two default GanttRenderers should be equal");
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "setCompletePaint, Color.YELLOW",
+        "setIncompletePaint, Color.GREEN",
+        "setStartPercent, 0.11",
+        "setEndPercent, 0.88"
+    })
+    void testSinglePropertyChange(String methodName, Object value) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        Method method = GanttRenderer.class.getMethod(methodName, value.getClass());
+        method.invoke(r1, value);
+        assertNotEquals(r1, r2, "GanttRenderers should not be equal after changing " + methodName);
+
+        method.invoke(r2, value);
+        assertEquals(r1, r2, "GanttRenderers should be equal after setting the same " + methodName);
+    }
+}
+```
+
+### Explanation:
+1. **Understanding the Test Intent**:
+   - The original test checks the equality of `GanttRenderer` objects when different properties are set.
+   - It verifies that two `GanttRenderer` objects are equal by default and become unequal when one of their properties is changed, and then equal again when the same property is set on both objects.
+
+2. **Understanding the Code Smells**:
+   - **Assertion Roulette**: The test contains multiple assertions without clear messages.
+   - **Eager Test**: The test method performs multiple operations and checks.
+   - **Duplicate Assert**: The test has multiple assertions with similar structures.
+
+3. **Refactoring the Test Code**:
+   - **All assert statements have been added with clear explanatory messages**.
+   - **All eager tests have been split into separate tests**:
+     - `testDefaultEquality` checks the default equality.
+     - `testSinglePropertyChange` uses JUnit 5 Parameterized Tests to check each property change individually.
+   - **All duplicate assertions have been refactored using JUnit 5 Parameterized Tests**:
+     - The `@ParameterizedTest` and `@CsvSource` annotations are used to test each property change independently.
+

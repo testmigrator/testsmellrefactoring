@@ -1,0 +1,105 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.api.condition.EnabledIf;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+public class CircleFittingTest {
+
+    private static final double TOLERANCE = 1e-6;
+    private static final double COVARIANCE_TOLERANCE = 0.001;
+    private static final double SMALL_TOLERANCE = 1e-14;
+    private static final double PERFECT_MEASUREMENTS_ANGLE_STEP = 0.01;
+    private static final double WEIGHT_VALUE = 2;
+
+    @Test
+    public void testCircleFitting() {
+        CircleVectorial circle = createInitialCircle();
+        Optimum optimum = optimizeCircle(circle, new double[]{98.680, 47.345});
+
+        assertOptimumEvaluations(optimum);
+        assertRMS(circle, optimum);
+        assertCenterAndRadius(circle, optimum);
+        assertCovariances(optimum);
+    }
+
+    @Test
+    @EnabledIf("isPerfectMeasurementsEnabled")
+    public void testCircleFittingWithPerfectMeasurements() {
+        CircleVectorial circle = createInitialCircle();
+        addPerfectMeasurements(circle);
+        Optimum optimum = optimizeCircleWithWeights(circle, new double[]{98.680, 47.345}, WEIGHT_VALUE);
+
+        assertCovariancesAfterPerfectMeasurements(optimum);
+    }
+
+    private CircleVectorial createInitialCircle() {
+        CircleVectorial circle = new CircleVectorial();
+        circle.addPoint(30, 68);
+        circle.addPoint(50, -6);
+        circle.addPoint(110, -20);
+        circle.addPoint(35, 15);
+        circle.addPoint(45, 97);
+        return circle;
+    }
+
+    private Optimum optimizeCircle(CircleVectorial circle, double[] start) {
+        return optimizer.optimize(builder(circle).start(start).build());
+    }
+
+    private Optimum optimizeCircleWithWeights(CircleVectorial circle, double[] start, double weightValue) {
+        double[] weights = new double[circle.getN()];
+        Arrays.fill(weights, weightValue);
+        return optimizer.optimize(builder(circle).weight(new DiagonalMatrix(weights)).start(start).build());
+    }
+
+    private void assertOptimumEvaluations(Optimum optimum) {
+        assertTrue(optimum.getEvaluations() < 10, "Optimum evaluations should be less than 10");
+    }
+
+    private void assertRMS(CircleVectorial circle, Optimum optimum) {
+        double rms = optimum.getRMS();
+        assertEquals(1.768262623567235, JdkMath.sqrt(circle.getN()) * rms, TOLERANCE, "RMS value does not match expected");
+    }
+
+    private void assertCenterAndRadius(CircleVectorial circle, Optimum optimum) {
+        Vector2D center = Vector2D.of(optimum.getPoint().getEntry(0), optimum.getPoint().getEntry(1));
+        assertEquals(69.96016176931406, circle.getRadius(center), TOLERANCE, "Radius does not match expected");
+        assertEquals(96.07590211815305, center.getX(), TOLERANCE, "Center X coordinate does not match expected");
+        assertEquals(48.13516790438953, center.getY(), TOLERANCE, "Center Y coordinate does not match expected");
+    }
+
+    private void assertCovariances(Optimum optimum) {
+        double[][] cov = optimum.getCovariances(SMALL_TOLERANCE).getData();
+        assertEquals(1.839, cov[0][0], COVARIANCE_TOLERANCE, "Covariance [0][0] does not match expected");
+        assertEquals(0.731, cov[0][1], COVARIANCE_TOLERANCE, "Covariance [0][1] does not match expected");
+        assertEquals(cov[0][1], cov[1][0], SMALL_TOLERANCE, "Covariance [1][0] does not match expected");
+        assertEquals(0.786, cov[1][1], COVARIANCE_TOLERANCE, "Covariance [1][1] does not match expected");
+    }
+
+    private void assertCovariancesAfterPerfectMeasurements(Optimum optimum) {
+        double[][] cov = optimum.getCovariances(SMALL_TOLERANCE).getData();
+        assertEquals(0.0016, cov[0][0], COVARIANCE_TOLERANCE, "Covariance [0][0] after perfect measurements does not match expected");
+        assertEquals(3.2e-7, cov[0][1], 1e-9, "Covariance [0][1] after perfect measurements does not match expected");
+        assertEquals(cov[0][1], cov[1][0], SMALL_TOLERANCE, "Covariance [1][0] after perfect measurements does not match expected");
+        assertEquals(0.0016, cov[1][1], COVARIANCE_TOLERANCE, "Covariance [1][1] after perfect measurements does not match expected");
+    }
+
+    private void addPerfectMeasurements(CircleVectorial circle) {
+        double r = circle.getRadius(Vector2D.of(96.07590211815305, 48.13516790438953));
+        for (double d = 0; d < 2 * JdkMath.PI; d += PERFECT_MEASUREMENTS_ANGLE_STEP) {
+            circle.addPoint(96.07590211815305 + r * JdkMath.cos(d), 48.13516790438953 + r * JdkMath.sin(d));
+        }
+    }
+
+    private boolean isPerfectMeasurementsEnabled() {
+        // This method can be used to enable or disable the test based on some condition
+        return true;
+    }
+}
+```
+

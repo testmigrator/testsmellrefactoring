@@ -1,0 +1,33 @@
+asserts result: 
+ - `assertEquals(JsonToken.BEGIN_OBJECT, reader.peek(), "Expected BEGIN_OBJECT token");` - yes
+- `assertEquals(JsonToken.NAME, reader.peek(), "Expected NAME token");` - yes
+- `assertEquals("", reader.nextName(), "Expected empty string as name");` - yes
+- `assertEquals(JsonToken.BOOLEAN, reader.peek(), "Expected BOOLEAN token");` - yes
+- `assertTrue(reader.nextBoolean(), "Expected true value");` - yes
+- `assertEquals(JsonToken.END_OBJECT, reader.peek(), "Expected END_OBJECT token");` - yes
+- `assertEquals(JsonToken.END_DOCUMENT, reader.peek(), "Expected END_DOCUMENT token");` - yes
+- `assertTrue(reader.nextBoolean(), "Expected true for 'True'");` - yes
+- `assertTrue(reader.nextBoolean(), "Expected true for 'TruE'");` - yes
+- `assertFalse(reader.nextBoolean(), "Expected false for 'False'");` - yes
+- `assertFalse(reader.nextBoolean(), "Expected false for 'FALSe'");` - yes
+- `assertEquals(JsonToken.END_DOCUMENT, reader.peek(), "Expected END_DOCUMENT after processing all elements");` - yes
+- `assertEquals("a", reader.nextName(), "Expected name 'a' with '=' separator");` - yes
+- `assertEquals(true, reader.nextBoolean(), "Expected boolean value 'true' with '=' separator");` - yes
+- `assertEquals("a", reader.nextName(), "Expected name 'a' with '=>' separator");` - yes
+- `assertEquals(true, reader.nextBoolean(), "Expected boolean value 'true' with '=>' separator");` - yes
+- `assertEquals("a", reader.nextName(), "The next name should be 'a'");` - yes
+- `assertEquals("b", reader.nextName(), "The next name should be 'b'");` - yes
+- `assertEquals(123, reader.nextInt(), "The integer value should be 123");` - yes
+- `assertSame(JsonToken.END_DOCUMENT, reader.peek(), "The peek token should be END_DOCUMENT");` - yes
+- `assertEquals("a", reader.nextName(), "Expected first key to be 'a'");` - yes
+- `assertEquals("a", reader.nextName(), "Expected first key to be 'a'");` - yes (However, it's redundant if the previous assertion already checked for this.)
+- `assertEquals("b", reader.nextName(), "Expected second key to be 'b'");` - yes
+- `assertEquals("a", reader.nextName(), "Expected first key to be 'a'");` - yes (Redundant, same as above.)
+- `assertEquals("b", reader.nextName(), "Expected second key to be 'b'");` - yes (Redundant, same as above.)
+- `assertEquals(JsonToken.END_DOCUMENT, reader.peek(), "Expected the next token to be END_DOCUMENT");` - yes
+- `assertEquals("a", reader.nextName(), "Expected first key to be 'a'");` - yes (Redundant, same as above.)
+- `assertEquals("b", reader.nextName(), "Expected second key to be 'b'");` - yes (Redundant, same as above.)
+- `assertEquals(JsonToken.END_DOCUMENT, reader.peek(), "Expected the next token to be END_DOCUMENT");` - yes
+- `assertEquals("one", reader.nextName(), "Expected next name to be 'one'");` - yes
+
+All assertions meet the criteria.

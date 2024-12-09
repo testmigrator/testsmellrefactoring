@@ -1,0 +1,23 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+public class OptimizerTest {
+
+    @Override
+    @Test
+    public void testMoreEstimatedParametersUnsorted() {
+        // Exception is expected with this optimizer
+        assertThrows(ConvergenceException.class, new Executable() {
+            @Override
+            public void execute() throws Throwable {
+                super.testMoreEstimatedParametersUnsorted();
+            }
+        });
+    }
+}
+```
+

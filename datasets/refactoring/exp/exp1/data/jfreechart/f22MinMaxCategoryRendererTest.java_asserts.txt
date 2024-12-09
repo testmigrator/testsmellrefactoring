@@ -1,0 +1,7 @@
+total tests: 2
+total asserts: 5
+assertEquals("r1 and r2 should be equal", r1, r2);
+assertEquals("Hash codes of r1 and r2 should be equal", h1, h2);
+assertNotSame(r1, r2, "The cloned object should be a different instance from the original");
+assertSame(r1.getClass(), r2.getClass(), "The cloned object should be of the same class as the original");
+assertEquals(r1, r2, "The cloned object should be equal to the original");

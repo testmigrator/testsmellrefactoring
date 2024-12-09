@@ -1,0 +1,58 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.Strictness;
+
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.Arrays;
+
+public class JsonReaderTest {
+
+    @Test
+    public void testBeginArrayWithVeryLongUnquotedString() throws IOException {
+        char[] stringChars = new char[1024 * 16];
+        Arrays.fill(stringChars, 'x');
+        String string = new String(stringChars);
+        String json = "[" + string + "]";
+
+        JsonReader reader = new JsonReader(new StringReader(json));
+        reader.setStrictness(Strictness.LENIENT);
+
+        assertDoesNotThrow(() -> reader.beginArray());
+    }
+
+    @Test
+    public void testNextStringWithVeryLongUnquotedString() throws IOException {
+        char[] stringChars = new char[1024 * 16];
+        Arrays.fill(stringChars, 'x');
+        String string = new String(stringChars);
+        String json = "[" + string + "]";
+
+        JsonReader reader = new JsonReader(new StringReader(json));
+        reader.setStrictness(Strictness.LENIENT);
+        reader.beginArray();
+
+        assertEquals(string, reader.nextString());
+    }
+
+    @Test
+    public void testEndArrayWithVeryLongUnquotedString() throws IOException {
+        char[] stringChars = new char[1024 * 16];
+        Arrays.fill(stringChars, 'x');
+        String string = new String(stringChars);
+        String json = "[" + string + "]";
+
+        JsonReader reader = new JsonReader(new StringReader(json));
+        reader.setStrictness(Strictness.LENIENT);
+        reader.beginArray();
+        reader.nextString();
+
+        assertDoesNotThrow(() -> reader.endArray());
+    }
+}
+```
+

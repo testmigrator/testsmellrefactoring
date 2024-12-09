@@ -1,0 +1,60 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
+
+class GroupedStackedBarRendererTest {
+
+    @Test
+    public void testCloningCreatesDistinctInstances() {
+        GroupedStackedBarRenderer r1 = createRendererWithMappedKeys();
+        GroupedStackedBarRenderer r2 = cloneRenderer(r1);
+
+        assertNotSame(r1, r2, "Cloned instance should be a different object from the original.");
+    }
+
+    @Test
+    public void testCloningPreservesClassType() {
+        GroupedStackedBarRenderer r1 = createRendererWithMappedKeys();
+        GroupedStackedBarRenderer r2 = cloneRenderer(r1);
+
+        assertSame(GroupedStackedBarRenderer.class, r2.getClass(), "Cloned instance should be of the same class type as the original.");
+    }
+
+    @Test
+    public void testCloningProducesEqualInstances() {
+        GroupedStackedBarRenderer r1 = createRendererWithMappedKeys();
+        GroupedStackedBarRenderer r2 = cloneRenderer(r1);
+
+        assertEquals(r1, r2, "Cloned instance should be equal to the original.");
+    }
+
+    @Test
+    public void testCloningEnsuresIndependence() {
+        GroupedStackedBarRenderer r1 = createRendererWithMappedKeys();
+        GroupedStackedBarRenderer r2 = cloneRenderer(r1);
+
+        TestUtils.checkIndependence(r1, r2, "Cloned instance should be independent of the original.");
+    }
+
+    private GroupedStackedBarRenderer createRendererWithMappedKeys() {
+        GroupedStackedBarRenderer renderer = new GroupedStackedBarRenderer();
+        KeyToGroupMap map = new KeyToGroupMap();
+        map.mapKeyToGroup("A", "X");
+        map.mapKeyToGroup("B", "Y");
+        renderer.setSeriesToGroupMap(map);
+        return renderer;
+    }
+
+    private GroupedStackedBarRenderer cloneRenderer(GroupedStackedBarRenderer renderer) {
+        try {
+            return (GroupedStackedBarRenderer) renderer.clone();
+        } catch (CloneNotSupportedException e) {
+            fail("Cloning should be supported but was not.", e);
+            return null; // This line will never be reached due to the fail call.
+        }
+    }
+}
+```
+

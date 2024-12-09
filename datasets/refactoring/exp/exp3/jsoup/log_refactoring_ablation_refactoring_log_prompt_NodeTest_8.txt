@@ -1,0 +1,33 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class NodeTest {
+
+    @Test
+    public void handlesAbsOnProtocolessAbsoluteUrisForHttp() {
+        Document doc = Jsoup.parse("<a href='//example.net/foo'>One</a>", "http://example.com/");
+        Element link = doc.select("a").first();
+        assertEquals("Should resolve protocoless URI with http base URL", "http://example.net/foo", link.absUrl("href"));
+    }
+
+    @Test
+    public void handlesAbsOnProtocolessAbsoluteUrisForHttps() {
+        Document doc = Jsoup.parse("<a href='//example.net/foo'>One</a>", "https://example.com/");
+        Element link = doc.select("a").first();
+        assertEquals("Should resolve protocoless URI with https base URL", "https://example.net/foo", link.absUrl("href"));
+    }
+
+    @Test
+    public void handlesAbsOnProtocolessImageSrcUri() {
+        Document doc = Jsoup.parse("<img src=//www.google.com/images/errors/logo_sm.gif alt=Google>", "https://google.com");
+        Element img = doc.select("img").first();
+        assertEquals("Should resolve protocoless image src URI with https base URL", "https://www.google.com/images/errors/logo_sm.gif", img.absUrl("src"));
+    }
+}
+```
+

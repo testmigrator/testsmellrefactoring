@@ -1,0 +1,89 @@
+Input Parameters:
+Test Code:
+ @Test
+    public void testComputeValueAndJacobian() {
+        //setup
+        final RealVector point = new ArrayRealVector(new double[]{1, 2});
+        Evaluation evaluation = new LeastSquaresBuilder()
+                .weight(new DiagonalMatrix(new double[]{16, 4}))
+                .model(new MultivariateJacobianFunction() {
+                    @Override
+                    public Pair<RealVector, RealMatrix> value(RealVector actualPoint) {
+                        //verify correct values passed in
+                        Assert.assertArrayEquals(
+                                point.toArray(), actualPoint.toArray(), Precision.EPSILON);
+                        //return values
+                        return new Pair<>(
+                                new ArrayRealVector(new double[]{3, 4}),
+                                MatrixUtils.createRealMatrix(new double[][]{{5, 6}, {7, 8}})
+                        );
+                    }
+                })
+                .target(new double[2])
+                .build()
+                .evaluate(point);
+
+        //action
+        RealVector residuals = evaluation.getResiduals();
+        RealMatrix jacobian = evaluation.getJacobian();
+
+        //verify
+        Assert.assertArrayEquals(evaluation.getPoint().toArray(), point.toArray(), 0);
+        Assert.assertArrayEquals(new double[]{-12, -8}, residuals.toArray(), Precision.EPSILON);
+        TestUtils.assertEquals(
+                "jacobian",
+                jacobian,
+                MatrixUtils.createRealMatrix(new double[][]{{20, 24},{14, 16}}),
+                Precision.EPSILON);
+    }
+Context: 
+Smell List: ['Magic_Number_Test']
+Smell Description List: ['Test Smell Type：Magic Number Test\n\nFeature:\nAn assertion method that contains a numeric literal as an argument.\n']
+Refactoring DSL: ['RefactorRule:\n  SmellType: Magic Number Test\n  Description: "Extract magic numbers and assign meaningful names to improve readability and maintainability."\n  Steps:\n    - Step:\n        Action: IdentifyMagicNumbers\n        Description: "Identify magic numbers in assertions"\n        Parameters:\n          TargetType: Method\n          SourcePattern: |\n            assertEquals({magicNumber}, {variable})\n    - Step:\n        Action: ExtractVariable\n        Description: "Extract magic number to a variable with meaningful name"\n        Parameters:\n          TargetType: Method\n          SourcePattern: |\n            assertEquals({magicNumber}, {variable})\n          ReplacementPattern: |\n            int {meaningfulName} = {magicNumber};\n            assertEquals({meaningfulName}, {variable})\n  Example:\n    Before: |\n      @Test\n      public void T() {\n          stmt\n          assertEquals(1, a)\n          stmt\'\n      }\n    After: |\n      @Test\n      public void T() {\n          int x = 1; // x: meaningful variable name\n          stmt\n          assertEquals(x, a)\n          stmt\'\n      }\n  Variables:\n    magicNumber: "1"\n    variable: "a"\n    meaningfulName: "x"\n']
+Checkpoints: ['[ ] All magic numbers in the test code have been extracted and assigned meaningful variable names.\n']
+
+Refactored Code: 
+ 
+@Test
+public void testComputeValueAndJacobian() {
+    //setup
+    final RealVector point = new ArrayRealVector(new double[]{1, 2});
+    double[] expectedResiduals = {-12, -8};
+    double[][] expectedJacobian = {{20, 24}, {14, 16}};
+    double epsilon = Precision.EPSILON;
+
+    Evaluation evaluation = new LeastSquaresBuilder()
+            .weight(new DiagonalMatrix(new double[]{16, 4}))
+            .model(new MultivariateJacobianFunction() {
+                @Override
+                public Pair<RealVector, RealMatrix> value(RealVector actualPoint) {
+                    //verify correct values passed in
+                    Assert.assertArrayEquals(
+                            point.toArray(), actualPoint.toArray(), epsilon);
+                    //return values
+                    return new Pair<>(
+                            new ArrayRealVector(new double[]{3, 4}),
+                            MatrixUtils.createRealMatrix(new double[][]{{5, 6}, {7, 8}})
+                    );
+                }
+            })
+            .target(new double[2])
+            .build()
+            .evaluate(point);
+
+    //action
+    RealVector residuals = evaluation.getResiduals();
+    RealMatrix jacobian = evaluation.getJacobian();
+
+    //verify
+    int delta = 0;
+    Assert.assertArrayEquals(evaluation.getPoint().toArray(), point.toArray(), delta);
+    Assert.assertArrayEquals(expectedResiduals, residuals.toArray(), epsilon);
+    TestUtils.assertEquals(
+            "jacobian",
+            jacobian,
+            MatrixUtils.createRealMatrix(expectedJacobian),
+            epsilon);
+}
+
+

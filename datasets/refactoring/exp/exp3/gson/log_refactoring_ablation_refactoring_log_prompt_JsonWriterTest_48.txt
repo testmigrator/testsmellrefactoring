@@ -1,0 +1,349 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.*;
+
+import com.google.gson.stream.JsonWriter;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
+
+import java.io.IOException;
+import java.io.StringWriter;
+
+class JsonWriterTest {
+
+    @Test
+    public void testPrettyPrintArray() {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.setIndent("   ");
+
+        try {
+            jsonWriter.beginArray();
+            jsonWriter.value(true);
+            jsonWriter.value(false);
+            jsonWriter.value(5.0);
+            jsonWriter.nullValue();
+            jsonWriter.beginObject();
+            jsonWriter.name("a").value(6.0);
+            jsonWriter.name("b").value(7.0);
+            jsonWriter.endObject();
+            jsonWriter.beginArray();
+            jsonWriter.value(8.0);
+            jsonWriter.value(9.0);
+            jsonWriter.endArray();
+            jsonWriter.endArray();
+        } catch (IOException e) {
+            fail("IOException should not be thrown");
+        }
+
+        String expected =
+                "[\n"
+                        + "   true,\n"
+                        + "   false,\n"
+                        + "   5.0,\n"
+                        + "   null,\n"
+                        + "   {\n"
+                        + "      \"a\": 6.0,\n"
+                        + "      \"b\": 7.0\n"
+                        + "   },\n"
+                        + "   [\n"
+                        + "      8.0,\n"
+                        + "      9.0\n"
+                        + "   ]\n"
+                        + "]";
+
+        assertEquals(expected, stringWriter.toString());
+    }
+
+    @Test
+    public void testBeginArray() {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.setIndent("   ");
+
+        assertDoesNotThrow(new Executable() {
+            @Override
+            public void execute() throws Throwable {
+                jsonWriter.beginArray();
+            }
+        });
+
+        assertEquals("[\n", stringWriter.toString());
+    }
+
+    @Test
+    public void testValueTrue() {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.setIndent("   ");
+        jsonWriter.beginArray();
+
+        assertDoesNotThrow(new Executable() {
+            @Override
+            public void execute() throws Throwable {
+                jsonWriter.value(true);
+            }
+        });
+
+        assertEquals("[\n   true,\n", stringWriter.toString());
+    }
+
+    @Test
+    public void testValueFalse() {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.setIndent("   ");
+        jsonWriter.beginArray();
+        jsonWriter.value(true);
+
+        assertDoesNotThrow(new Executable() {
+            @Override
+            public void execute() throws Throwable {
+                jsonWriter.value(false);
+            }
+        });
+
+        assertEquals("[\n   true,\n   false,\n", stringWriter.toString());
+    }
+
+    @Test
+    public void testValueDouble() {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.setIndent("   ");
+        jsonWriter.beginArray();
+        jsonWriter.value(true);
+        jsonWriter.value(false);
+
+        assertDoesNotThrow(new Executable() {
+            @Override
+            public void execute() throws Throwable {
+                jsonWriter.value(5.0);
+            }
+        });
+
+        assertEquals("[\n   true,\n   false,\n   5.0,\n", stringWriter.toString());
+    }
+
+    @Test
+    public void testNullValue() {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.setIndent("   ");
+        jsonWriter.beginArray();
+        jsonWriter.value(true);
+        jsonWriter.value(false);
+        jsonWriter.value(5.0);
+
+        assertDoesNotThrow(new Executable() {
+            @Override
+            public void execute() throws Throwable {
+                jsonWriter.nullValue();
+            }
+        });
+
+        assertEquals("[\n   true,\n   false,\n   5.0,\n   null,\n", stringWriter.toString());
+    }
+
+    @Test
+    public void testBeginObject() {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.setIndent("   ");
+        jsonWriter.beginArray();
+        jsonWriter.value(true);
+        jsonWriter.value(false);
+        jsonWriter.value(5.0);
+        jsonWriter.nullValue();
+
+        assertDoesNotThrow(new Executable() {
+            @Override
+            public void execute() throws Throwable {
+                jsonWriter.beginObject();
+            }
+        });
+
+        assertEquals("[\n   true,\n   false,\n   5.0,\n   null,\n   {\n", stringWriter.toString());
+    }
+
+    @Test
+    public void testNameValue() {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.setIndent("   ");
+        jsonWriter.beginArray();
+        jsonWriter.value(true);
+        jsonWriter.value(false);
+        jsonWriter.value(5.0);
+        jsonWriter.nullValue();
+        jsonWriter.beginObject();
+
+        assertDoesNotThrow(new Executable() {
+            @Override
+            public void execute() throws Throwable {
+                jsonWriter.name("a").value(6.0);
+            }
+        });
+
+        assertEquals("[\n   true,\n   false,\n   5.0,\n   null,\n   {\n      \"a\": 6.0,\n", stringWriter.toString());
+    }
+
+    @Test
+    public void testNameValue2() {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.setIndent("   ");
+        jsonWriter.beginArray();
+        jsonWriter.value(true);
+        jsonWriter.value(false);
+        jsonWriter.value(5.0);
+        jsonWriter.nullValue();
+        jsonWriter.beginObject();
+        jsonWriter.name("a").value(6.0);
+
+        assertDoesNotThrow(new Executable() {
+            @Override
+            public void execute() throws Throwable {
+                jsonWriter.name("b").value(7.0);
+            }
+        });
+
+        assertEquals("[\n   true,\n   false,\n   5.0,\n   null,\n   {\n      \"a\": 6.0,\n      \"b\": 7.0,\n", stringWriter.toString());
+    }
+
+    @Test
+    public void testEndObject() {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.setIndent("   ");
+        jsonWriter.beginArray();
+        jsonWriter.value(true);
+        jsonWriter.value(false);
+        jsonWriter.value(5.0);
+        jsonWriter.nullValue();
+        jsonWriter.beginObject();
+        jsonWriter.name("a").value(6.0);
+        jsonWriter.name("b").value(7.0);
+
+        assertDoesNotThrow(new Executable() {
+            @Override
+            public void execute() throws Throwable {
+                jsonWriter.endObject();
+            }
+        });
+
+        assertEquals("[\n   true,\n   false,\n   5.0,\n   null,\n   {\n      \"a\": 6.0,\n      \"b\": 7.0\n   },\n", stringWriter.toString());
+    }
+
+    @Test
+    public void testNestedArray() {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.setIndent("   ");
+        jsonWriter.beginArray();
+        jsonWriter.value(true);
+        jsonWriter.value(false);
+        jsonWriter.value(5.0);
+        jsonWriter.nullValue();
+        jsonWriter.beginObject();
+        jsonWriter.name("a").value(6.0);
+        jsonWriter.name("b").value(7.0);
+        jsonWriter.endObject();
+
+        assertDoesNotThrow(new Executable() {
+            @Override
+            public void execute() throws Throwable {
+                jsonWriter.beginArray();
+            }
+        });
+
+        assertEquals("[\n   true,\n   false,\n   5.0,\n   null,\n   {\n      \"a\": 6.0,\n      \"b\": 7.0\n   },\n   [\n", stringWriter.toString());
+    }
+
+    @Test
+    public void testNestedArrayValues() {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.setIndent("   ");
+        jsonWriter.beginArray();
+        jsonWriter.value(true);
+        jsonWriter.value(false);
+        jsonWriter.value(5.0);
+        jsonWriter.nullValue();
+        jsonWriter.beginObject();
+        jsonWriter.name("a").value(6.0);
+        jsonWriter.name("b").value(7.0);
+        jsonWriter.endObject();
+        jsonWriter.beginArray();
+
+        assertDoesNotThrow(new Executable() {
+            @Override
+            public void execute() throws Throwable {
+                jsonWriter.value(8.0);
+                jsonWriter.value(9.0);
+            }
+        });
+
+        assertEquals("[\n   true,\n   false,\n   5.0,\n   null,\n   {\n      \"a\": 6.0,\n      \"b\": 7.0\n   },\n   [\n      8.0,\n      9.0,\n", stringWriter.toString());
+    }
+
+    @Test
+    public void testEndNestedArray() {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.setIndent("   ");
+        jsonWriter.beginArray();
+        jsonWriter.value(true);
+        jsonWriter.value(false);
+        jsonWriter.value(5.0);
+        jsonWriter.nullValue();
+        jsonWriter.beginObject();
+        jsonWriter.name("a").value(6.0);
+        jsonWriter.name("b").value(7.0);
+        jsonWriter.endObject();
+        jsonWriter.beginArray();
+        jsonWriter.value(8.0);
+        jsonWriter.value(9.0);
+
+        assertDoesNotThrow(new Executable() {
+            @Override
+            public void execute() throws Throwable {
+                jsonWriter.endArray();
+            }
+        });
+
+        assertEquals("[\n   true,\n   false,\n   5.0,\n   null,\n   {\n      \"a\": 6.0,\n      \"b\": 7.0\n   },\n   [\n      8.0,\n      9.0\n   ],\n", stringWriter.toString());
+    }
+
+    @Test
+    public void testEndArray() {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.setIndent("   ");
+        jsonWriter.beginArray();
+        jsonWriter.value(true);
+        jsonWriter.value(false);
+        jsonWriter.value(5.0);
+        jsonWriter.nullValue();
+        jsonWriter.beginObject();
+        jsonWriter.name("a").value(6.0);
+        jsonWriter.name("b").value(7.0);
+        jsonWriter.endObject();
+        jsonWriter.beginArray();
+        jsonWriter.value(8.0);
+        jsonWriter.value(9.0);
+        jsonWriter.endArray();
+
+        assertDoesNotThrow(new Executable() {
+            @Override
+            public void execute() throws Throwable {
+                jsonWriter.endArray();
+            }
+        });
+
+        assertEquals("[\n   true,\n   false,\n   5.0,\n   null,\n   {\n      \"a\": 6.0,\n      \"b\": 7.0\n   },\n   [\n      8.0,\n      9.0\n   ]\n]", stringWriter.toString());
+    }
+}
+```
+

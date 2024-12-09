@@ -1,0 +1,5 @@
+asserts result: 
+ Yes
+
+The refactored tests maintain the same functionality as the original test. Each scenario from the original test has been broken down into separate test methods, and the assertions and logic within each method are consistent with the original. The use of descriptive test names and detailed assertion messages also helps to ensure clarity and maintainability of the tests.
+

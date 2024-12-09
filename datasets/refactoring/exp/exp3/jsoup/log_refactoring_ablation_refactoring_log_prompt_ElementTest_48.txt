@@ -1,0 +1,76 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.nodes.TextNode;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class ElementTest {
+
+    private static final String BASE_URI = "http://example.com/";
+    private static final String HTML_CONTENT = "<div id=1 class=one><p id=2 class=two>One";
+    private static final String DIV_ID = "1";
+    private static final String P_ID = "2";
+    private static final String CLASS_NAME = "two";
+    private static final String TEXT_CONTENT = "One";
+    private static final String APPENDED_TEXT = "Three";
+
+    @Test
+    public void testShallowCloneChildNodeSize() {
+        Document doc = Jsoup.parse(HTML_CONTENT, BASE_URI);
+        Element div = doc.selectFirst("div#" + DIV_ID);
+        Element p = doc.selectFirst("p#" + P_ID);
+
+        Element divClone = div.shallowClone();
+        Element pClone = p.shallowClone();
+
+        assertEquals("Original div should have 1 child node", 1, div.childNodeSize());
+        assertEquals("Cloned div should have 0 child nodes", 0, divClone.childNodeSize());
+
+        assertEquals("Original p should have 1 child node", 1, p.childNodeSize());
+        assertEquals("Cloned p should have 0 child nodes", 0, pClone.childNodeSize());
+    }
+
+    @Test
+    public void testShallowCloneTextContent() {
+        Document doc = Jsoup.parse(HTML_CONTENT, BASE_URI);
+        Element p = doc.selectFirst("p#" + P_ID);
+        TextNode textNode = p.textNodes().get(0);
+
+        Element pClone = p.shallowClone();
+        TextNode textNodeClone = (TextNode) textNode.shallowClone();
+
+        assertEquals("Cloned p should have empty text content", "", pClone.text());
+        assertEquals("Cloned text node should have the same text content", TEXT_CONTENT, textNodeClone.text());
+    }
+
+    @Test
+    public void testShallowCloneClassName() {
+        Document doc = Jsoup.parse(HTML_CONTENT, BASE_URI);
+        Element p = doc.selectFirst("p#" + P_ID);
+
+        Element pClone = p.shallowClone();
+
+        assertEquals("Cloned p should have the same class name", CLASS_NAME, pClone.className());
+        pClone.removeClass(CLASS_NAME);
+        assertEquals("Original p should still have the class name", CLASS_NAME, p.className());
+    }
+
+    @Test
+    public void testShallowCloneAppend() {
+        Document doc = Jsoup.parse(HTML_CONTENT, BASE_URI);
+        Element div = doc.selectFirst("div#" + DIV_ID);
+
+        Element divClone = div.shallowClone();
+        divClone.append("<p id=3>" + APPENDED_TEXT);
+
+        assertEquals("Cloned div should have 1 child node after appending", 1, divClone.childNodeSize());
+        assertEquals("Cloned div should have the appended text content", APPENDED_TEXT, divClone.text());
+        assertEquals("Original div should not be affected", TEXT_CONTENT, div.text());
+        assertEquals("Base URI should be preserved in cloned div", BASE_URI, divClone.baseUri());
+    }
+}
+```
+

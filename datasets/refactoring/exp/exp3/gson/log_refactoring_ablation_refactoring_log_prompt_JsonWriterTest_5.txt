@@ -1,0 +1,35 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.io.StringWriter;
+import com.google.gson.stream.JsonWriter;
+
+class JsonWriterTest {
+
+    @Test
+    public void testSetStrictnessNull() {
+        JsonWriter jsonWriter = new JsonWriter(new StringWriter());
+        assertThrows(NullPointerException.class, () -> jsonWriter.setStrictness(null));
+    }
+
+    @Test
+    public void testWriteValueAfterSettingStrictness() throws IOException {
+        JsonWriter jsonWriter = new JsonWriter(new StringWriter());
+        jsonWriter.setStrictness(JsonWriter.Strictness.STRICT);
+        jsonWriter.value(false);
+        jsonWriter.close();
+        
+        // Assuming we can check the output or state after writing the value
+        // This part depends on the actual implementation and expected behavior
+        // For example, if we expect the StringWriter to contain a specific JSON string:
+        StringWriter stringWriter = (StringWriter) jsonWriter.out();
+        assertEquals("false", stringWriter.toString());
+    }
+}
+```
+

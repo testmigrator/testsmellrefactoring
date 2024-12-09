@@ -1,0 +1,65 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class ElementTest {
+
+    private static final String HTML_CONTENT = "<div><p>Hello <span>there</span></div>";
+    private static final int EXPECTED_PARENTS_SIZE = 4;
+    private static final String EXPECTED_FIRST_PARENT_TAG_NAME = "p";
+    private static final String EXPECTED_SECOND_PARENT_TAG_NAME = "div";
+    private static final String EXPECTED_THIRD_PARENT_TAG_NAME = "body";
+    private static final String EXPECTED_FOURTH_PARENT_TAG_NAME = "html";
+
+    @Test
+    public void testGetParentsSize() {
+        Document doc = Jsoup.parse(HTML_CONTENT);
+        Element span = doc.select("span").first();
+        Elements parents = span.parents();
+
+        assertEquals("Expected number of parent elements", EXPECTED_PARENTS_SIZE, parents.size());
+    }
+
+    @Test
+    public void testGetFirstParentTagName() {
+        Document doc = Jsoup.parse(HTML_CONTENT);
+        Element span = doc.select("span").first();
+        Elements parents = span.parents();
+
+        assertEquals("First parent element should be a paragraph", EXPECTED_FIRST_PARENT_TAG_NAME, parents.get(0).tagName());
+    }
+
+    @Test
+    public void testGetSecondParentTagName() {
+        Document doc = Jsoup.parse(HTML_CONTENT);
+        Element span = doc.select("span").first();
+        Elements parents = span.parents();
+
+        assertEquals("Second parent element should be a div", EXPECTED_SECOND_PARENT_TAG_NAME, parents.get(1).tagName());
+    }
+
+    @Test
+    public void testGetThirdParentTagName() {
+        Document doc = Jsoup.parse(HTML_CONTENT);
+        Element span = doc.select("span").first();
+        Elements parents = span.parents();
+
+        assertEquals("Third parent element should be a body", EXPECTED_THIRD_PARENT_TAG_NAME, parents.get(2).tagName());
+    }
+
+    @Test
+    public void testGetFourthParentTagName() {
+        Document doc = Jsoup.parse(HTML_CONTENT);
+        Element span = doc.select("span").first();
+        Elements parents = span.parents();
+
+        assertEquals("Fourth parent element should be a html", EXPECTED_FOURTH_PARENT_TAG_NAME, parents.get(3).tagName());
+    }
+}
+```
+

@@ -1,0 +1,38 @@
+asserts result: 
+ ```java
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.PosixParser;
+import org.apache.commons.cli.PatternOptionBuilder;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.assertions.AssertionFailedError;
+
+import java.io.FileInputStream;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class PatternOptionBuilderTest {
+
+    @Test
+    void testExistingFilePattern() {
+        final Options options = PatternOptionBuilder.parsePattern("g<");
+        final CommandLineParser parser = new PosixParser();
+        final String[] args = {"-g", "src/test/resources/org/apache/commons/cli/existing-readable.file"};
+
+        CommandLine line;
+        try {
+            line = parser.parse(options, args);
+        } catch (Exception e) {
+            fail("Exception should not be thrown during parsing: " + e.getMessage());
+            return;
+        }
+
+        final Object parsedReadableFileStream = line.getOptionObject("g");
+
+        assertNotNull(parsedReadableFileStream, "option g not parsed");
+        assertTrue(parsedReadableFileStream instanceof FileInputStream, "option g not FileInputStream");
+    }
+}
+```
+

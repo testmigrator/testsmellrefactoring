@@ -1,0 +1,151 @@
+Input Parameters:
+Test Code:
+ @Test
+    public void testFindLiveItemsUpperBound_Unordered() {
+        DefaultXYDataset<String> d = new DefaultXYDataset<>();
+
+        // check a series with no items
+        d.addSeries("S1", new double[][] {{}, {}});
+        assertEquals(0, RendererUtils.findLiveItemsUpperBound(d, 0, 10.0, 11.0));
+
+        // check a series with one item
+        d.addSeries("S2", new double[][] {{1.0}, {9.9}});
+        assertEquals(0, RendererUtils.findLiveItemsUpperBound(d, 1, 0.0, 1.1));
+        assertEquals(0, RendererUtils.findLiveItemsUpperBound(d, 1, 2.0, 3.3));
+
+        // check a series with two items
+        d.addSeries("S3", new double[][] {{1.0, 2.0}, {9.9, 9.9}});
+        assertEquals(0, RendererUtils.findLiveItemsUpperBound(d, 2, 0.0, 1.1));
+        assertEquals(1, RendererUtils.findLiveItemsUpperBound(d, 2, 1.0, 2.2));
+        assertEquals(1, RendererUtils.findLiveItemsUpperBound(d, 2, 2.0, 3.3));
+        assertEquals(1, RendererUtils.findLiveItemsUpperBound(d, 2, 3.0, 4.4));
+
+        // check a series with three items
+        d.addSeries("S4", new double[][] {{1.0, 2.0, 1.5}, {9.9, 9.9, 9.9}});
+        assertEquals(0, RendererUtils.findLiveItemsUpperBound(d, 3, 0.0, 1.1));
+        assertEquals(2, RendererUtils.findLiveItemsUpperBound(d, 3, 1.0, 2.2));
+        assertEquals(2, RendererUtils.findLiveItemsUpperBound(d, 3, 2.0, 3.3));
+        assertEquals(2, RendererUtils.findLiveItemsUpperBound(d, 3, 3.0, 4.4));
+
+        // check a series with four items
+        d.addSeries("S5", new double[][] {{1.0, 2.0, 1.5, 1.8}, {9.9, 9.9,
+                9.9, 9.9}});
+        assertEquals(0, RendererUtils.findLiveItemsUpperBound(d, 4, 0.0, 1.1));
+        assertEquals(3, RendererUtils.findLiveItemsUpperBound(d, 4, 1.0, 2.2));
+        assertEquals(3, RendererUtils.findLiveItemsUpperBound(d, 4, 2.0, 3.3));
+        assertEquals(3, RendererUtils.findLiveItemsUpperBound(d, 4, 3.0, 4.4));
+        assertEquals(3, RendererUtils.findLiveItemsUpperBound(d, 4, 4.0, 5.5));
+    }
+Context: /org/jfree/chart/renderer/RendererUtils
+Smell List: ['Assertion_Roulette', 'Eager_Test', 'Magic_Number_Test']
+Smell Description List: ['Test Smell Type：Assertion Roulette\n\nFeature:\nA test method contains more than one assertion statement without an explanation/message (parameter in the assertion method).\n', 'Test Smell Type：Eager Test\n\nFeature:\nA test method contains multiple calls to multiple production methods.\n', 'Test Smell Type：Magic Number Test\n\nFeature:\nAn assertion method that contains a numeric literal as an argument.\n']
+Refactoring DSL: ['RefactorRule:\n  SmellType: Assertion Roulette\n  Description: Add descriptive messages to assert statements to improve readability and maintainability.\n  Steps:\n    - Step:\n        Description: "Add descriptive message to each assert statement(except assertThat, assertThrows)."\n        Action: AddMessageToAssert\n        Parameters:\n          MessagePattern: "{assertionMessage}"\n  Example:\n    Before: |\n      @Test\n      public void T() {\n        stmt\n        assert_1\n        ...\n        assert_n\n        stmt\'\n      }\n    After: |\n      @Test\n      public void T() {\n        stmt\n        assert_1(..., "Descriptive message for assert statement")\n        ...\n        assert_n(..., "Descriptive message for assert statement")\n        stmt\'\n      }\n    Variables:\n      assertionMessage: "Descriptive message for assert statement"\n', 'RefactorRule:\n  SmellType: Eager Test\n  Description: "Refactor test methods to group related assertions logically and extract reusable setup logic into private methods."\n  Steps:\n    - Step1:\n        Description: "Extract shared setup logic into a reusable, private method and ensure it is used across all relevant tests."\n        Action: ExtractSetupMethod\n        Parameters:\n          Condition: "If multiple tests share the same setup logic."\n          MethodNamePattern: setupTest{OriginalMethodName}\n    - Step2:\n        Description: "Group related assertions into cohesive sub-tests while retaining necessary setup logic."\n        Action: GroupAssertions\n        Parameters:\n          GroupBy: LogicalConcern\n    - Step3:\n        Description: "Create new test methods for each cohesive group of assertions and ensure readability."\n        Action: CreateTestMethods\n        Parameters:\n          IncludeSetup: True\n          NamePattern: test{OriginalMethodName}_{Concern}\n  Example:\n    Before: |\n      @Test\n      public void testExample() {\n          setup();\n          assertEquals(1, methodA());\n          assertTrue(methodB());\n      }\n    After: |\n      private void setupTestExample() {\n          setup();\n      }\n\n      @Test\n      public void testExample_MethodA() {\n          setupTestExample();\n          assertEquals(1, methodA());\n      }\n\n      @Test\n      public void testExample_MethodB() {\n          setupTestExample();\n          assertTrue(methodB());\n      }\n  Variables:\n    OriginalMethodName: The name of the original test method.\n    LogicalConcern: The logical aspect tested (e.g., a specific API, validation, or behavior).\n', 'RefactorRule:\n  SmellType: Magic Number Test\n  Description: "Extract magic numbers and assign meaningful names to improve readability and maintainability."\n  Steps:\n    - Step:\n        Action: IdentifyMagicNumbers\n        Description: "Identify magic numbers in assertions"\n        Parameters:\n          TargetType: Method\n          SourcePattern: |\n            assertEquals({magicNumber}, {variable})\n    - Step:\n        Action: ExtractVariable\n        Description: "Extract magic number to a variable with meaningful name"\n        Parameters:\n          TargetType: Method\n          SourcePattern: |\n            assertEquals({magicNumber}, {variable})\n          ReplacementPattern: |\n            int {meaningfulName} = {magicNumber};\n            assertEquals({meaningfulName}, {variable})\n  Example:\n    Before: |\n      @Test\n      public void T() {\n          stmt\n          assertEquals(1, a)\n          stmt\'\n      }\n    After: |\n      @Test\n      public void T() {\n          int x = 1; // x: meaningful variable name\n          stmt\n          assertEquals(x, a)\n          stmt\'\n      }\n  Variables:\n    magicNumber: "1"\n    variable: "a"\n    meaningfulName: "x"\n']
+Checkpoints: ['[ ] All assert statements have been added with clear explanatory messages.\n', '[ ] All eager tests have been split into separate tests, each focusing on verifying a single API.\n', '[ ] All magic numbers in the test code have been extracted and assigned meaningful variable names.\n']
+
+Refactored Code: 
+ 
+private static final double NO_ITEMS_X_UPPER_BOUND = 10.0;
+private static final double NO_ITEMS_X_LOWER_BOUND = 11.0;
+private static final double SINGLE_ITEM_X_VALUE = 1.0;
+private static final double SINGLE_ITEM_Y_VALUE = 9.9;
+private static final double SINGLE_ITEM_X_LOWER_BOUND = 0.0;
+private static final double SINGLE_ITEM_X_UPPER_BOUND_1 = 1.1;
+private static final double SINGLE_ITEM_X_UPPER_BOUND_2 = 2.2;
+private static final double TWO_ITEMS_X_VALUE_1 = 1.0;
+private static final double TWO_ITEMS_X_VALUE_2 = 2.0;
+private static final double TWO_ITEMS_X_LOWER_BOUND = 0.0;
+private static final double TWO_ITEMS_X_UPPER_BOUND_1 = 1.1;
+private static final double TWO_ITEMS_X_UPPER_BOUND_2 = 2.2;
+private static final double TWO_ITEMS_X_UPPER_BOUND_3 = 3.3;
+private static final double TWO_ITEMS_X_UPPER_BOUND_4 = 4.4;
+private static final double THREE_ITEMS_X_VALUE_1 = 1.0;
+private static final double THREE_ITEMS_X_VALUE_2 = 2.0;
+private static final double THREE_ITEMS_X_VALUE_3 = 1.5;
+private static final double THREE_ITEMS_X_LOWER_BOUND = 0.0;
+private static final double THREE_ITEMS_X_UPPER_BOUND_1 = 1.1;
+private static final double THREE_ITEMS_X_UPPER_BOUND_2 = 2.2;
+private static final double THREE_ITEMS_X_UPPER_BOUND_3 = 3.3;
+private static final double THREE_ITEMS_X_UPPER_BOUND_4 = 4.4;
+private static final double FOUR_ITEMS_X_VALUE_1 = 1.0;
+private static final double FOUR_ITEMS_X_VALUE_2 = 2.0;
+private static final double FOUR_ITEMS_X_VALUE_3 = 1.5;
+private static final double FOUR_ITEMS_X_VALUE_4 = 1.8;
+private static final double FOUR_ITEMS_X_LOWER_BOUND = 0.0;
+private static final double FOUR_ITEMS_X_UPPER_BOUND_1 = 1.1;
+private static final double FOUR_ITEMS_X_UPPER_BOUND_2 = 2.2;
+private static final double FOUR_ITEMS_X_UPPER_BOUND_3 = 3.3;
+private static final double FOUR_ITEMS_X_UPPER_BOUND_4 = 4.4;
+private static final double FOUR_ITEMS_X_UPPER_BOUND_5 = 5.5;
+
+private DefaultXYDataset<String> setupDatasetWithNoItems() {
+    DefaultXYDataset<String> d = new DefaultXYDataset<>();
+    d.addSeries("S1", new double[][] {{}, {}});
+    return d;
+}
+
+private DefaultXYDataset<String> setupDatasetWithSingleItem() {
+    DefaultXYDataset<String> d = new DefaultXYDataset<>();
+    d.addSeries("S2", new double[][] {{SINGLE_ITEM_X_VALUE}, {SINGLE_ITEM_Y_VALUE}});
+    return d;
+}
+
+private DefaultXYDataset<String> setupDatasetWithTwoItems() {
+    DefaultXYDataset<String> d = new DefaultXYDataset<>();
+    d.addSeries("S3", new double[][] {{TWO_ITEMS_X_VALUE_1, TWO_ITEMS_X_VALUE_2}, {SINGLE_ITEM_Y_VALUE, SINGLE_ITEM_Y_VALUE}});
+    return d;
+}
+
+private DefaultXYDataset<String> setupDatasetWithThreeItems() {
+    DefaultXYDataset<String> d = new DefaultXYDataset<>();
+    d.addSeries("S4", new double[][] {{THREE_ITEMS_X_VALUE_1, THREE_ITEMS_X_VALUE_2, THREE_ITEMS_X_VALUE_3}, {SINGLE_ITEM_Y_VALUE, SINGLE_ITEM_Y_VALUE, SINGLE_ITEM_Y_VALUE}});
+    return d;
+}
+
+private DefaultXYDataset<String> setupDatasetWithFourItems() {
+    DefaultXYDataset<String> d = new DefaultXYDataset<>();
+    d.addSeries("S5", new double[][] {{FOUR_ITEMS_X_VALUE_1, FOUR_ITEMS_X_VALUE_2, FOUR_ITEMS_X_VALUE_3, FOUR_ITEMS_X_VALUE_4}, {SINGLE_ITEM_Y_VALUE, SINGLE_ITEM_Y_VALUE, SINGLE_ITEM_Y_VALUE, SINGLE_ITEM_Y_VALUE}});
+    return d;
+}
+
+@Test
+public void testFindLiveItemsUpperBound_NoItems() {
+    DefaultXYDataset<String> d = setupDatasetWithNoItems();
+    assertEquals(0, RendererUtils.findLiveItemsUpperBound(d, 0, NO_ITEMS_X_UPPER_BOUND, NO_ITEMS_X_LOWER_BOUND), "No items in the dataset should return 0");
+}
+
+@Test
+public void testFindLiveItemsUpperBound_SingleItem() {
+    DefaultXYDataset<String> d = setupDatasetWithSingleItem();
+    assertEquals(0, RendererUtils.findLiveItemsUpperBound(d, 1, SINGLE_ITEM_X_LOWER_BOUND, SINGLE_ITEM_X_UPPER_BOUND_1), "Single item within bounds should return 0");
+    assertEquals(0, RendererUtils.findLiveItemsUpperBound(d, 1, SINGLE_ITEM_X_VALUE, SINGLE_ITEM_X_UPPER_BOUND_2), "Single item outside bounds should return 0");
+}
+
+@Test
+public void testFindLiveItemsUpperBound_TwoItems() {
+    DefaultXYDataset<String> d = setupDatasetWithTwoItems();
+    assertEquals(0, RendererUtils.findLiveItemsUpperBound(d, 2, TWO_ITEMS_X_LOWER_BOUND, TWO_ITEMS_X_UPPER_BOUND_1), "First item within bounds should return 0");
+    assertEquals(1, RendererUtils.findLiveItemsUpperBound(d, 2, TWO_ITEMS_X_VALUE_1, TWO_ITEMS_X_UPPER_BOUND_2), "Second item within bounds should return 1");
+    assertEquals(1, RendererUtils.findLiveItemsUpperBound(d, 2, TWO_ITEMS_X_VALUE_2, TWO_ITEMS_X_UPPER_BOUND_3), "Both items within bounds should return 1");
+    assertEquals(1, RendererUtils.findLiveItemsUpperBound(d, 2, TWO_ITEMS_X_VALUE_2 + 1, TWO_ITEMS_X_UPPER_BOUND_4), "Both items outside bounds should return 1");
+}
+
+@Test
+public void testFindLiveItemsUpperBound_ThreeItems() {
+    DefaultXYDataset<String> d = setupDatasetWithThreeItems();
+    assertEquals(0, RendererUtils.findLiveItemsUpperBound(d, 3, THREE_ITEMS_X_LOWER_BOUND, THREE_ITEMS_X_UPPER_BOUND_1), "First item within bounds should return 0");
+    assertEquals(2, RendererUtils.findLiveItemsUpperBound(d, 3, THREE_ITEMS_X_VALUE_1, THREE_ITEMS_X_UPPER_BOUND_2), "Second item within bounds should return 2");
+    assertEquals(2, RendererUtils.findLiveItemsUpperBound(d, 3, THREE_ITEMS_X_VALUE_2, THREE_ITEMS_X_UPPER_BOUND_3), "Third item within bounds should return 2");
+    assertEquals(2, RendererUtils.findLiveItemsUpperBound(d, 3, THREE_ITEMS_X_VALUE_3 + 1, THREE_ITEMS_X_UPPER_BOUND_4), "All items outside bounds should return 2");
+}
+
+@Test
+public void testFindLiveItemsUpperBound_FourItems() {
+    DefaultXYDataset<String> d = setupDatasetWithFourItems();
+    assertEquals(0, RendererUtils.findLiveItemsUpperBound(d, 4, FOUR_ITEMS_X_LOWER_BOUND, FOUR_ITEMS_X_UPPER_BOUND_1), "First item within bounds should return 0");
+    assertEquals(3, RendererUtils.findLiveItemsUpperBound(d, 4, FOUR_ITEMS_X_VALUE_1, FOUR_ITEMS_X_UPPER_BOUND_2), "Second item within bounds should return 3");
+    assertEquals(3, RendererUtils.findLiveItemsUpperBound(d, 4, FOUR_ITEMS_X_VALUE_2, FOUR_ITEMS_X_UPPER_BOUND_3), "Third item within bounds should return 3");
+    assertEquals(3, RendererUtils.findLiveItemsUpperBound(d, 4, FOUR_ITEMS_X_VALUE_3 + 1, FOUR_ITEMS_X_UPPER_BOUND_4), "Fourth item within bounds should return 3");
+    assertEquals(3, RendererUtils.findLiveItemsUpperBound(d, 4, FOUR_ITEMS_X_VALUE_4 + 1, FOUR_ITEMS_X_UPPER_BOUND_5), "All items outside bounds should return 3");
+}
+
+

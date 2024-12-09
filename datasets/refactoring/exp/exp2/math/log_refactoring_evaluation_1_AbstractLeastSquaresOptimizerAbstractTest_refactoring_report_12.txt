@@ -1,0 +1,5 @@
+asserts result: 
+ Yes
+
+The functionality between the original and refactored tests is consistent. The only changes made were to extract the point addition logic into a separate method (`addPoint`) and to explicitly name the expected values for readability. The assertions and their conditions remain the same, ensuring that the test still checks for the same conditions and outcomes.
+

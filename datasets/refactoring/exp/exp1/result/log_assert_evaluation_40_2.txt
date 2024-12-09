@@ -1,0 +1,28 @@
+asserts result: 
+ - For the assert statement: `assertEquals(maxStack, attribute.maxStack, "Max stack should match the expected value");`
+  - yes
+
+- For the assert statement: `assertEquals(expectedByteCodeString, actualByteCodeString, "Byte code at index 4 should match the expected string");`
+  - The message is specific to an index (4), but the assert statement does not specify which index is being checked in the code. This could lead to confusion if the test fails, as the index is not dynamically indicated in the message.
+  - **Reason for non-compliance:** The message does not dynamically reflect the index being tested.
+
+- For the assert statement: `assertEquals(expectedLabel, actualLabel, "Byte code offset at index " + index + " should match the expected label");`
+  - yes
+
+- For the assert statement: `assertEquals(expectedMaxLocals, attribute.maxLocals, "Max locals should match the expected value");`
+  - yes
+
+- For the assert statement: `assertEquals(expectedMaxStack, attribute.maxStack, "Max stack should match the expected value");`
+  - yes
+
+- For the assert statement: `assertEquals(expectedByteCodeToString, actualByteCodeToString, "Byte code at index 3 should match the expected string");`
+  - Similar to the second assert statement, the message specifies a fixed index (3) without indicating that this index is part of the test logic.
+  - **Reason for non-compliance:** The message does not dynamically reflect the index being tested.
+
+- For the assert statement: `assertEquals(expectedLabel, actualLabel, "Byte code offset at index " + index + " should match the expected label");`
+  - yes
+
+### Summary of Non-Compliance:
+- **Second Assert Statement:** `assertEquals(expectedByteCodeString, actualByteCodeString, "Byte code at index 4 should match the expected string");` - The message should dynamically reflect the index being tested.
+- **Sixth Assert Statement:** `assertEquals(expectedByteCodeToString, actualByteCodeToString, "Byte code at index 3 should match the expected string");` - The message should dynamically reflect the index being tested.
+

@@ -1,0 +1,35 @@
+asserts result: 
+ ```java
+import static org.junit.Assert.assertThrows;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.MalformedJsonException;
+import com.google.gson.stream.Strictness;
+import org.junit.Test;
+
+public class JsonReaderTest {
+
+    @Test
+    public void testDocumentWithCommentEndingInSlash_PeekThrowsException() {
+        JsonReader reader = new JsonReader(reader("/* foo *//"));
+        reader.setStrictness(Strictness.LENIENT);
+
+        MalformedJsonException exception = assertThrows(
+            MalformedJsonException.class,
+            () -> reader.peek()
+        );
+
+        assertThat(exception.getMessage(), equalTo(
+            "Expected value at line 1 column 10 path $\n" +
+            "See https://github.com/google/gson/blob/main/Troubleshooting.md#malformed-json"
+        ));
+    }
+
+    private java.io.Reader reader(String content) {
+        return new java.io.StringReader(content);
+    }
+}
+```
+

@@ -1,0 +1,37 @@
+asserts result: 
+ No, the functionality between the original and refactored tests is not consistent.
+
+**Reasons for Inconsistency:**
+
+1. **Multiple Assertions in One Test:**
+   - The original test expects either a `ConvergenceException` or a `TooManyEvaluationsException` but only one of these exceptions can be caught and handled.
+   - The refactored test attempts to assert that both `ConvergenceException` and `TooManyEvaluationsException` are thrown, which is logically incorrect because only one exception can be thrown at a time. This means the second `assertThrows` call will always fail if the first one succeeds, or vice versa.
+
+2. **Different Exception Handling:**
+   - In the original test, the `fail(optimizer)` method is called if no exception is thrown, indicating that the test should fail if neither exception occurs.
+   - The refactored test does not have an equivalent mechanism to fail the test if no exception is thrown. It assumes that both exceptions will be thrown, which is not the intended behavior.
+
+3. **Behavioral Change:**
+   - The original test is designed to pass if either a `ConvergenceException` or a `TooManyEvaluationsException` is thrown.
+   - The refactored test will fail if only one of the exceptions is thrown, as it expects both to be thrown, which changes the behavior of the test.
+
+To make the refactored test consistent with the original, you should ensure that only one of the exceptions is expected, similar to the original test:
+
+```java
+@Test
+public void testHahn1() {
+    /*
+     * TODO This test leads to a singular problem with the Gauss-Newton
+     * optimizer. This should be inquired.
+     */
+    try {
+        super.testHahn1();
+        fail("Expected ConvergenceException or TooManyEvaluationsException to be thrown");
+    } catch (ConvergenceException | TooManyEvaluationsException e) {
+        // Expected
+    }
+}
+```
+
+This refactored version maintains the same functionality as the original test.
+

@@ -1,0 +1,35 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import static org.junit.Assert.assertEquals;
+import org.junit.Test;
+
+public class ElementTest {
+
+    @Test
+    public void testTitleElement() {
+        Document doc = Jsoup.parse("<title>Hello there</title> <div><p>Hello</p><p>there</p></div> <div>Another</div>");
+        String expectedTitle = "<title>Hello there</title>";
+        String actualTitle = doc.select("title").first().outerHtml();
+        assertEquals("Title element should match the expected HTML", expectedTitle, actualTitle);
+    }
+
+    @Test
+    public void testFirstDivElement() {
+        Document doc = Jsoup.parse("<title>Hello there</title> <div><p>Hello</p><p>there</p></div> <div>Another</div>");
+        String expectedFirstDiv = "<div>\n <p>Hello</p>\n <p>there</p>\n</div>";
+        String actualFirstDiv = doc.select("div").first().outerHtml();
+        assertEquals("First div element should match the expected HTML", expectedFirstDiv, actualFirstDiv);
+    }
+
+    @Test
+    public void testBodyContent() {
+        Document doc = Jsoup.parse("<title>Hello there</title> <div><p>Hello</p><p>there</p></div> <div>Another</div>");
+        String expectedBodyContent = "<div>\n <p>Hello</p>\n <p>there</p>\n</div> \n<div>\n Another\n</div>";
+        String actualBodyContent = doc.select("body").first().html();
+        assertEquals("Body content should match the expected HTML", expectedBodyContent, actualBodyContent);
+    }
+}
+```
+

@@ -1,0 +1,6 @@
+total tests: 1
+total asserts: 4
+Assert.assertTrue("Should converge based on relative tolerance", checker.converged(0, e200, mockEvaluation(210)));
+Assert.assertTrue("Should converge based on absolute tolerance", checker.converged(0, e1, mockEvaluation(1.9)));
+Assert.assertTrue("Should converge based on both tolerances", checker.converged(0, e1, mockEvaluation(1.01)));
+Assert.assertFalse("Should not converge as neither tolerance is met", checker.converged(0, e200, mockEvaluation(300)));

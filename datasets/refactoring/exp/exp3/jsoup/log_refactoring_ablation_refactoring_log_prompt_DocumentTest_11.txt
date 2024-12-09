@@ -1,0 +1,30 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+class DocumentTest {
+
+    @Test
+    public void documentsWithSameContentAreEqual() {
+        Document docA = Jsoup.parse("<div/>One");
+        Document docB = Jsoup.parse("<div/>One");
+        Document docC = Jsoup.parse("<div/>Two");
+
+        // Check if documents with the same content are equal
+        assertTrue(docA.equals(docB), "Documents with the same content should be equal");
+
+        // Check if a document is equal to itself
+        assertTrue(docA.equals(docA), "A document should be equal to itself");
+
+        // Check if the hash codes of equal documents are the same
+        assertEquals(docA.hashCode(), docB.hashCode(), "Hash codes of equal documents should be the same");
+
+        // Check if the hash codes of different documents are different
+        assertNotEquals(docA.hashCode(), docC.hashCode(), "Hash codes of different documents should be different");
+    }
+}
+```
+

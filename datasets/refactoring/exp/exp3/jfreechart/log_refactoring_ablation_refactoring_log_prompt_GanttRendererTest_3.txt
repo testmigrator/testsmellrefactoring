@@ -1,0 +1,52 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
+import org.jfree.chart.renderer.category.GanttRenderer;
+import java.awt.Color;
+import java.awt.GradientPaint;
+
+class GanttRendererTest {
+
+    @Test
+    public void testCloning_createsDifferentInstance() throws CloneNotSupportedException {
+        GanttRenderer r1 = createGanttRenderer();
+        GanttRenderer r2 = (GanttRenderer) r1.clone();
+        
+        assertNotSame(r1, r2, "Cloned object should be a different instance");
+    }
+
+    @Test
+    public void testCloning_preservesClassType() throws CloneNotSupportedException {
+        GanttRenderer r1 = createGanttRenderer();
+        GanttRenderer r2 = (GanttRenderer) r1.clone();
+        
+        assertSame(r1.getClass(), r2.getClass(), "Cloned object should have the same class type");
+    }
+
+    @Test
+    public void testCloning_preservesState() throws CloneNotSupportedException {
+        GanttRenderer r1 = createGanttRenderer();
+        GanttRenderer r2 = (GanttRenderer) r1.clone();
+        
+        assertEquals(r1, r2, "Cloned object should have the same state as the original");
+    }
+
+    @Test
+    public void testCloning_independenceOfObjects() throws CloneNotSupportedException {
+        GanttRenderer r1 = createGanttRenderer();
+        GanttRenderer r2 = (GanttRenderer) r1.clone();
+        
+        TestUtils.checkIndependence(r1, r2, "Cloned object should be independent of the original");
+    }
+
+    private GanttRenderer createGanttRenderer() {
+        GanttRenderer r1 = new GanttRenderer();
+        r1.setCompletePaint(new GradientPaint(1.0f, 2.0f, Color.BLUE, 4.0f, 3.0f, Color.CYAN));
+        r1.setIncompletePaint(new GradientPaint(1.0f, 2.0f, Color.RED, 4.0f, 3.0f, Color.GREEN));
+        return r1;
+    }
+}
+```
+

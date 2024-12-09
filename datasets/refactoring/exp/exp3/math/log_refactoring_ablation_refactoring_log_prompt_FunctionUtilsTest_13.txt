@@ -1,0 +1,41 @@
+asserts result: 
+ ```java
+import org.apache.commons.math4.legacy.analysis.FunctionUtils;
+import org.apache.commons.math4.legacy.analysis.MultivariateDifferentiableFunction;
+import org.apache.commons.math4.legacy.analysis.MultivariateFunction;
+import org.apache.commons.math4.legacy.analysis.MultivariateVectorFunction;
+import org.apache.commons.math4.legacy.analysis.differentiation.DerivativeStructure;
+import org.apache.commons.math4.legacy.exception.DimensionMismatchException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
+public class FunctionUtilsTest {
+
+    private static final double A = 1.5;
+    private static final double B = 0.5;
+    private static final int EXPECTED_DIMENSION = 2;
+    private static final int ACTUAL_DIMENSION = 3;
+
+    @Test
+    public void testToDifferentiableMultivariateInconsistentGradient() {
+        MultivariateFunction function = point -> A * point[0] + B * point[1];
+        MultivariateVectorFunction gradient = point -> new double[] { A, B, 0.0 };
+
+        MultivariateDifferentiableFunction differentiableFunction = FunctionUtils.toDifferentiable(function, gradient);
+
+        Assertions.assertThrows(DimensionMismatchException.class, () -> {
+            DerivativeStructure dsT = new DerivativeStructure(1, 1, 0, 0.0);
+            differentiableFunction.value(new DerivativeStructure[] { dsT.sin(), dsT.cos() });
+        }, "Expected DimensionMismatchException to be thrown");
+
+        try {
+            DerivativeStructure dsT = new DerivativeStructure(1, 1, 0, 0.0);
+            differentiableFunction.value(new DerivativeStructure[] { dsT.sin(), dsT.cos() });
+        } catch (DimensionMismatchException e) {
+            Assertions.assertEquals(EXPECTED_DIMENSION, e.getDimension(), "Expected dimension mismatch");
+            Assertions.assertEquals(ACTUAL_DIMENSION, e.getArgument(), "Expected actual dimension mismatch");
+        }
+    }
+}
+```
+

@@ -1,0 +1,5 @@
+total tests: 2
+total asserts: 3
+assertThrows(IllegalStateException.class, () -> writer.name("a"), "Expected IllegalStateException when calling name on a closed JsonWriter");
+assertEquals("[]", firstCloseResult, "First close call should result in an empty JSON array");
+assertEquals("[]", secondCloseResult, "Second close call should not change the output");

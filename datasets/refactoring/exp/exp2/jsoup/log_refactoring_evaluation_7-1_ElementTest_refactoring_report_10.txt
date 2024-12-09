@@ -1,0 +1,5 @@
+asserts result: 
+ Yes
+
+The refactored tests maintain the same functionality as the original test. Each assertion from the original `testGetSiblings` method has been split into separate test methods, each focusing on a specific aspect of the siblings' relationships. The setup method `setupTestGetSiblings()` initializes the document and the element, ensuring that each test starts with the same conditions. The assertions in the refactored tests are identical to those in the original test, thus preserving the intended functionality.
+

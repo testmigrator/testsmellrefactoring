@@ -1,0 +1,11 @@
+asserts result: 
+ Yes
+
+The refactored tests maintain the same functionality as the original test. The original test checks that the `JsonReader` can parse a semicolon-delimited array in lenient mode and that the booleans read from the array are both `true`. The refactored tests achieve the same goals but split the verification into separate methods:
+
+1. **testLenientSemicolonDelimitedArray_FirstBoolean**: Verifies that the first boolean is `true`.
+2. **testLenientSemicolonDelimitedArray_SecondBoolean**: Verifies that the second boolean is `true`.
+3. **testLenientSemicolonDelimitedArray_NoExceptionThrown**: Ensures that no exception is thrown when reading the array.
+
+Each of these tests covers the same aspects as the original test, ensuring that the functionality remains consistent.
+

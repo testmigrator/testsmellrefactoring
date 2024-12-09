@@ -1,0 +1,5 @@
+asserts result: 
+ Yes
+
+The refactored code maintains the same functionality as the original test. Each test case in the refactored version corresponds to a specific scenario from the original test, and the `setupTestBlank` method ensures that the `TextNode` instances are initialized consistently across all tests. The assertions in each refactored test method match the original assertions, ensuring that the behavior remains the same.
+

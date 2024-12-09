@@ -1,0 +1,40 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import static org.junit.Assert.assertEquals;
+import org.junit.Test;
+
+public class ElementTest {
+
+    @Test
+    public void testWrapSingleElement() {
+        Document doc = Jsoup.parse("<div><p>Hello</p><p>There</p></div>");
+        Element p = doc.select("p").first();
+        p.wrap("<div class='head'></div>");
+        String expectedHtml = "<div><div class=\"head\"><p>Hello</p></div><p>There</p></div>";
+        String actualHtml = TextUtil.stripNewlines(doc.body().html());
+        assertEquals("Single element should be wrapped correctly", expectedHtml, actualHtml);
+    }
+
+    @Test
+    public void testWrapNestedElements() {
+        Document doc = Jsoup.parse("<div><p>Hello</p><p>There</p></div>");
+        Element p = doc.select("p").first();
+        Element ret = p.wrap("<div><div class=foo></div><p>What?</p></div>");
+        String expectedHtml = "<div><div class=\"head\"><div><div class=\"foo\"><p>Hello</p></div><p>What?</p></div></div><p>There</p></div>";
+        String actualHtml = TextUtil.stripNewlines(doc.body().html());
+        assertEquals("Nested elements should be wrapped correctly", expectedHtml, actualHtml);
+    }
+
+    @Test
+    public void testWrapReturnsWrappedElement() {
+        Document doc = Jsoup.parse("<div><p>Hello</p><p>There</p></div>");
+        Element p = doc.select("p").first();
+        Element ret = p.wrap("<div><div class=foo></div><p>What?</p></div>");
+        assertEquals("The wrap method should return the original element", ret, p);
+    }
+}
+```
+

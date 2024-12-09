@@ -1,0 +1,5 @@
+asserts result: 
+ no
+
+The original test expects a `MalformedJsonException` to be thrown when calling `reader.nextDouble()` due to a very long number. However, the refactored test uses `assertDoesNotThrow` at the beginning, which would fail if any exception is thrown during the setup or execution of the test, including the expected `MalformedJsonException`. This changes the behavior of the test, making it inconsistent with the original. The `assertDoesNotThrow` should be removed or adjusted to ensure that the test only checks for the expected exception at the correct point.
+

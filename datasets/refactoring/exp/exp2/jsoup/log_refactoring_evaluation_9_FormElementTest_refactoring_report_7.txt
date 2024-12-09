@@ -1,0 +1,11 @@
+asserts result: 
+ Yes
+
+The refactored tests maintain the same functionality as the original test. The original test checks three things:
+
+1. The form element is an instance of `FormElement`.
+2. The form contains exactly one element.
+3. The form data content is "foo=bar".
+
+The refactored tests split these checks into three separate test methods, but each check is still performed, and the logic and assertions are consistent with the original test. Therefore, the functionality is consistent between the original and refactored tests.
+

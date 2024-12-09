@@ -1,0 +1,41 @@
+asserts result: 
+ ```java
+import org.apache.commons.math4.legacy.analysis.BivariateFunction;
+import org.apache.commons.math4.legacy.analysis.UnivariateFunction;
+import org.apache.commons.math4.legacy.analysis.function.Divide;
+import org.apache.commons.math4.legacy.analysis.function.Identity;
+import org.apache.commons.math4.legacy.analysis.function.Sin;
+import org.apache.commons.math4.legacy.analysis.function.Sinc;
+import org.apache.commons.math4.legacy.util.JdkMath;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIf;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class SincTest {
+
+    private static final double EPS = 1e-10;
+
+    @EnabledIf("isTestConditionMet")
+    @Test
+    public void testSinc() {
+        BivariateFunction div = new Divide();
+        UnivariateFunction sin = new Sin();
+        UnivariateFunction id = new Identity();
+        UnivariateFunction sinc1 = FunctionUtils.combine(div, sin, id);
+        UnivariateFunction sinc2 = new Sinc();
+
+        for (int i = 0; i < 10; i++) {
+            double x = JdkMath.random();
+            assertEquals(sinc1.value(x), sinc2.value(x), EPS);
+        }
+    }
+
+    private boolean isTestConditionMet() {
+        // Define the condition for the test to run
+        // For example, always return true if no specific condition is needed
+        return true;
+    }
+}
+```
+

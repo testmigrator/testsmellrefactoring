@@ -1,0 +1,58 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Elements;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+class LeafNodeTest {
+
+    private static final String TEST_BODY = "<p>One <!-- Two --> Three<![CDATA[Four]]></p>";
+    private static final int EXPECTED_PARAGRAPH_COUNT = 1;
+
+    @Test
+    public void doesNotGetAttributesTooEasily() {
+        // Test to ensure attributes are not set on all nodes right away
+        Document doc = Jsoup.parse(TEST_BODY);
+        assertTrue(hasAnyAttributes(doc), "Document should have at least one attribute (base URI)");
+
+        Element html = doc.child(0);
+        assertFalse(hasAnyAttributes(html), "HTML element should not have any attributes initially");
+
+        String outerHtml = doc.outerHtml();
+        assertFalse(hasAnyAttributes(html), "HTML element should still not have any attributes after getting outer HTML");
+
+        Elements paragraphs = doc.select("p");
+        Element paragraph = paragraphs.first();
+        assertEquals(EXPECTED_PARAGRAPH_COUNT, paragraphs.size(), "There should be exactly one paragraph element");
+        assertFalse(hasAnyAttributes(html), "HTML element should still not have any attributes after selecting paragraph");
+
+        Elements nonExistentParagraphs = doc.select("p.none");
+        assertFalse(hasAnyAttributes(html), "HTML element should still not have any attributes after selecting non-existent paragraph");
+
+        String paragraphId = paragraph.id();
+        assertEquals("", paragraphId, "Paragraph ID should be empty");
+        assertFalse(paragraph.hasClass("Foobs"), "Paragraph should not have class 'Foobs' initially");
+        assertFalse(hasAnyAttributes(html), "HTML element should still not have any attributes after checking class");
+
+        paragraph.addClass("Foobs");
+        assertTrue(paragraph.hasClass("Foobs"), "Paragraph should now have class 'Foobs'");
+        assertTrue(hasAnyAttributes(html), "HTML element should now have attributes after adding class to paragraph");
+        assertTrue(hasAnyAttributes(paragraph), "Paragraph should have attributes after adding class");
+
+        Attributes attributes = paragraph.attributes();
+        assertTrue(attributes.hasKey("class"), "Attributes should contain key 'class'");
+        paragraph.clearAttributes();
+        assertFalse(hasAnyAttributes(paragraph), "Paragraph should not have any attributes after clearing");
+        assertFalse(hasAnyAttributes(html), "HTML element should not have any attributes after clearing paragraph attributes");
+        assertFalse(attributes.hasKey("class"), "Attributes should not contain key 'class' after clearing");
+    }
+
+    private boolean hasAnyAttributes(Element element) {
+        return element.attributes().size() > 0;
+    }
+}
+```
+

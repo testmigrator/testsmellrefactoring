@@ -1,0 +1,55 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
+
+public class JsonReaderTest {
+
+    private JsonReader createJsonReader(String json) {
+        return new JsonReader(new StringReader(json));
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "one, BEGIN_OBJECT",
+        "two, BEGIN_OBJECT",
+        "three, END_OBJECT"
+    })
+    public void testNextNameAndPeek(String expectedName, String expectedToken) throws Exception {
+        String json = "{ \"one\": { \"num\": 1 }, \"two\": { \"num\": 2 }, \"three\": { \"num\": 3 } }";
+        JsonReader reader = createJsonReader(json);
+        reader.beginObject();
+
+        // Skip previous values if needed
+        while (!expectedName.equals(reader.nextName())) {
+            reader.skipValue();
+        }
+
+        JsonToken token = reader.peek();
+        assertEquals(expectedToken, token.name(), "Expected token type did not match for name: " + expectedName);
+
+        if (token == JsonToken.BEGIN_OBJECT) {
+            reader.skipValue();
+        }
+    }
+
+    @Test
+    public void testEndDocument() throws Exception {
+        String json = "{ \"one\": { \"num\": 1 }, \"two\": { \"num\": 2 }, \"three\": { \"num\": 3 } }";
+        JsonReader reader = createJsonReader(json);
+        reader.beginObject();
+
+        reader.skipValue(); // Skip "one"
+        reader.skipValue(); // Skip "two"
+        reader.skipValue(); // Skip "three"
+
+        reader.endObject();
+        assertEquals(JsonToken.END_DOCUMENT, reader.peek(), "Expected END_DOCUMENT after reading all values");
+    }
+}
+```
+

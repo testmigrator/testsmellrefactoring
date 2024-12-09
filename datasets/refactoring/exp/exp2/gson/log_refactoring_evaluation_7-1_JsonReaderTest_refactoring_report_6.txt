@@ -1,0 +1,5 @@
+asserts result: 
+ yes
+
+The functionality between the original and refactored tests is consistent. Both tests aim to verify that the `JsonReader` in strict mode allows control characters outside the range U+0000 - U+001F. The refactored test uses `assertDoesNotThrow` to ensure no unexpected exceptions occur during the test, and it still checks that the `nextString` method returns the expected string. The core logic and assertions remain the same.
+

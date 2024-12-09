@@ -1,0 +1,5 @@
+asserts result: 
+ Yes
+
+The refactored tests maintain the same functionality as the original test. The original single test method has been split into two methods to test different scenarios more clearly, but the overall behavior and assertions remain consistent. The introduction of a helper method `createGenerator()` does not alter the functionality and serves to reduce redundancy.
+

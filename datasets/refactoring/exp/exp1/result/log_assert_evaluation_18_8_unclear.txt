@@ -1,0 +1,61 @@
+asserts result: 
+ - The first assert statement: `assertEquals(expectedSecondPText, ((TextNode) ps.get(1).childNode(0)).getWholeText(), "Expected second paragraph text to be \'Another \'");` - The message is not semantically clear because it specifies a partial string ('Another ') rather than the full expected text. It should clearly state the full expected text.
+
+- The second assert statement: `assertEquals(ps, ps2, "Expected case-insensitive tag matching for paragraphs");` - The message does not correctly express the purpose of the assert statement. It should specify that the lists of paragraphs are expected to be equal, possibly with a note about case sensitivity if that's a specific requirement.
+
+- The third assert statement: `assertEquals(expectedImgSrc, imgs.get(0).attr("src"), "Expected image source to be \'foo.png\'");` - yes
+
+- The fourth assert statement: `assertEquals(expectedEmptyCount, empty.size(), "Expected 0 elements for non-existent tag \'wtf\'");` - yes
+
+- The fifth assert statement: `assertEquals(Integer.parseInt(EXPECTED_ELEMENT_COUNT), els.size(), "Expected element count does not match actual count");` - yes
+
+- The sixth assert statement: `assertEquals(EXPECTED_ELEMENT_ID, els.first().id(), "Expected element ID does not match actual ID");` - yes
+
+- The seventh assert statement: `assertEquals(EXPECTED_ELEMENT_TAG_NAME, els.first().tagName(), "Expected element tag name does not match actual tag name");` - yes
+
+- The eighth assert statement: `assertEquals("div1", div.id(), "The ID of the element should be \'div1\'");` - yes
+
+- The ninth assert statement: `assertNull(doc.getElementById("none"), "No element with ID \'none\' should exist");` - yes
+
+- The tenth assert statement: `assertEquals("div", div2.tagName(), "The tag name of the element with ID \'2\' should be \'div\'");` - yes
+
+- The eleventh assert statement: `assertEquals("span", span.tagName(), "The tag name of the element with ID \'2\' within the <p> context should be \'span\'");` - The message is misleading as it specifies the context (within the `<p>` context) which is not necessary for the assertion.
+
+- The twelfth assert statement: `assertEquals("Hello Another element", doc.text(), "Document text should match expected value");` - yes
+
+- The thirteenth assert statement: `assertEquals("Another element", doc.getElementsByTag("p").get(1).text(), "Second paragraph text should match expected value");` - yes
+
+- The fourteenth assert statement: `assertEquals("Hello there now", p.text(), "Check if the combined text of the element and its children matches");` - yes
+
+- The fifteenth assert statement: `assertEquals("Hello now", p.ownText(), "Check if the text of the element itself, excluding its children, matches");` - yes
+
+- The sixteenth assert statement: `assertEquals("code\\n\\ncode", doc.text(), "The text content within <pre><code> should match the expected value");` - yes
+
+- The seventeenth assert statement: `assertEquals("<pre><code>code\\n\\ncode</code></pre>", doc.body().html(), "The HTML content within <pre><code> should match the expected value");` - yes
+
+- The eighteenth assert statement: `assertEquals("code\\n\\ncode", doc.text(), "Text content should match the expected value");` - yes
+
+- The nineteenth assert statement: `assertEquals("<pre><code><span><b>code\\n\\ncode</b></span></code></pre>", doc.body().html(), "HTML content should match the expected value");` - yes
+
+- The twentieth assert statement: `assertEquals(expectedText, doc.text(), "Document text does not match expected text");` - yes
+
+- The twenty-first assert statement: `assertEquals(expectedText, doc.select("p").first().ownText(), "Paragraph own text does not match expected text");` - yes
+
+- The twenty-second assert statement: `assertEquals(expectedText, document.wholeText(), "The whole text does not match the expected output for the given HTML: " + html);` - yes
+
+- The twenty-third assert statement: `assertEquals("Text of element with id \'1\' should be \'there\'", "there", p.text());` - The message is not semantically clear. It should state what is being compared and the expected result.
+
+- The twenty-fourth assert statement: `assertEquals("Previous element sibling of element with id \'1\' should be \'Hello\'", "Hello", p.previousElementSibling().text());` - The message is not semantically clear. It should state what is being compared and the expected result.
+
+- The twenty-fifth assert statement: `assertEquals("Next element sibling of element with id \'1\' should be \'this\'", "this", p.nextElementSibling().text());` - The message is not semantically clear. It should state what is being compared and the expected result.
+
+- The twenty-sixth assert statement: `assertEquals("First element sibling of element with id \'1\' should be \'Hello\'", "Hello", p.firstElementSibling().text());` - The message is not semantically clear. It should state what is being compared and the expected result.
+
+- The twenty-seventh assert statement: `assertEquals("Last element sibling of element with id \'1\' should be \'element\'", "element", p.lastElementSibling().text());` - The message is not semantically clear. It should state what is being compared and the expected result.
+
+- The twenty-eighth assert statement: `assertEquals("there", p.text(), "Text of <p> element with id=1 should be \'there\'");` - yes
+
+- The twenty-ninth assert statement: `assertEquals("Hello", p.previousElementSibling().text(), "Text of previous sibling of <p> element with id=1 should be \'Hello\'");` - yes
+
+- The thirtieth assert statement: `assertEquals("this", p.nextElementSibling().text(), "Text of next sibling of <p> element with id=1 should be \'this\'");` - yes
+

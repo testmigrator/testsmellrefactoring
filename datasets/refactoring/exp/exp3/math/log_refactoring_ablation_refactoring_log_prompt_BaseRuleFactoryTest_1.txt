@@ -1,0 +1,90 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIf;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class BaseRuleFactoryTest {
+
+    private static final int NUM_TASKS = 20;
+    private static final int POOL_SIZE = 3;
+    private static final int QUEUE_CAPACITY = 2;
+    private static final int EXPECTED_CALL_COUNT = 1;
+
+    @EnabledIf("isConcurrentCreationTestEnabled")
+    @Test
+    public void testConcurrentCreation() throws InterruptedException, ExecutionException {
+        ThreadPoolExecutor exec = new ThreadPoolExecutor(
+                POOL_SIZE, NUM_TASKS, 1, TimeUnit.SECONDS, new ArrayBlockingQueue<>(QUEUE_CAPACITY)
+        );
+
+        List<Future<Pair<double[], double[]>>> results = new ArrayList<>();
+        for (int i = 0; i < NUM_TASKS; i++) {
+            results.add(exec.submit(new RuleBuilder()));
+        }
+
+        // Ensure that all computations have completed.
+        for (Future<Pair<double[], double[]>> f : results) {
+            f.get();
+        }
+        exec.shutdown();
+        exec.awaitTermination(1, TimeUnit.MINUTES);
+
+        // Assertion would fail if "getRuleInternal" were not "synchronized".
+        int actualCallCount = RuleBuilder.getNumberOfCalls();
+        assertEquals(EXPECTED_CALL_COUNT, actualCallCount, "Rule computation was called " + actualCallCount + " times");
+    }
+
+    public boolean isConcurrentCreationTestEnabled() {
+        // Condition to enable the test, can be based on environment variables, system properties, etc.
+        return true;
+    }
+
+    static class RuleBuilder implements Callable<Pair<double[], double[]>> {
+        @Override
+        public Pair<double[], double[]> call() throws Exception {
+            // Simulate rule building
+            double[] rule1 = {1.0, 2.0};
+            double[] rule2 = {3.0, 4.0};
+            RuleBuilder.incrementNumberOfCalls();
+            return new Pair<>(rule1, rule2);
+        }
+
+        private static int numberOfCalls = 0;
+
+        synchronized static void incrementNumberOfCalls() {
+            numberOfCalls++;
+        }
+
+        static int getNumberOfCalls() {
+            return numberOfCalls;
+        }
+    }
+
+    static class Pair<T, U> {
+        private final T first;
+        private final U second;
+
+        public Pair(T first, U second) {
+            this.first = first;
+            this.second = second;
+        }
+
+        public T getFirst() {
+            return first;
+        }
+
+        public U getSecond() {
+            return second;
+        }
+    }
+}
+```
+

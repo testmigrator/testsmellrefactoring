@@ -1,0 +1,52 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
+
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.junit.jupiter.api.Test;
+
+public class HelpFormatterTest {
+
+    @Test
+    public void testRenderOptionsWithSince() throws IOException {
+        final String[] expected = {
+            "Options            Since   Description",
+            "  -n,--no-since    -          Description for n",
+            "  -W,--with-since  1.19.0     Descripton for W"
+        };
+
+        final Options options = new Options()
+            .addOption(Option.builder("W").longOpt("with-since").since("1.19.0").desc("Descripton for W").build())
+            .addOption(Option.builder("n").longOpt("no-since").desc("Description for n").build());
+
+        final HelpFormatter formatter = HelpFormatter.builder().setShowSince(true).get();
+
+        final StringBuffer sb = new StringBuffer();
+        formatter.renderOptions(sb, 50, options, 2, 5);
+
+        String[] actual = sb.toString().split(System.lineSeparator());
+        assertArrayEquals(expected, actual, "Rendered options should match expected output");
+    }
+
+    @Test
+    public void testRenderOptionsWithIOException() throws IOException {
+        final Options options = new Options()
+            .addOption(Option.builder("W").longOpt("with-since").since("1.19.0").desc("Descripton for W").build())
+            .addOption(Option.builder("n").longOpt("no-since").desc("Description for n").build());
+
+        final HelpFormatter formatter = HelpFormatter.builder().setShowSince(true).get();
+        final HelpFormatter spy = spy(formatter);
+
+        final StringBuffer sb = new StringBuffer();
+        when(spy.appendOptions(sb, 50, options, 2, 5)).thenThrow(new IOException("Simulated IOException"));
+
+        assertThrows(UncheckedIOException.class, () -> spy.renderOptions(sb, 50, options, 2, 5), "Expected UncheckedIOException to be thrown");
+    }
+}
+```
+

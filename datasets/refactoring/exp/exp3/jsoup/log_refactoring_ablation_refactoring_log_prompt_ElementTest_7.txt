@@ -1,0 +1,29 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class ElementTest {
+
+    @Test
+    public void testKeepsPreTextContent() {
+        String html = "<pre><code><span><b>code\n\ncode</b></span></code></pre>";
+        Document doc = Jsoup.parse(html);
+        String expectedText = "code\n\ncode";
+        String actualText = doc.text();
+        assertEquals("Text content within <pre> tag should be preserved correctly", expectedText, actualText);
+    }
+
+    @Test
+    public void testKeepsPreHtmlStructure() {
+        String html = "<pre><code><span><b>code\n\ncode</b></span></code></pre>";
+        Document doc = Jsoup.parse(html);
+        String expectedHtml = "<pre><code><span><b>code\n\ncode</b></span></code></pre>";
+        String actualHtml = doc.body().html();
+        assertEquals("HTML structure within <pre> tag should be preserved correctly", expectedHtml, actualHtml);
+    }
+}
+```
+

@@ -1,0 +1,36 @@
+asserts result: 
+ ```java
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.OptionGroup;
+import org.apache.commons.cli.Options;
+import org.junit.Test;
+
+import java.io.PrintWriter;
+import java.io.StringWriter;
+
+import static org.junit.Assert.assertEquals;
+
+@Test
+public void testPrintRequiredOptionGroupUsage() {
+    final OptionGroup group = new OptionGroup();
+    group.addOption(Option.builder("a").build());
+    group.addOption(Option.builder("b").build());
+    group.addOption(Option.builder("c").build());
+    group.setRequired(true);
+
+    final Options options = new Options();
+    options.addOptionGroup(group);
+
+    final StringWriter out = new StringWriter();
+    final PrintWriter printWriter = new PrintWriter(out);
+
+    final HelpFormatter formatter = new HelpFormatter();
+    formatter.printUsage(printWriter, 80, "app", options);
+    printWriter.flush(); // Ensure all content is written to the StringWriter
+
+    String expectedUsage = "usage: app -a | -b | -c" + System.lineSeparator();
+    assertEquals(expectedUsage, out.toString());
+}
+```
+

@@ -1,0 +1,32 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
+import static org.junit.jupiter.api.Assertions.*;
+
+class AttributesTest {
+
+    @Test
+    @DisplayName("Test Attribute 'a' is removed after renaming")
+    void testAttributeARemovedAfterRenaming() {
+        Attributes a = new Attributes();
+        a.put("a", "a");
+        for (Attribute at : a) {
+            at.setKey("b");
+        }
+        assertFalse(a.hasKey("a"), "Attribute 'a' not correctly removed");
+    }
+
+    @Test
+    @DisplayName("Test Attribute 'b' is present after renaming")
+    void testAttributeBPresentAfterRenaming() {
+        Attributes a = new Attributes();
+        a.put("a", "a");
+        for (Attribute at : a) {
+            at.setKey("b");
+        }
+        assertTrue(a.hasKey("b"), "Attribute 'b' not present after renaming");
+    }
+}
+```
+

@@ -1,0 +1,74 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.*;
+import static com.google.common.truth.Truth.assertThat;
+
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
+
+import java.io.IOException;
+import java.io.StringReader;
+
+class JsonReaderTest {
+
+    @Test
+    public void testSkipArray_nextNameIsA() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("{\"a\": [\"one\", \"two\", \"three\"], \"b\": 123}"));
+        reader.beginObject();
+        assertThat(reader.nextName(), "Expected next name to be 'a'").isEqualTo("a");
+    }
+
+    @Test
+    public void testSkipArray_skipValue() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("{\"a\": [\"one\", \"two\", \"three\"], \"b\": 123}"));
+        reader.beginObject();
+        reader.nextName(); // Consume "a"
+        reader.skipValue();
+    }
+
+    @Test
+    public void testSkipArray_nextNameIsB() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("{\"a\": [\"one\", \"two\", \"three\"], \"b\": 123}"));
+        reader.beginObject();
+        reader.nextName(); // Consume "a"
+        reader.skipValue();
+        assertThat(reader.nextName(), "Expected next name to be 'b'").isEqualTo("b");
+    }
+
+    @Test
+    public void testSkipArray_readIntValue() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("{\"a\": [\"one\", \"two\", \"three\"], \"b\": 123}"));
+        reader.beginObject();
+        reader.nextName(); // Consume "a"
+        reader.skipValue();
+        reader.nextName(); // Consume "b"
+        assertThat(reader.nextInt(), "Expected integer value to be 123").isEqualTo(123);
+    }
+
+    @Test
+    public void testSkipArray_endObject() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("{\"a\": [\"one\", \"two\", \"three\"], \"b\": 123}"));
+        reader.beginObject();
+        reader.nextName(); // Consume "a"
+        reader.skipValue();
+        reader.nextName(); // Consume "b"
+        reader.nextInt(); // Consume 123
+        reader.endObject();
+    }
+
+    @Test
+    public void testSkipArray_peekEndDocument() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("{\"a\": [\"one\", \"two\", \"three\"], \"b\": 123}"));
+        reader.beginObject();
+        reader.nextName(); // Consume "a"
+        reader.skipValue();
+        reader.nextName(); // Consume "b"
+        reader.nextInt(); // Consume 123
+        reader.endObject();
+        assertThat(reader.peek(), "Expected peek to return END_DOCUMENT").isEqualTo(JsonToken.END_DOCUMENT);
+    }
+}
+```
+

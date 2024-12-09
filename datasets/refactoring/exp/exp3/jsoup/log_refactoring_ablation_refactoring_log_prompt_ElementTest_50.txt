@@ -1,0 +1,27 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.junit.Test;
+import static org.junit.Assert.assertTrue;
+
+public class ElementTest {
+
+    @Test
+    public void testHtmlContainsTitleOuterHtml() {
+        Document doc = Jsoup.parse("<title>Check</title> <div>Hello there</div>");
+        doc.outputSettings().indentAmount(0);
+        String titleOuterHtml = doc.select("title").outerHtml();
+        assertTrue("HTML should contain the outer HTML of the title element", doc.html().contains(titleOuterHtml));
+    }
+
+    @Test
+    public void testHtmlContainsDivOuterHtml() {
+        Document doc = Jsoup.parse("<title>Check</title> <div>Hello there</div>");
+        doc.outputSettings().indentAmount(0);
+        String divOuterHtml = doc.select("div").outerHtml();
+        assertTrue("HTML should contain the outer HTML of the div element", doc.html().contains(divOuterHtml));
+    }
+}
+```
+

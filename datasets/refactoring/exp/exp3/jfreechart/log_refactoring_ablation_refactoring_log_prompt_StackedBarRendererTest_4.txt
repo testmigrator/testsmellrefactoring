@@ -1,0 +1,52 @@
+asserts result: 
+ ```java
+import org.jfree.chart.renderer.category.StackedBarRenderer;
+import org.jfree.data.category.DefaultCategoryDataset;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class StackedBarRendererTest {
+
+    private StackedBarRenderer renderer;
+
+    @BeforeEach
+    void setUp() {
+        renderer = new StackedBarRenderer();
+    }
+
+    @Test
+    void testFindRangeBoundsWithNullDataset() {
+        assertNull(renderer.findRangeBounds(null), "Expected null when dataset is null");
+    }
+
+    @Test
+    void testFindRangeBoundsWithEmptyDataset() {
+        DefaultCategoryDataset<String, String> dataset = new DefaultCategoryDataset<>();
+        assertNull(renderer.findRangeBounds(dataset), "Expected null when dataset is empty");
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "1.0, R1, C1, 0.0, 1.0",
+            "-2.0, R1, C2, -2.0, 1.0",
+            "null, R1, C3, -2.0, 1.0",
+            "2.0, R2, C1, -2.0, 3.0",
+            "null, R2, C2, -2.0, 3.0"
+    })
+    void testFindRangeBoundsWithValues(Double value, String rowKey, String columnKey, double expectedLowerBound, double expectedUpperBound) {
+        DefaultCategoryDataset<String, String> dataset = new DefaultCategoryDataset<>();
+        if (value != null) {
+            dataset.addValue(value, rowKey, columnKey);
+        } else {
+            dataset.addValue(null, rowKey, columnKey);
+        }
+        assertEquals(new Range(expectedLowerBound, expectedUpperBound), renderer.findRangeBounds(dataset),
+                String.format("Expected range [%f, %f] for value %s at (%s, %s)", expectedLowerBound, expectedUpperBound, value, rowKey, columnKey));
+    }
+}
+```
+

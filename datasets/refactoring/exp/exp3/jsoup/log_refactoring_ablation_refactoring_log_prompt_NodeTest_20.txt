@@ -1,0 +1,53 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Node;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class NodeTest {
+
+    private static final String HTML_CONTENT = "<div><p>One</p><p>Two</p><p>Three</p></div>";
+    private static final int EXPECTED_SIBLING_COUNT = 2;
+    private static final String FIRST_SIBLING_EXPECTED_HTML = "<p>One</p>";
+    private static final String SECOND_SIBLING_EXPECTED_HTML = "<p>Three</p>";
+
+    @Test
+    public void testNodeTextContent() {
+        Document doc = Jsoup.parse(HTML_CONTENT);
+        Element p2 = doc.select("p").get(1);
+
+        assertEquals("Expected text content of the second <p> element to be 'Two'", "Two", p2.text());
+    }
+
+    @Test
+    public void testSiblingNodeCount() {
+        Document doc = Jsoup.parse(HTML_CONTENT);
+        Element p2 = doc.select("p").get(1);
+
+        List<Node> nodes = p2.siblingNodes();
+        assertEquals("Expected the second <p> element to have 2 sibling nodes", EXPECTED_SIBLING_COUNT, nodes.size());
+    }
+
+    @Test
+    public void testFirstSiblingNodeHtml() {
+        Document doc = Jsoup.parse(HTML_CONTENT);
+        Element p2 = doc.select("p").get(1);
+
+        List<Node> nodes = p2.siblingNodes();
+        assertEquals("Expected the first sibling node to be '<p>One</p>'", FIRST_SIBLING_EXPECTED_HTML, nodes.get(0).outerHtml());
+    }
+
+    @Test
+    public void testSecondSiblingNodeHtml() {
+        Document doc = Jsoup.parse(HTML_CONTENT);
+        Element p2 = doc.select("p").get(1);
+
+        List<Node> nodes = p2.siblingNodes();
+        assertEquals("Expected the second sibling node to be '<p>Three</p>'", SECOND_SIBLING_EXPECTED_HTML, nodes.get(1).outerHtml());
+    }
+}
+```
+

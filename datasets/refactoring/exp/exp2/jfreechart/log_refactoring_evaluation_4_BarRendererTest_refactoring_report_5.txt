@@ -1,0 +1,13 @@
+asserts result: 
+ Yes
+
+The refactored tests maintain the same functionality as the original test. The original test checks two conditions:
+1. A `LegendItem` is returned when the series is visible in the legend.
+2. No `LegendItem` is returned when the series is hidden in the legend.
+
+The refactored tests achieve the same goals by splitting the original test into two separate tests:
+- `testGetLegendItem_Visible` checks that a `LegendItem` is returned when the series is visible.
+- `testGetLegendItem_NotVisible` checks that no `LegendItem` is returned when the series is hidden.
+
+Both the original and refactored tests use the same logic and assertions to verify these conditions. Therefore, the functionality is consistent.
+

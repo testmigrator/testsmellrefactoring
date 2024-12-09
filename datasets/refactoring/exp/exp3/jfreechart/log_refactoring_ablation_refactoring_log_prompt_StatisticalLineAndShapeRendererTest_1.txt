@@ -1,0 +1,42 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+
+import org.jfree.chart.renderer.category.StatisticalLineAndShapeRenderer;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+
+import java.awt.Color;
+
+class StatisticalLineAndShapeRendererTest {
+
+    private StatisticalLineAndShapeRenderer r1;
+    private StatisticalLineAndShapeRenderer r2;
+
+    @BeforeEach
+    void setUp() {
+        r1 = new StatisticalLineAndShapeRenderer();
+        r2 = new StatisticalLineAndShapeRenderer();
+    }
+
+    @Test
+    void testDefaultEquality() {
+        assertEquals(r1, r2, "Two default instances should be equal");
+        assertEquals(r2, r1, "Two default instances should be equal (reverse check)");
+    }
+
+    @ParameterizedTest
+    @ValueSource(colors = {Color.RED, Color.BLUE, Color.GREEN})
+    void testEqualityWithDifferentErrorIndicatorPaint(Color color) {
+        r1.setErrorIndicatorPaint(color);
+        assertNotEquals(r1, r2, "Instances should not be equal when error indicator paint is different");
+
+        r2.setErrorIndicatorPaint(color);
+        assertEquals(r1, r2, "Instances should be equal when error indicator paint is the same");
+    }
+}
+```
+

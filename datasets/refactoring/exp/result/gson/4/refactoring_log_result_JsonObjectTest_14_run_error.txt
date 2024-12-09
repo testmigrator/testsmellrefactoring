@@ -1,0 +1,115 @@
+Input Parameters:
+Test Code:
+ @Test
+  public void testKeySet() {
+    JsonObject a = new JsonObject();
+    assertThat(a.keySet()).hasSize(0);
+
+    a.add("foo", new JsonArray());
+    a.add("bar", new JsonObject());
+
+    assertThat(a.size()).isEqualTo(2);
+    assertThat(a.keySet()).hasSize(2);
+    assertThat(a.keySet()).containsExactly("foo", "bar").inOrder();
+
+    a.addProperty("1", true);
+    a.addProperty("2", false);
+
+    // Insertion order should be preserved by keySet()
+    Deque<String> expectedKeys = new ArrayDeque<>(Arrays.asList("foo", "bar", "1", "2"));
+    // Note: Must wrap in ArrayList because Deque implementations do not implement `equals`
+    assertThat(new ArrayList<>(a.keySet())).isEqualTo(new ArrayList<>(expectedKeys));
+    Iterator<String> iterator = a.keySet().iterator();
+
+    // Remove keys one by one
+    for (int i = a.size(); i >= 1; i--) {
+      assertThat(iterator.hasNext()).isTrue();
+      assertThat(iterator.next()).isEqualTo(expectedKeys.getFirst());
+      iterator.remove();
+      expectedKeys.removeFirst();
+
+      assertThat(a.size()).isEqualTo(i - 1);
+      assertThat(new ArrayList<>(a.keySet())).isEqualTo(new ArrayList<>(expectedKeys));
+    }
+  }
+Context: /com/google/gson/JsonObject
+Smell List: ['Assertion_Roulette', 'Conditional_Test_Logic', 'Eager_Test', 'Duplicate_Assert']
+Smell Description List: ['Test Smell Type：Assertion Roulette\n\nFeature:\nA test method contains more than one assertion statement without an explanation/message (parameter in the assertion method).\n', 'Test Smell Type：Conditional Test Logic\n\nFeature:\nA test method that contains one or more control statements (i.e if, switch, conditional expression, for, foreach and while statement).\n', 'Test Smell Type：Eager Test\n\nFeature:\nA test method contains multiple calls to multiple production methods.\n', 'Test Smell Type：Duplicate Assert\n\nFeature:\nA test method that contains more than one assertion statement with the same parameters.\n']
+Refactoring DSL: ['RefactorRule:\n  SmellType: Assertion Roulette\n  Description: Add descriptive messages to assert statements to improve readability and maintainability.\n  Steps:\n    - Step:\n        Description: "Add descriptive message to each assert statement(except assertThat, assertThrows)."\n        Action: AddMessageToAssert\n        Parameters:\n          MessagePattern: "{assertionMessage}"\n  Example:\n    Before: |\n      @Test\n      public void T() {\n        stmt\n        assert_1\n        ...\n        assert_n\n        stmt\'\n      }\n    After: |\n      @Test\n      public void T() {\n        stmt\n        assert_1(..., "Descriptive message for assert statement")\n        ...\n        assert_n(..., "Descriptive message for assert statement")\n        stmt\'\n      }\n    Variables:\n      assertionMessage: "Descriptive message for assert statement"\n', 'RefactorRule:\n  SmellType: Conditional Test Logic\n  Description: "Extract complex control flow logic into separate helper methods to improve readability and testability."\n  Steps:\n    - Step:\n        Description: "Identify complex control flow constructs"\n        Action: IdentifyComplexControlFlow\n        Parameters:\n          TargetType: Method\n    - Step:\n        Description: "Extract control flow logic into a separate helper method"\n        Action: ExtractMethod\n        Parameters:\n          TargetType: Method\n          SourcePattern: |\n            (if|switch|for|while|do-while) ({condition}) {\n                {statements}\n            }\n          ExtractedMethod: |\n            private boolean/void helperMethodName() {\n                {extractedStatements}\n            }\n    - Step:\n        Description: "Replace complex control flow with a call to the helper method"\n        Action: ReplaceControlFlow\n        Parameters:\n          SourcePattern: |\n            (if|switch|for|while|do-while) ({condition}) {\n                {statements}\n            }\n          ReplacementPattern: |\n            helperMethodName();\n  Example:\n    Before: |\n      @Test\n      public void complexTest() {\n          if (condition1 && condition2) {\n              if (condition3) {\n                  doSomething();\n              } else {\n                  doSomethingElse();\n              }\n          } else {\n              doDefault();\n          }\n      }\n    After: |\n      private boolean isComplexConditionMet() {\n          return condition1 && condition2 && condition3;\n      }\n\n      private void handleComplexScenario() {\n          if (isComplexConditionMet()) {\n              doSomething();\n          } else {\n              doSomethingElse();\n          }\n      }\n\n      @Test\n      public void complexTest() {\n          handleComplexScenario();\n          doDefault();\n      }\n', 'RefactorRule:\n  SmellType: Eager Test\n  Description: "Refactor test methods to group related assertions logically and extract reusable setup logic into private methods."\n  Steps:\n    - Step1:\n        Description: "Extract shared setup logic into a reusable, private method and ensure it is used across all relevant tests."\n        Action: ExtractSetupMethod\n        Parameters:\n          Condition: "If multiple tests share the same setup logic."\n          MethodNamePattern: setupTest{OriginalMethodName}\n    - Step2:\n        Description: "Group related assertions into cohesive sub-tests while retaining necessary setup logic."\n        Action: GroupAssertions\n        Parameters:\n          GroupBy: LogicalConcern\n    - Step3:\n        Description: "Create new test methods for each cohesive group of assertions and ensure readability."\n        Action: CreateTestMethods\n        Parameters:\n          IncludeSetup: True\n          NamePattern: test{OriginalMethodName}_{Concern}\n  Example:\n    Before: |\n      @Test\n      public void testExample() {\n          setup();\n          assertEquals(1, methodA());\n          assertTrue(methodB());\n      }\n    After: |\n      private void setupTestExample() {\n          setup();\n      }\n\n      @Test\n      public void testExample_MethodA() {\n          setupTestExample();\n          assertEquals(1, methodA());\n      }\n\n      @Test\n      public void testExample_MethodB() {\n          setupTestExample();\n          assertTrue(methodB());\n      }\n  Variables:\n    OriginalMethodName: The name of the original test method.\n    LogicalConcern: The logical aspect tested (e.g., a specific API, validation, or behavior).\n', 'RefactorRule:\n  SmellType: Duplicate Assert\n  Description: "If the assertion logic is the same but tested with different inputs, convert the test to a parameterized test using JUnit 5\'s @CsvSource annotation. Otherwise, split the test into multiple separate methods, each containing a single assertion."\n  Steps:\n    - Step:\n        Description: "Check if there are multiple assertions testing the same condition"\n        Action: IdentifySameAssertions\n        Parameters:\n          SourcePattern: |\n\t          assert(expected, ...)\n\t          assert(expected, ...)\n    - Step:\n        Description: "Create new test methods if necessary to separate assertions for different inputs"\n        Action: SplitMethod\n        Parameters:\n          TargetType: Method\n\n    - Step:\n        Description: "Convert the test method to a parameterized test"\n        Action: ConvertToParameterizedTest\n        Parameters:\n          TargetType: Method\n    - Step:\n        Description: "Add @CsvSource annotation to declare parameterized values."\n        Action: AddAnnotation\n        Parameters:\n          TargetType: Method\n          Annotation: |\n            @CsvSource({\n              "{paramValues}"\n            })\n    - Step:\n        Description: "Refactor the test method to use parameterized values."\n        Action: RefactorMethod\n        Parameters:\n          SourcePattern: |\n            public void T() {\n              {originalStatements}\n            }\n          ReplacementPattern: |\n            public void T({parameterNames}) {\n              {refactoredStatements}\n            }\n  Example:\n    Before: |\n      @Test\n      public void T() {\n        assertEquals(expectedA, methodUnderTest(a));\n        assertEquals(expectedB, methodUnderTest(b));\n      }\n\n    After: |\n      @ParameterizedTest\n      @CsvSource({\n        "a, expectedA",\n        "b, expectedB"\n      })\n      public void T(String input, String expected) {\n        assertEquals(expected, methodUnderTest(input));\n      }\n']
+Checkpoints: ['[ ] All assert statements have been added with clear explanatory messages.\n', '[ ] All conditional test logic has been refactored to use JUnit 5’s conditional test execution feature, with the condition verified in an external method assigned via the @EnabledIf annotation.\n', '[ ] All eager tests have been split into separate tests, each focusing on verifying a single API.\n', '[ ] All duplicate assertions have been refactored using JUnit 5 Parameterized Tests, where the lists of parameterizable values are declared in a specific annotation, and the test method is executed independently m times.\n']
+
+Refactored Code: 
+ 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+
+import java.util.ArrayList;
+import java.util.Deque;
+import java.util.Iterator;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+public class JsonObjectTest {
+
+    private JsonObject a;
+
+    @BeforeEach
+    public void setUp() {
+        a = new JsonObject();
+    }
+
+    @Test
+    public void testEmptyKeySet() {
+        assertThat(a.keySet()).hasSize(0, "Initial key set should be empty");
+    }
+
+    @Test
+    public void testAddingJsonElements() {
+        a.add("foo", new JsonArray());
+        a.add("bar", new JsonObject());
+
+        assertThat(a.size()).isEqualTo(2, "Size after adding two elements should be 2");
+        assertThat(a.keySet()).hasSize(2, "Key set size after adding two elements should be 2");
+        assertThat(a.keySet()).containsExactly("foo", "bar").inOrder("Key set should contain 'foo' and 'bar' in order");
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "1, true",
+        "2, false"
+    })
+    public void testAddingProperties(String key, boolean value) {
+        a.addProperty(key, value);
+
+        assertThat(a.containsKey(key)).isTrue("JsonObject should contain key " + key);
+    }
+
+    @Test
+    public void testInsertionOrderPreservation() {
+        a.add("foo", new JsonArray());
+        a.add("bar", new JsonObject());
+        a.addProperty("1", true);
+        a.addProperty("2", false);
+
+        List<String> expectedKeys = List.of("foo", "bar", "1", "2");
+        assertThat(new ArrayList<>(a.keySet())).isEqualTo(expectedKeys, "Key set should preserve insertion order");
+
+        Iterator<String> iterator = a.keySet().iterator();
+        for (int i = a.size(); i >= 1; i--) {
+            assertThat(iterator.hasNext()).isTrue("Iterator should have next element at index " + i);
+            String nextKey = iterator.next();
+            assertThat(nextKey).isEqualTo(expectedKeys.get(0), "Next key should be " + expectedKeys.get(0));
+
+            iterator.remove();
+            expectedKeys.remove(0);
+
+            assertThat(a.size()).isEqualTo(i - 1, "Size should be " + (i - 1) + " after removing a key");
+            assertThat(new ArrayList<>(a.keySet())).isEqualTo(expectedKeys, "Key set should match expected keys after removal");
+        }
+    }
+}
+
+

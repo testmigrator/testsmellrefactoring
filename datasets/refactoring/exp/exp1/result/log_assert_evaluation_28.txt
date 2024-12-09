@@ -1,0 +1,34 @@
+asserts result: 
+ - 'assertEquals("POST", ihVal("Method", doc), "HTTP method should be POST");' - yes
+- 'assertEquals("uname=Jsoup&uname=Jonathan&%E7%99%BE=%E5%BA%A6%E4%B8%80%E4%B8%8B", ihVal("Query String", doc), "Query string parameters do not match expected values");' - yes
+- 'assertEquals(body, ihVal("Post Data", doc), "Request body does not match expected value");' - yes
+- 'assertEquals("what=the&what=about+%26+me%3F", ihVal("Query String", doc), "Query string should match expected value");' - yes
+- 'assertEquals("the, about & me?", ihVal("what", doc), "Value of \'what\' should match expected value");' - yes
+- 'assertEquals("Mozilla", ihVal("User-Agent", doc), "User-Agent should match expected value");' - yes
+- 'assertEquals("http://example.com", ihVal("Referer", doc), "Referer should match expected value");' - yes
+- 'assertEquals("PUT", ihVal("Method", doc), "The HTTP method should be PUT");' - yes
+- 'assertEquals("gzip", ihVal("Accept-Encoding", doc), "The Accept-Encoding header should be gzip");' - yes
+- 'assertEquals("auth=token", ihVal("Cookie", doc), "The Cookie header should be auth=token");' - yes
+- 'assertTrue(doc.title().contains("Environment"), "First parse should contain \'Environment\' in the title");' - yes
+- 'assertTrue(doc2.title().contains("Environment"), "Second parse should contain \'Environment\' in the title");' - yes
+- 'assertTrue(body.contains("Environment"), "Body should contain \'Environment\'");' - yes
+- 'assertTrue(bytes.length > 100, "Bytes length should be greater than 100");' - yes
+- 'assertTrue(doc.title().contains("Environment"), "Document title should contain \'Environment\'");' - yes
+- 'assertEquals("Expected token cookie value to be asdfg123", "asdfg123", cookies.get("token"));' - yes
+- 'assertEquals("Expected uid cookie value to be jhy", "jhy", cookies.get("uid"));' - yes
+- 'assertEquals("Expected Cookie header in response to match sent cookies", "token=asdfg123; uid=jhy", ihVal("Cookie", doc));' - yes
+- 'assertEquals("The document text should be replaced", "Replaced", doc.text());' - yes
+- 'assertEquals("The body text should reflect the replacement", "Replaced", doc.body().text());' - yes
+- 'assertEquals("The document should contain exactly one head element", expectedHeadElementCount, doc.select("head").size());' - yes
+- 'assertEquals("", noTitle.title(), "Initial title should be empty");' - yes
+- 'assertEquals("Hello", noTitle.title(), "Title should be set to \'Hello\'");' - yes
+- 'assertEquals("Hello", noTitle.select("title").first().text(), "Title element text should be \'Hello\'");' - yes
+- 'assertEquals("First", withTitle.title(), "Initial title should be \'First\'");' - yes
+- 'assertEquals("Hello", withTitle.title(), "Title should be set to \'Hello\'");' - yes
+- 'assertEquals("Hello", withTitle.select("title").first().text(), "Title element text should be \'Hello\'");' - yes
+- 'assertEquals("Hello there now", normaliseTitle.title(), "Normalized title should be \'Hello there now\'");' - yes
+- 'assertEquals("<p title=\\"π\\">π &amp; &lt; &gt; </p>", doc.body().html(), "Default charset encoding should match expected HTML output.");' - yes
+- 'assertEquals("UTF-8", doc.outputSettings().charset().name(), "Default charset should be UTF-8.");' - yes
+
+All provided assert statements meet the specified criteria.
+

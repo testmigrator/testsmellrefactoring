@@ -1,0 +1,90 @@
+asserts result: 
+ ```java
+import org.apache.commons.math4.optimization.general.LevenbergMarquardtOptimizer;
+import org.apache.commons.math4.optimization.fit.leastsquares.LeastSquaresBuilder;
+import org.apache.commons.math4.optimization.fit.leastsquares.LeastSquaresProblem;
+import org.apache.commons.math4.optimization.fit.leastsquares.Optimum;
+import org.apache.commons.math4.linear.RealVector;
+import org.junit.Test;
+import static org.junit.Assert.*;
+
+public class ParameterValidatorTest {
+
+    private final LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer();
+
+    @Test
+    public void testParameterValidatorWithoutCheating() {
+        // Setup.
+        final double xCenter = 123.456;
+        final double yCenter = 654.321;
+        final double xSigma = 10;
+        final double ySigma = 15;
+        final double radius = 111.111;
+        final RandomCirclePointGenerator factory
+                = new RandomCirclePointGenerator(xCenter, yCenter, radius, xSigma, ySigma);
+        final CircleProblem circle = new CircleProblem(xSigma, ySigma);
+
+        final int numPoints = 10;
+        factory.samples(numPoints).forEach(circle::addPoint);
+
+        // First guess for the center's coordinates and radius.
+        final double[] init = { 118, 659, 115 };
+
+        final Optimum optimum = optimizer.optimize(
+                builder(circle).maxIterations(50).start(init).build());
+
+        final int numEval = optimum.getEvaluations();
+        assertTrue("Number of evaluations should be greater than 1", numEval > 1);
+    }
+
+    @Test
+    public void testParameterValidatorWithCheating() {
+        // Setup.
+        final double xCenter = 123.456;
+        final double yCenter = 654.321;
+        final double xSigma = 10;
+        final double ySigma = 15;
+        final double radius = 111.111;
+        final RandomCirclePointGenerator factory
+                = new RandomCirclePointGenerator(xCenter, yCenter, radius, xSigma, ySigma);
+        final CircleProblem circle = new CircleProblem(xSigma, ySigma);
+
+        final int numPoints = 10;
+        factory.samples(numPoints).forEach(circle::addPoint);
+
+        // First guess for the center's coordinates and radius.
+        final double[] init = { 118, 659, 115 };
+
+        final Optimum optimum = optimizer.optimize(
+                builder(circle).maxIterations(50).start(init).build());
+
+        final int numEval = optimum.getEvaluations();
+        assertTrue("Number of evaluations should be greater than 1", numEval > 1);
+
+        // Build a new problem with a validator that amounts to cheating.
+        final ParameterValidator cheatValidator
+                = new ParameterValidator() {
+            @Override
+            public RealVector validate(RealVector params) {
+                // Cheat: Move towards the optimum found previously.
+                final RealVector direction = optimum.getPoint().subtract(params);
+                return params.add(direction.mapMultiply(0.75));
+            }
+        };
+
+        final Optimum cheatOptimum
+                = optimizer.optimize(builder(circle).maxIterations(50).start(init).parameterValidator(cheatValidator).build());
+        final int cheatNumEval = cheatOptimum.getEvaluations();
+        assertTrue("Number of evaluations with cheating should be less than without cheating (n=" + numEval + " nc=" + cheatNumEval + ")", cheatNumEval < numEval);
+    }
+
+    private LeastSquaresBuilder builder(CircleProblem circle) {
+        return new LeastSquaresBuilder()
+                .model(circle.getModelFunction(), circle.getModelFunctionJacobian())
+                .target(circle.getTargets())
+                .weight(circle.getWeights())
+                .start(circle.getStart());
+    }
+}
+```
+

@@ -1,0 +1,10 @@
+total tests: 2
+total asserts: 8
+assertEquals(expectedMissingOptionsCount, exception.getMissingOptions().size(), "The size of missing options does not match the expected value");
+assertTrue(exception.getMissingOptions().contains("n"), "The missing options do not contain the expected option 'n'");
+assertTrue(line.hasOption('a'), "Option 'a' should be present");
+assertNull(line.getOptionObject('a'), "Option 'a' should not have a value");
+assertTrue(line.hasOption('b'), "Option 'b' should be present");
+assertNull(line.getOptionObject('b'), "Option 'b' should not have a value");
+assertTrue(line.hasOption('c'), "Option 'c' should be present");
+assertNull(line.getOptionObject('c'), "Option 'c' should not have a value");

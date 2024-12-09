@@ -1,0 +1,9 @@
+asserts result: 
+ Yes
+
+The refactored tests maintain the same functionality as the original test. The original test checks two things:
+1. The HTML of the entire document.
+2. The HTML of a specific `div` element.
+
+In the refactored version, these checks have been split into two separate test methods (`testNotPretty_DocumentHtml` and `testNotPretty_DivHtml`), but they still perform the same assertions. The `setupTestNotPretty` method is used to prepare the document, ensuring that the setup is consistent across both tests. This approach improves readability and modularity without changing the functional behavior of the tests.
+

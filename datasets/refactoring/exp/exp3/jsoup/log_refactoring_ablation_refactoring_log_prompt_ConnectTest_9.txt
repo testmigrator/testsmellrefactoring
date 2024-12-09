@@ -1,0 +1,59 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
+
+public class ConnectionTest {
+
+    private static final String echoUrl = "http://example.com/echo";
+
+    @Test
+    public void shouldGetDocumentWithCorrectHeadersAndData() throws IOException {
+        // Arrange
+        String expectedQueryString = "what=the&what=about+%26+me%3F";
+        String expectedWhatValue = "the, about & me?";
+        String expectedUserAgent = "Mozilla";
+        String expectedReferer = "http://example.com";
+
+        Connection con = Jsoup.connect(echoUrl + "?what=the")
+                .userAgent(expectedUserAgent)
+                .referrer(expectedReferer)
+                .data("what", "about & me?");
+
+        // Act
+        Document doc = con.get();
+
+        // Assert
+        assertEquals(expectedQueryString, ihVal("Query String", doc), "Query string should match");
+        assertEquals(expectedWhatValue, ihVal("what", doc), "What value should match");
+        assertEquals(expectedUserAgent, ihVal("User-Agent", doc), "User-Agent should match");
+        assertEquals(expectedReferer, ihVal("Referer", doc), "Referer should match");
+    }
+
+    @Test
+    public void shouldThrowIOExceptionWhenConnectionFails() {
+        // Arrange
+        String invalidUrl = "http://invalid-url";
+
+        Connection con = Jsoup.connect(invalidUrl)
+                .userAgent("Mozilla")
+                .referrer("http://example.com")
+                .data("what", "about & me?");
+
+        // Act and Assert
+        Executable executable = () -> con.get();
+        assertThrows(IOException.class, executable, "Should throw IOException when connection fails");
+    }
+
+    private String ihVal(String key, Document doc) {
+        // Implementation of ihVal method
+        return doc.select(String.format("[name=%s]", key)).attr("value");
+    }
+}
+```
+

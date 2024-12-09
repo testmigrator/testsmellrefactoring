@@ -1,0 +1,52 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.assertions.AssertionFailedError;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+
+public class RequestTest {
+
+    private final String echoUrl = "http://example.com/echo";
+    private final String browserUa = "Mozilla/5.0";
+
+    @Test
+    public void sendsRequestBodyJsonWithoutData() {
+        final String body = "{\"key\":\"value\"}";
+
+        Document doc = assertDoesNotThrow(() -> {
+            return Jsoup.connect(echoUrl)
+                    .requestBody(body)
+                    .header("Content-Type", "application/json")
+                    .userAgent(browserUa)
+                    .post();
+        }, "Failed to connect to the server");
+
+        assertEquals("POST", ihVal("Method", doc), "HTTP method should be POST");
+        assertEquals("application/json", ihVal("Content-Type", doc), "Content-Type header should be application/json");
+        assertEquals(body, ihVal("Post Data", doc), "Post data should match the request body");
+    }
+
+    private String ihVal(String key, Document doc) {
+        // Implementation of ihVal method
+        return doc.select("[name=" + key + "]").attr("value");
+    }
+
+    private <T> T assertDoesNotThrow(Supplier<T> supplier, String message) {
+        try {
+            return supplier.get();
+        } catch (Exception e) {
+            throw new AssertionFailedError(message, e);
+        }
+    }
+
+    @FunctionalInterface
+    interface Supplier<T> {
+        T get() throws Exception;
+    }
+}
+```
+

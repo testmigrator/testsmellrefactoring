@@ -1,0 +1,56 @@
+asserts result: 
+ ```java
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
+import org.junit.jupiter.api.Test;
+
+class JsonReaderTest {
+
+    @Test
+    public void testReadArray_BeginArray() throws Exception {
+        JsonReader reader = new JsonReader(new StringReader("[true, true]"));
+        reader.beginArray();
+        assertThat(reader.peek()).isEqualTo(JsonToken.BOOLEAN);
+    }
+
+    @Test
+    public void testReadArray_NextBoolean_FirstValue() throws Exception {
+        JsonReader reader = new JsonReader(new StringReader("[true, true]"));
+        reader.beginArray();
+        assertThat(reader.nextBoolean()).isTrue();
+    }
+
+    @Test
+    public void testReadArray_NextBoolean_SecondValue() throws Exception {
+        JsonReader reader = new JsonReader(new StringReader("[true, true]"));
+        reader.beginArray();
+        reader.nextBoolean(); // Consume first value
+        assertThat(reader.nextBoolean()).isTrue();
+    }
+
+    @Test
+    public void testReadArray_EndArray() throws Exception {
+        JsonReader reader = new JsonReader(new StringReader("[true, true]"));
+        reader.beginArray();
+        reader.nextBoolean();
+        reader.nextBoolean();
+        reader.endArray();
+        assertThat(reader.peek()).isEqualTo(JsonToken.END_DOCUMENT);
+    }
+
+    @Test
+    public void testReadArray_ExceptionHandling() {
+        JsonReader reader = new JsonReader(new StringReader("[true, true"));
+        assertThrows(IOException.class, () -> {
+            reader.beginArray();
+            reader.nextBoolean();
+            reader.nextBoolean();
+            reader.endArray();
+        });
+    }
+}
+```
+

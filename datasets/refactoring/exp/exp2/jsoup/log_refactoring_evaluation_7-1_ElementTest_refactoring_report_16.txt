@@ -1,0 +1,14 @@
+asserts result: 
+ Yes
+
+The refactored tests maintain the same functionality as the original test. The original test checks for elements with the "style" attribute and ensures there are no elements with the "class" attribute. The refactored version splits these checks into two separate tests but still performs the same assertions:
+
+1. **testGetElementsWithAttribute_Style**:
+   - Checks that there are exactly 2 elements with the "style" attribute.
+   - Verifies that the first element is a "div" and the second element is a "b".
+
+2. **testGetElementsWithAttribute_Class**:
+   - Checks that there are no elements with the "class" attribute.
+
+Both the original and refactored tests use the same HTML document and perform the same assertions, ensuring that the functionality remains consistent.
+

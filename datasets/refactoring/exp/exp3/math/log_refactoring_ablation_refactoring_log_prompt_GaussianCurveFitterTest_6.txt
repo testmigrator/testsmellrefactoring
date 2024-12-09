@@ -1,0 +1,18 @@
+asserts result: 
+ ```java
+@Test
+public void testFit05() {
+    SimpleCurveFitter fitter = GaussianCurveFitter.create();
+    double[] parameters = fitter.fit(createDataset(DATASET3).toList());
+
+    double expectedAmplitude = 283863.81929180305;
+    double expectedMean = -13.29641995105174;
+    double expectedSigma = 1.7297330293549908;
+    double tolerance = 1e-4;
+
+    Assert.assertEquals(expectedAmplitude, parameters[0], tolerance);
+    Assert.assertEquals(expectedMean, parameters[1], tolerance);
+    Assert.assertEquals(expectedSigma, parameters[2], tolerance);
+}
+```
+

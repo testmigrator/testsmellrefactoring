@@ -1,0 +1,11 @@
+asserts result: 
+ yes
+
+The refactored code maintains the same functionality as the original test. The original test verified that the `Attributes` collection has three elements and that their values are `"1"`, `"2"`, and `"3"` in order. The refactored code splits this into two tests:
+
+1. **testIteratorHasNext_SeenCount**: This test checks that the number of attributes seen is 3, which is consistent with the original test's `assertEquals(3, seen)`.
+
+2. **testIteratorHasNext_AttributeValues**: This test checks that the values of the attributes are `"1"`, `"2"`, and `"3"` in order, which is consistent with the original test's `assertEquals(String.valueOf(seen), attribute.getValue())`.
+
+The functionality is preserved, and the refactoring improves readability and separation of concerns.
+

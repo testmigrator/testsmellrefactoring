@@ -1,0 +1,82 @@
+asserts result: 
+ ```java
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import com.google.gson.stream.FormattingStyle;
+import com.google.gson.stream.JsonWriter;
+import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.io.StringWriter;
+
+class JsonWriterTest {
+
+    @Test
+    public void testDefaultFormattingStyle() {
+        JsonWriter jsonWriter = new JsonWriter(new StringWriter());
+        assertThat(jsonWriter.getFormattingStyle()).isSameAs(FormattingStyle.COMPACT)
+                .withFailMessage("Default formatting style should be COMPACT");
+    }
+
+    @Test
+    public void testSetFormattingStyle() {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.setFormattingStyle(
+                FormattingStyle.PRETTY.withIndent(" \t ").withNewline("\r\n"));
+
+        assertThat(jsonWriter.getFormattingStyle()).isNotSameAs(FormattingStyle.COMPACT)
+                .withFailMessage("Formatting style should be updated after setting");
+
+        assertThat(jsonWriter.getFormattingStyle().getIndent()).isEqualTo(" \t ")
+                .withFailMessage("Indent should be set correctly");
+        assertThat(jsonWriter.getFormattingStyle().getNewline()).isEqualTo("\r\n")
+                .withFailMessage("Newline should be set correctly");
+    }
+
+    @Test
+    public void testWriteWithCustomFormattingStyle() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.setFormattingStyle(
+                FormattingStyle.PRETTY.withIndent(" \t ").withNewline("\r\n"));
+
+        jsonWriter.beginArray();
+        jsonWriter.value(true);
+        jsonWriter.value("text");
+        jsonWriter.value(5.0);
+        jsonWriter.nullValue();
+        jsonWriter.endArray();
+
+        String expected =
+                "[\r\n" +
+                " \t true,\r\n" +
+                " \t \"text\",\r\n" +
+                " \t 5.0,\r\n" +
+                " \t null\r\n" +
+                "]";
+        assertThat(stringWriter.toString()).isEqualTo(expected)
+                .withFailMessage("Output should match the expected JSON with custom formatting");
+    }
+
+    @Test
+    public void testIOExceptionWhenWriting() {
+        StringWriter stringWriter = new StringWriter() {
+            @Override
+            public void write(int c) throws IOException {
+                throw new IOException("Simulated IO Exception");
+            }
+        };
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+        jsonWriter.setFormattingStyle(
+                FormattingStyle.PRETTY.withIndent(" \t ").withNewline("\r\n"));
+
+        assertThrows(IOException.class, () -> {
+            jsonWriter.beginArray();
+            jsonWriter.value(true);
+        }, "Expected IOException when writing to a faulty StringWriter");
+    }
+}
+```
+

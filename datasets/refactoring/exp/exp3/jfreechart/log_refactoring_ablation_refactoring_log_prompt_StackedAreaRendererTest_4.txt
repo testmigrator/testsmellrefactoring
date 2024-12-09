@@ -1,0 +1,30 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+import org.jfree.chart.renderer.category.StackedAreaRenderer;
+import org.jfree.chart.util.CloneUtils;
+import org.jfree.chart.util.TestUtils;
+
+class StackedAreaRendererTest {
+
+    @Test
+    void testCloning() {
+        StackedAreaRenderer r1 = new StackedAreaRenderer();
+        StackedAreaRenderer r2 = null;
+
+        try {
+            r2 = CloneUtils.clone(r1);
+        } catch (CloneNotSupportedException e) {
+            fail("CloneNotSupportedException should not be thrown during cloning: " + e.getMessage());
+        }
+
+        assertNotNull(r2, "Cloned object should not be null");
+        assertNotSame(r1, r2, "Cloned object should not be the same as the original object");
+        assertEquals(r1.getClass(), r2.getClass(), "Cloned object should be of the same class as the original object");
+        assertEquals(r1, r2, "Cloned object should be equal to the original object");
+        TestUtils.checkIndependence(r1, r2, "Cloned object should be independent of the original object");
+    }
+}
+```
+

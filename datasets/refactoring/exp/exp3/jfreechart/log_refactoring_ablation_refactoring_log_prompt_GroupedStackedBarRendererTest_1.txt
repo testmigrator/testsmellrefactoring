@@ -1,0 +1,59 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import static org.junit.jupiter.api.Assertions.*;
+
+class GroupedStackedBarRendererTest {
+
+    private GroupedStackedBarRenderer r1;
+    private GroupedStackedBarRenderer r2;
+
+    @BeforeEach
+    void setUp() {
+        r1 = new GroupedStackedBarRenderer();
+        r2 = new GroupedStackedBarRenderer();
+    }
+
+    @Test
+    void testEquals_DefaultInstances() {
+        assertEquals(r1, r2, "Default instances should be equal");
+        assertEquals(r2, r1, "Default instances should be equal when order is reversed");
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "G1, S1, G2",
+        "G2, S2, G3"
+    })
+    void testEquals_WithSeriesToGroupMap(String defaultGroup, String key, String group) {
+        KeyToGroupMap<String, String> m1 = new KeyToGroupMap<>(defaultGroup);
+        m1.mapKeyToGroup(key, group);
+        r1.setSeriesToGroupMap(m1);
+
+        assertNotEquals(r1, r2, "Instances should not be equal after setting different series to group maps");
+
+        KeyToGroupMap<String, String> m2 = new KeyToGroupMap<>(defaultGroup);
+        m2.mapKeyToGroup(key, group);
+        r2.setSeriesToGroupMap(m2);
+
+        assertEquals(r1, r2, "Instances should be equal after setting the same series to group maps");
+    }
+
+    @Test
+    void testIndependence() {
+        KeyToGroupMap<String, String> m1 = new KeyToGroupMap<>("G1");
+        m1.mapKeyToGroup("S1", "G2");
+        r1.setSeriesToGroupMap(m1);
+
+        KeyToGroupMap<String, String> m2 = new KeyToGroupMap<>("G1");
+        m2.mapKeyToGroup("S1", "G2");
+        r2.setSeriesToGroupMap(m2);
+
+        TestUtils.checkIndependence(r1, r2);
+    }
+}
+```
+

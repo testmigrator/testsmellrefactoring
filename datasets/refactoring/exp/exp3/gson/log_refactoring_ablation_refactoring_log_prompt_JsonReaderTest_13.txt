@@ -1,0 +1,43 @@
+asserts result: 
+ ```java
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
+
+import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.io.StringReader;
+
+class JsonReaderTest {
+
+    @Test
+    public void testReadEmptyArray_BeginArray() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("[]"));
+        reader.beginArray();
+        assertThat(reader.hasNext()).as("Check if hasNext returns false after beginArray").isFalse();
+    }
+
+    @Test
+    public void testReadEmptyArray_EndArray() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("[]"));
+        reader.beginArray();
+        reader.hasNext(); // Ensure we are at the correct position
+        reader.endArray();
+        assertThat(reader.peek()).as("Check if peek returns END_DOCUMENT after endArray").isEqualTo(JsonToken.END_DOCUMENT);
+    }
+
+    @Test
+    public void testReadEmptyArray_ExceptionHandling() {
+        JsonReader reader = new JsonReader(new StringReader("[]"));
+        assertThrows(IOException.class, () -> {
+            reader.beginArray();
+            reader.endArray();
+            reader.endArray(); // This should throw an IOException
+        }, "Check if IOException is thrown when calling endArray twice");
+    }
+}
+```
+

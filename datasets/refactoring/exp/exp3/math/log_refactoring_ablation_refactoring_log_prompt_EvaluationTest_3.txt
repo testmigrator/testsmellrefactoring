@@ -1,0 +1,43 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.assertions.AssertionUtils;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class StatisticalReferenceDatasetTest {
+
+    @Test
+    public void testComputeCost() {
+        final StatisticalReferenceDataset dataset = StatisticalReferenceDatasetFactory.createKirby2();
+
+        assertDoesNotThrow(() -> {
+            final LeastSquaresProblem lsp = builder(dataset).build();
+
+            final double expected = dataset.getResidualSumOfSquares();
+            final double cost = lsp.evaluate(lsp.getStart()).getCost();
+            final double actual = cost * cost;
+            assertEquals(expected, actual, 1e-11 * expected, dataset.getName());
+        });
+    }
+
+    private LeastSquaresProblem.Builder builder(StatisticalReferenceDataset dataset) {
+        // Assuming this is a placeholder for the actual builder logic
+        return new LeastSquaresProblem.Builder().addLeastSquaresProblem(new AbstractEvaluation() {
+            @Override
+            public double[] getValue(double[] params) {
+                return dataset.getValues(params);
+            }
+        });
+    }
+}
+```
+
+### Explanation:
+1. **Understand the test intent**: The test aims to verify that the computed cost from the `LeastSquaresProblem` matches the expected residual sum of squares from the dataset within a specified tolerance.
+2. **Understand the code smells**: The original test code uses a `throws IOException` clause, which is a code smell because it catches exceptions but does not handle them properly.
+3. **Refactoring the test code**:
+   - Replaced the `throws IOException` with `assertDoesNotThrow` to ensure that any `IOException` is caught and reported as a test failure.
+   - Used `assertEquals` with a custom message to match the original test's behavior.
+   - Added a placeholder `builder` method to simulate the actual builder logic, assuming it is part of the test setup.
+

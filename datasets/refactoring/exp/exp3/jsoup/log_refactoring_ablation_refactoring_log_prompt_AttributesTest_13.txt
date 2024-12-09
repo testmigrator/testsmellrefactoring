@@ -1,0 +1,36 @@
+asserts result: 
+ ```java
+import org.jsoup.nodes.Attributes;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class AttributesTest {
+
+    private static final String BASE_URI_KEY = "baseUri";
+    private static final String ANOTHER_KEY = "another";
+    private static final String EXAMPLE_COM = "example.com";
+    private static final int INITIAL_SIZE = 2;
+
+    @Test
+    public void testSizeWithInitialAttributes() {
+        Attributes attributes = new Attributes();
+        attributes.put("One", "One");
+        attributes.put("Two", "Two");
+
+        assertEquals(INITIAL_SIZE, attributes.size(), "Initial size should be 2 after adding two attributes");
+    }
+
+    @Test
+    public void testSizeWithInternalAttributes() {
+        Attributes attributes = new Attributes();
+        attributes.put("One", "One");
+        attributes.put("Two", "Two");
+
+        attributes.put(Attributes.internalKey(BASE_URI_KEY), EXAMPLE_COM);
+        attributes.put(Attributes.internalKey(ANOTHER_KEY), EXAMPLE_COM);
+
+        assertEquals(INITIAL_SIZE, attributes.size(), "Size should still be 2 after adding internal attributes");
+    }
+}
+```
+

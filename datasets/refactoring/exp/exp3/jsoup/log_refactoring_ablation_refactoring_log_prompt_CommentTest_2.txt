@@ -1,0 +1,31 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Comment;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Node;
+import static org.junit.Assert.assertEquals;
+
+@Test
+public void testHtmlNoPretty() {
+    // Arrange
+    String htmlContent = "<!-- a simple comment -->";
+    Document doc = Jsoup.parse(htmlContent);
+    doc.outputSettings().prettyPrint(false);
+
+    // Act
+    String documentHtml = doc.html();
+    Node node = doc.childNode(0);
+    Comment c1 = (Comment) node;
+
+    // Assert
+    assertEquals("The document HTML should match the expected output without pretty print", 
+                 "<!-- a simple comment --><html><head></head><body></body></html>", 
+                 documentHtml);
+    
+    assertEquals("The outer HTML of the comment node should match the original comment", 
+                 "<!-- a simple comment -->", 
+                 c1.outerHtml());
+}
+```
+

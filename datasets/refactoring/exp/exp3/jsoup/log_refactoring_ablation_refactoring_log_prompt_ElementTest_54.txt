@@ -1,0 +1,53 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class ElementTest {
+
+    private static final String HTML = "<div><p>One</p><p>Two</p><p>Three</p></div>";
+    private static final int EXPECTED_SIBLING_COUNT = 2;
+    private static final String EXPECTED_FIRST_SIBLING_HTML = "<p>One</p>";
+    private static final String EXPECTED_SECOND_SIBLING_HTML = "<p>Three</p>";
+
+    @Test
+    public void shouldReturnCorrectTextForElement() {
+        Document doc = Jsoup.parse(HTML);
+        Element p2 = doc.select("p").get(1);
+
+        assertEquals("Element text should be 'Two'", "Two", p2.text());
+    }
+
+    @Test
+    public void shouldReturnCorrectNumberOfSiblingElements() {
+        Document doc = Jsoup.parse(HTML);
+        Element p2 = doc.select("p").get(1);
+        Elements siblingElements = p2.siblingElements();
+
+        assertEquals("Number of sibling elements should be 2", EXPECTED_SIBLING_COUNT, siblingElements.size());
+    }
+
+    @Test
+    public void shouldReturnCorrectFirstSiblingElementHtml() {
+        Document doc = Jsoup.parse(HTML);
+        Element p2 = doc.select("p").get(1);
+        Elements siblingElements = p2.siblingElements();
+
+        assertEquals("First sibling element HTML should be '<p>One</p>'", EXPECTED_FIRST_SIBLING_HTML, siblingElements.get(0).outerHtml());
+    }
+
+    @Test
+    public void shouldReturnCorrectSecondSiblingElementHtml() {
+        Document doc = Jsoup.parse(HTML);
+        Element p2 = doc.select("p").get(1);
+        Elements siblingElements = p2.siblingElements();
+
+        assertEquals("Second sibling element HTML should be '<p>Three</p>'", EXPECTED_SECOND_SIBLING_HTML, siblingElements.get(1).outerHtml());
+    }
+}
+```
+

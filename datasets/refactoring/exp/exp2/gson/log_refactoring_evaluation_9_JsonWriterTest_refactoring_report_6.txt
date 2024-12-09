@@ -1,0 +1,5 @@
+asserts result: 
+ Yes
+
+The refactored tests maintain the same functionality as the original test. Each type of value (boolean, null, integer, double, string) is tested individually, and the assertions check that the output matches the expected JSON representation. The use of helper methods (`createStringWriter` and `createJsonWriter`) does not alter the behavior of the tests. The addition of `assertDoesNotThrow` ensures that no exceptions are thrown during the execution of the test, which is a reasonable enhancement that does not change the core functionality being tested.
+

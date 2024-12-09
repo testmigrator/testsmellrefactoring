@@ -1,0 +1,20 @@
+asserts result: 
+ - For the assert statement `assertTrue(div.hasAttr("true"), "The 'true' attribute should exist.");`, the message is misleading because it suggests that the attribute named "true" should exist, but the actual assertion checks if the attribute "true" is present on the `div` element. A more accurate message would be `"The 'true' attribute should be present."`.
+
+- For the assert statement `assertEquals("", div.attr("true"), "The value of the 'true' attribute should be an empty string.");`, the message is correct, but the order of the parameters is incorrect. The expected value should come before the actual value. It should be: `assertEquals("", div.attr("true"), "The value of the 'true' attribute should be an empty string.");`. However, the current order does not affect the correctness of the test since both values are being compared, but it's a best practice to follow the convention.
+
+- For the assert statement `assertEquals("&lt;i&gt;bad&lt;/i&gt;", title.html(), "The title element should contain the escaped HTML '<i>bad</i>'");`, the message is slightly misleading. The message suggests that the title element should contain the escaped HTML, but the actual assertion checks if the title element contains the unescaped HTML. A better message would be `"The title element should contain the HTML '<i>bad</i>'"`.
+
+- For the assert statement `assertEquals("<title>&lt;i&gt;bad&lt;/i&gt;</title>", head.html(), "The head element should contain the escaped HTML '<title><i>bad</i></title>'");`, the message is also misleading. The message suggests that the head element should contain the escaped HTML, but the actual assertion checks if the head element contains the unescaped HTML. A better message would be `"The head element should contain the HTML '<title><i>bad</i></title>'"`.
+
+- For the assert statement `assertEquals(ret, p, "Return value from wrap method is incorrect");`, the message is clear and correctly expresses the purpose of the assert statement.
+
+- All other assert statements meet the criteria for both clarity and correctness in their messages.
+
+In summary, the assert statements with issues are:
+- `assertTrue(div.hasAttr("true"), "The 'true' attribute should exist.");`
+- `assertEquals("&lt;i&gt;bad&lt;/i&gt;", title.html(), "The title element should contain the escaped HTML '<i>bad</i>'");`
+- `assertEquals("<title>&lt;i&gt;bad&lt;/i&gt;</title>", head.html(), "The head element should contain the escaped HTML '<title><i>bad</i></title>'");`
+
+All other assert statements meet the specified criteria.
+

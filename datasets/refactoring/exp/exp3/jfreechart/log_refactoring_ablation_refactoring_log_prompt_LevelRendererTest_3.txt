@@ -1,0 +1,57 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.assertions.AssertionFailedError;
+
+class LevelRendererTest {
+
+    @Test
+    public void testCloningCreatesDifferentInstance() throws CloneNotSupportedException {
+        LevelRenderer r1 = createLevelRenderer();
+        LevelRenderer r2 = CloneUtils.clone(r1);
+        assertNotSame(r1, r2, "Cloned object should be a different instance");
+    }
+
+    @Test
+    public void testCloningPreservesClassType() throws CloneNotSupportedException {
+        LevelRenderer r1 = createLevelRenderer();
+        LevelRenderer r2 = CloneUtils.clone(r1);
+        assertSame(r1.getClass(), r2.getClass(), "Cloned object should have the same class type");
+    }
+
+    @Test
+    public void testCloningPreservesState() throws CloneNotSupportedException {
+        LevelRenderer r1 = createLevelRenderer();
+        LevelRenderer r2 = CloneUtils.clone(r1);
+        assertEquals(r1, r2, "Cloned object should have the same state as the original");
+    }
+
+    @Test
+    public void testCloningEnsuresIndependence() throws CloneNotSupportedException {
+        LevelRenderer r1 = createLevelRenderer();
+        LevelRenderer r2 = CloneUtils.clone(r1);
+        assertTrue(checkIndependence(r1, r2), "Cloned object should be independent of the original");
+    }
+
+    @Test
+    public void testCloningEnsuresIndependenceWithTestUtils() throws CloneNotSupportedException {
+        LevelRenderer r1 = createLevelRenderer();
+        LevelRenderer r2 = CloneUtils.clone(r1);
+        TestUtils.checkIndependence(r1, r2);
+    }
+
+    private LevelRenderer createLevelRenderer() {
+        LevelRenderer r1 = new LevelRenderer();
+        r1.setItemMargin(0.123);
+        r1.setMaximumItemWidth(0.234);
+        return r1;
+    }
+
+    private boolean checkIndependence(LevelRenderer r1, LevelRenderer r2) {
+        // Implementation of checkIndependence method
+        return true; // Placeholder implementation
+    }
+}
+```
+

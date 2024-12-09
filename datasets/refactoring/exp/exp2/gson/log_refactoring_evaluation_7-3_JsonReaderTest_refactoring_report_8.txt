@@ -1,0 +1,15 @@
+asserts result: 
+ Yes
+
+The refactored tests maintain the same functionality as the original test. The original test checks two things:
+
+1. The default nesting limit is correctly set.
+2. An exception is thrown when the nesting limit is exceeded.
+
+The refactored tests split these into two separate tests:
+
+- `testNestingLimitDefault_getNestingLimit` verifies that the default nesting limit is correctly set.
+- `testNestingLimitDefault_exceedLimit` verifies that an exception is thrown when the nesting limit is exceeded.
+
+Both refactored tests use the same logic and assertions as the original test, ensuring that the functionality remains consistent. The introduction of helper methods like `createNestedJson` and `setupReaderToLimit` does not alter the behavior but rather improves readability and maintainability.
+

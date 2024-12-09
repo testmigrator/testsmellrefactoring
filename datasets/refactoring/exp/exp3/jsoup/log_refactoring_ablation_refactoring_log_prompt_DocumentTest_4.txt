@@ -1,0 +1,54 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Entities;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class DocumentTest {
+
+    @Test
+    public void testXhtmlEscapeLt() {
+        Document doc = Jsoup.parse("&lt;");
+        doc.outputSettings().escapeMode(Entities.EscapeMode.xhtml);
+        assertEquals("&lt;", doc.body().html());
+    }
+
+    @Test
+    public void testXhtmlEscapeGt() {
+        Document doc = Jsoup.parse("&gt;");
+        doc.outputSettings().escapeMode(Entities.EscapeMode.xhtml);
+        assertEquals("&gt;", doc.body().html());
+    }
+
+    @Test
+    public void testXhtmlEscapeAmp() {
+        Document doc = Jsoup.parse("&amp;");
+        doc.outputSettings().escapeMode(Entities.EscapeMode.xhtml);
+        assertEquals("&amp;", doc.body().html());
+    }
+
+    @Test
+    public void testXhtmlEscapeQuot() {
+        Document doc = Jsoup.parse("&quot;");
+        doc.outputSettings().escapeMode(Entities.EscapeMode.xhtml);
+        assertEquals("\"", doc.body().html());
+    }
+
+    @Test
+    public void testXhtmlEscapeApos() {
+        Document doc = Jsoup.parse("&apos;");
+        doc.outputSettings().escapeMode(Entities.EscapeMode.xhtml);
+        assertEquals("'", doc.body().html());
+    }
+
+    @Test
+    public void testXhtmlEscapeTimes() {
+        Document doc = Jsoup.parse("&times;");
+        doc.outputSettings().escapeMode(Entities.EscapeMode.xhtml);
+        assertEquals("×", doc.body().html());
+    }
+}
+```
+

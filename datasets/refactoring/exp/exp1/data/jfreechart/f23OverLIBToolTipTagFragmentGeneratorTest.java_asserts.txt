@@ -1,0 +1,2 @@
+total tests: 1
+total asserts: 0

@@ -1,0 +1,94 @@
+Input Parameters:
+Test Code:
+ @Test
+    public void testNoError() {
+        final Random randomizer = new Random(64925784252L);
+        for (int degree = 1; degree < 10; ++degree) {
+            final PolynomialFunction p = buildRandomPolynomial(degree, randomizer);
+            final SimpleCurveFitter fitter = PolynomialCurveFitter.create(degree);
+
+            final WeightedObservedPoints obs = new WeightedObservedPoints();
+            for (int i = 0; i <= degree; ++i) {
+                obs.add(1.0, i, p.value(i));
+            }
+
+            final PolynomialFunction fitted = new PolynomialFunction(fitter.fit(obs.toList()));
+
+            for (double x = -1.0; x < 1.0; x += 0.01) {
+                final double error = JdkMath.abs(p.value(x) - fitted.value(x)) /
+                    (1.0 + JdkMath.abs(p.value(x)));
+                Assert.assertEquals(0.0, error, 1.0e-6);
+            }
+        }
+    }
+Context: /org/apache/commons/math4/legacy/fitting/PolynomialCurveFitter
+Smell List: ['Conditional_Test_Logic', 'Magic_Number_Test']
+Smell Description List: ['Test Smell Type：Conditional Test Logic\n\nFeature:\nA test method that contains one or more control statements (i.e if, switch, conditional expression, for, foreach and while statement).\n', 'Test Smell Type：Magic Number Test\n\nFeature:\nAn assertion method that contains a numeric literal as an argument.\n']
+Refactoring DSL: ['RefactorRule:\n  SmellType: Conditional Test Logic\n  Description: "Extract complex control flow logic into separate helper methods to improve readability and testability."\n  Steps:\n    - Step:\n        Description: "Identify complex control flow constructs"\n        Action: IdentifyComplexControlFlow\n        Parameters:\n          TargetType: Method\n    - Step:\n        Description: "Extract control flow logic into a separate helper method"\n        Action: ExtractMethod\n        Parameters:\n          TargetType: Method\n          SourcePattern: |\n            (if|switch|for|while|do-while) ({condition}) {\n                {statements}\n            }\n          ExtractedMethod: |\n            private boolean/void helperMethodName() {\n                {extractedStatements}\n            }\n    - Step:\n        Description: "Replace complex control flow with a call to the helper method"\n        Action: ReplaceControlFlow\n        Parameters:\n          SourcePattern: |\n            (if|switch|for|while|do-while) ({condition}) {\n                {statements}\n            }\n          ReplacementPattern: |\n            helperMethodName();\n  Example:\n    Before: |\n      @Test\n      public void complexTest() {\n          if (condition1 && condition2) {\n              if (condition3) {\n                  doSomething();\n              } else {\n                  doSomethingElse();\n              }\n          } else {\n              doDefault();\n          }\n      }\n    After: |\n      private boolean isComplexConditionMet() {\n          return condition1 && condition2 && condition3;\n      }\n\n      private void handleComplexScenario() {\n          if (isComplexConditionMet()) {\n              doSomething();\n          } else {\n              doSomethingElse();\n          }\n      }\n\n      @Test\n      public void complexTest() {\n          handleComplexScenario();\n          doDefault();\n      }\n', 'RefactorRule:\n  SmellType: Magic Number Test\n  Description: "Extract magic numbers and assign meaningful names to improve readability and maintainability."\n  Steps:\n    - Step:\n        Action: IdentifyMagicNumbers\n        Description: "Identify magic numbers in assertions"\n        Parameters:\n          TargetType: Method\n          SourcePattern: |\n            assertEquals({magicNumber}, {variable})\n    - Step:\n        Action: ExtractVariable\n        Description: "Extract magic number to a variable with meaningful name"\n        Parameters:\n          TargetType: Method\n          SourcePattern: |\n            assertEquals({magicNumber}, {variable})\n          ReplacementPattern: |\n            int {meaningfulName} = {magicNumber};\n            assertEquals({meaningfulName}, {variable})\n  Example:\n    Before: |\n      @Test\n      public void T() {\n          stmt\n          assertEquals(1, a)\n          stmt\'\n      }\n    After: |\n      @Test\n      public void T() {\n          int x = 1; // x: meaningful variable name\n          stmt\n          assertEquals(x, a)\n          stmt\'\n      }\n  Variables:\n    magicNumber: "1"\n    variable: "a"\n    meaningfulName: "x"\n']
+Checkpoints: ['[ ] All conditional test logic has been refactored to use JUnit 5’s conditional test execution feature, with the condition verified in an external method assigned via the @EnabledIf annotation.\n', '[ ] All magic numbers in the test code have been extracted and assigned meaningful variable names.\n']
+
+Refactored Code: 
+ 
+import org.apache.commons.math4.analysis.polynomials.PolynomialFunction;
+import org.apache.commons.math4.fitting.PolynomialCurveFitter;
+import org.apache.commons.math4.fitting.SimpleCurveFitter;
+import org.apache.commons.math4.fitting.WeightedObservedPoints;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIf;
+
+import java.util.Random;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class PolynomialCurveFitterTest {
+
+    private static final long SEED = 64925784252L;
+    private static final double TOLERANCE = 1.0e-6;
+    private static final double STEP_SIZE = 0.01;
+    private static final double X_RANGE_START = -1.0;
+    private static final double X_RANGE_END = 1.0;
+
+    @Test
+    @EnabledIf("isTestEnabled")
+    public void testNoError() {
+        final Random randomizer = new Random(SEED);
+        for (int degree = 1; degree < 10; ++degree) {
+            final PolynomialFunction p = buildRandomPolynomial(degree, randomizer);
+            final SimpleCurveFitter fitter = PolynomialCurveFitter.create(degree);
+
+            final WeightedObservedPoints obs = new WeightedObservedPoints();
+            addObservations(obs, p, degree);
+
+            final PolynomialFunction fitted = new PolynomialFunction(fitter.fit(obs.toList()));
+
+            for (double x = X_RANGE_START; x < X_RANGE_END; x += STEP_SIZE) {
+                final double error = calculateRelativeError(p, fitted, x);
+                assertEquals(0.0, error, TOLERANCE);
+            }
+        }
+    }
+
+    private boolean isTestEnabled() {
+        return true; // Placeholder for actual condition
+    }
+
+    private void addObservations(WeightedObservedPoints obs, PolynomialFunction p, int degree) {
+        for (int i = 0; i <= degree; ++i) {
+            obs.add(1.0, i, p.value(i));
+        }
+    }
+
+    private double calculateRelativeError(PolynomialFunction p, PolynomialFunction fitted, double x) {
+        return Math.abs(p.value(x) - fitted.value(x)) / (1.0 + Math.abs(p.value(x)));
+    }
+
+    private PolynomialFunction buildRandomPolynomial(int degree, Random randomizer) {
+        double[] coefficients = new double[degree + 1];
+        for (int i = 0; i <= degree; i++) {
+            coefficients[i] = randomizer.nextDouble();
+        }
+        return new PolynomialFunction(coefficients);
+    }
+}
+
+

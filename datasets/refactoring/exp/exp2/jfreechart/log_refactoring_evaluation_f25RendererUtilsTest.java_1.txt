@@ -1,0 +1,5 @@
+asserts result: 
+ yes
+
+The refactored tests maintain the same functionality as the original test. Each scenario from the original test is represented in the refactored version, and the expected outcomes are preserved. The refactoring primarily involves breaking down the single large test method into smaller, more focused test methods, each testing a specific case. The use of constants and a setup method (`@Before`) also helps in making the tests clearer and more maintainable without altering their functional correctness.
+

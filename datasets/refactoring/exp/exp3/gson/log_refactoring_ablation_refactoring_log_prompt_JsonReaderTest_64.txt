@@ -1,0 +1,170 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
+import org.junit.jupiter.api.Test;
+
+public class JsonReaderTest {
+
+    @Test
+    public void testNextStringFailsBeforeName() throws Exception {
+        JsonReader reader = new JsonReader(new java.io.StringReader("{\"a\":true}"));
+        reader.beginObject();
+
+        var e = assertThrows(IllegalStateException.class, () -> reader.nextString());
+        assertEquals("Expected: a string but was: NAME at line 1 column 3 path $.", e.getMessage());
+
+        reader.close();
+    }
+
+    @Test
+    public void testNextNameSucceedsAfterBeginObject() throws Exception {
+        JsonReader reader = new JsonReader(new java.io.StringReader("{\"a\":true}"));
+        reader.beginObject();
+
+        assertEquals("a", reader.nextName());
+
+        reader.close();
+    }
+
+    @Test
+    public void testNextNameFailsAfterBooleanValue() throws Exception {
+        JsonReader reader = new JsonReader(new java.io.StringReader("{\"a\":true}"));
+        reader.beginObject();
+        reader.nextName();
+
+        var e = assertThrows(IllegalStateException.class, () -> reader.nextName());
+        assertEquals("Expected: a name but was: BOOLEAN at line 1 column 10 path $.a", e.getMessage());
+
+        reader.close();
+    }
+
+    @Test
+    public void testBeginArrayFailsAfterBooleanValue() throws Exception {
+        JsonReader reader = new JsonReader(new java.io.StringReader("{\"a\":true}"));
+        reader.beginObject();
+        reader.nextName();
+
+        var e = assertThrows(IllegalStateException.class, () -> reader.beginArray());
+        assertEquals("Expected: BEGIN_ARRAY but was: BOOLEAN at line 1 column 10 path $.a", e.getMessage());
+
+        reader.close();
+    }
+
+    @Test
+    public void testEndArrayFailsAfterBooleanValue() throws Exception {
+        JsonReader reader = new JsonReader(new java.io.StringReader("{\"a\":true}"));
+        reader.beginObject();
+        reader.nextName();
+
+        var e = assertThrows(IllegalStateException.class, () -> reader.endArray());
+        assertEquals("Expected: END_ARRAY but was: BOOLEAN at line 1 column 10 path $.a", e.getMessage());
+
+        reader.close();
+    }
+
+    @Test
+    public void testBeginObjectFailsAfterBooleanValue() throws Exception {
+        JsonReader reader = new JsonReader(new java.io.StringReader("{\"a\":true}"));
+        reader.beginObject();
+        reader.nextName();
+
+        var e = assertThrows(IllegalStateException.class, () -> reader.beginObject());
+        assertEquals("Expected: BEGIN_OBJECT but was: BOOLEAN at line 1 column 10 path $.a", e.getMessage());
+
+        reader.close();
+    }
+
+    @Test
+    public void testEndObjectFailsAfterBooleanValue() throws Exception {
+        JsonReader reader = new JsonReader(new java.io.StringReader("{\"a\":true}"));
+        reader.beginObject();
+        reader.nextName();
+
+        var e = assertThrows(IllegalStateException.class, () -> reader.endObject());
+        assertEquals("Expected: END_OBJECT but was: BOOLEAN at line 1 column 10 path $.a", e.getMessage());
+
+        reader.close();
+    }
+
+    @Test
+    public void testNextBooleanSucceedsAfterName() throws Exception {
+        JsonReader reader = new JsonReader(new java.io.StringReader("{\"a\":true}"));
+        reader.beginObject();
+        reader.nextName();
+
+        assertEquals(true, reader.nextBoolean());
+
+        reader.close();
+    }
+
+    @Test
+    public void testNextStringFailsAfterBooleanValue() throws Exception {
+        JsonReader reader = new JsonReader(new java.io.StringReader("{\"a\":true}"));
+        reader.beginObject();
+        reader.nextName();
+        reader.nextBoolean();
+
+        var e = assertThrows(IllegalStateException.class, () -> reader.nextString());
+        assertEquals("Expected: a string but was: END_OBJECT at line 1 column 11 path $.a", e.getMessage());
+
+        reader.close();
+    }
+
+    @Test
+    public void testNextNameFailsAfterBooleanValueAndEndObject() throws Exception {
+        JsonReader reader = new JsonReader(new java.io.StringReader("{\"a\":true}"));
+        reader.beginObject();
+        reader.nextName();
+        reader.nextBoolean();
+
+        var e = assertThrows(IllegalStateException.class, () -> reader.nextName());
+        assertEquals("Expected: a name but was: END_OBJECT at line 1 column 11 path $.a", e.getMessage());
+
+        reader.close();
+    }
+
+    @Test
+    public void testBeginArrayFailsAfterBooleanValueAndEndObject() throws Exception {
+        JsonReader reader = new JsonReader(new java.io.StringReader("{\"a\":true}"));
+        reader.beginObject();
+        reader.nextName();
+        reader.nextBoolean();
+
+        var e = assertThrows(IllegalStateException.class, () -> reader.beginArray());
+        assertEquals("Expected: BEGIN_ARRAY but was: END_OBJECT at line 1 column 11 path $.a", e.getMessage());
+
+        reader.close();
+    }
+
+    @Test
+    public void testEndArrayFailsAfterBooleanValueAndEndObject() throws Exception {
+        JsonReader reader = new JsonReader(new java.io.StringReader("{\"a\":true}"));
+        reader.beginObject();
+        reader.nextName();
+        reader.nextBoolean();
+
+        var e = assertThrows(IllegalStateException.class, () -> reader.endArray());
+        assertEquals("Expected: END_ARRAY but was: END_OBJECT at line 1 column 11 path $.a", e.getMessage());
+
+        reader.close();
+    }
+
+    @Test
+    public void testEndObjectSucceedsAfterBooleanValue() throws Exception {
+        JsonReader reader = new JsonReader(new java.io.StringReader("{\"a\":true}"));
+        reader.beginObject();
+        reader.nextName();
+        reader.nextBoolean();
+
+        reader.endObject();
+        assertEquals(JsonToken.END_DOCUMENT, reader.peek());
+
+        reader.close();
+    }
+}
+```
+

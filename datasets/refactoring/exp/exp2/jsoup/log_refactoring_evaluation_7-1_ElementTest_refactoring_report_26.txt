@@ -1,0 +1,5 @@
+asserts result: 
+ yes
+
+The refactored tests maintain the same functionality as the original test. Each aspect of the original test is now covered by a separate test method, ensuring that all conditions and assertions are still checked. The setup of the `Element` object is moved to a common method (`setupTestAddBooleanAttribute`), which is called by each test method, maintaining the consistency of the test environment. All assertions and checks from the original test are preserved in the refactored version.
+

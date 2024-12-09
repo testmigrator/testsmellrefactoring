@@ -1,0 +1,17 @@
+total tests: 2
+total asserts: 15
+assertEquals("<!doctype html>", html5.outerHtml(), "HTML5 doctype should be generated correctly");
+assertEquals("<!DOCTYPE html PUBLIC \"-//IETF//DTD HTML//\">", publicDocType.outerHtml(), "Public doctype should be generated correctly");
+assertEquals("<!DOCTYPE html SYSTEM \"http://www.ibm.com/data/dtd/v11/ibmxhtml1-transitional.dtd\">", systemDocType.outerHtml(), "System doctype should be generated correctly");
+assertEquals("<!DOCTYPE notHtml PUBLIC \"--public\" \"--system\">", combo.outerHtml(), "Combo doctype should be generated correctly");
+assertEquals("notHtml", combo.name(), "Name should match");
+assertEquals("--public", combo.publicId(), "Public ID should match");
+assertEquals("--system", combo.systemId(), "System ID should match");
+assertEquals("<!doctype html>", htmlOutput(base), "HTML output for base DOCTYPE should be lowercase");
+assertEquals(base, xmlOutput(base), "XML output for base DOCTYPE should match input");
+assertEquals(publicDoc, htmlOutput(publicDoc), "HTML output for public DOCTYPE should match input");
+assertEquals(publicDoc, xmlOutput(publicDoc), "XML output for public DOCTYPE should match input");
+assertEquals(systemDoc, htmlOutput(systemDoc), "HTML output for system DOCTYPE should match input");
+assertEquals(systemDoc, xmlOutput(systemDoc), "XML output for system DOCTYPE should match input");
+assertEquals(legacyDoc, htmlOutput(legacyDoc), "HTML output for legacy DOCTYPE should match input");
+assertEquals(legacyDoc, xmlOutput(legacyDoc), "XML output for legacy DOCTYPE should match input");

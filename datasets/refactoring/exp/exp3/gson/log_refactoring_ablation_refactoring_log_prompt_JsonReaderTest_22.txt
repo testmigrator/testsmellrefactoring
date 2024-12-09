@@ -1,0 +1,67 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.*;
+import static com.google.common.truth.Truth.assertThat;
+
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
+
+import java.io.IOException;
+import java.io.StringReader;
+
+class JsonReaderTest {
+
+    @Test
+    public void testSkipObjectName_BeginObject() {
+        JsonReader reader = createJsonReader("{\"a\": 1}");
+        try {
+            reader.beginObject();
+        } catch (IOException e) {
+            fail("beginObject should not throw an IOException", e);
+        }
+    }
+
+    @Test
+    public void testSkipObjectName_SkipValue() {
+        JsonReader reader = createJsonReader("{\"a\": 1}");
+        try {
+            reader.beginObject();
+            reader.skipValue();
+            assertThat(reader.peek()).isEqualTo(JsonToken.NUMBER).named("Expected token after skipValue");
+        } catch (IOException e) {
+            fail("skipValue should not throw an IOException", e);
+        }
+    }
+
+    @Test
+    public void testSkipObjectName_GetPath() {
+        JsonReader reader = createJsonReader("{\"a\": 1}");
+        try {
+            reader.beginObject();
+            reader.skipValue();
+            assertThat(reader.getPath()).isEqualTo("$.<skipped>").named("Expected path after skipValue");
+        } catch (IOException e) {
+            fail("getPath should not throw an IOException", e);
+        }
+    }
+
+    @Test
+    public void testSkipObjectName_ReadInt() {
+        JsonReader reader = createJsonReader("{\"a\": 1}");
+        try {
+            reader.beginObject();
+            reader.skipValue();
+            assertThat(reader.nextInt()).isEqualTo(1).named("Expected integer value after skipValue");
+        } catch (IOException e) {
+            fail("nextInt should not throw an IOException", e);
+        }
+    }
+
+    private JsonReader createJsonReader(String json) {
+        return new JsonReader(new StringReader(json));
+    }
+}
+```
+

@@ -1,0 +1,49 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import com.google.gson.stream.JsonWriter;
+import com.google.gson.stream.FormattingStyle;
+import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.io.StringWriter;
+
+class JsonWriterTest {
+
+    @Test
+    public void testIndentOverwritesFormattingStyle() throws IOException {
+        StringWriter stringWriter = new StringWriter();
+        JsonWriter jsonWriter = new JsonWriter(stringWriter);
+
+        assertDoesNotThrow(() -> {
+            jsonWriter.setFormattingStyle(FormattingStyle.COMPACT);
+            // Should overwrite formatting style
+            jsonWriter.setIndent("  ");
+        });
+
+        writeJson(jsonWriter);
+
+        String expected =
+                "{\n" +
+                "  \"a\": [\n" +
+                "    1,\n" +
+                "    2\n" +
+                "  ]\n" +
+                "}";
+        assertEquals(expected, stringWriter.toString());
+    }
+
+    private void writeJson(JsonWriter jsonWriter) throws IOException {
+        jsonWriter.beginObject();
+        jsonWriter.name("a");
+        jsonWriter.beginArray();
+        jsonWriter.value(1);
+        jsonWriter.value(2);
+        jsonWriter.endArray();
+        jsonWriter.endObject();
+    }
+}
+```
+

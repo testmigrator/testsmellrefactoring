@@ -1,0 +1,39 @@
+asserts result: 
+ ```java
+@Test
+public void testGetLegendItemSeriesIndex() {
+    // Define meaningful variable names for magic numbers
+    double value1 = 21.0;
+    double value2 = 22.0;
+    double value3 = 23.0;
+    double value4 = 24.0;
+    double value5 = 25.0;
+
+    // Create datasets with meaningful row and column labels
+    DefaultCategoryDataset<String, String> dataset0 = new DefaultCategoryDataset<>();
+    dataset0.addValue(value1, "Row1", "Column1");
+    dataset0.addValue(value2, "Row2", "Column1");
+
+    DefaultCategoryDataset<String, String> dataset1 = new DefaultCategoryDataset<>();
+    dataset1.addValue(value3, "Row3", "Column1");
+    dataset1.addValue(value4, "Row4", "Column1");
+    dataset1.addValue(value5, "Row5", "Column1");
+
+    // Initialize renderer and plot
+    CategoryStepRenderer r = new CategoryStepRenderer();
+    CategoryPlot<String, String> plot = new CategoryPlot<>(dataset0, new CategoryAxis("x"), new NumberAxis("y"), r);
+    plot.setDataset(1, dataset1);
+
+    // Create chart (commented out as it is not used in the test)
+    // JFreeChart chart = new JFreeChart(plot);
+
+    // Retrieve legend item
+    LegendItem li = r.getLegendItem(1, 2);
+
+    // Assert with clear explanatory messages
+    assertEquals("Expected label to be 'Row5'", "Row5", li.getLabel());
+    assertEquals("Expected dataset index to be 1", 1, li.getDatasetIndex());
+    assertEquals("Expected series index to be 2", 2, li.getSeriesIndex());
+}
+```
+

@@ -1,0 +1,35 @@
+asserts result: 
+
+The message parameters are semantically clear and correctly express the purpose of the assert statements. Therefore, they meet the criteria:
+
+- yes
+- yes
+- yes
+- yes
+- yes
+- yes
+- yes
+- yes
+- yes
+- yes
+- yes
+- yes
+- yes
+- yes
+- yes
+- yes
+- yes
+- yes
+- yes
+- yes
+- yes
+- yes
+- yes
+- yes
+- yes
+- yes
+- yes
+- yes
+- yes
+- yes
+

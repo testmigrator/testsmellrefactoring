@@ -1,0 +1,47 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
+import com.google.gson.stream.Strictness;
+
+import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.io.StringReader;
+
+public class JsonReaderTest {
+
+    @Test
+    public void testLenientNonExecutePrefixWithLeadingWhitespaceBeginArray() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("\r\n \t)]}'\n []"));
+        reader.setStrictness(Strictness.LENIENT);
+        reader.beginArray();
+        assertThat(reader.peek(), equalTo(JsonToken.BEGIN_ARRAY));
+    }
+
+    @Test
+    public void testLenientNonExecutePrefixWithLeadingWhitespaceEndArray() throws IOException {
+        JsonReader reader = new JsonReader(new StringReader("\r\n \t)]}'\n []"));
+        reader.setStrictness(Strictness.LENIENT);
+        reader.beginArray();
+        reader.endArray();
+        assertThat(reader.peek(), equalTo(JsonToken.END_DOCUMENT));
+    }
+
+    @Test
+    public void testLenientNonExecutePrefixWithLeadingWhitespaceIOException() {
+        JsonReader reader = new JsonReader(new StringReader("\r\n \t)]}'\n []"));
+        reader.setStrictness(Strictness.LENIENT);
+        assertThrows(IOException.class, () -> {
+            reader.beginArray();
+            reader.endArray();
+            reader.nextName(); // This should throw an IOException as there is no name to read
+        });
+    }
+}
+```
+

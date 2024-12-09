@@ -1,0 +1,66 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.assertions.AssertionConsumer;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+class ChartRenderingInfoTest {
+
+    private ChartRenderingInfo originalInfo;
+
+    @BeforeEach
+    void setUp() {
+        originalInfo = new ChartRenderingInfo();
+    }
+
+    @Test
+    void testCloning_ShouldCloneObject() {
+        // Arrange
+        ChartRenderingInfo clonedInfo = CloneUtils.clone(originalInfo);
+
+        // Act & Assert
+        assertNotSame(originalInfo, clonedInfo, "The cloned object should be a different instance.");
+        assertSame(originalInfo.getClass(), clonedInfo.getClass(), "The cloned object should be of the same class.");
+        assertEquals(originalInfo, clonedInfo, "The cloned object should be equal to the original.");
+    }
+
+    @Test
+    void testCloning_ShouldCreateIndependentObjects() {
+        // Arrange
+        ChartRenderingInfo clonedInfo = CloneUtils.clone(originalInfo);
+
+        // Act
+        originalInfo.getChartArea().setRect(4.0, 3.0, 2.0, 1.0);
+
+        // Assert
+        assertNotEquals(originalInfo, clonedInfo, "Modifying the original object should not affect the cloned object.");
+
+        // Act
+        clonedInfo.getChartArea().setRect(4.0, 3.0, 2.0, 1.0);
+
+        // Assert
+        assertEquals(originalInfo, clonedInfo, "Setting the same properties on both objects should make them equal again.");
+    }
+
+    @Test
+    void testCloning_ShouldCreateIndependentEntityCollections() {
+        // Arrange
+        ChartRenderingInfo clonedInfo = CloneUtils.clone(originalInfo);
+
+        // Act
+        originalInfo.getEntityCollection().add(new ChartEntity(new Rectangle(1, 2, 2, 1)));
+
+        // Assert
+        assertNotEquals(originalInfo, clonedInfo, "Adding an entity to the original collection should not affect the cloned collection.");
+
+        // Act
+        clonedInfo.getEntityCollection().add(new ChartEntity(new Rectangle(1, 2, 2, 1)));
+
+        // Assert
+        assertEquals(originalInfo, clonedInfo, "Adding the same entity to both collections should make them equal again.");
+    }
+}
+```
+

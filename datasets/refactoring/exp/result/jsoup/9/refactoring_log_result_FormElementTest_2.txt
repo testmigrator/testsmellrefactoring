@@ -1,0 +1,69 @@
+Input Parameters:
+Test Code:
+ @Test public void createsFormData() {
+        String html = "<form><input name='one' value='two'><select name='three'><option value='not'>" +
+                "<option value='four' selected><option value='five' selected><textarea name=six>seven</textarea>" +
+                "<input name='seven' type='radio' value='on' checked><input name='seven' type='radio' value='off'>" +
+                "<input name='eight' type='checkbox' checked><input name='nine' type='checkbox' value='unset'>" +
+                "<input name='ten' value='text' disabled>" +
+                "<input name='eleven' value='text' type='button'>" +
+                "</form>";
+        Document doc = Jsoup.parse(html);
+        FormElement form = (FormElement) doc.select("form").first();
+        List<Connection.KeyVal> data = form.formData();
+
+        assertEquals(6, data.size());
+        assertEquals("one=two", data.get(0).toString());
+        assertEquals("three=four", data.get(1).toString());
+        assertEquals("three=five", data.get(2).toString());
+        assertEquals("six=seven", data.get(3).toString());
+        assertEquals("seven=on", data.get(4).toString()); // set
+        assertEquals("eight=on", data.get(5).toString()); // default
+        // nine should not appear, not checked checkbox
+        // ten should not appear, disabled
+        // eleven should not appear, button
+    }
+Context: /org/jsoup/nodes/FormElement
+Smell List: ['Assertion_Roulette', 'Sensitive_Equality', 'Magic_Number_Test']
+Smell Description List: ['Test Smell Type：Assertion Roulette\n\nFeature:\nA test method contains more than one assertion statement without an explanation/message (parameter in the assertion method).\n', 'Test Smell Type：Sensitive Equality\n\nFeature:\nA test method invokes the toString() method of an object.\n', 'Test Smell Type：Magic Number Test\n\nFeature:\nAn assertion method that contains a numeric literal as an argument.\n']
+Refactoring DSL: ['RefactorRule:\n  SmellType: Assertion Roulette\n  Description: Add descriptive messages to assert statements to improve readability and maintainability.\n  Steps:\n    - Step:\n        Description: "Add descriptive message to each assert statement(except assertThat, assertThrows)."\n        Action: AddMessageToAssert\n        Parameters:\n          MessagePattern: "{assertionMessage}"\n  Example:\n    Before: |\n      @Test\n      public void T() {\n        stmt\n        assert_1\n        ...\n        assert_n\n        stmt\'\n      }\n    After: |\n      @Test\n      public void T() {\n        stmt\n        assert_1(..., "Descriptive message for assert statement")\n        ...\n        assert_n(..., "Descriptive message for assert statement")\n        stmt\'\n      }\n    Variables:\n      assertionMessage: "Descriptive message for assert statement"\n', 'RefactorRule:\n  SmellType: Sensitive Equality\n  Description: "Avoid using the toString() method for comparing objects in assertions."\n  Steps:\n    - Step:\n        Description: "Extract the value returned by toString() into a separate variable for comparison. Ensure toString() does not directly appear in assertions."\n        Action: ReplaceMethodCall\n        Parameters:\n          TargetPattern: |\n            assertEquals({object1}.toString(), {expectedString});\n          ReplacementPattern: |\n            String actualValue = {object1}.toString();\n            assertEquals({expectedString}, actualValue);\n  Example:\n    Before: |\n      @Test\n      public void T() {\n        Object object1 = new Object();\n        assertEquals(object1.toString(), "expectedString");\n      }\n    After: |\n      @Test\n      public void T() {\n        Object object1 = new Object();\n        String actualValue = object1.toString();\n        assertEquals("expectedString", actualValue);\n      }\n', 'RefactorRule:\n  SmellType: Magic Number Test\n  Description: "Extract magic numbers and assign meaningful names to improve readability and maintainability."\n  Steps:\n    - Step:\n        Action: IdentifyMagicNumbers\n        Description: "Identify magic numbers in assertions"\n        Parameters:\n          TargetType: Method\n          SourcePattern: |\n            assertEquals({magicNumber}, {variable})\n    - Step:\n        Action: ExtractVariable\n        Description: "Extract magic number to a variable with meaningful name"\n        Parameters:\n          TargetType: Method\n          SourcePattern: |\n            assertEquals({magicNumber}, {variable})\n          ReplacementPattern: |\n            int {meaningfulName} = {magicNumber};\n            assertEquals({meaningfulName}, {variable})\n  Example:\n    Before: |\n      @Test\n      public void T() {\n          stmt\n          assertEquals(1, a)\n          stmt\'\n      }\n    After: |\n      @Test\n      public void T() {\n          int x = 1; // x: meaningful variable name\n          stmt\n          assertEquals(x, a)\n          stmt\'\n      }\n  Variables:\n    magicNumber: "1"\n    variable: "a"\n    meaningfulName: "x"\n']
+Checkpoints: ['[ ] All assert statements have been added with clear explanatory messages.\n', '[ ] All instances of the ‘Sensitive Equality’ code smell have been refactored by directly comparing objects instead of using the toString() method for comparisons in tests, to enhance stability and avoid future failures due to changes in the toString() method’s implementation.\n', '[ ] All magic numbers in the test code have been extracted and assigned meaningful variable names.\n']
+
+Refactored Code: 
+ 
+@Test
+public void createsFormData() {
+    String html = "<form><input name='one' value='two'><select name='three'><option value='not'>" +
+            "<option value='four' selected><option value='five' selected><textarea name=six>seven</textarea>" +
+            "<input name='seven' type='radio' value='on' checked><input name='seven' type='radio' value='off'>" +
+            "<input name='eight' type='checkbox' checked><input name='nine' type='checkbox' value='unset'>" +
+            "<input name='ten' value='text' disabled>" +
+            "<input name='eleven' value='text' type='button'>" +
+            "</form>";
+    Document doc = Jsoup.parse(html);
+    FormElement form = (FormElement) doc.select("form").first();
+    List<Connection.KeyVal> data = form.formData();
+
+    int expectedSize = 6;
+    assertEquals(expectedSize, data.size(), "The form data size should be 6");
+
+    String actualOne = data.get(0).toString();
+    assertEquals("one=two", actualOne, "The first form element should be 'one=two'");
+
+    String actualThreeFirst = data.get(1).toString();
+    assertEquals("three=four", actualThreeFirst, "The second form element should be 'three=four'");
+
+    String actualThreeSecond = data.get(2).toString();
+    assertEquals("three=five", actualThreeSecond, "The third form element should be 'three=five'");
+
+    String actualSix = data.get(3).toString();
+    assertEquals("six=seven", actualSix, "The fourth form element should be 'six=seven'");
+
+    String actualSeven = data.get(4).toString();
+    assertEquals("seven=on", actualSeven, "The fifth form element should be 'seven=on'");
+
+    String actualEight = data.get(5).toString();
+    assertEquals("eight=on", actualEight, "The sixth form element should be 'eight=on'");
+}
+
+

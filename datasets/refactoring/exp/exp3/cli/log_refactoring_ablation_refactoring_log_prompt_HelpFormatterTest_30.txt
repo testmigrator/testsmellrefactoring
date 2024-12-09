@@ -1,0 +1,27 @@
+asserts result: 
+ ```java
+import org.junit.Test;
+import static org.junit.Assert.*;
+
+public class HelpFormatterTest {
+
+    @Test
+    public void testRtrimWithNullInput() {
+        final HelpFormatter formatter = new HelpFormatter();
+        assertNull("Expected null when input is null", formatter.rtrim(null));
+    }
+
+    @Test
+    public void testRtrimWithEmptyString() {
+        final HelpFormatter formatter = new HelpFormatter();
+        assertEquals("Expected empty string when input is empty", "", formatter.rtrim(""));
+    }
+
+    @Test
+    public void testRtrimWithWhitespaceAndText() {
+        final HelpFormatter formatter = new HelpFormatter();
+        assertEquals("Expected '  foo' when input is '  foo  '", "  foo", formatter.rtrim("  foo  "));
+    }
+}
+```
+

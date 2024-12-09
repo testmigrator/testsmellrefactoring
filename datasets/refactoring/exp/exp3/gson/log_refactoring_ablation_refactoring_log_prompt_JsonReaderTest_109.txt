@@ -1,0 +1,62 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonToken;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIf;
+
+import java.io.IOException;
+import java.io.StringReader;
+
+public class JsonReaderTest {
+
+    private static final int NESTING_LEVELS = 40;
+
+    @Test
+    @EnabledIf("isNestingLevelSupported")
+    public void testDeeplyNestedArrays() throws IOException {
+        String deeplyNestedArray = createDeeplyNestedArray(NESTING_LEVELS);
+        JsonReader reader = new JsonReader(new StringReader(deeplyNestedArray));
+
+        // Verify the path after reaching the deepest level
+        navigateToDeepestLevel(reader);
+        assertEquals("$[0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0][0]", reader.getPath(), "Path should match the expected deeply nested path");
+
+        // Verify the end of the document
+        navigateBackToTopLevel(reader);
+        assertEquals(JsonToken.END_DOCUMENT, reader.peek(), "Expected END_DOCUMENT token at the end of the document");
+    }
+
+    private void navigateToDeepestLevel(JsonReader reader) throws IOException {
+        for (int i = 0; i < NESTING_LEVELS; i++) {
+            reader.beginArray();
+        }
+    }
+
+    private void navigateBackToTopLevel(JsonReader reader) throws IOException {
+        for (int i = 0; i < NESTING_LEVELS; i++) {
+            reader.endArray();
+        }
+    }
+
+    private String createDeeplyNestedArray(int levels) {
+        StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i < levels - 1; i++) {
+            sb.append("[");
+        }
+        sb.append("[]");
+        for (int i = 0; i < levels - 1; i++) {
+            sb.append("]");
+        }
+        return sb.toString();
+    }
+
+    private boolean isNestingLevelSupported() {
+        return true; // Placeholder for actual condition check
+    }
+}
+```
+

@@ -1,0 +1,11 @@
+asserts result: 
+ Yes
+
+The refactored tests maintain the same functionality as the original test. The original single test has been split into three separate tests, each focusing on a specific aspect of the functionality:
+
+1. `testElementIsNotASiblingOfItself_Text` checks that the text content of the selected element is "Two".
+2. `testElementIsNotASiblingOfItself_SiblingCount` verifies that the selected element has 2 sibling elements.
+3. `testElementIsNotASiblingOfItself_SiblingElements` ensures that the sibling elements are correctly identified and match the expected HTML.
+
+Each refactored test calls the `setupElementIsNotASiblingOfItself` method to initialize the document and the element, ensuring that the setup is consistent across all tests. The assertions in the refactored tests are equivalent to those in the original test, thus preserving the intended functionality.
+

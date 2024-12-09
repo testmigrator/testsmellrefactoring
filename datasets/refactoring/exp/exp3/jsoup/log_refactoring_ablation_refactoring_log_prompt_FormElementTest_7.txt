@@ -1,0 +1,54 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.nodes.FormElement;
+import org.junit.Test;
+import static org.junit.Assert.*;
+
+public class FormElementTest {
+
+    private static final String HTML_FORM = "<form />";
+    private static final String INPUT_NAME = "foo";
+    private static final String INPUT_VALUE = "bar";
+    private static final int EXPECTED_ELEMENTS_SIZE = 1;
+
+    @Test
+    public void testFormElementIsInstance() {
+        Document doc = Jsoup.parse("<body />");
+        doc.body().html(HTML_FORM);
+
+        Element formEl = doc.select("form").first();
+        assertTrue("Form element should be an instance of FormElement", formEl instanceof FormElement);
+    }
+
+    @Test
+    public void testFormElementContainsSingleInput() {
+        Document doc = Jsoup.parse("<body />");
+        doc.body().html(HTML_FORM);
+
+        Element formEl = doc.select("form").first();
+        formEl.append("<input name=" + INPUT_NAME + " value=" + INPUT_VALUE + ">");
+
+        FormElement form = (FormElement) formEl;
+        assertEquals("Form should contain exactly one input element", EXPECTED_ELEMENTS_SIZE, form.elements().size());
+    }
+
+    @Test
+    public void testFormDataContainsCorrectKeyValuePair() {
+        Document doc = Jsoup.parse("<body />");
+        doc.body().html(HTML_FORM);
+
+        Element formEl = doc.select("form").first();
+        formEl.append("<input name=" + INPUT_NAME + " value=" + INPUT_VALUE + ">");
+
+        FormElement form = (FormElement) formEl;
+        List<Connection.KeyVal> data = form.formData();
+        Connection.KeyVal keyValue = data.get(0);
+        assertEquals("Key should be 'foo'", INPUT_NAME, keyValue.key());
+        assertEquals("Value should be 'bar'", INPUT_VALUE, keyValue.value());
+    }
+}
+```
+

@@ -1,0 +1,61 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Node;
+import org.jsoup.nodes.TextNode;
+import org.jsoup.nodes.TextUtil;
+import org.junit.Test;
+import static org.junit.Assert.*;
+
+public class NodeTest {
+
+    @Test
+    public void testUnwrapUpdatesHtmlCorrectly() {
+        Document doc = Jsoup.parse("<div>One <span>Two <b>Three</b></span> Four</div>");
+        Element span = doc.select("span").first();
+        span.unwrap();
+
+        assertEquals("HTML should be updated correctly after unwrapping", "<div>One Two <b>Three</b> Four</div>", TextUtil.stripNewlines(doc.body().html()));
+    }
+
+    @Test
+    public void testUnwrapReturnsTextNode() {
+        Document doc = Jsoup.parse("<div>One <span>Two <b>Three</b></span> Four</div>");
+        Element span = doc.select("span").first();
+        Node node = span.unwrap();
+
+        assertTrue("Returned node should be an instance of TextNode", node instanceof TextNode);
+    }
+
+    @Test
+    public void testUnwrapTextNodeContent() {
+        Document doc = Jsoup.parse("<div>One <span>Two <b>Three</b></span> Four</div>");
+        Element span = doc.select("span").first();
+        Node node = span.unwrap();
+
+        assertEquals("Text content of the returned TextNode should be correct", "Two ", ((TextNode) node).text());
+    }
+
+    @Test
+    public void testUnwrapPreservesTextNodeReference() {
+        Document doc = Jsoup.parse("<div>One <span>Two <b>Three</b></span> Four</div>");
+        Element span = doc.select("span").first();
+        Node twoText = span.childNode(0);
+        Node node = span.unwrap();
+
+        assertEquals("Returned node should be the same as the original text node", node, twoText);
+    }
+
+    @Test
+    public void testUnwrapSetsCorrectParentForTextNode() {
+        Document doc = Jsoup.parse("<div>One <span>Two <b>Three</b></span> Four</div>");
+        Element span = doc.select("span").first();
+        Node node = span.unwrap();
+
+        assertEquals("Parent of the returned TextNode should be the div element", doc.select("div").first(), node.parent());
+    }
+}
+```
+

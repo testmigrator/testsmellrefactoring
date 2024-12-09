@@ -1,0 +1,5 @@
+asserts result: 
+ Yes
+
+The refactored tests maintain the same functionality as the original test. The original test checks both the size of the `parents` list and the tag names of each parent element in a single method. The refactored version splits these checks into two separate methods (`testGetParents_Size` and `testGetParents_TagNames`), but the overall functionality remains consistent. Each test in the refactored version verifies the same conditions as the original test, ensuring that the `parents` list has the correct size and that each parent element has the expected tag name.
+

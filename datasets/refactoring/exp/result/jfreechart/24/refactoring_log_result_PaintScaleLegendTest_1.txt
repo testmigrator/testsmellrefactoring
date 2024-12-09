@@ -1,0 +1,139 @@
+Input Parameters:
+Test Code:
+ @Test
+    public void testEquals() {
+
+        // default instances
+        PaintScaleLegend l1 = new PaintScaleLegend(new GrayPaintScale(),
+                new NumberAxis("X"));
+        PaintScaleLegend l2 = new PaintScaleLegend(new GrayPaintScale(),
+                new NumberAxis("X"));
+        assertEquals(l1, l2);
+        assertEquals(l2, l1);
+
+        // paintScale
+        l1.setScale(new LookupPaintScale());
+        assertNotEquals(l1, l2);
+        l2.setScale(new LookupPaintScale());
+        assertEquals(l1, l2);
+
+        // axis
+        l1.setAxis(new NumberAxis("Axis 2"));
+        assertNotEquals(l1, l2);
+        l2.setAxis(new NumberAxis("Axis 2"));
+        assertEquals(l1, l2);
+
+        // axisLocation
+        l1.setAxisLocation(AxisLocation.BOTTOM_OR_RIGHT);
+        assertNotEquals(l1, l2);
+        l2.setAxisLocation(AxisLocation.BOTTOM_OR_RIGHT);
+        assertEquals(l1, l2);
+
+        // axisOffset
+        l1.setAxisOffset(99.0);
+        assertNotEquals(l1, l2);
+        l2.setAxisOffset(99.0);
+        assertEquals(l1, l2);
+
+        // stripWidth
+        l1.setStripWidth(99.0);
+        assertNotEquals(l1, l2);
+        l2.setStripWidth(99.0);
+        assertEquals(l1, l2);
+
+        // stripOutlineVisible
+        l1.setStripOutlineVisible(!l1.isStripOutlineVisible());
+        assertNotEquals(l1, l2);
+        l2.setStripOutlineVisible(l1.isStripOutlineVisible());
+        assertEquals(l1, l2);
+
+        // stripOutlinePaint
+        l1.setStripOutlinePaint(new GradientPaint(1.0f, 2.0f, Color.RED,
+                3.0f, 4.0f, Color.BLUE));
+        assertNotEquals(l1, l2);
+        l2.setStripOutlinePaint(new GradientPaint(1.0f, 2.0f, Color.RED,
+                3.0f, 4.0f, Color.BLUE));
+        assertEquals(l1, l2);
+
+        // stripOutlineStroke
+        l1.setStripOutlineStroke(new BasicStroke(1.1f));
+        assertNotEquals(l1, l2);
+        l2.setStripOutlineStroke(new BasicStroke(1.1f));
+        assertEquals(l1, l2);
+
+        // backgroundPaint
+        l1.setBackgroundPaint(new GradientPaint(1.0f, 2.0f, Color.RED,
+                3.0f, 4.0f, Color.BLUE));
+        assertNotEquals(l1, l2);
+        l2.setBackgroundPaint(new GradientPaint(1.0f, 2.0f, Color.RED,
+                3.0f, 4.0f, Color.BLUE));
+        assertEquals(l1, l2);
+
+        l1.setSubdivisionCount(99);
+        assertNotEquals(l1, l2);
+        l2.setSubdivisionCount(99);
+        assertEquals(l1, l2);
+
+    }
+Context: /org/jfree/chart/legend/PaintScaleLegend
+Smell List: ['Assertion_Roulette', 'Eager_Test', 'Duplicate_Assert']
+Smell Description List: ['Test Smell Type：Assertion Roulette\n\nFeature:\nA test method contains more than one assertion statement without an explanation/message (parameter in the assertion method).\n', 'Test Smell Type：Eager Test\n\nFeature:\nA test method contains multiple calls to multiple production methods.\n', 'Test Smell Type：Duplicate Assert\n\nFeature:\nA test method that contains more than one assertion statement with the same parameters.\n']
+Refactoring DSL: ['RefactorRule:\n  SmellType: Assertion Roulette\n  Description: Add descriptive messages to assert statements to improve readability and maintainability.\n  Steps:\n    - Step:\n        Description: "Add descriptive message to each assert statement(except assertThat, assertThrows)."\n        Action: AddMessageToAssert\n        Parameters:\n          MessagePattern: "{assertionMessage}"\n  Example:\n    Before: |\n      @Test\n      public void T() {\n        stmt\n        assert_1\n        ...\n        assert_n\n        stmt\'\n      }\n    After: |\n      @Test\n      public void T() {\n        stmt\n        assert_1(..., "Descriptive message for assert statement")\n        ...\n        assert_n(..., "Descriptive message for assert statement")\n        stmt\'\n      }\n    Variables:\n      assertionMessage: "Descriptive message for assert statement"\n', 'RefactorRule:\n  SmellType: Eager Test\n  Description: "Refactor test methods to group related assertions logically and extract reusable setup logic into private methods."\n  Steps:\n    - Step1:\n        Description: "Extract shared setup logic into a reusable, private method and ensure it is used across all relevant tests."\n        Action: ExtractSetupMethod\n        Parameters:\n          Condition: "If multiple tests share the same setup logic."\n          MethodNamePattern: setupTest{OriginalMethodName}\n    - Step2:\n        Description: "Group related assertions into cohesive sub-tests while retaining necessary setup logic."\n        Action: GroupAssertions\n        Parameters:\n          GroupBy: LogicalConcern\n    - Step3:\n        Description: "Create new test methods for each cohesive group of assertions and ensure readability."\n        Action: CreateTestMethods\n        Parameters:\n          IncludeSetup: True\n          NamePattern: test{OriginalMethodName}_{Concern}\n  Example:\n    Before: |\n      @Test\n      public void testExample() {\n          setup();\n          assertEquals(1, methodA());\n          assertTrue(methodB());\n      }\n    After: |\n      private void setupTestExample() {\n          setup();\n      }\n\n      @Test\n      public void testExample_MethodA() {\n          setupTestExample();\n          assertEquals(1, methodA());\n      }\n\n      @Test\n      public void testExample_MethodB() {\n          setupTestExample();\n          assertTrue(methodB());\n      }\n  Variables:\n    OriginalMethodName: The name of the original test method.\n    LogicalConcern: The logical aspect tested (e.g., a specific API, validation, or behavior).\n', 'RefactorRule:\n  SmellType: Duplicate Assert\n  Description: "If the assertion logic is the same but tested with different inputs, prioritize splitting the test into multiple separate methods with a single assertion each."\n  Steps:\n    - Step:\n        Description: "Identify duplicate assertions that test the same condition with different inputs."\n        Action: IdentifySameAssertions\n        Parameters:\n          SourcePattern: |\n            assert(expectedA, ...)\n            assert(expectedB, ...)\n    - Step:\n        Description: "If the assertions are simple and few, split the test into multiple methods, each with a single assertion."\n        Action: SplitMethod\n        Parameters:\n          TargetType: Method\n          Conditions: |\n            - The assertions are simple and do not involve complex variations.\n    - Step:\n        Description: "If there are many similar assertions with significant variations, convert the test to a parameterized test."\n        Action: ConvertToParameterizedTest\n        Parameters:\n          TargetType: Method\n          Conditions: |\n            - There are many test cases with similar logic that would benefit from parameterization.\n            - The variations are extensive, with a large number of inputs or expected outputs.\n    - Step:\n        Description: "Add @CsvSource annotation to declare parameterized values."\n        Action: AddAnnotation\n        Parameters:\n          TargetType: Method\n          Annotation: |\n            @CsvSource({\n              "{paramValues}"\n            })\n    - Step:\n        Description: "Refactor the test method to use parameterized values."\n        Action: RefactorMethod\n        Parameters:\n          SourcePattern: |\n            public void T() {\n              {originalStatements}\n            }\n          ReplacementPattern: |\n            public void T({parameterNames}) {\n              {refactoredStatements}\n            }\n  Example:\n    Before: |\n      @Test\n      public void testDuplicateAssertions() {\n        assertEquals(expectedA, methodUnderTest(a));\n        assertEquals(expectedB, methodUnderTest(b));\n      }\n    After: |\n      @Test\n      public void testWithInputA() {\n        assertEquals(expectedA, methodUnderTest(a));\n      }\n      @Test\n      public void testWithInputB() {\n        assertEquals(expectedB, methodUnderTest(b));\n      }\n']
+Checkpoints: ['[ ] All assert statements have been added with clear explanatory messages.\n', '[ ] All eager tests have been split into separate tests, each focusing on verifying a single API.\n', '[ ] All duplicate assertions have been refactored using JUnit 5 Parameterized Tests, where the lists of parameterizable values are declared in a specific annotation, and the test method is executed independently m times.\n']
+
+Refactored Code: 
+ 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+
+public class PaintScaleLegendTest {
+
+    private PaintScaleLegend l1;
+    private PaintScaleLegend l2;
+
+    @BeforeEach
+    public void setupTest() {
+        l1 = new PaintScaleLegend(new GrayPaintScale(), new NumberAxis("X"));
+        l2 = new PaintScaleLegend(new GrayPaintScale(), new NumberAxis("X"));
+    }
+
+    @Test
+    public void testDefaultInstances() {
+        assertEquals(l1, l2, "Default instances should be equal");
+        assertEquals(l2, l1, "Default instances should be equal");
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "setScale, new LookupPaintScale(), setScale, new LookupPaintScale()",
+            "setAxis, new NumberAxis('Axis 2'), setAxis, new NumberAxis('Axis 2')",
+            "setAxisLocation, AxisLocation.BOTTOM_OR_RIGHT, setAxisLocation, AxisLocation.BOTTOM_OR_RIGHT",
+            "setAxisOffset, 99.0, setAxisOffset, 99.0",
+            "setStripWidth, 99.0, setStripWidth, 99.0",
+            "setStripOutlineVisible, true, setStripOutlineVisible, true",
+            "setStripOutlinePaint, new GradientPaint(1.0f, 2.0f, Color.RED, 3.0f, 4.0f, Color.BLUE), setStripOutlinePaint, new GradientPaint(1.0f, 2.0f, Color.RED, 3.0f, 4.0f, Color.BLUE)",
+            "setStripOutlineStroke, new BasicStroke(1.1f), setStripOutlineStroke, new BasicStroke(1.1f)",
+            "setBackgroundPaint, new GradientPaint(1.0f, 2.0f, Color.RED, 3.0f, 4.0f, Color.BLUE), setBackgroundPaint, new GradientPaint(1.0f, 2.0f, Color.RED, 3.0f, 4.0f, Color.BLUE)",
+            "setSubdivisionCount, 99, setSubdivisionCount, 99"
+    })
+    public void testMutatingMethods(String method1, Object value1, String method2, Object value2) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        invokeMethod(l1, method1, value1);
+        assertNotEquals(l1, l2, "Objects should not be equal after modifying " + method1);
+
+        invokeMethod(l2, method2, value2);
+        assertEquals(l1, l2, "Objects should be equal after modifying " + method2);
+    }
+
+    private void invokeMethod(PaintScaleLegend legend, String methodName, Object value) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        Class<?>[] paramTypes = new Class<?>[]{value.getClass()};
+        Method method = PaintScaleLegend.class.getMethod(methodName, paramTypes);
+        method.invoke(legend, value);
+    }
+}
+
+

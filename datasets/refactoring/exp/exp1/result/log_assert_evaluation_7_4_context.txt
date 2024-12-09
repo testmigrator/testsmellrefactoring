@@ -1,0 +1,19 @@
+asserts result: 
+ - The first 10 assert statements meet both criteria: the message parameter information is semantically clear, and the message correctly expresses the purpose of the assert statement.
+
+- For the 12th to 24th assert statements: These also meet both criteria as the messages are clear and express the purpose of the assert statements accurately.
+
+- For the 25th assert statement: `assertEquals("Expected upper bound index for series with no items", expectedIndex, actualIndex);`
+  - **Reason**: The message is clear but does not specify what the expected behavior is (e.g., what value `expectedIndex` should be). It would be more informative to include the expected value in the message.
+
+- For the 26th assert statement: `assertEquals("Expected upper bound index for series with one item (range 0.0-1.1)", expectedIndex1, actualIndex1);`
+  - **Reason**: The message is clear but lacks specificity about the expected value. It would be more helpful to include the expected value in the message.
+
+- For the 27th assert statement: `assertEquals("Expected upper bound index for series with one item (range 2.0-2.2)", expectedIndex2, actualIndex2);`
+  - **Reason**: The message is clear but lacks specificity about the expected value. It would be more helpful to include the expected value in the message.
+
+- For the 28th assert statement: `assertEquals("Expected upper bound index for series with two items (range 0.0-1.0)", expectedIndex1, actualIndex1);`
+  - **Reason**: The message is clear but lacks specificity about the expected value. It would be more helpful to include the expected value in the message.
+
+In summary, the 25th to 28th assert statements could be improved by including the expected values in the message to make them more informative. All other assert statements meet the criteria.
+

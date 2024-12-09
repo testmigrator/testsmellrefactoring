@@ -1,0 +1,38 @@
+Input Parameters:
+Test Code:
+ @Test
+    public void testFit01() {
+        SimpleCurveFitter fitter = GaussianCurveFitter.create();
+        double[] parameters = fitter.fit(createDataset(DATASET1).toList());
+
+        Assert.assertEquals(3496978.1837704973, parameters[0], 1e-7);
+        Assert.assertEquals(4.054933085999146, parameters[1], 1e-16);
+        Assert.assertEquals(0.015039355620304326, parameters[2], 1e-15);
+    }
+Context: /org/apache/commons/math4/legacy/fitting/GaussianCurveFitter
+Smell List: ['Magic_Number_Test']
+Smell Description List: ['Test Smell Type：Magic Number Test\n\nFeature:\nAn assertion method that contains a numeric literal as an argument.\n']
+Refactoring DSL: ['RefactorRule:\n  SmellType: Magic Number Test\n  Description: "Extract magic numbers and assign meaningful names to improve readability and maintainability."\n  Steps:\n    - Step:\n        Action: IdentifyMagicNumbers\n        Description: "Identify magic numbers in assertions"\n        Parameters:\n          TargetType: Method\n          SourcePattern: |\n            assertEquals({magicNumber}, {variable})\n    - Step:\n        Action: ExtractVariable\n        Description: "Extract magic number to a variable with meaningful name"\n        Parameters:\n          TargetType: Method\n          SourcePattern: |\n            assertEquals({magicNumber}, {variable})\n          ReplacementPattern: |\n            int {meaningfulName} = {magicNumber};\n            assertEquals({meaningfulName}, {variable})\n  Example:\n    Before: |\n      @Test\n      public void T() {\n          stmt\n          assertEquals(1, a)\n          stmt\'\n      }\n    After: |\n      @Test\n      public void T() {\n          int x = 1; // x: meaningful variable name\n          stmt\n          assertEquals(x, a)\n          stmt\'\n      }\n  Variables:\n    magicNumber: "1"\n    variable: "a"\n    meaningfulName: "x"\n']
+Checkpoints: ['[ ] All magic numbers in the test code have been extracted and assigned meaningful variable names.\n']
+
+Refactored Code: 
+ 
+@Test
+public void testFit01() {
+    SimpleCurveFitter fitter = GaussianCurveFitter.create();
+    double[] parameters = fitter.fit(createDataset(DATASET1).toList());
+
+    double expectedAmplitude = 3496978.1837704973;
+    double expectedMean = 4.054933085999146;
+    double expectedSigma = 0.015039355620304326;
+
+    double deltaAmplitude = 1e-7;
+    double deltaMean = 1e-16;
+    double deltaSigma = 1e-15;
+
+    Assert.assertEquals(expectedAmplitude, parameters[0], deltaAmplitude);
+    Assert.assertEquals(expectedMean, parameters[1], deltaMean);
+    Assert.assertEquals(expectedSigma, parameters[2], deltaSigma);
+}
+
+

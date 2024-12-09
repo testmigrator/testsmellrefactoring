@@ -1,0 +1,46 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIf;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+public class CodeAttributeTest {
+
+    private static final int MAX_STACK = 4;
+    private static final int MAX_LOCALS = 3;
+    private static final byte[] SINGLE_BYTE_ARRAY = new byte[]{/* Initialize with actual values */};
+    private static final String EXPECTED_BYTE_CODE_STRING = "invokespecial_this";
+    private static final int[] EXPECTED_LABELS = {0, 1, 2, 4};
+
+    @Test
+    @EnabledIf("isTestConditionMet")
+    public void testSingleByteCodes() {
+        final OperandManager operandManager = new MockOperandManager();
+        operandManager.setSegment(segment);
+        operandManager.setCurrentClass("java/lang/Foo");
+
+        final CodeAttribute attribute = new CodeAttribute(
+            MAX_STACK, 
+            MAX_LOCALS, 
+            SINGLE_BYTE_ARRAY, 
+            segment, 
+            operandManager, 
+            new ArrayList<>()
+        );
+
+        assertEquals(MAX_LOCALS, attribute.maxLocals, "Max locals should match");
+        assertEquals(MAX_STACK, attribute.maxStack, "Max stack should match");
+        assertEquals(EXPECTED_BYTE_CODE_STRING, attribute.byteCodes.get(3), "Byte code at index 3 should match");
+
+        for (int index = 0; index < EXPECTED_LABELS.length; index++) {
+            assertEquals(EXPECTED_LABELS[index], attribute.byteCodeOffsets.get(index).intValue(), "Byte code offset at index " + index + " should match");
+        }
+    }
+
+    private boolean isTestConditionMet() {
+        // Define the condition for enabling the test
+        return true; // Example condition, replace with actual condition
+    }
+}
+```
+

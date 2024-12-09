@@ -1,0 +1,41 @@
+asserts result: 
+ ```java
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class DocumentTypeTest {
+
+    @Test
+    public void testOuterHtmlForHTML5() {
+        DocumentType html5 = new DocumentType("html", "", "");
+        assertEquals("HTML5 doctype should be <!doctype html>", "<!doctype html>", html5.outerHtml());
+    }
+
+    @Test
+    public void testOuterHtmlForPublicDocType() {
+        DocumentType publicDocType = new DocumentType("html", "-//IETF//DTD HTML//", "");
+        assertEquals("Public doctype should be <!DOCTYPE html PUBLIC \"-//IETF//DTD HTML//\">", "<!DOCTYPE html PUBLIC \"-//IETF//DTD HTML//\">", publicDocType.outerHtml());
+    }
+
+    @Test
+    public void testOuterHtmlForSystemDocType() {
+        DocumentType systemDocType = new DocumentType("html", "", "http://www.ibm.com/data/dtd/v11/ibmxhtml1-transitional.dtd");
+        assertEquals("System doctype should be <!DOCTYPE html SYSTEM \"http://www.ibm.com/data/dtd/v11/ibmxhtml1-transitional.dtd\">", "<!DOCTYPE html SYSTEM \"http://www.ibm.com/data/dtd/v11/ibmxhtml1-transitional.dtd\">", systemDocType.outerHtml());
+    }
+
+    @Test
+    public void testOuterHtmlForComboDocType() {
+        DocumentType combo = new DocumentType("notHtml", "--public", "--system");
+        assertEquals("Combo doctype should be <!DOCTYPE notHtml PUBLIC \"--public\" \"--system\">", "<!DOCTYPE notHtml PUBLIC \"--public\" \"--system\">", combo.outerHtml());
+    }
+
+    @Test
+    public void testPropertiesForComboDocType() {
+        DocumentType combo = new DocumentType("notHtml", "--public", "--system");
+        assertEquals("Name should be notHtml", "notHtml", combo.name());
+        assertEquals("Public ID should be --public", "--public", combo.publicId());
+        assertEquals("System ID should be --system", "--system", combo.systemId());
+    }
+}
+```
+

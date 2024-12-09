@@ -1,0 +1,24 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+
+import com.google.gson.stream.JsonReader;
+import org.junit.jupiter.api.Test;
+
+import java.io.IOException;
+import java.io.StringReader;
+
+class JsonReaderTest {
+
+    @Test
+    public void testNonStrictModeParsesUnescapedControlCharacter() throws IOException {
+        String json = "\"\t\"";
+        JsonReader reader = new JsonReader(new StringReader(json));
+        assertThat(reader.nextString()).isEqualTo("\t");
+    }
+}
+```
+
+Note: The original test code did not actually contain an explicit `throw` or `catch` statement, so the refactoring primarily focuses on ensuring the test is clear and concise. However, if there were any exceptions to be expected, we would use JUnit 5's `assertThrows` method to handle it properly. In this case, no such exception handling is necessary as the test is straightforward and does not involve catching or throwing exceptions.
+

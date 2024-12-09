@@ -1,0 +1,52 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+import org.junit.Test;
+import static org.junit.Assert.*;
+
+public class ElementTest {
+
+    @Test
+    public void testHashAndEqualsAndValue() {
+        // Given: A document with multiple paragraphs
+        String docContent = "<div id=1><p class=one>One</p><p class=one>One</p><p class=one>Two</p><p class=two>One</p></div>" +
+                            "<div id=2><p class=one>One</p><p class=one>One</p><p class=one>Two</p><p class=two>One</p></div>";
+        Document doc = Jsoup.parse(docContent);
+        Elements paragraphs = doc.select("p");
+
+        // Then: Verify the number of paragraphs
+        assertEquals("Expected 8 paragraphs", 8, paragraphs.size());
+
+        // When: Retrieve specific paragraphs
+        Element p0 = paragraphs.get(0);
+        Element p1 = paragraphs.get(1);
+        Element p2 = paragraphs.get(2);
+        Element p3 = paragraphs.get(3);
+        Element p4 = paragraphs.get(4);
+        Element p5 = paragraphs.get(5);
+        Element p6 = paragraphs.get(6);
+        Element p7 = paragraphs.get(7);
+
+        // Then: Verify equality and hashCode behavior
+        assertEquals("p0 should be equal to itself", p0, p0);
+        assertTrue("p0 and p1 should have the same value", p0.hasSameValue(p1));
+        assertTrue("p0 and p4 should have the same value", p0.hasSameValue(p4));
+        assertTrue("p0 and p5 should have the same value", p0.hasSameValue(p5));
+        assertFalse("p0 and p2 should not be equal", p0.equals(p2));
+        assertFalse("p0 and p2 should not have the same value", p0.hasSameValue(p2));
+        assertFalse("p0 and p3 should not have the same value", p0.hasSameValue(p3));
+        assertFalse("p0 and p6 should not have the same value", p0.hasSameValue(p6));
+        assertFalse("p0 and p7 should not have the same value", p0.hasSameValue(p7));
+
+        assertEquals("p0 hashCode should be consistent", p0.hashCode(), p0.hashCode());
+        assertFalse("p0 and p2 should have different hashCodes", p0.hashCode() == p2.hashCode());
+        assertFalse("p0 and p3 should have different hashCodes", p0.hashCode() == p3.hashCode());
+        assertFalse("p0 and p6 should have different hashCodes", p0.hashCode() == p6.hashCode());
+        assertFalse("p0 and p7 should have different hashCodes", p0.hashCode() == p7.hashCode());
+    }
+}
+```
+

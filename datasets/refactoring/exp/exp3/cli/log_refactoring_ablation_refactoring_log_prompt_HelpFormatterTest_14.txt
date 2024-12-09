@@ -1,0 +1,42 @@
+asserts result: 
+ ```java
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Options;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+public class HelpFormatterTest {
+
+    @Test
+    public void testPrintHelpWithNullSyntax() {
+        final HelpFormatter formatter = new HelpFormatter();
+        assertThrows(IllegalArgumentException.class, () -> formatter.printHelp(null, new Options()), "null command line syntax should be rejected");
+    }
+
+    @Test
+    public void testPrintHelpWithNullSyntaxAndWidth() {
+        final HelpFormatter formatter = new HelpFormatter();
+        assertThrows(IllegalArgumentException.class, () -> formatter.printHelp(null, new Options(), true), "null command line syntax should be rejected");
+    }
+
+    @Test
+    public void testPrintHelpWithNullSyntaxAndNoWidth() {
+        final HelpFormatter formatter = new HelpFormatter();
+        assertThrows(IllegalArgumentException.class, () -> formatter.printHelp(null, new Options(), false), "null command line syntax should be rejected");
+    }
+
+    @Test
+    public void testPrintHelpWithEmptySyntaxAndWidth() {
+        final HelpFormatter formatter = new HelpFormatter();
+        assertThrows(IllegalArgumentException.class, () -> formatter.printHelp("", new Options(), true), "empty command line syntax should be rejected");
+    }
+
+    @Test
+    public void testPrintHelpWithEmptySyntaxAndNoWidth() {
+        final HelpFormatter formatter = new HelpFormatter();
+        assertThrows(IllegalArgumentException.class, () -> formatter.printHelp("", new Options(), false), "empty command line syntax should be rejected");
+    }
+}
+```
+

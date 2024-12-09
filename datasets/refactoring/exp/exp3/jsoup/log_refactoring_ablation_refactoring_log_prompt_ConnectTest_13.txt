@@ -1,0 +1,48 @@
+asserts result: 
+ ```java
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import java.io.IOException;
+import java.util.Map;
+
+import org.jsoup.Jsoup;
+import org.jsoup.Connection;
+import org.jsoup.nodes.Document;
+import org.junit.jupiter.api.Test;
+
+public class RedirectServletTest {
+
+    private static final String RedirectServletUrl = RedirectServlet.Url;
+    private static final String echoUrl = "http://example.com/echo";
+
+    @Test
+    public void shouldSetAndEchoCookiesOnRedirect() {
+        Connection con = Jsoup
+                .connect(RedirectServletUrl)
+                .data(RedirectServlet.CodeParam, "302")
+                .data(RedirectServlet.SetCookiesParam, "true")
+                .data(RedirectServlet.LocationParam, echoUrl);
+
+        try {
+            Connection.Response res = con.execute();
+
+            // Test cookies set by redirect
+            Map<String, String> cookies = res.cookies();
+            assertEquals("asdfg123", cookies.get("token"), "Token cookie value does not match expected");
+            assertEquals("jhy", cookies.get("uid"), "UID cookie value does not match expected");
+
+            // Send those cookies into the echo URL by map
+            Document doc = Jsoup.connect(echoUrl).cookies(cookies).get();
+            assertEquals("token=asdfg123; uid=jhy", ihVal("Cookie", doc), "Echoed Cookie header does not match expected");
+        } catch (IOException e) {
+            assertThrows(IOException.class, () -> con.execute(), "Expected an IOException to be thrown");
+        }
+    }
+
+    private String ihVal(String key, Document doc) {
+        return doc.select("pre").text().split("\n")[0].split(": ")[1];
+    }
+}
+```
+

@@ -1,0 +1,48 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.Iterator;
+
+class AttributesTest {
+
+    private Attributes attributes;
+    private String[][] datas;
+
+    @BeforeEach
+    void setUp() {
+        attributes = new Attributes();
+        datas = new String[][]{
+            {"Tot", "raul"},
+            {"Hello", "pismuth"},
+            {"data-name", "Jsoup"}
+        };
+        for (String[] atts : datas) {
+            attributes.put(atts[0], atts[1]);
+        }
+    }
+
+    @Test
+    void testIteratorHasNext() {
+        Iterator<Attribute> iterator = attributes.iterator();
+        assertTrue(iterator.hasNext(), "Iterator should have elements");
+    }
+
+    @Test
+    void testIteratorKeyValues() {
+        int expectedSize = datas.length;
+        int actualSize = 0;
+        for (Attribute attribute : attributes) {
+            String[] data = datas[actualSize];
+            assertEquals(data[0], attribute.getKey(), "Key does not match for index " + actualSize);
+            assertEquals(data[1], attribute.getValue(), "Value does not match for index " + actualSize);
+            actualSize++;
+        }
+        assertEquals(expectedSize, actualSize, "Number of attributes does not match expected size");
+    }
+}
+```
+

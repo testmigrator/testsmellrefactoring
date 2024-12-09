@@ -1,0 +1,29 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Node;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+public class NodeTest {
+
+    @Test
+    public void unwrapNoChildren() {
+        // Arrange
+        Document doc = Jsoup.parse("<div>One <span></span> Two</div>");
+        Element span = doc.select("span").first();
+
+        // Act
+        Node node = span.unwrap();
+
+        // Assert
+        assertEquals("Expected the HTML content to be '<div>One  Two</div>' after unwrapping the span element",
+                "<div>One  Two</div>", TextUtil.stripNewlines(doc.body().html()));
+        assertTrue("Expected the unwrapped node to be null", node == null);
+    }
+}
+```
+

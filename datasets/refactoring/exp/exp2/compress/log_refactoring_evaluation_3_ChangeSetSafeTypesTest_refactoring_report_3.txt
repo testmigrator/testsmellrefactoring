@@ -1,0 +1,5 @@
+asserts result: 
+ yes
+
+The refactored test maintains the same functionality as the original test. The changes made are primarily to improve readability and clarity, such as using a named constant `EXPECTED_CHANGE_SIZE` and adding more descriptive error messages to the assertions. The core logic and behavior of the test remain unchanged.
+

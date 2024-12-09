@@ -1,0 +1,5 @@
+asserts result: 
+ yes
+
+The refactored tests maintain the same functionality as the original test. The original test checks two things: the size of the selected elements and the ID of the first element. The refactored version splits these checks into two separate tests (`testGetElementsWithAttributeDash_Size` and `testGetElementsWithAttributeDash_Id`), but both checks are still performed, and the conditions being tested are identical to those in the original test. The setup of the document is also consistent between the original and refactored versions.
+

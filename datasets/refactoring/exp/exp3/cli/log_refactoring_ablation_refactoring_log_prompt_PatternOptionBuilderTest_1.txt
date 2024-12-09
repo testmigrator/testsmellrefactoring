@@ -1,0 +1,31 @@
+asserts result: 
+ ```java
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.PatternOptionBuilder;
+import org.apache.commons.cli.PosixParser;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.assertions.AssertionConsumer;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+class PatternOptionBuilderTest {
+
+    @Test
+    public void testClassPattern() {
+        final Options options = PatternOptionBuilder.parsePattern("c+d+");
+        final CommandLineParser parser = new PosixParser();
+
+        assertThrows(ParseException.class, () -> {
+            final CommandLine line = parser.parse(options, new String[] {"-c", "java.util.Calendar", "-d", "System.DateTime"});
+            assertEquals(Calendar.class, line.getOptionObject("c"), "c value should be Calendar class");
+            assertNull(line.getOptionObject("d"), "d value should be null");
+        });
+    }
+}
+```
+

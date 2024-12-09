@@ -1,0 +1,23 @@
+asserts result: 
+ ```java
+import org.junit.Test;
+import static org.junit.Assert.*;
+
+public class StatisticalLineAndShapeRendererTest {
+
+    @Test
+    public void testDefaultLinesVisibleWhenLinesEnabledAndShapesDisabled() {
+        StatisticalLineAndShapeRenderer renderer = new StatisticalLineAndShapeRenderer(true, false);
+        assertTrue("Lines should be visible when lines are enabled and shapes are disabled", renderer.getDefaultLinesVisible());
+        assertFalse("Shapes should not be visible when lines are enabled and shapes are disabled", renderer.getDefaultShapesVisible());
+    }
+
+    @Test
+    public void testDefaultShapesVisibleWhenLinesDisabledAndShapesEnabled() {
+        StatisticalLineAndShapeRenderer renderer = new StatisticalLineAndShapeRenderer(false, true);
+        assertFalse("Lines should not be visible when lines are disabled and shapes are enabled", renderer.getDefaultLinesVisible());
+        assertTrue("Shapes should be visible when lines are disabled and shapes are enabled", renderer.getDefaultShapesVisible());
+    }
+}
+```
+

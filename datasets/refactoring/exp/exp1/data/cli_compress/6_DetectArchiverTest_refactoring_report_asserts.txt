@@ -1,0 +1,21 @@
+total tests: 5
+total asserts: 19
+assertNotNull(tar, "The ArchiveInputStream should not be null");
+assertTrue(tar instanceof TarArchiveInputStream, "The ArchiveInputStream should be an instance of TarArchiveInputStream");
+assertNotNull(tar, "The ArchiveInputStream should not be null");
+assertTrue(tar instanceof TarArchiveInputStream, "The ArchiveInputStream should be an instance of TarArchiveInputStream");
+assertNotNull(ar, "AR archive input stream should not be null");
+assertTrue(ar instanceof ArArchiveInputStream, "AR archive input stream should be an instance of ArArchiveInputStream");
+assertNotNull(tar, "TAR archive input stream should not be null");
+assertTrue(tar instanceof TarArchiveInputStream, "TAR archive input stream should be an instance of TarArchiveInputStream");
+assertNotNull(zip, "ZIP archive input stream should not be null");
+assertTrue(zip instanceof ZipArchiveInputStream, "ZIP archive input stream should be an instance of ZipArchiveInputStream");
+assertNotNull(jar, "JAR archive input stream should not be null");
+assertTrue(jar instanceof ZipArchiveInputStream, "JAR archive input stream should be an instance of ZipArchiveInputStream");
+assertNotNull(cpio, "CPIO archive input stream should not be null");
+assertTrue(cpio instanceof CpioArchiveInputStream, "CPIO archive input stream should be an instance of CpioArchiveInputStream");
+assertNotNull(arj, "ARJ archive input stream should not be null");
+assertTrue(arj instanceof ArjArchiveInputStream, "ARJ archive input stream should be an instance of ArjArchiveInputStream");
+assertNotNull(tar, "The ArchiveInputStream should not be null");
+assertTrue(tar instanceof TarArchiveInputStream, "The ArchiveInputStream should be an instance of TarArchiveInputStream");
+assertNull(ArchiveStreamFactory.detect(in), "Expected null as the archive type could not be detected");

@@ -1,0 +1,39 @@
+asserts result: 
+ ```java
+import org.apache.commons.math4.legacy.fitting.leastsquares.LinearProblem;
+import org.apache.commons.math4.legacy.fitting.leastsquares.LevenbergMarquardtOptimizer;
+import org.apache.commons.math4.legacy.fitting.leastsquares.Optimum;
+import org.apache.commons.math4.legacy.util.JdkMath;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+public class LevenbergMarquardtOptimizerTest {
+
+    private final LevenbergMarquardtOptimizer optimizer = new LevenbergMarquardtOptimizer();
+
+    @Test
+    public void testNonInvertible() {
+        // Arrange
+        LinearProblem problem = new LinearProblem(new double[][] {
+            {  1, 2, -3 },
+            {  2, 1,  3 },
+            { -3, 0, -9 }
+        }, new double[] { 1, 1, 1 });
+
+        // Act
+        Optimum optimum = optimizer.optimize(
+            problem.getBuilder().maxIterations(20).build()
+        );
+
+        // Assert
+        assertTrue(JdkMath.sqrt(problem.getTarget().length) * optimum.getRMS() > 0.6,
+            "The root mean square error should indicate a bad fit");
+
+        assertThrows(SingularMatrixException.class, () -> {
+            optimum.getCovariances(1.5e-14);
+        }, "Expected SingularMatrixException to be thrown");
+    }
+}
+```
+

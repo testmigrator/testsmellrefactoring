@@ -1,0 +1,7 @@
+total tests: 2
+total asserts: 5
+Assert.assertTrue("Store should contain 2 points after adding them",   store.toList().size() == 2);
+Assert.assertTrue("Store should be empty after clearing", store.toList().isEmpty());
+Assert.assertEquals(EXPECTED_SIZE, list.size(), "List size should match the expected size");
+Assert.assertNotEquals(list.size(), store.toList().size(), "Adding an element to the list should not affect the store size");
+Assert.assertFalse(list.isEmpty(), "Clearing the store should not affect the list content");

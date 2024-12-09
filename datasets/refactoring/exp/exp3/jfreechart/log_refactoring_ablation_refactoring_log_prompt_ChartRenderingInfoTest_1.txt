@@ -1,0 +1,62 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+
+class ChartRenderingInfoTest {
+
+    private ChartRenderingInfo i1;
+    private ChartRenderingInfo i2;
+
+    @BeforeEach
+    void setUp() {
+        i1 = new ChartRenderingInfo();
+        i2 = new ChartRenderingInfo();
+    }
+
+    @Test
+    void testEqualsInitial() {
+        assertEquals(i1, i2, "Initially, two default ChartRenderingInfo objects should be equal.");
+    }
+
+    @Test
+    void testEqualsAfterSettingChartArea() {
+        i1.setChartArea(new Rectangle2D.Double(1.0, 2.0, 3.0, 4.0));
+        assertNotEquals(i1, i2, "After setting chart area for i1, i1 and i2 should not be equal.");
+
+        i2.setChartArea(new Rectangle2D.Double(1.0, 2.0, 3.0, 4.0));
+        assertEquals(i1, i2, "After setting the same chart area for both i1 and i2, they should be equal.");
+    }
+
+    @Test
+    void testEqualsAfterSettingDataArea() {
+        i1.getPlotInfo().setDataArea(new Rectangle(1, 2, 3, 4));
+        assertNotEquals(i1, i2, "After setting data area for i1, i1 and i2 should not be equal.");
+
+        i2.getPlotInfo().setDataArea(new Rectangle(1, 2, 3, 4));
+        assertEquals(i1, i2, "After setting the same data area for both i1 and i2, they should be equal.");
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "1, 2, 3, 4",
+        "5, 6, 7, 8"
+    })
+    void testEqualsAfterSettingEntityCollection(int x, int y, int width, int height) {
+        StandardEntityCollection e1 = new StandardEntityCollection();
+        e1.add(new ChartEntity(new Rectangle(x, y, width, height)));
+        i1.setEntityCollection(e1);
+        assertNotEquals(i1, i2, "After setting entity collection for i1, i1 and i2 should not be equal.");
+
+        StandardEntityCollection e2 = new StandardEntityCollection();
+        e2.add(new ChartEntity(new Rectangle(x, y, width, height)));
+        i2.setEntityCollection(e2);
+        assertEquals(i1, i2, "After setting the same entity collection for both i1 and i2, they should be equal.");
+    }
+}
+```
+

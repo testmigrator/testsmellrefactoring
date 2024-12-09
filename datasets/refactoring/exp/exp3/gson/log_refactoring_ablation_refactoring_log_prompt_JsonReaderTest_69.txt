@@ -1,0 +1,31 @@
+asserts result: 
+ ```java
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import static org.assertj.core.api.Assertions.assertThat;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.Strictness;
+
+class JsonReaderTest {
+
+    private JsonReader reader;
+
+    @BeforeEach
+    public void setUp() throws IOException {
+        // Setup common resources for tests
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"{\"a\"=true}", "{\"a\"=>true}"})
+    public void testLenientNameValueSeparator(String json) throws IOException {
+        reader = new JsonReader(new StringReader(json));
+        reader.setStrictness(Strictness.LENIENT);
+        reader.beginObject();
+        assertThat(reader.nextName(), "Expected name 'a'").isEqualTo("a");
+        assertThat(reader.nextBoolean(), "Expected boolean value 'true'").isTrue();
+    }
+}
+```
+

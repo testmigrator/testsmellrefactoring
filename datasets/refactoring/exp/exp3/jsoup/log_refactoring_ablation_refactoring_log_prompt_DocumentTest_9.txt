@@ -1,0 +1,22 @@
+asserts result: 
+ ```java
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Document.OutputSettings.Syntax;
+import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+
+public class DocumentTest {
+
+    @Test
+    public void htmlParseDefaultsToHtmlOutputSyntax() {
+        Document doc = createDocumentFromHtml("x");
+        assertEquals(Syntax.html, doc.outputSettings().syntax());
+    }
+
+    private Document createDocumentFromHtml(String html) {
+        return Jsoup.parse(html);
+    }
+}
+```
+
