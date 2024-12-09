@@ -1,0 +1,42 @@
+Based on the provided test context information, you are required to refactor the test code. Use a Chain-of-Thought approach to break down the problem, understand the intent of the test, recognize the code smells present in the test code, comprehend the refactoring rules and measures, and refactor the test code accordingly.
+
+Test Code:
+@Test
+public void testAddingAndRemovingObjectProperties() {
+    JsonObject jsonObj = new JsonObject();
+    String propertyName = "property";
+    assertThat(jsonObj.has(propertyName)).isFalse();
+    assertThat(jsonObj.get(propertyName)).isNull();
+
+    JsonPrimitive value = new JsonPrimitive("blah");
+    jsonObj.add(propertyName, value);
+    assertThat(jsonObj.get(propertyName)).isEqualTo(value);
+
+    JsonElement removedElement = jsonObj.remove(propertyName);
+    assertThat(removedElement).isEqualTo(value);
+    assertThat(jsonObj.has(propertyName)).isFalse();
+    assertThat(jsonObj.get(propertyName)).isNull();
+
+    assertThat(jsonObj.remove(propertyName)).isNull();
+}
+
+Context of the Test Code:
+/com/google/gson/JsonObject
+The test has the following code smells:
+['Assertion_Roulette', 'Eager_Test', 'Duplicate_Assert']
+The explanation for each smell is:
+['Test Smell Type：Assertion Roulette\n\nFeature:\nA test method contains more than one assertion statement without an explanation/message (parameter in the assertion method).\n', 'Test Smell Type：Eager Test\n\nFeature:\nA test method contains multiple calls to multiple production methods.\n', 'Test Smell Type：Duplicate Assert\n\nFeature:\nA test method that contains more than one assertion statement with the same parameters.\n']
+The corresponding refactoring DSL to eliminate the bad smell is:
+['RefactorRule:\n  SmellType: Assertion Roulette\n  Description: Add descriptive messages to assert statements to improve readability and maintainability.\n  Steps:\n    - Step:\n        Description: "Add descriptive message to each assert statement."\n        Action: AddMessageToAssert\n        Parameters:\n          MessagePattern: "{assertionMessage}"\n  Example:\n    Before: |\n      @Test\n      public void T() {\n        stmt\n        assert_1\n        ...\n        assert_n\n        stmt\'\n      }\n    After: |\n      @Test\n      public void T() {\n        stmt\n        assert_1(..., "Descriptive message for assert statement")\n        ...\n        assert_n(..., "Descriptive message for assert statement")\n        stmt\'\n      }\n    Variables:\n      assertionMessage: "Descriptive message for assert statement"\n', 'RefactorRule:\n  SmellType: Eager Test\n  Description: "Split the test method to ensure each test focuses on verifying a single API."\n  Steps:\n    - Step:\n        Description: "Identify assert statements for each API"\n        Action: IdentifyAssertions\n        Parameters:\n          TargetType: Method\n          SourcePattern: |\n            assertEquals(.{api}(), is("{value}"))\n    - Step:\n        Description: "Create new test methods for each assert statement"\n        Action: CreateTestMethod\n        Parameters:\n          TargetType: Method\n          SourcePattern: |\n            @Test\n            public void {originalMethod}() {\n              stmt\n              assertEquals(.{api}(), is("{value}"))\n            }\n          ReplacementPattern: |\n            @Test\n            public void {newMethod}_{api}() {\n              stmt\n              assertEquals(.{api}(), is("{value}"))\n            }\n  Example:\n    Before: |\n      @Test\n      public void T() {\n        stmt\n        assertEquals(.api1(), is("1.5"));\n        assertEquals(.api2(), is("2.5"));\n        assertEquals(.api3(), is("3.5"));\n      }\n    After: |\n      @Test\n      public void T_api1() {\n        stmt\n        assertEquals(.api1(), is("1.5"));\n      }\n\n      @Test\n      public void T_api2() {\n        stmt\n        assertEquals(.api2(), is("2.5"));\n      }\n\n      @Test\n      public void T_api3() {\n        stmt\n        assertEquals(.api3(), is("3.5"));\n      }\n  Variables:\n    originalMethod: "T"\n    newMethod: "T"\n    api: "api1, api2, api3"\n    value: "1.5, 2.5, 3.5"\n', 'RefactorRule:\n  SmellType: Duplicate Assert\n  Description: "Uses JUnit 5 Parameterized Tests to eliminate duplicate assert statements by declaring parameterizable values in an annotation and executing the test method multiple times."\n  Steps:\n    - Step:\n        Description: "Convert test method to a parameterized test method"\n        Action: ConvertToParameterizedTest\n        Parameters:\n          TargetType: Method\n    - Step:\n        Description: "Declare parameterizable values in @CsvSource annotation"\n        Action: AddAnnotation\n        Parameters:\n          TargetType: Method\n          Annotation: |\n            @CsvSource({\n              "{paramValues}"\n            })\n    - Step:\n        Description: "Refactor test method to use parameterized values"\n        Action: RefactorMethod\n        Parameters:\n          SourcePattern: |\n            public void T() {\n              {stmts}\n            }\n          ReplacementPattern: |\n            public void T({params}) {\n              {refactoredStmts}\n            }\n  Example:\n    Before: |\n      @Test\n      public void T() {\n        stmt_1(P1);\n        ...\n        stmt_n(W1);\n        ...\n        stmt_1(Pm);\n        ...\n        stmt_n(Wm);\n      }\n    After: |\n      @ParameterizedTest\n      @CsvSource({\n        "P1, ..., W1",\n        ...\n        "Pm, ..., Wm"\n      })\n      public void T(P, ..., W) {\n        stmt_1(P);\n        ...\n        stmt_n(W);\n      }\n  Variables:\n    paramValues: |\n      "P1, ..., W1",\n      ...\n      "Pm, ..., Wm"\n    stmts: |\n      stmt_1(P1);\n      ...\n      stmt_n(W1);\n      ...\n      stmt_1(Pm);\n      ...\n      stmt_n(Wm);\n    params: "P, ..., W"\n    refactoredStmts: |\n      stmt_1(P);\n      ...\n      stmt_n(W);\n']
+
+During the refactoring process, it is necessary to ensure that all code smells are addressed. checkpoints:
+['[ ] All assert statements have been added with clear explanatory messages.\n', '[ ] All eager tests have been split into separate tests, each focusing on verifying a single API.\n', '[ ] All duplicate assertions have been refactored using JUnit 5 Parameterized Tests, where the lists of parameterizable values are declared in a specific annotation, and the test method is executed independently m times.\n']
+
+**Instructions**:
+1. **Understand the test intent**: Make sure you understand the design intent of the test.
+2. **Understand the code smells**: Make sure you understand the insight of the existing code smells.
+3. **Understand the corresponding refactoring DSL**: Make sure you understand the corresponding refactoring DSL and how the test code should be refactored.
+4. **Refactoring the test code**: For the above analysis, refactor the test and provide the refactored test code. Make sure not to miss any code smell.
+
+Provide only the complete refactored code, including the test and any additional variable and method definitions, strictly following the refactoring steps, without any other responses.
+

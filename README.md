@@ -55,8 +55,11 @@ Execute the `Main` class.
 
 The tool will automatically parse and detect, and preprocess the unit tests from the project directory.
 
-
 ### Step 2: Test Refactoring
 Execute the `refactoring_test.py`.
 
 This process will automatically refactor the test code with 'smell'. Note, please change the paths used in the code to the actual paths in your computer environment.
+
+
+
+You can find a prompt in the `motivation_example_prompt.txt` file, and use an LLM to quickly see the effect of a test refactoring.
